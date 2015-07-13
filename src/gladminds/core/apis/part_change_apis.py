@@ -208,7 +208,7 @@ class BOMPlatePartResource(CustomBaseModelResource):
               ERROR: if any param is invalid
               MISSING: if any part present in DB has not been sent in csv
         '''
-#         self.is_authenticated(request)
+        self.is_authenticated(request)
         import itertools
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
