@@ -236,12 +236,12 @@ class ConsumerResource(CustomBaseModelResource):
                     user_obj.is_active = False
                     user_obj.save(using=settings.BRAND)
                     consumer_obj.save(using=settings.BRAND)
+                    
                     user_obj = self.create_user(False, phone_number, email)
                     self.send_otp_to_mail(phone_number, email)
                     return HttpResponse(json.dumps({'status':200, 'message' : 'OTP sent successfully'}),
                                         content_type='application/json')
             except Exception as ex:
-                print "=[>", ex
                 logger.info("Exception while registering user whose email doesnot exist - {0}".format(ex))
                 return HttpBadRequest("Could not register the user with this email")
             
@@ -275,7 +275,8 @@ class ConsumerResource(CustomBaseModelResource):
         except Exception as ex:
             logger.info("Exception while validating OTP {0}".format(ex))
             return HttpBadRequest("OTP couldnot be validated")
-         
+
+    @atomic(using=settings.BRAND)
     def validate_otp_email(self, request, **kwargs):
         if request.method != 'POST':
             return HttpResponse(json.dumps({'message':"Method not allowed"}),
@@ -288,16 +289,71 @@ class ConsumerResource(CustomBaseModelResource):
             if not otp_token or not phone_number or not email:
                 return HttpBadRequest("OTP , phone number , email is mandatory")
             otp_handler.validate_otp(otp_token, email=email)
-            consumer = get_model('Consumer', settings.BRAND).objects.filter(Q(user__email=email) &
-                                                                            ~Q(phone_number=phone_number))
-            user = consumer.user
-            user.update(is_active=False)
-            return HttpResponse(json.dumps({'status':200, 'message': 'OTP validated'}),
-                                content_type='application/json')
+            consumer = get_model('Consumer', settings.BRAND).objects.get(user__email=email,
+                                                                         phone_number=phone_number)
+            consumer.is_email_verified = True
+            consumer.save(using=settings.BRAND)
+            
+            user_products = get_model('UserProduct', settings.BRAND).objects.\
+                    select_related('consumer').filter(~Q(consumer__phone_number=phone_number) &
+                                                      Q(consumer__user__email=email))
+            for product in user_products:
+                user = product.consumer.user
+                user.is_active =  False
+                user.save(using=settings.BRAND)
+                product.save(using=settings.BRAND)
+            
+            products = []
+            for product in user_products:
+                products.append(get_model('UserProduct', settings.BRAND)(consumer=consumer,
+                                                                         nick_name=product.nick_name,
+                                                                         product_type=product.product_type,
+                                                                         purchase_date=product.purchase_date,
+                                                                         brand_product_id=product.brand_product_id,
+                                                                         image_url=product.image_url,
+                                                                         color=product.color,
+                                                                         is_deleted=product.is_deleted,
+                                                                         description=product.description,
+                                                                         is_accepted=product.is_accepted,
+                                                                         service_reminder=product.service_reminder,
+                                                                         details_completed=product.details_completed,
+                                                                         manual_link=product.manual_link,
+                                                                         warranty_year=product.warranty_year,
+                                                                         insurance_year=product.insurance_year))
+            new_products = get_model('UserProduct', settings.BRAND).objects.bulk_create(products)
+            new_products = get_model('UserProduct', settings.BRAND).objects.\
+                    select_related('consumer').filter(Q(consumer__phone_number=phone_number) &
+                                                      Q(consumer__user__email=email))
+
+            
+            product_dict = {}
+            for user_product in user_products:
+                product_mapping = filter(lambda product : product.brand_product_id == user_product.brand_product_id,
+                                         new_products)
+                product_dict[user_product.brand_product_id] = product_mapping[0]
+            
+            insurance_details = get_model('ProductInsuranceInfo', settings.BRAND).objects.filter(product__in=user_products)
+            self.update_product_insurance_warranty(product_dict, insurance_details)
+            
+            warranty_details = get_model('ProductWarrantyInfo', settings.BRAND).objects.filter(product__in=user_products)
+            self.update_product_insurance_warranty(product_dict, warranty_details)
+            access_token = self.generate_access_token(request, consumer)
+            return HttpResponse(json.dumps(access_token),
+                                    content_type='application/json')
+
         except Exception as ex:
             logger.info("Exception while validating email otp - {0}".format(ex))
             return HttpBadRequest("OTP could not be validated")
-        
+    
+    
+    def update_product_insurance_warranty(self, product_dict, details):
+        for insurance in details:
+            if product_dict.has_key(insurance.product.brand_product_id):
+                product = product_dict[insurance.product.brand_product_id]
+                insurance.product = product
+                insurance.save(using=settings.BRAND)
+          
+          
     def validate_user_phone_number(self,phone_number, otp):
         if not otp and not phone_number :
             return HttpBadRequest("otp and phone_number required")
