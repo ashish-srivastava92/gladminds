@@ -58,3 +58,8 @@ alter table gm_containerlr add column partner_name varchar(50);
 alter table gm_brandproductrange drop column vertical;
 
 alter table gm_bomheader add column revision_number int default 0;
+alter table gm_bomvisualization modify column x_coordinate int default 0;
+alter table gm_bomvisualization modify column y_coordinate int default 0;
+alter table gm_bomvisualization modify column z_coordinate int default 0;
+
+
