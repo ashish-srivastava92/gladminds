@@ -2,6 +2,7 @@ import csv
 from datetime import datetime
 import json
 import logging
+import itertools
 
 from django.conf import settings
 from django.conf.urls import url
@@ -209,7 +210,6 @@ class BOMPlatePartResource(CustomBaseModelResource):
               MISSING: if any part present in DB has not been sent in csv
         '''
         self.is_authenticated(request)
-        import itertools
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
                                 status=400)
