@@ -369,12 +369,6 @@ class ConsumerResource(CustomBaseModelResource):
             return HttpResponse(json.dumps(access_token),
                                     content_type='application/json')
 
-            consumer = get_model('Consumer', settings.BRAND).objects.filter(Q(user__email=email) &
-                                                                            ~Q(phone_number=phone_number))
-            user = consumer.user
-            user.update(is_active=False)
-            return HttpResponse(json.dumps({'status':200, 'message': 'OTP validated'}),
-                                content_type='application/json')
         except Exception as ex:
             logger.info("Exception while validating email otp - {0}".format(ex))
             return HttpBadRequest("OTP could not be validated")
@@ -433,7 +427,7 @@ class ConsumerResource(CustomBaseModelResource):
                 otp = otp_handler.get_otp(user=user_obj)
                 message = afterbuy_utils.get_template('SEND_OTP').format(otp)
                 send_job_to_queue('send_otp', {'phone_number': phone_number,
-                                             'message': message, "sms_client": settings.SMS_CLIENT})
+                             'message': message, "sms_client": settings.SMS_CLIENT})
                 logger.info('OTP sent to mobile {0}'.format(phone_number))
                 data = {'status': 1, 'message': "OTP sent_successfully"}
                 #Send email if email address exist
