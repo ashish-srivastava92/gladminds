@@ -427,7 +427,7 @@ class ConsumerResource(CustomBaseModelResource):
                 otp = otp_handler.get_otp(user=user_obj)
                 message = afterbuy_utils.get_template('SEND_OTP').format(otp)
                 send_job_to_queue('send_otp', {'phone_number': phone_number,
-                             'message': message, "sms_client": settings.SMS_CLIENT})
+                                               'message': message, "sms_client": settings.SMS_CLIENT})
                 logger.info('OTP sent to mobile {0}'.format(phone_number))
                 data = {'status': 1, 'message': "OTP sent_successfully"}
                 #Send email if email address exist
