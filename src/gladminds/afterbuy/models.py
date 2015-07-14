@@ -306,11 +306,15 @@ class UserMobileInfo(base_models.BaseModel):
     operating_system = models.CharField(max_length=50, null=True, blank=True)
     version = models.CharField(max_length=50, null=True, blank=True)
     model = models.CharField(max_length=50, null=True, blank=True)
-
+    brand = models.CharField(max_length=50, null=True, blank=True)
+    total_memory = models.FloatField(null=True, blank=True)
+    available_memory = models.FloatField(null=True, blank=True)
+    mac_address = models.CharField(max_length=100, null=True, blank=True)
+    network_provider = models.CharField(max_length=100, null=True, blank=True)
+    
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Mobile Details"
-
 
 class UserPreference(base_models.UserPreference):
     consumer = models.ForeignKey(Consumer)

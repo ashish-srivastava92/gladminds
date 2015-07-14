@@ -934,3 +934,23 @@ PRODUCT_BRAND =  {
                   "name": "bajaj",
                   "resource_uri": "/afterbuy/v1/brands/1/"
                   } 
+
+USER_MOBILE_INFO = {
+                    "ICCID": "689",
+                    "IMEI": "4567008",
+                    "available_memory": None,
+                    "brand": "",
+                    "capacity": "",
+                    "consumer": "/afterbuy/v1/consumers/1/",
+                    "created_date": "2015-07-14T13:39:30",
+                    "mac_address": "",
+                    "model": "",    
+                    "modified_date": "2015-07-14T13:39:30",
+                    "network_provider": "",
+                    "operating_system": "",
+                    "phone_name": "rtyu",
+                    "resource_uri": "/afterbuy/v1/user-mobile-info/1/",
+                    "serial_number": "",
+                    "total_memory": None,
+                    "version": ""
+                    }   

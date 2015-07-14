@@ -101,3 +101,10 @@ rename table gm_constant to afterbuy_constant;
 alter table afterbuy_consumer drop index phone_number;
 
 alter table gm_bomheader add column revision_number int default 0;
+
+alter table afterbuy_usermobileinfo add column brand varchar(50) null;
+alter table afterbuy_usermobileinfo add column mac_address varchar(100) null;
+alter table afterbuy_usermobileinfo add column network_provider varchar(100) null;
+alter table afterbuy_usermobileinfo add column total_memory double null;
+alter table afterbuy_usermobileinfo add column available_memory double null;
+

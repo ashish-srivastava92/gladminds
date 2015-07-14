@@ -12,6 +12,7 @@ api_v1.register(user_apis.ConsumerResource())
 api_v1.register(user_apis.UserNotificationResource())
 api_v1.register(user_apis.ServiceResource())
 api_v1.register(user_apis.ServiceTypeResource())
+api_v1.register(user_apis.UserMobileInfoResource())
 
 api_v1.register(product_apis.ProductInsuranceInfoResource())
 api_v1.register(product_apis.InvoiceResource())

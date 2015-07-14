@@ -251,4 +251,12 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, BaseTestCase):
         resp = client.get(uri)
         self.assertEquals(json.loads(resp.content)['coupon_data'][0]['unique_service_coupon'], 'USC9217')
         self.assertEquals(resp.status_code, 200)
+
+    def test_post_usermobile_info(self):
+        access_token = self.user_login()
+        uri = '/afterbuy/v1/user-mobile-info/'
+        resp = client.post(uri, data=json.dumps(USER_MOBILE_INFO), content_type='application/json')
+        self.assertEquals(resp.status_code, 201)
+        self.assertEquals(json.loads(resp.content)['IMEI'], '4567008')
+        
         

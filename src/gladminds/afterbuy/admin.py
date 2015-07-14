@@ -54,6 +54,7 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("ProductFeature", brand))
     brand_admin.register(get_model("RecommendedPart", brand))
     brand_admin.register(get_model("Constant", brand))
+    brand_admin.register(get_model('UserMobileInfo', brand))
     
     brand_admin.register(User, UserAdmin)
     brand_admin.register(Group, GroupAdmin)
