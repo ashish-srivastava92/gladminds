@@ -30,6 +30,7 @@ api_v1.register(product_apis.ProductSpecificationResource())
 api_v1.register(product_apis.ProductFeatureResource())
 api_v1.register(product_apis.RecommendedPartResource())
 api_v1.register(product_apis.ServiceCenterLocationResource())
+api_v1.register(product_apis.ServiceHistoryResource())
 
 api_v1.register(brand_apis.BrandResource())
 api_v1.register(brand_apis.IndustryResource())

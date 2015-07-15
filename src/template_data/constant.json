@@ -62,5 +62,13 @@
       "constant_name":"welcome_msg_active_days",
       "constant_value":"10"
     }
+  },
+    {
+    "model": "gladminds.constant",
+    "pk": 9,
+    "fields": {
+      "constant_name":"service_center_count",
+      "constant_value":"3"
+    }
   }
 ]

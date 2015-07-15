@@ -254,9 +254,22 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, BaseTestCase):
 
     def test_post_usermobile_info(self):
         access_token = self.user_login()
-        uri = '/afterbuy/v1/user-mobile-info/'
+        uri = '/afterbuy/v1/user-mobile-info/?access_token='+access_token
         resp = client.post(uri, data=json.dumps(USER_MOBILE_INFO), content_type='application/json')
         self.assertEquals(resp.status_code, 201)
         self.assertEquals(json.loads(resp.content)['IMEI'], '4567008')
         
-        
+    def test_post_service_center_data(self):
+        access_token = self.user_login()
+        uri = '/afterbuy/v1/service-center-locations/?access_token='+access_token
+        resp = client.post(uri, data=json.dumps(SERVICE_CENTER_LOCATION), content_type='application/json')
+        self.assertEquals(resp.status_code, 201)
+        self.assertEquals(json.loads(resp.content)['brand'], 'bajaj')
+        return access_token
+    
+    def test_book_service(self):
+        access_token = self.test_post_service_center_data()
+        uri = '/afterbuy/v1/service-history/book-service/?access_token='+access_token
+        resp = client.post(uri, data=json.dumps(BOOK_SERVICE), content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(json.loads(resp.content)['status'], 1)

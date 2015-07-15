@@ -953,4 +953,25 @@ USER_MOBILE_INFO = {
                     "serial_number": "",
                     "total_memory": None,
                     "version": ""
-                    }   
+                    }
+
+SERVICE_CENTER_LOCATION = {
+                           "address": "",
+                           "brand": "bajaj",
+                           "country": "",
+                           "created_date": "2015-07-14",
+                           "latitude": 10,
+                           "longitude": 8,
+                           "modified_date": "2015-07-14",
+                           "name": "name1",
+                           "phone_number": "",
+                           "pincode": "",
+                           "state": ""            
+                           }
+
+BOOK_SERVICE = {
+                "asc_id": "1",
+                "service_date" : "2015-09-06",
+                "product_id" : "VBK23456789098765"
+                }
+   

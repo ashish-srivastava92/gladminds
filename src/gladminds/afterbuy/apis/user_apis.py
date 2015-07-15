@@ -306,7 +306,6 @@ class ConsumerResource(CustomBaseModelResource):
         Args : email , phone number , otp
         Returns : map the products and returns access token 
         '''
-        print "> here"
         if request.method != 'POST':
             return HttpResponse(json.dumps({'message':"Method not allowed"}),
                                 content_type='application/json')
@@ -372,7 +371,6 @@ class ConsumerResource(CustomBaseModelResource):
                                     content_type='application/json')
 
         except Exception as ex:
-            print "......?????", ex
             logger.info("Exception while validating email otp - {0}".format(ex))
             return HttpBadRequest("OTP could not be validated")
     
@@ -627,11 +625,7 @@ class UserMobileInfoResource(CustomBaseModelResource):
     class Meta:
         queryset = get_model('UserMobileInfo', settings.BRAND).objects.all()
         resource_name = 'user-mobile-info'
-#         authentication = AccessTokenAuthentication()
+        authentication = AccessTokenAuthentication()
         authorization = Authorization()
         always_return_data = True
         
-        
-    
-    
-    
