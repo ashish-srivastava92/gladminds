@@ -2,6 +2,7 @@ import csv
 from datetime import datetime
 import json
 import logging
+import itertools
 
 from django.conf import settings
 from django.conf.urls import url
@@ -111,13 +112,13 @@ class BOMPlatePartResource(CustomBaseModelResource):
        Resource for BOMheader, plate and part associations
     '''
     bom = fields.ForeignKey(BOMHeaderResource, 'bom', null=True , blank=True)
-    plate = fields.ForeignKey(BOMPlateResource, 'plate', null=True, blank=True)
+    plate = fields.ForeignKey(BOMPlateResource, 'plate', null=True, blank=True, full=True)
     part = fields.ForeignKey(BOMPartResource, 'part', null=True, blank=True, full=True)
     class Meta:
         queryset = get_model('BOMPlatePart').objects.all()
         resource_name = 'bom-plate-parts'
         authorization = Authorization()
-        authentication = AccessTokenAuthentication()
+#         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post']
         always_return_data = True
         include_resource_uri = False
@@ -125,7 +126,9 @@ class BOMPlatePartResource(CustomBaseModelResource):
         filtering = {
                      "bom" : ALL_WITH_RELATIONS,
                      "plate" : ALL_WITH_RELATIONS,
-                     "part" : ALL_WITH_RELATIONS
+                     "part" : ALL_WITH_RELATIONS,
+                     "valid_to": ALL,
+                     "valid_from": ALL
                      }
     
     def prepend_urls(self):
@@ -139,10 +142,11 @@ class BOMPlatePartResource(CustomBaseModelResource):
                 ]
     
     def alter_list_data_to_serialize(self, request, data):
-        plate =  get_model('BOMPlate').objects.get(plate_id=request.GET.get('plate__plate_id'))
-        data['meta']['plate_id'] = plate.plate_id
-        data['meta']['plate_image'] = "{0}/{1}".format(settings.S3_BASE_URL, plate.plate_image)
-        data['meta']['plate_image_with_part'] = "{0}/{1}".format(settings.S3_BASE_URL, plate.plate_image_with_part)
+        if request.GET.get('plate__plate_id'):
+            plate =  get_model('BOMPlate').objects.get(plate_id=request.GET.get('plate__plate_id'))
+            data['meta']['plate_id'] = plate.plate_id
+            data['meta']['plate_image'] = "{0}/{1}".format(settings.S3_BASE_URL, plate.plate_image)
+            data['meta']['plate_image_with_part'] = "{0}/{1}".format(settings.S3_BASE_URL, plate.plate_image_with_part)
         return data
         
     def dehydrate(self, bundle):
@@ -218,19 +222,28 @@ class BOMPlatePartResource(CustomBaseModelResource):
         plate_map=request.FILES['plateMap']
         sbom_part_mapping=[]
         try:
-            queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
+            bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
                                                                 bom__bom_number=bom_number,
-                                                                plate__plate_id=plate_id)
-            for query in queryset:
+                                                                plate__plate_id=plate_id).select_related(
+                                                                                        'bom','plate','part')
+            visual_queryset=get_model('BOMVisualization').objects.filter(bom__in=bom_queryset).select_related(
+                                                                            'bom__bom','bom__plate','bom__part')
+            insert_visual_bom=[]
+            for bom in bom_queryset:
+                visual_bom = filter(lambda visual_bom: visual_bom.bom == bom, visual_queryset)
+                if not visual_bom:
+                    insert_visual_bom.append(get_model('BOMVisualization')(bom=bom))
+            
+            new_visual_queryset=get_model('BOMVisualization').objects.bulk_create(insert_visual_bom)
+         
+            for query in itertools.chain(visual_queryset, new_visual_queryset):
                 temp={}
-                temp['part_number']=query.part.part_number
-                temp['bomplatepart_object']=query
+                temp['part_number']=query.bom.part.part_number
+                temp['bomvisualization_object']=query
                 sbom_part_mapping.append(temp)
 
-            plate_obj=get_model('BOMPlate').objects.filter(plate_id=plate_id)
-            plate_obj[0].plate_image_with_part.save(plate_image.name, plate_image)
-
-        
+            plate_obj=bom_queryset[0].plate
+            plate_obj.plate_image_with_part.save(plate_image.name, plate_image)
             data={'plate_id':plate_id, 'sku_code':sku_code,
                   'bom_number':bom_number,
                   'model':model, 'part':[]}
@@ -238,35 +251,26 @@ class BOMPlatePartResource(CustomBaseModelResource):
             next(spamreader)
             csv_data=format_part_csv(spamreader)
             for part_entry in csv_data:
-                active = filter(lambda active: active['part_number'] == part_entry['part_number'], sbom_part_mapping)
-                if active:
-                    bompartplate_obj=active[0]['bomplatepart_object']
+                try:
+                    bom_visual = filter(lambda bom_visual: bom_visual['part_number'] == part_entry['part_number'], sbom_part_mapping)
+                    visual_obj=bom_visual[0]['bomvisualization_object']
+                    bompartplate_obj = visual_obj.bom
                     part_data=bompartplate_obj.part
                     part_data.description=part_entry['desc']
                     part_data.save(using=settings.BRAND)
-                    try:
-                        visual_obj=get_model('BOMVisualization').objects.filter(bom=bompartplate_obj)
-                        if not visual_obj:
-                            visual_obj=get_model('BOMVisualization')(bom=bompartplate_obj,
-                                                        x_coordinate=part_entry['x-axis'],
-                                                        y_coordinate=part_entry['y-axis'],
-                                                        z_coordinate=part_entry['z-axis'],
-                                                        serial_number=part_entry['serial_number'],
-                                                        part_href=part_entry['href'])
-                        else:
-                            visual_obj=visual_obj[0]
-                            visual_obj.x_coordinate=part_entry['x-axis']
-                            visual_obj.y_coordinate=part_entry['y-axis']
-                            visual_obj.z_coordinate=part_entry['z-axis']
-                            visual_obj.serial_number=part_entry['serial_number']
-                            visual_obj.part_href=part_entry['href']
+                    if part_entry['x-axis'] and part_entry['y-axis'] and part_entry['z-axis']:
+                        visual_obj.x_coordinate=part_entry['x-axis']
+                        visual_obj.y_coordinate=part_entry['y-axis']
+                        visual_obj.z_coordinate=part_entry['z-axis']
+                        visual_obj.serial_number=part_entry['serial_number']
+                        visual_obj.part_href=part_entry['href']
                         visual_obj.save(using=settings.BRAND)
                         part_entry['status']='SUCCESS'
-                    except Exception as ex:
-                        LOG.error('[save_plate_part]: {0}'.format(ex))
+                    else:
+                        LOG.error('[save_plate_part]: Coordinate is missing {0}'.format(part_entry))
                         part_entry['status']='INCOMPLETE'
-                else:
-                    LOG.info('[save_plate_part]: the part number {0} is invalid'.format(part_entry['part_number']))
+                except Exception as ex:
+                    LOG.info('[save_plate_part]: {0} :: {1}'.format(part_entry['part_number'], ex))
                     part_entry['status']='ERROR'
                 data['part'].append(part_entry)
             for part in sbom_part_mapping:
@@ -278,47 +282,79 @@ class BOMPlatePartResource(CustomBaseModelResource):
                     data['part'].append(temp)
         except Exception as ex:
             LOG.info('[save_plate_part]: {0}'.format(ex))
+            data = {'message': 'Some error occurred'}
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def search_sbom_for_vin(self, request):
         '''
            Gives the sbom data for a particular VIN
         '''
-        pass
+        get_data=request.GET
+        vin = get_data.get('value')
+        try:
+            product_obj=get_model('ProductData').objects.get(product_id=vin)
+            bom_header_obj=get_model('BOMHeader').objects.get(sku_code=product_obj.sku_code,
+                                                           valid_from__lte=product_obj.invoice_date,
+                                                           valid_to__gte=product_obj.invoice_date)
+            return self.get_list(request, bom=bom_header_obj,
+                                   valid_from__lte=product_obj.invoice_date,
+                                   valid_to__gte=product_obj.invoice_date)
+        except Exception as ex:
+            LOG.error('[search_sbom_for_vin]: {0}'.format(ex))
+            data = {'status':0 , 'message': 'VIN has no matching BOM number'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
         
 
     def search_sku_for_desc(self, request):
         '''
            Gives list of sku code for a desc
         '''
-        pass
+        get_data=request.GET
+        product_description = get_data.get('value')
+        product_obj=get_model('BrandProductRange').objects.filter(description__startswith=product_description)
+        data = {'objects': [model_to_dict(c, exclude='image_url') for c in product_obj]}
+        return HttpResponse(json.dumps(data), content_type="application/json")
     
     def search_revison_for_sku(self, request):
         '''
            Gives list of revision for a sku code
         '''
-        pass
+        get_data=request.GET
+        sku_code = get_data.get('value')
+        header_obj=get_model('BOMHeader').objects.filter(sku_code=sku_code)
+        data = {'objects': [model_to_dict(c, fields=['sku_code','revision_number']) for c in header_obj]}
+        return HttpResponse(json.dumps(data), content_type="application/json")
     
     def search_sbom_for_revision(self, request):
         '''
            Gives the sbom data for a given revision
         '''
-        pass
+        get_data=request.GET
+        revision_number = int(get_data.get('value'))
+        sku_code = get_data.get('sku_code')
+        try:
+            bom_header_obj=get_model('BOMHeader').objects.get(sku_code=sku_code,
+                                                revision_number=revision_number)
+            return self.get_list(request, bom=bom_header_obj)
+        except Exception as ex:
+            LOG.error('[search_sbom_for_revision]: {0}'.format(ex))
+            data = {'status':0 , 'message': 'SKU and Revision has no matching BOM data'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
+        
     
-    def search_sbom(self, request):
+    def search_sbom(self, request, **kwargs):
         if request.method != 'GET':
             return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
                                 status=400)
         get_data=request.GET
-        parameter = get_data.get('parameter')
+        parameter = get_data.get('parameter').lower()
         search_handler = {
-                          'VIN': 'search_sbom_for_vin',
-                          'description': 'search_sku_for_desc',
-                          'sku_code': 'search_revison_for_sku',
-                          'revision': 'search_sbom_for_revision'
+                          'vin': self.search_sbom_for_vin,
+                          'description': self.search_sku_for_desc,
+                          'sku_code': self.search_revison_for_sku,
+                          'revision': self.search_sbom_for_revision
                           }
-        data = search_handler[parameter](self, request)
-        return HttpResponse(json.dumps(data), content_type="application/json")
+        return search_handler[parameter](request)
 
 class BOMVisualizationResource(CustomBaseModelResource):
     '''
