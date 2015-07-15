@@ -29,6 +29,9 @@ AUDIT_ACTION = 'SEND TO QUEUE'
 
 @log_time
 def register_customer(sms_dict, phone_number):
+    '''
+       A function that handles customer registration
+    '''
     pass
 
 @log_time
