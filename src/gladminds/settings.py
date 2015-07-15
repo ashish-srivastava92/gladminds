@@ -77,6 +77,10 @@ SUIT_CONFIG = {
                      'label': 'Zonal Service Manager'},
                     {'model': 'areaservicemanager',
                      'label': 'Area Service Manager'},
+                    {'model': 'countrydistributor',
+                     'label': 'Country Distributor'},
+                    {'model': 'maincountrydealer',
+                     'label': 'Main Country Dealer'},
                     {'model': 'dealer',
                      'label': 'Dealer'},
                     {'model': 'authorizedservicecenter',
@@ -93,7 +97,9 @@ SUIT_CONFIG = {
                     {'model': 'productdata',
                      'label': 'Product Purchase'},
                     {'model': 'coupondata',
-                     'label': 'Coupon Redemption'},)},
+                     'label': 'Coupon Redemption'},
+                   {'model': 'fleetrider',
+                     'label': 'Fleet Rider'},)},
         {'app': 'bajaj', 'label': 'Logs', 'icon': ' icon-folder-open',
          'models':(
                     {'model': 'smslog',
@@ -348,6 +354,7 @@ ALL_APPS = (
     'gladminds.bajaj',
     'gladminds.demo',
     'gladminds.afterbuy',
+    'gladminds.bajajib',
     'djcelery',
     'corsheaders',
     'storages',
@@ -709,7 +716,8 @@ BRAND_META = {
                         "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
             "bajajcv": {"title": "BajajCV", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/",
                         "basecss": "/css/portal.css"},
-            "bajajib": {"title": "BajajIB", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/"},
+            "bajajib": {"title": "BajajIB", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/",
+                        "basecss": "/css/portal.css"},
                }
 
 HOME_URLS = {
