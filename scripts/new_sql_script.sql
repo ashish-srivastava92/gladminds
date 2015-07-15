@@ -105,4 +105,6 @@ alter table gm_bomvisualization modify column x_coordinate int default 0;
 alter table gm_bomvisualization modify column y_coordinate int default 0;
 alter table gm_bomvisualization modify column z_coordinate int default 0;
 
+alter table gm_bomheader add column eco_number varchar(20) null;
+
 
