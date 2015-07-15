@@ -601,7 +601,6 @@ class ServiceHistoryResource(CustomBaseModelResource):
             product_id = load.get('product_id')
             service_center = get_model('ServiceCenterLocation', settings.BRAND).objects.get(id=asc_id)
             consumer = get_model('Consumer', settings.BRAND).objects.get(user=request.user)
-            print "> service_center", service_center, consumer
             service_obj = get_model('ServiceHistory', settings.BRAND)(consumer=consumer,
                                                                       service_center_location=service_center,
                                                                       product_id=product_id,

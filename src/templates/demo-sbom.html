@@ -1,0 +1,72 @@
+{% extends "base_template.html" %}
+{% block body  %}
+<div class="row portal-form-heading">
+                  <div class="col-md-10">
+                      <h3 class="text-center">UCN Recovery</h3>
+                  </div>
+              </div>
+              <form class="plate-map-form" role="search">
+              <div class="col-md-offset-2">
+                <div class="row">
+                  <div class="col-md-4 form-group">
+                    <label class="control-label">model*:</label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <input type="text" class="form-control" name="model" id="model" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4 form-group">
+                    <label class="control-label">skuCode*:</label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <input type="text" class="form-control" name="skuCode" id="skuCode" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4 form-group">
+                    <label class="control-label">bomNumber*:</label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <input type="text" class="form-control" name="bomNumber" id="bomNumber" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4 form-group">
+                    <label class="control-label">plateId*:</label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <input type="text" class="form-control" name="plateId" id="plateId" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4 form-group">
+                    <label class="control-label">plate image *:</label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <input type="file" id="platImage" name="platImage" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-4 form-group">
+                    <label class="control-label">plate csv *:</label>
+                  </div>
+                  <div class="col-md-5 form-group">
+                    <input type="file" id="plateMap" name="plateMap" required>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-9 form-group">
+                    <button type="submit" value="Submit" class="btn btn-primary pull-right">
+                      Submit
+                    </button>
+                  </div>
+                </div>
+                </div>
+              </form>
+{% endblock %}
+{% block dependency %}
+<script src="/static/js/portal/utils.js"></script>
+<script src="/static/js/portal/main.js"></script>
+<script src="/static/js/portal/uploadSBOM.js"></script>
+{% endblock dependency %}
