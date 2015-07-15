@@ -78,6 +78,7 @@ DISTRIBUTOR_SYNC_WSDL_URL = "http://qa.bajaj.gladminds.co/api/v1/distributor-syn
 
 WSDL_TNS="http://qa.bajaj.gladminds.co/api/v1/feed/"
 CORE_WSDL_TNS="http://qa.bajajcv.gladminds.co/api/v1/feed/"
+IB_WSDL_TNS="http://qa.bajajib.gladminds.co/api/v1/feed/"
 
 ENABLE_AMAZON_SQS = True
 

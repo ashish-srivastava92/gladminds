@@ -173,6 +173,7 @@ class GmApps():
     GM = 'default'
     DAIMLER = 'daimler'
     PROBIKING = 'probiking'
+    BAJAJIB= 'bajajib'
 
 # Mapping is first app name then db name
 DATABASE_APPS_MAPPING = {
@@ -182,7 +183,8 @@ DATABASE_APPS_MAPPING = {
                          GmApps.AFTERBUY:'afterbuy',
                          GmApps.BAJAJCV:'bajajcv',
                          GmApps.DAIMLER:'daimler',
-                         GmApps.PROBIKING : 'probiking'
+                         GmApps.PROBIKING : 'probiking',
+                         GmApps.BAJAJIB: 'bajajib'
                     }
 
 db_common = {
@@ -651,7 +653,8 @@ ADMIN_DETAILS = {GmApps.BAJAJ: {'user': 'bajaj', 'password': 'bajaj'},
           GmApps.GM: {'user': 'gladminds', 'password': 'gladminds'},
           GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'bajajcv'},
           GmApps.DAIMLER: {'user': 'daimler', 'password': 'daimler'},
-          GmApps.PROBIKING: {'user': 'probiking', 'password': 'probiking'}
+          GmApps.PROBIKING: {'user': 'probiking', 'password': 'probiking'},
+          GmApps.BAJAJIB: {'user': 'bajajib', 'password': 'bajajib'}
           }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True
@@ -704,8 +707,9 @@ BRAND_META = {
                         "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
               "daimler": {"title": "Daimler", "logo": "daimler/img/Daimler-logo.png", "tagline": "2015 Daimler AG",
                         "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
-            "bajajcv": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/",
+            "bajajcv": {"title": "BajajCV", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/",
                         "basecss": "/css/portal.css"},
+            "bajajib": {"title": "BajajIB", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/"},
                }
 
 HOME_URLS = {
@@ -725,6 +729,9 @@ HOME_URLS = {
                        "Dealers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        "DealerAdmins":[{"SERVICE DESK":"/aftersell/helpdesk"},
                                        {"ADD SERVICE DESK USER":"/add/servicedesk-user"}]
+                       },
+             "bajaj": { "MainCountryDealer" :[{"DFSC":"/aftersell/register/asc"}],
+                       "Dealers" :[{"DFSC":"/aftersell/register/asc"}],
                        }
              }
 
