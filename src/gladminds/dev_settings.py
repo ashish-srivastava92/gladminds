@@ -68,3 +68,4 @@ ENV = "dev"
 
 WSDL_TNS="http://dev.bajaj.gladminds.co/api/v1/feed/"
 CORE_WSDL_TNS="http://dev.bajajcv.gladminds.co/api/v1/feed/"
+IB_WSDL_TNS="http://dev.bajajib.gladminds.co/api/v1/feed/"
