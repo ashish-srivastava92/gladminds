@@ -512,7 +512,7 @@ class ServiceCenterLocationResource(CustomBaseModelResource):
         resource_name = 'service-center-locations'
         authentication = AccessTokenAuthentication()
         authorization = Authorization()
-        allowed_methods = ['get']
+        allowed_methods = ['get', 'post']
         always_return_data = True
         
     def prepend_urls(self):
@@ -521,7 +521,8 @@ class ServiceCenterLocationResource(CustomBaseModelResource):
         ]
 
     def get_locations(self, latitude, longitude, brand, radius=50):
-        query = "SELECT z.name, z.latitude, z.longitude, p.distance_unit\
+        query = "SELECT z.id, z.name, z.phone_number, z.address, z.state, z.country, z.pincode, \
+                z.latitude, z.longitude, p.distance_unit\
                  * DEGREES(ACOS(COS(RADIANS(p.latpoint))\
                  * COS(RADIANS(z.latitude))\
                  * COS(RADIANS(p.longpoint) - RADIANS(z.longitude))\
@@ -548,6 +549,7 @@ class ServiceCenterLocationResource(CustomBaseModelResource):
         Args : latitude , longitude, brand 
         Returns : The nearest 3 service centers 
         '''
+        self.is_authenticated(request)
         if request.method != 'POST':
             return HttpResponse(json.dumps({'message' :  'Method not allowed'}),
                                 content_type='application/json')
@@ -569,3 +571,46 @@ class ServiceCenterLocationResource(CustomBaseModelResource):
             return HttpBadRequest("Cannot locate nearby service centers")
         
         
+class ServiceHistoryResource(CustomBaseModelResource):
+    consumer = fields.ForeignKey(ConsumerResource, 'consumer', null=True, blank=True)
+    service_center_location = fields.ForeignKey(ServiceCenterLocationResource, 'service_center_location',
+                                                null=True, blank=True)
+    
+    class Meta:
+        queryset = get_model('ServiceHistory', settings.BRAND).objects.all()
+        resource_name = 'service-history'
+        authentication = AccessTokenAuthentication()
+        authorization = Authorization()
+        always_return_data = True
+        
+        
+    def prepend_urls(self):
+        return[
+               url(r"^(?P<resource_name>%s)/book-service%s" % (self._meta.resource_name, trailing_slash()), self.wrap_view('book_service'), name='book_service')
+               ]
+        
+    def book_service(self, request, **kwargs):
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({'message' : 'Method not allowed'}),
+                                content_type='application/json')
+        try:
+            load = json.loads(request.body)
+            asc_id = load.get('asc_id')
+            service_date = load.get('service_date')
+            product_id = load.get('product_id')
+            service_center = get_model('ServiceCenterLocation', settings.BRAND).objects.get(id=asc_id)
+            consumer = get_model('Consumer', settings.BRAND).objects.get(user=request.user)
+            service_obj = get_model('ServiceHistory', settings.BRAND)(consumer=consumer,
+                                                                      service_center_location=service_center,
+                                                                      product_id=product_id,
+                                                                      service_date=service_date,
+                                                                      asc_id=asc_id
+                                                                      )
+            service_obj.save(using=settings.BRAND)
+            return HttpResponse(json.dumps({'status' : 1, 'message' : 'Service Requested'}),
+                                content_type='application/json')
+        except Exception as ex:
+            logger.error("Exception while booking a service - {0}".format(ex))
+            return HttpBadRequest("Service couldnot be booked")
+        return

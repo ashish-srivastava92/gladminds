@@ -128,7 +128,8 @@ class ConsumerResource(CustomBaseModelResource):
                                                    password, http_host)
                 if user_auth.is_active:
                     login(request, user_auth)
-                    data = {'status':1 , 'message':'success', 'access_token': access_token}
+                    data = {'status':1 , 'message':'success', 'access_token': access_token,
+                            'consumer_id' : consumer.user.id}
                 else:
                     data = {'status': 0, 'message': "failure"}
             except Exception as ex:
@@ -427,7 +428,7 @@ class ConsumerResource(CustomBaseModelResource):
                 otp = otp_handler.get_otp(user=user_obj)
                 message = afterbuy_utils.get_template('SEND_OTP').format(otp)
                 send_job_to_queue('send_otp', {'phone_number': phone_number,
-                                             'message': message, "sms_client": settings.SMS_CLIENT})
+                                               'message': message, "sms_client": settings.SMS_CLIENT})
                 logger.info('OTP sent to mobile {0}'.format(phone_number))
                 data = {'status': 1, 'message': "OTP sent_successfully"}
                 #Send email if email address exist
@@ -617,3 +618,14 @@ class ServiceResource(CustomBaseModelResource):
                      "service_type": ALL,
                      "is_active": ALL
                      }
+
+class UserMobileInfoResource(CustomBaseModelResource):
+    consumer = fields.ForeignKey(ConsumerResource, 'consumer')
+    
+    class Meta:
+        queryset = get_model('UserMobileInfo', settings.BRAND).objects.all()
+        resource_name = 'user-mobile-info'
+        authentication = AccessTokenAuthentication()
+        authorization = Authorization()
+        always_return_data = True
+        
