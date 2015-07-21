@@ -26,6 +26,7 @@ from gladminds.core.auth_helper import GmApps
 from gladminds.core.managers.mail import send_recycle_mail
 from gladminds.core.model_fetcher import get_model
 from django.db.models.query_utils import Q
+from datetime import date, datetime
 
 
 logger = logging.getLogger("gladminds")
@@ -245,7 +246,8 @@ class UserProductResource(CustomBaseModelResource):
         try:
             phone_number = request.GET['phone_number']
             consumer = afterbuy_models.Consumer.objects.get(user=request.user)
-            all_users = afterbuy_models.Consumer.objects.filter(~Q(user__email=consumer.user.email) & Q(phone_number=consumer.phone_number))
+            all_users = afterbuy_models.Consumer.objects.filter(~Q(user__email=consumer.user.email) \
+                                                                & Q(phone_number=consumer.phone_number))
             if len(all_users)>1:
                 return HttpResponse(json.dumps({'message': 'Products cannot be synced'}),
                                     content_type='application/json')
@@ -273,6 +275,8 @@ class UserProductResource(CustomBaseModelResource):
                                                             brand_product_id=product.product_id,
                                                             product_type=product_type)
                     user_product.save()
+                consumer.last_sync_date = datetime.now()
+                consumer.save()
                 return HttpResponse(json.dumps({'status' : 200 , 'message':'Products Synced Successfully'}),
                                         content_type='application/json')
         except Exception as ex:
@@ -581,6 +585,7 @@ class ServiceHistoryResource(CustomBaseModelResource):
         resource_name = 'service-history'
         authentication = AccessTokenAuthentication()
         authorization = Authorization()
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         
         

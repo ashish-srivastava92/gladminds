@@ -24,11 +24,12 @@ from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
 from gladminds.core.cron_jobs.update_fact_tables import update_coupon_history_table
 from gladminds.core.managers.mail import get_email_template,send_email_to_redeem_escaltion_group,\
     send_email_to_welcomekit_escaltion_group
-from gladminds.core.auth_helper import Roles
+from gladminds.core.auth_helper import Roles, GmApps
 from django.db.models import Q
 import textwrap
 import StringIO
 import csv
+from gladminds.core.cron_jobs.taskmanager import add_product
 
 
 logger = logging.getLogger("gladminds")
@@ -822,6 +823,48 @@ def send_mail_for_manufacture_data_discrepancy(*args, **kwargs):
         discrepant_entries.update(sent_to_sap=True)
     else:
         logger.info("[manufacture_data_discrepancy]: No discrepancy were update on {0}".format(datetime.now()))
+
+@shared_task()
+def brand_sync_to_afterbuy(*args, **kwargs):
+    '''Sync all the products from bajaj to afterbuy'''
+    try:
+#         last_sync = datetime.now() - timedelta(days=5)
+        consumers = get_model('Consumer', GmApps.AFTERBUY).objects.filter(user__is_active=True,
+                                                                          has_discrepancy=False)
+        phone_numbers = []
+        consumer_phone_number_mapping = {}
+        for consumer in consumers:
+            consumer_phone_number_mapping[str(consumer.phone_number)] = consumer
+            phone_numbers.append(str('+91'+consumer.phone_number))
+         
+        query = reduce(operator.or_, (Q(customer_phone_number__contains = phone_number) for phone_number in phone_numbers))
+        brand_products = get_model('ProductData', GmApps.BAJAJ).objects.filter(query)
+        product_dict = {}
+        user_products = get_model('UserProduct', GmApps.AFTERBUY).objects.filter(consumer__in=consumers)
+        product_phone_number_mapping = {}
+        
+        for product in user_products:
+            product_phone_number_mapping[str(product.consumer.phone_number)]=product
+        
+            
+        final_products = []
+        for product in brand_products:
+            phone_number = product.customer_phone_number.split('+91')[1]
+            if product_phone_number_mapping.has_key(phone_number):
+                product_details = product_phone_number_mapping[phone_number]
+                if product.product_id != product_details.brand_product_id:
+                    if consumer_phone_number_mapping.has_key(phone_number):
+                        final_products = add_product(product, consumer_phone_number_mapping,
+                                                     phone_number, product_details, final_products)
+            else:
+                final_products = add_product(product, consumer_phone_number_mapping, phone_number, product_details, final_products)
+            
+            new_products = get_model('UserProduct', GmApps.AFTERBUY).objects.bulk_create(final_products)
+    except Exception as ex:
+        logger.info("Cron Job Exception while syncing products - {0}".format(ex))
+    
+    return
+
 
 _tasks_map = {"send_registration_detail": send_registration_detail,
 

@@ -14,6 +14,7 @@ from gladminds.core.core_utils.utils import dictfetchall
 from django.conf import settings
 import csv
 import StringIO
+from gladminds.core.auth_helper import GmApps
 
 AUDIT_ACTION = "SENT TO QUEUE"
 logger = logging.getLogger("gladminds")
@@ -218,3 +219,15 @@ def get_sql_data(query, brand):
     return data
     
     
+def add_product(product, consumer_phone_number_mapping, phone_number, product_details, final_products):
+    consumer_obj = consumer_phone_number_mapping[phone_number]
+    product_brand =  get_model('Brand', GmApps.AFTERBUY).objects.get(name=GmApps.BAJAJ)
+    try:
+        product_type = get_model('ProductType', GmApps.AFTERBUY).objects.get(product_type=product.sku_code)
+    except Exception as ObjectDoesNotExist:
+        product_type = afterbuy_models.ProductType(product_type=product.sku_code,
+                                                               brand=product_brand)
+        product_type.save()
+    final_products.append(get_model('UserProduct', GmApps.AFTERBUY)(consumer=consumer_obj, product_type=product_type,
+                                                                    brand_product_id=product_details.brand_product_id))
+    return final_products

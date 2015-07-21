@@ -81,6 +81,8 @@ class Consumer(base_models.BaseModel):
                                    blank=True, null=True)
     is_email_verified = models.BooleanField(default=False)
     is_phone_verified = models.BooleanField(default=False)
+    has_discrepancy = models.BooleanField(default=False)
+    last_sync_date = models.DateTimeField(null=True, blank=True) 
     objects = user_manager.ConsumerManager()
     
     def image_tag(self):
