@@ -384,15 +384,15 @@ class ConsumerResource(CustomBaseModelResource):
             
             
             all_consumers = get_model('Consumer', settings.BRAND).objects.select_related('user')\
-                                                                            .get(Q(phone_number=phone_number) &
+                                                                            .filter(Q(phone_number=phone_number) &
                                                                             ~Q(user__email=email) &
                                                                             Q(user__is_active=True))
-            all_consumers.has_discrepancy = True
-                                                                        
-            user_obj = all_consumers.user
-            user_obj.is_active = False
-            user_obj.save(using=settings.BRAND)
-            all_consumers.save(using=settings.BRAND)
+            if len(all_consumers) >0:                                                                
+                all_consumers[0].has_discrepancy = True
+                user_obj = all_consumers[0].user
+                user_obj.is_active = False
+                user_obj.save(using=settings.BRAND)
+                all_consumers[0].save(using=settings.BRAND)
 
             access_token = self.generate_access_token(request, consumer)
             return HttpResponse(json.dumps(access_token),
