@@ -826,7 +826,7 @@ def send_mail_for_manufacture_data_discrepancy(*args, **kwargs):
 
 @shared_task()
 def brand_sync_to_afterbuy(*args, **kwargs):
-    print ".......finalllly...."
+    '''Sync all the products from bajaj to afterbuy'''
     try:
 #         last_sync = datetime.now() - timedelta(days=5)
         consumers = get_model('Consumer', GmApps.AFTERBUY).objects.filter(user__is_active=True,
@@ -860,7 +860,6 @@ def brand_sync_to_afterbuy(*args, **kwargs):
                 final_products = add_product(product, consumer_phone_number_mapping, phone_number, product_details, final_products)
             
             new_products = get_model('UserProduct', GmApps.AFTERBUY).objects.bulk_create(final_products)
-     
     except Exception as ex:
         logger.info("Cron Job Exception while syncing products - {0}".format(ex))
     
