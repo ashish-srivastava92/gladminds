@@ -954,4 +954,6 @@ _tasks_map = {"send_registration_detail": send_registration_detail,
               
               "send_mail_for_manufacture_data_discrepancy": send_mail_for_manufacture_data_discrepancy,
 
+              "brand_sync_to_afterbuy" : brand_sync_to_afterbuy
+              
               }
