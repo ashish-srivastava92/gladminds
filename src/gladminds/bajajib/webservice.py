@@ -5,7 +5,7 @@ from spyne.protocol.soap import Soap11
 from spyne.server.django import DjangoApplication
 from gladminds.bajajib.services.coupons import feed_models as fsc_feed
 
-tns = settings.WSDL_TNS
+tns = settings.IB_WSDL_TNS
 
 all_app = Application([fsc_feed.BrandService,
                        fsc_feed.DealerService,

@@ -80,6 +80,7 @@ DISTRIBUTOR_SYNC_WSDL_URL = "http://staging.bajaj.gladminds.co/api/v1/distributo
 
 WSDL_TNS="http://staging.bajaj.gladminds.co/api/v1/feed/"
 CORE_WSDL_TNS="http://staging.bajajcv.gladminds.co/api/v1/feed/"
+IB_WSDL_TNS="http://staging.bajajib.gladminds.co:8000/api/v1/feed/"
 
 ENABLE_AMAZON_SQS = True
 
