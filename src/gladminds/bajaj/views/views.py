@@ -44,6 +44,8 @@ from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
 from gladminds.core.auth import otp_handler
 from django.core.serializers.json import DjangoJSONEncoder
+from django.template import loader
+from django.template.context import Context
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -594,8 +596,9 @@ def reports(request):
             report_data['params']['status']='2'
             template_rendered = 'portal/credit_note_report.html'
         report_data['records'] = create_reconciliation_report(report_data['params'], request.user)
+        if '_download' in request.POST:
+            return download_reconcilation_reports(report_data)
     return render(request, template_rendered, report_data)
-
 
 @log_time
 def create_reconciliation_report(query_params, user):
@@ -654,6 +657,7 @@ def create_reconciliation_report(query_params, user):
             coupon_data_dict['service_type'] = coupon_data.service_type
             coupon_data_dict['special_case'] = coupon_data.special_case
         report_data.append(coupon_data_dict)
+        
     return report_data
 
 #FIXME: Refactor the code
@@ -707,3 +711,18 @@ def get_active_asc_report(request, role=None):
                    "cyear": str(year),
                    "role": role
                    })
+    
+'''Download the reconciliation report under the filter criteria'''
+    
+def download_reconcilation_reports(download_data):
+    response = HttpResponse(content_type='text/excel')
+    response['Content-Disposition'] = 'attachment; filename="ReportList.xlsx"'
+    if download_data['params']['type']== 'credit':
+        template = loader.get_template('portal/reconciliation_credit_download.txt')
+    else:
+        template = loader.get_template('portal/reconciliation_download.txt')
+    c = Context({
+        'data': download_data['records'],
+    })
+    response.write(template.render(c))
+    return response
