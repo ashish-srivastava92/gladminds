@@ -77,7 +77,7 @@ class Command(BaseCommand):
         self.create_territory()
         self.create_loyalty_admins()
         self.set_afterbuy_permissions()
-        if settings.ENV not in ['prod', 'staging', 'qa']:
+        if settings.ENV not in ['prod', 'staging', 'qa', 'local']:
             self.upload_loyalty_user()
             self.upload_asm_user()
             self.upload_part_data()
@@ -99,7 +99,7 @@ class Command(BaseCommand):
         for group in AFTERBUY_GROUPS:
             self.add_group(GmApps.AFTERBUY, group)
 
-        for app in [GmApps.BAJAJ, GmApps.DEMO, GmApps.GM, GmApps.DAIMLER, GmApps.BAJAJCV, GmApps.PROBIKING]:
+        for app in [GmApps.BAJAJ, GmApps.DEMO, GmApps.GM, GmApps.DAIMLER, GmApps.BAJAJCV, GmApps.PROBIKING, GmApps.BAJAJIB]:
             for group in OTHER_GROUPS:
                 self.add_group(app, group)
 
