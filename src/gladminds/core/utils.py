@@ -151,7 +151,7 @@ def update_pass(otp, password):
 
 
 def format_product_object(product_obj):
-    purchase_date = product_obj.purchase_date.strftime('%d/%m/%Y')
+    purchase_date = convert_utc_to_local_time(product_obj.purchase_date).strftime('%d/%m/%Y')
     return {'id': product_obj.customer_id,
             'phone': get_phone_number_format(str(product_obj.customer_phone_number)), 
             'name': product_obj.customer_name, 
@@ -222,13 +222,6 @@ def format_date_string(date_string, date_format='%d/%m/%Y'):
     date = datetime.datetime.strptime(date_string, date_format)
     return date
 
-def format_date_field(date_string, date_format='%Y-%m-%d'):
-    '''
-    This function converts the date from string to datetime format
-    '''
-    date = datetime.datetime.strptime(date_string, date_format)
-    return date
-
 def get_dict_from_object(object):
     temp_dict = {}
     for key in object:
@@ -250,7 +243,7 @@ def create_purchase_feed_data(post_data, product_data, temp_customer_id):
     data = {}
     data['sap_customer_id'] = temp_customer_id
     product_purchase_date = format_date_string(post_data['purchase-date'])
-    data['product_purchase_date'] = product_purchase_date.replace(tzinfo=pytz.utc)  
+    data['product_purchase_date'] = product_purchase_date
     data['customer_phone_number'] = mobile_format(post_data['customer-phone'])
     data['customer_name'] = post_data['customer-name']
     data['engine'] = product_data.engine

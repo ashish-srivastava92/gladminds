@@ -2,8 +2,6 @@ import csv
 import logging
 import os
 import time
-import pytz
-
 from datetime import datetime, timedelta
 
 from django.conf import settings
@@ -19,8 +17,6 @@ from gladminds.core.managers.audit_manager import feed_log, sms_log
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.auth_helper import Roles
 from gladminds.core.services.feed_resources import BaseFeed, BaseExportFeed
-from gladminds.core.utils import format_date_field
-
 logger = logging.getLogger("gladminds")
 
 USER_GROUP = {'dealer': Roles.DEALERS,
@@ -266,8 +262,7 @@ class ProductPurchaseFeed(BaseFeed):
                     product_data.veh_reg_no =  product['veh_reg_no']
                 
                 product_purchase_date = product['product_purchase_date']
-                product_purchase_date = format_date_field(str(product_purchase_date))
-                product_data.purchase_date = product_purchase_date.replace(tzinfo=pytz.utc)
+                product_data.purchase_date = product_purchase_date
                 product_data.customer_phone_number = product['customer_phone_number']    
                 product_data.customer_name = product['customer_name']
                 product_data.customer_city = product['city']
