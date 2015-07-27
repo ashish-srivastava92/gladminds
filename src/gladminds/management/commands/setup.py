@@ -22,6 +22,7 @@ _GM = GmApps.GM
 _BAJAJCV = GmApps.BAJAJCV
 _DAIMLER = GmApps.DAIMLER
 _PROBIKING = GmApps.PROBIKING
+_BAJAJIB = GmApps.BAJAJIB
 
 _ALL_APPS = ALL_APPS
 
@@ -61,6 +62,7 @@ class Command(BaseCommand):
         call_command('syncdb', database=_BAJAJCV, interactive=False)
         call_command('syncdb', database=_DAIMLER, interactive=False)
         call_command('syncdb', database=_PROBIKING, interactive=False)
+        call_command('syncdb', database=_BAJAJIB, interactive=False)
         call_command('syncdb', interactive=False)
         self.define_groups()
         self.upload_state()
@@ -70,11 +72,12 @@ class Command(BaseCommand):
         self.create_admin(_BAJAJCV)
         self.create_admin(_DAIMLER)
         self.create_admin(_PROBIKING)
+        self.create_admin(_BAJAJIB)
         self.create_afterbuy_admins()
         self.create_territory()
         self.create_loyalty_admins()
         self.set_afterbuy_permissions()
-        if settings.ENV not in ['prod', 'staging', 'qa']:
+        if settings.ENV not in ['prod', 'staging', 'qa', 'local']:
             self.upload_loyalty_user()
             self.upload_asm_user()
             self.upload_part_data()
@@ -96,7 +99,7 @@ class Command(BaseCommand):
         for group in AFTERBUY_GROUPS:
             self.add_group(GmApps.AFTERBUY, group)
 
-        for app in [GmApps.BAJAJ, GmApps.DEMO, GmApps.GM, GmApps.DAIMLER, GmApps.BAJAJCV, GmApps.PROBIKING]:
+        for app in [GmApps.BAJAJ, GmApps.DEMO, GmApps.GM, GmApps.DAIMLER, GmApps.BAJAJCV, GmApps.PROBIKING, GmApps.BAJAJIB]:
             for group in OTHER_GROUPS:
                 self.add_group(app, group)
 
