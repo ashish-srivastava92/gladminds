@@ -13,7 +13,7 @@ from gladminds.core.auth_helper import GmApps, Roles
 from integration.bajaj.test_brand_logic import Brand
 from integration.bajaj.base import BaseTestCase
 from django.db.models.query_utils import Q
-# from integration.bajaj.test_feeds import FeedsResourceTest
+from integration.bajaj.test_feeds import FeedsResourceTest
 
 client = Client(SERVER_NAME='afterbuy')
 client1 = Client(SERVER_NAME='bajaj')

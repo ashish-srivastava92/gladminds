@@ -222,6 +222,13 @@ def format_date_string(date_string, date_format='%d/%m/%Y'):
     date = datetime.datetime.strptime(date_string, date_format)
     return date
 
+def format_date_field(date_string, date_format='%Y-%m-%d'):
+    '''
+    This function converts the date from string to datetime format
+    '''
+    date = datetime.datetime.strptime(date_string, date_format)
+    return date
+
 def get_dict_from_object(object):
     temp_dict = {}
     for key in object:
