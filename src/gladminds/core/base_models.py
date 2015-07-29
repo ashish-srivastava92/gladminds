@@ -1713,7 +1713,7 @@ class CountryDistributor(BaseModel):
         db_table = "gm_countrydistributor"
 
     def __unicode__(self):
-        return self.dealer_id
+        return self.distributor_id
    
 class MainCountryDealer(BaseModel):
     '''Details of Main Country Dealer'''

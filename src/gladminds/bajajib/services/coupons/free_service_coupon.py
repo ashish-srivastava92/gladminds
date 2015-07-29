@@ -28,11 +28,99 @@ AUDIT_ACTION = 'SEND TO QUEUE'
 
 
 @log_time
-def register_customer(sms_dict, phone_number):
+def register_owner(sms_dict, phone_number):
     '''
-       A function that handles customer registration
+       A function that handles owner registration
     '''
-    pass
+    dealer = models.Dealer.objects.active_dealer(phone_number)
+    if not dealer:
+        message = templates.get_template('UNAUTHORISED_DEALER')
+        return {'message' : message}
+    registration_number = sms_dict['registration_number']
+    owner_phone_number = sms_dict['phone_number']
+    customer_name = sms_dict['customer_name']
+    customer_support = models.Constant.objects.get(constant_name='customer_support_number_uganda').constant_value
+    try:
+        purchase_date = datetime.strptime(sms_dict['purchase_date'], '%m-%d-%Y')
+        if purchase_date > datetime.now():
+            message = templates.get_template('INVALID_REGISTRATION_NUMBER_OR_PURCHASE_DATE').format(phone_number=customer_support)
+            return {'message' : message, 'status': False}
+            
+        product = models.ProductData.objects.get(registration_number=registration_number)
+        all_products = models.ProductData.objects.filter(customer_id__isnull=False).order_by('-customer_id')
+        if all_products:
+            customer_id = int(all_products[0].customer_id) + 1
+        else:
+            customer_id = models.Constant.objects.get(constant_name='customer_id').constant_value
+        if not product.purchase_date:
+            product.customer_name = customer_name
+            product.customer_phone_number = owner_phone_number
+            product.purchase_date = purchase_date
+            product.customer_id = customer_id
+        else:
+            if product.customer_phone_number != owner_phone_number:
+                update_history = models.CustomerUpdateHistory(updated_field='phone_number',
+                                                              old_value=product.customer_phone_number,
+                                                              new_value=owner_phone_number,
+                                                              product=product)
+                update_history.save()
+                product.customer_phone_number = owner_phone_number
+        product.save()
+        owner_message = templates.get_template('SEND_OWNER_REGISTER').format(customer_name=product.customer_name,
+                                                                            customer_id=product.customer_id)
+        sms_log(settings.BRAND, receiver=product.customer_phone_number, action=AUDIT_ACTION, message=owner_message)
+        send_job_to_queue(send_coupon, {"phone_number":product.customer_phone_number, "message": owner_message,
+                                            "sms_client":settings.SMS_CLIENT})
+        data = {'message' : owner_message, 'status': True}
+    except Exception as ex:
+        LOG.info('[register_owner]:Exception : '.format(ex))
+        message = templates.get_template('INVALID_REGISTRATION_NUMBER_OR_PURCHASE_DATE').format(phone_number=customer_support)
+        data = {'message' : message, 'status': False}
+
+    return data 
+
+@log_time
+def register_rider(sms_dict, phone_number):
+    '''
+    A function that handles rider registration
+    '''
+    dealer = models.Dealer.objects.active_dealer(phone_number)
+    if not dealer:
+        message = templates.get_template('UNAUTHORISED_DEALER')
+        return {'message' : message}
+
+    registration_number = sms_dict['registration_number']
+    rider_phone_number = sms_dict['phone_number']
+    try:
+        customer_support = models.Constant.objects.get(constant_name='customer_support_number_uganda').constant_value
+        product = models.ProductData.objects.get(registration_number=registration_number)
+        if product:
+            riders = models.FleetRider.objects.filter(product=product, is_active=True, phone_number=rider_phone_number)
+            if not riders:
+                rider = models.FleetRider(product=product, is_active=True, phone_number=rider_phone_number)
+                rider.save()
+            riders = models.FleetRider.objects.filter(Q(product=product),~Q(phone_number=rider_phone_number))
+            riders.update(is_active=False)
+            
+            rider_message = templates.get_template('SEND_RIDER_REGISTER').format(phone_number=rider_phone_number)
+            sms_log(settings.BRAND, receiver=rider_phone_number, action=AUDIT_ACTION, message=rider_message)
+            send_job_to_queue(send_coupon, {"phone_number":rider_phone_number, "message": rider_message,
+                                            "sms_client":settings.SMS_CLIENT})
+            owner_message = templates.get_template('SEND_RIDER_REGISTER_TO_OWNER').format(customer_name=product.customer_name,
+                                                                                          registration_number=product.registration_number,
+                                                                                          phone_number=customer_support)
+            sms_log(settings.BRAND, receiver=product.customer_phone_number, action=AUDIT_ACTION, message=owner_message)
+            send_job_to_queue(send_coupon, {"phone_number":product.customer_phone_number, "message": owner_message,
+                                            "sms_client":settings.SMS_CLIENT})
+            
+            message = templates.get_template('RIDER_SUCCESSFULLY_REGISTERED')
+            data = {'message' : message, 'status': True}
+    except Exception as ex:
+        LOG.info('[register_rider]:Exception : '.format(ex))
+        message = templates.get_template('INVALID_REGISTRATION_NUMBER').format(phone_number=customer_support)
+        data = {'message' : message, 'status': False}
+    
+    return data
 
 @log_time
 def update_customer(sms_dict, phone_number):
