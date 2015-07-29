@@ -5,15 +5,15 @@ import json
 from datetime import datetime
 from django.test.client import Client
 from django.conf import settings
-from django.contrib.auth.models import Group, User, Permission
+from django.contrib.auth.models import Group, Permission
 from test_constants import *
 from integration.afterbuy import base_integration
 from gladminds.afterbuy import models
 from gladminds.core.auth_helper import GmApps, Roles
-from integration.bajaj.test_feeds import FeedsResourceTest
 from integration.bajaj.test_brand_logic import Brand
 from integration.bajaj.base import BaseTestCase
-# from integration.bajaj.test_feeds import FeedsResourceTest
+from django.db.models.query_utils import Q
+from integration.bajaj.test_feeds import FeedsResourceTest
 
 client = Client(SERVER_NAME='afterbuy')
 client1 = Client(SERVER_NAME='bajaj')
@@ -42,20 +42,156 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, BaseTestCase):
         login_details = self.login()
         access_token = json.loads(login_details.content)['access_token']
         return access_token
-
-    def test_user_registration(self):
-
-        create_mock_data = {"phone_number":"1111111111",
-                            }
-        uri = '/afterbuy/v1/consumers/registration/phone'
-        resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
-        self.assertEquals(json.loads(resp.content)['status'], 200)
-        create_mock_data = {"phone_number":"1111111111",
-                            }
-        uri = '/afterbuy/v1/consumers/registration/phone'
-        resp = client.post(uri, data=json.dumps(create_mock_data), content_type='application/json')
-        self.assertEquals(json.loads(resp.content)['status_code'], 200)
     
+    def register_phone_number(self, phone_number):
+        data = {
+                "phone_number":phone_number,
+                }
+        uri = '/afterbuy/v1/consumers/registration/phone/'
+        resp = client.post(uri, data=json.dumps(data), content_type='application/json')
+        return resp
+    
+    def register_email(self,phone_number, email):
+        data = {
+                "phone_number": phone_number,
+                "email" : email
+                }
+        uri = '/afterbuy/v1/consumers/registration/email/'
+        resp = client.post(uri, data=json.dumps(data), content_type='application/json')
+        return resp
+     
+    def validate_otp_email(self, otp, phone_number, email):
+        data = {
+                "otp_token": otp,
+                "phone_number" : phone_number,
+                "email" : email
+                }
+        resp = client.post('/afterbuy/v1/consumers/validate-otp/email/',
+                           data=json.dumps(data), content_type='application/json')
+        return resp
+    
+    def check_consumer_status(self, phone_number, email=None):
+        if not email:
+            status =  models.Consumer.objects.get(phone_number=phone_number).user.is_active
+        else:
+            status =  models.Consumer.objects.get(phone_number=phone_number, user__email=email).user.is_active
+
+        return status
+        
+    def test_user_registration_case1(self):
+        '''
+        Both phone and email does not exist
+        '''
+        
+        resp = self.register_phone_number("1111111111")
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+
+        resp = self.register_email("1111111111", "abc@gmail.com")
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+    
+    
+    def test_user_registration_case2(self):
+        '''
+        phone number does not exist email exists
+        '''
+        resp = self.register_phone_number("1111111112")
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+        
+        resp = self.register_email("1111111112", "abb@gmail.com")
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+        
+        resp = self.register_phone_number("1111111113")
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+        
+        resp = self.register_email("1111111113", "abb@gmail.com")
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+
+        otp = models.OTPToken.objects.get(email="abb@gmail.com").token
+        
+        old_status = self.check_consumer_status("1111111112")
+        self.assertEquals(old_status, True)
+        
+        resp = self.validate_otp_email(otp, "1111111113", "abb@gmail.com")
+
+        new_status = self.check_consumer_status("1111111112")
+        self.assertEquals(new_status,False)
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+
+    def test_user_registration_case3(self):
+        '''
+        phone number and email exists
+        '''
+        resp = self.register_phone_number("1111111112")    
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+        
+        resp = self.register_email("1111111112", "abb@gmail.com")
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+        
+        
+        resp = self.register_phone_number("1111111113")    
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+        
+        resp = self.register_email("1111111113", "abc@gmail.com")
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+        
+        resp = self.register_phone_number("1111111112")    
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+
+        resp = self.register_email("1111111112", "abc@gmail.com")
+
+        otp = models.OTPToken.objects.get(email="abc@gmail.com").token
+        
+        status = self.check_consumer_status("1111111113")
+        self.assertEquals(status, True)
+        
+        resp = self.validate_otp_email(otp, "1111111112", "abc@gmail.com")
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+
+        status = self.check_consumer_status("1111111113")
+        self.assertEquals(status, False)
+        
+
+    
+    def test_user_registration_case4(self):
+        '''
+        Phone exists but email email does not exist
+        '''
+        resp = self.register_phone_number("1111111113")    
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+        
+        resp = self.register_email("1111111113", "abc@gmail.com")
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+        
+        resp = self.register_phone_number("1111111112")    
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+        
+        resp = self.register_email("1111111112", "abb@gmail.com")
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+        
+        resp = self.register_phone_number("1111111112")    
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+
+        resp = self.register_email("1111111112", "abc@gmail.com")
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+        
+        otp = models.OTPToken.objects.get(email="abc@gmail.com").token
+        old_status = self.check_consumer_status("1111111112", "abb@gmail.com")
+        self.assertEquals(old_status, True)
+        
+        resp = self.validate_otp_email(otp, "1111111112", "abc@gmail.com")
+        self.assertEquals(json.loads(resp.content)['status'], 1)
+        
+        old_status = self.check_consumer_status("1111111112", "abb@gmail.com")
+        self.assertEquals(old_status, False)
+        
+        new_status = self.check_consumer_status("1111111112", "abc@gmail.com")
+        self.assertEquals(new_status, True)
+        
+        new_status =  models.Consumer.objects.get(~Q(phone_number="1111111112") & Q(user__email="abc@gmail.com")).user.is_active
+        self.assertEquals(new_status, False)
+
+        
     def test_validate_otp(self):
         self.test_user_registration()
         uri = '/afterbuy/v1/consumers/validate-otp/'
@@ -251,4 +387,26 @@ class TestAfterbuyApi(base_integration.AfterBuyResourceTestCase, BaseTestCase):
         resp = client.get(uri)
         self.assertEquals(json.loads(resp.content)['coupon_data'][0]['unique_service_coupon'], 'USC9217')
         self.assertEquals(resp.status_code, 200)
+
+    def test_post_usermobile_info(self):
+        access_token = self.user_login()
+        uri = '/afterbuy/v1/user-mobile-info/?access_token='+access_token
+        resp = client.post(uri, data=json.dumps(USER_MOBILE_INFO), content_type='application/json')
+        self.assertEquals(resp.status_code, 201)
+        self.assertEquals(json.loads(resp.content)['IMEI'], '4567008')
+        
+    def test_post_service_center_data(self):
+        access_token = self.user_login()
+        uri = '/afterbuy/v1/service-center-locations/?access_token='+access_token
+        resp = client.post(uri, data=json.dumps(SERVICE_CENTER_LOCATION), content_type='application/json')
+        self.assertEquals(resp.status_code, 201)
+        self.assertEquals(json.loads(resp.content)['brand'], 'bajaj')
+        return access_token
+    
+    def test_book_service(self):
+        access_token = self.test_post_service_center_data()
+        uri = '/afterbuy/v1/service-history/book-service/?access_token='+access_token
+        resp = client.post(uri, data=json.dumps(BOOK_SERVICE), content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        self.assertEquals(json.loads(resp.content)['status'], 1)
         

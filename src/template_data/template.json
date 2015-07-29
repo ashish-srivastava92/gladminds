@@ -597,5 +597,95 @@
       "template":  "Dear {customer_name}, Congratulations for owning KTM RC Bike. Download link for KTM RC Owner's Manual for Android. Users: {rc_android_url} and Web Users : {rc_web_url}", 
       "description": "Send message on KTM RC bike purchase"
     }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 67,
+    "fields": {
+      "template_key":"RCV_OWNER_REGISTRATION",
+      "template":"{registration_number} {customer_name} {phone_number} {purchase_date}",
+      "description":"Receive message template from owner for registration"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 68,
+    "fields": {
+      "template_key":"SEND_OWNER_REGISTER",
+      "template":"Dear {customer_name}, Thanks for registering, and your customer id is {customer_id}. Please refer this ID during servicing.",
+      "description":"Send registration confirmation message to customer"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 69,
+    "fields": {
+      "template_key":"RCV_RIDER_REGISTRATION",
+      "template":"{registration_number} {phone_number}",
+      "description":"Receive message template from rider for registration"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 70,
+    "fields": {
+      "template_key":"SEND_RIDER_REGISTER",
+      "template":"Dear Rider, Thanks for updating your mobile number {phone_number}",
+      "description":"Send registration confirmation message to rider"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 71,
+    "fields": {
+      "template_key":"SEND_RIDER_REGISTER_TO_OWNER",
+      "template":"Dear {customer_name}, The mobile number is updated for registration number {registration_number}. For any query contact customer support {phone_number}",
+      "description":"Send registration confirmation message to owner"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 72,
+    "fields": {
+      "template_key":"RIDER_SUCCESSFULLY_REGISTERED",
+      "template":"The customer details are successfully updated in the system",
+      "description":"Send success message to the rider"
+    }
+  },
+    {
+    "model": "gladminds.messagetemplate",
+    "pk": 73,
+    "fields": {
+      "template_key":"INVALID_REGISTRATION_NUMBER",
+      "template":"Invalid Registration Number. Please check registration number and try again. If unsuccessful, please contact customer support {phone_number}",
+      "description":"Send when registration number doesnot exist"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 74,
+    "fields": {
+      "template_key":"OWNER_SUCCESSFULLY_REGISTERED",
+      "template":"The details are successfully registered in the system",
+      "description":"Send success message to the owner"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 75,
+    "fields": {
+      "template_key":"INVALID_REGISTRATION_NUMBER_OR_PURCHASE_DATE",
+      "template":"Invalid registration number or purchase date. Please check and try again. If unsuccessful, please contact customer support {phone_number}",
+      "description":"Send when registration number doesnot exist"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 76,
+    "fields": {
+      "template_key": "UNAUTHORISED_DEALER",
+      "template": "Sorry, you are not authorised to initiate this activity",
+      "description": "Send message to unauthorised Dealer"
+    }
   }
 ]

@@ -22,7 +22,8 @@ ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'service', 'check': 'a', 'close': 'c', 'brand': 'brand',
                     'service_desk': 'sd', 'customer_detail_recovery': 'r',
                     'accumulate_point':'ac', 'redeem_point':'rd',
-                    'check_point_balance':'chkbal'}
+                    'check_point_balance':'chkbal',
+                    'register_owner':'o', 'register_rider' :'r'}
 
 ADMINS = (
     ('naureen', 'naureen.razi@hashedin.com'),
@@ -633,7 +634,7 @@ BRANDS = OUTSIDE_BRANDS + ['afterbuy']
 ###############################################
 AIRTEL_IP = '54.84.243.77'
 SMS_CLIENT = "MOCK"
-BRAND_SMS_GATEWAY={'bajaj':'AIRTEL', 'daimler':'KAP', 'bajajcv': 'AIRTEL', 'afterbuy': 'KAP'}
+BRAND_SMS_GATEWAY={'bajaj':'AIRTEL', 'daimler':'KAP', 'bajajcv': 'AIRTEL', 'afterbuy': 'KAP', 'bajajib': 'KAP'}
 SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                               'pass':'bajaj',
                               'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',

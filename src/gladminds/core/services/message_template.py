@@ -78,5 +78,19 @@ def get_message_template_mapper():
                         'invalid':get_template('SEND_INVALID_MESSAGE'),
                         'handler':'loyalty.loyalty.loyalty.redeem_point',
                         'auth_rule': ['open']
+                        },
+            settings.ALLOWED_KEYWORDS['register_owner']:{
+                        'receive' : get_template('RCV_OWNER_REGISTRATION'),
+                        'send' : get_template('SEND_OWNER_REGISTER'),
+                        'invalid' : get_template('SEND_INVALID_MESSAGE'),
+                        'handler' : 'coupons.free_service_coupon.register_owner',
+                        'auth_rule' : ['open']
+                        },
+            settings.ALLOWED_KEYWORDS['register_rider']:{
+                        'receive' : get_template('RCV_RIDER_REGISTRATION'),
+                        'send' : get_template('SEND_RIDER_REGISTER'),
+                        'invalid' : get_template('SEND_INVALID_MESSAGE'),
+                        'handler' : 'coupons.free_service_coupon.register_rider',
+                        'auth_rule' : ['open']
                         }
             }
