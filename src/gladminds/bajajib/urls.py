@@ -4,7 +4,7 @@ from gladminds.core import urls as core_urls
 from gladminds.core.urls import api_v1
 
 urlpatterns = patterns('',
-    url(r'^sms/','gladminds.bajajib.services.feed_views.send_sms', name='send_sms'),
+    url(r'^ussd/sms/','gladminds.bajajib.services.feed_views.send_sms', name='send_sms'),
     url(r'^admin/', include(brand_admin.urls)),
     url(r'', include(api_v1.urls)),
     url(r'^site-info/$', 'gladminds.bajajib.views.site_info', name='site_info'),
