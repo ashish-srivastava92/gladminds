@@ -272,3 +272,8 @@ CONSIGNMENT_STATUS = (
 KTM_VIN ='VBK'
 SBOM_STATUS = (('Reject', 'Reject'),
                ('Publish', 'Publish'))
+
+SERVICE_STATUS = (('Pending', 'Pending'),
+                  ('Confirmed', 'Confirmed'),
+                  ('Completed', 'Completed'),
+                  ('Cancelled', 'Cancelled'))

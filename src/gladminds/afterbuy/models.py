@@ -9,7 +9,8 @@ from django.utils.translation import gettext as _
 from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
 from gladminds.core import base_models
 from gladminds.core.auth_helper import GmApps
-from gladminds.core.constants import GENDER_CHOICES, SIZE_CHOICES, FUEL_CHOICES
+from gladminds.core.constants import GENDER_CHOICES, SIZE_CHOICES, FUEL_CHOICES,\
+    SERVICE_STATUS
 from gladminds.core.managers.mail import send_email_activation, \
     sent_password_reset_link
 from gladminds.core.model_helpers import PhoneField, set_afterbuy_consumer_image, \
@@ -80,6 +81,8 @@ class Consumer(base_models.BaseModel):
                                    blank=True, null=True)
     is_email_verified = models.BooleanField(default=False)
     is_phone_verified = models.BooleanField(default=False)
+    has_discrepancy = models.BooleanField(default=False)
+    last_sync_date = models.DateTimeField(null=True, blank=True) 
     objects = user_manager.ConsumerManager()
     
     def image_tag(self):
@@ -306,11 +309,15 @@ class UserMobileInfo(base_models.BaseModel):
     operating_system = models.CharField(max_length=50, null=True, blank=True)
     version = models.CharField(max_length=50, null=True, blank=True)
     model = models.CharField(max_length=50, null=True, blank=True)
-
+    brand = models.CharField(max_length=50, null=True, blank=True)
+    total_memory = models.FloatField(null=True, blank=True)
+    available_memory = models.FloatField(null=True, blank=True)
+    mac_address = models.CharField(max_length=100, null=True, blank=True)
+    network_provider = models.CharField(max_length=100, null=True, blank=True)
+    
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Mobile Details"
-
 
 class UserPreference(base_models.UserPreference):
     consumer = models.ForeignKey(Consumer)
@@ -524,8 +531,24 @@ class ServiceCenterLocation(base_models.BaseModel):
     
     class Meta:
         app_label = _APP_NAME
-        verbose_name_plural = "Service Locations"
+        verbose_name_plural = "Service Center Locations"
     
     def __unicode__(self):
         return self.name
 
+class ServiceHistory(base_models.BaseModel):
+    service_center_location = models.ForeignKey(ServiceCenterLocation, null=True, blank=True)
+    consumer = models.ForeignKey(Consumer, null=True, blank=True)
+    asc_id = models.CharField(max_length=50, null=True, blank=True)
+    product_id = models.CharField(max_length=50, null=True, blank=True)
+    service_date = models.DateTimeField(null=True, blank=True)
+    actual_service_date = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=50, choices=SERVICE_STATUS, default='Pending')
+    comments = models.CharField(max_length=512, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Service History"
+        
+    def __unicode__(self):
+        return self.asc_id
