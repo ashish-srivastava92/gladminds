@@ -27,6 +27,14 @@ __all__ = ['GladmindsTaskManager']
 AUDIT_ACTION = 'SEND TO QUEUE'
 
 
+def update_coupon_expiry(product, purchase_date):
+    coupon_data = models.CouponData.objects.filter(product=product)
+    for coupon in coupon_data:
+        mark_expired_on = purchase_date + timedelta(days=int(coupon.valid_days))
+        coupon.mark_expired_on = mark_expired_on
+        coupon.save()
+    return
+
 @log_time
 def register_owner(sms_dict, phone_number):
     '''
@@ -57,6 +65,7 @@ def register_owner(sms_dict, phone_number):
             product.customer_phone_number = owner_phone_number
             product.purchase_date = purchase_date
             product.customer_id = customer_id
+            update_coupon_expiry(product, purchase_date)
         else:
             if product.customer_phone_number != owner_phone_number:
                 update_history = models.CustomerUpdateHistory(updated_field='phone_number',
