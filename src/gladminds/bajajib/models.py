@@ -189,3 +189,10 @@ class Constant(base_models.Constant):
 
     class Meta(base_models.Constant.Meta):
         app_label = _APP_NAME
+
+class CustomerUpdateHistory(base_models.CustomerUpdateHistory):
+    product = models.ForeignKey(ProductData)
+
+    class Meta(base_models.CustomerUpdateHistory.Meta):
+        app_label = _APP_NAME
+                
