@@ -684,7 +684,7 @@
     "pk": 76,
     "fields": {
       "template_key": "UNAUTHORISED_DEALER",
-      "template": "Sorry, you are not authorised to initiate this activity",
+      "template": "Sorry you are not authorised to initiate this activity",
       "description": "Send message to unauthorised Dealer"
     }
   }
