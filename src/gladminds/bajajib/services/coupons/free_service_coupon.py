@@ -40,7 +40,9 @@ def register_owner(sms_dict, phone_number):
     '''
        A function that handles owner registration
     '''
+    print "sms_dict,-------------",sms_dict
     dealer = models.Dealer.objects.active_dealer(phone_number)
+    print "dealer-------------",dealer
     if not dealer:
         message = templates.get_template('UNAUTHORISED_DEALER')
         return {'message' : message}
@@ -55,6 +57,7 @@ def register_owner(sms_dict, phone_number):
             return {'message' : message, 'status': False}
             
         product = models.ProductData.objects.get(registration_number=registration_number)
+        print "product of this reg number----------",product
         all_products = models.ProductData.objects.filter(customer_id__isnull=False).order_by('-customer_id')
         if all_products:
             customer_id = int(all_products[0].customer_id) + 1
@@ -167,7 +170,7 @@ def validate_coupon(sms_dict, phone_number):
         LOG.info("Associated product %s" % product_data_list.product_id)
 #         update_exceed_limit_coupon(actual_kms, product, service_advisor)
         valid_coupon = models.CouponData.objects.filter( (Q(status=1) | Q(status=4) | Q(status=5))  & Q(product=product_data_list.id)
-                        & Q(service_type=service_type )) 
+                                                         & Q(service_type=service_type )) 
         if not valid_coupon:
             return {'status': False, 'message': templates.get_template('COUPON_ALREADY_CLOSED')}
         LOG.info("List of available valid coupons %s" % valid_coupon)
@@ -175,11 +178,11 @@ def validate_coupon(sms_dict, phone_number):
             valid_coupon = valid_coupon[0]
             LOG.info("valid coupon %s" % valid_coupon)
             coupon_sa_obj = models.ServiceAdvisorCouponRelationship.objects.filter(unique_service_coupon=valid_coupon\
-                                                                                   , service_advisor=service_advisor)
+                                                                                   ,service_advisor=service_advisor)
             LOG.info('Coupon_sa_obj exists: %s' % coupon_sa_obj)
             if not len(coupon_sa_obj):
                 coupon_sa_obj = models.ServiceAdvisorCouponRelationship(unique_service_coupon=valid_coupon\
-                                                                        , service_advisor=service_advisor)
+                                                                        ,service_advisor=service_advisor)
                 coupon_sa_obj.save()
                 LOG.info('Coupon obj created: %s' % coupon_sa_obj)
 
@@ -250,6 +253,8 @@ def close_coupon(sms_dict, phone_number):
                                           'brand':settings.BRAND})
     if not service_advisor:
         return {'status': False, 'message': templates.get_template('UNAUTHORISED_SA')}
+    if not is_sa_initiator(unique_service_coupon, service_advisor, phone_number):
+        return {'status': False, 'message': "SA is not the coupon initiator."}
     
 #     if not is_valid_data(customer_id=customer_id, coupon=unique_service_coupon, sa_phone=phone_number):
 #         return {'status': False, 'message': templates.get_template('SEND_SA_WRONG_CUSTOMER_UCN')}
@@ -261,7 +266,7 @@ def close_coupon(sms_dict, phone_number):
                     return {'status': False, 'message': templates.get_template('INVALID_CUSTOMER_ID')}
                 
         coupon_object = models.CouponData.objects.filter(product=product.id,
-                        unique_service_coupon=unique_service_coupon).select_related ('product')
+                                                         unique_service_coupon=unique_service_coupon).select_related ('product')
         if not coupon_object:
                     return {'status': False, 'message': templates.get_template('INVALID_UCN')}
         coupon_object = coupon_object[0]     
