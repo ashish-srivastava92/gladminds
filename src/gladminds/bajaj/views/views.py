@@ -719,9 +719,9 @@ def download_reconcilation_reports(download_data):
     response = HttpResponse(content_type='text/excel')
     response['Content-Disposition'] = 'attachment; filename="ReportList.xlsx"'
     if download_data['params']['type']== 'credit':
-        template = loader.get_template('portal/reconciliation_credit_download.txt')
+        template = loader.get_template('portal/reconciliation_credit_download.html')
     else:
-        template = loader.get_template('portal/reconciliation_download.txt')
+        template = loader.get_template('portal/reconciliation_download.html')
     c = Context({
         'data': download_data['records'],
     })
