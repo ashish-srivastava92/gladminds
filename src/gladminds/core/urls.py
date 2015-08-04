@@ -142,6 +142,7 @@ urlpatterns = patterns('',
     url(r'^trigger-tasks', 'gladminds.core.views.trigger_sqs_tasks'),
     url(r'^tasks', SqsHandler.as_view(task_map=_tasks_map)),
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
+    url(r'^demo-sbom-upload/','gladminds.bajaj.services.feed_views.demo_sbom_upload', name='demo_sbom_upload'),
 
     url(r'^welcome', loyalty.send_welcome_message, name='send_welcome_message'),
     url(r'^check-detail/(?P<model>[a-zA-Z0-9]+)/(?P<choice>[a-zA-Z0-9]+)$', loyalty.check_details, name='check_details'),

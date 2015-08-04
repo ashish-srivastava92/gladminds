@@ -934,3 +934,44 @@ PRODUCT_BRAND =  {
                   "name": "bajaj",
                   "resource_uri": "/afterbuy/v1/brands/1/"
                   } 
+
+USER_MOBILE_INFO = {
+                    "ICCID": "689",
+                    "IMEI": "4567008",
+                    "available_memory": None,
+                    "brand": "",
+                    "capacity": "",
+                    "consumer": "/afterbuy/v1/consumers/1/",
+                    "created_date": "2015-07-14T13:39:30",
+                    "mac_address": "",
+                    "model": "",    
+                    "modified_date": "2015-07-14T13:39:30",
+                    "network_provider": "",
+                    "operating_system": "",
+                    "phone_name": "rtyu",
+                    "resource_uri": "/afterbuy/v1/user-mobile-info/1/",
+                    "serial_number": "",
+                    "total_memory": None,
+                    "version": ""
+                    }
+
+SERVICE_CENTER_LOCATION = {
+                           "address": "",
+                           "brand": "bajaj",
+                           "country": "",
+                           "created_date": "2015-07-14",
+                           "latitude": 10,
+                           "longitude": 8,
+                           "modified_date": "2015-07-14",
+                           "name": "name1",
+                           "phone_number": "",
+                           "pincode": "",
+                           "state": ""            
+                           }
+
+BOOK_SERVICE = {
+                "asc_id": "1",
+                "service_date" : "2015-09-06",
+                "product_id" : "VBK23456789098765"
+                }
+   

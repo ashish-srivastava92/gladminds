@@ -1561,6 +1561,7 @@ class BOMHeader(BaseModel):
     valid_from = models.DateField(null=True, blank= True)
     valid_to = models.DateField(null=True, blank= True)
     created_on = models.DateField(null=True, blank= True)
+    revision_number = models.IntegerField(default=0)
 
     class Meta:
         abstract = True
@@ -1633,10 +1634,10 @@ class BOMPlatePart(BaseModel):
         
 class BOMVisualization(BaseModel):
     '''Details of BOM Plates coordinates'''
-    x_coordinate  = models.IntegerField()
-    y_coordinate  = models.IntegerField()
-    z_coordinate  = models.IntegerField()
-    serial_number = models.IntegerField()
+    x_coordinate  = models.IntegerField(default=0)
+    y_coordinate  = models.IntegerField(default=0)
+    z_coordinate  = models.IntegerField(default=0)
+    serial_number = models.IntegerField(default=0)
     part_href = models.CharField(max_length=200)
     status =  models.CharField(max_length=25, choices=SBOM_STATUS,
                               blank=True, null=True)

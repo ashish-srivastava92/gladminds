@@ -667,6 +667,7 @@ def get_active_asc_report(request, role=None):
     if request.method != 'GET':
         return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
     try:
+        role = request.path.split('/')[3]
         data = request.GET.copy()
         if data.has_key('month'):
             month = MONTHS.index(data['month']) + 1
@@ -677,7 +678,7 @@ def get_active_asc_report(request, role=None):
             month = now.month
         no_of_days = utils.get_number_of_days(year, month)
         coupon_resource = CouponDataResource()
-        asc_query=coupon_resource.closed_ticket(year, month)
+        asc_query=coupon_resource.closed_ticket(year, month, role)
         asc_list = []
         for asc in asc_query:
             active = filter(lambda active: active['id']==asc['asc_id'], asc_list)

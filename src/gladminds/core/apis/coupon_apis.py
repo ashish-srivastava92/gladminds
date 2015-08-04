@@ -57,18 +57,28 @@ class CouponDataResource(CustomBaseModelResource):
         conn.close()
         return data
     
-    def closed_ticket(self, year, month):
+    def closed_ticket(self, year, month, role):
         trans_date = datetime.datetime.now() - datetime.timedelta(days=30)
-        query = "select count(*) as cnt, day(c.closed_date) as day, a.asc_id, e.address, f.first_name \
-                                      from gm_coupondata c\
-                                      left outer join gm_serviceadvisor s on c.service_advisor_id=s.user_id \
-                                      left outer join gm_dealer d on s.dealer_id=d.user_id left outer join \
-                                      gm_authorizedservicecenter a on s.asc_id=a.user_id \
-                                      left outer join gm_userprofile e on a.user_id = e.user_id \
-                                      left outer join auth_user f on a.asc_id = f.username \
-                                      where YEAR(closed_date)={0} and MONTH(closed_date)={1} \
-                                      and a.last_transaction_date > \"{2}\"\
-                                      group by date(c.closed_date),a.asc_id;".format( year, month, trans_date)
+        if role == 'asc':
+            query = "select count(*) as cnt, day(c.closed_date) as day, a.asc_id, e.address, f.first_name \
+                                          from gm_coupondata c\
+                                          left outer join gm_serviceadvisor s on c.service_advisor_id=s.user_id \
+                                          left outer join gm_dealer d on s.dealer_id=d.user_id left outer join \
+                                          gm_authorizedservicecenter a on s.asc_id=a.user_id \
+                                          left outer join gm_userprofile e on a.user_id = e.user_id \
+                                          left outer join auth_user f on a.asc_id = f.username \
+                                          where YEAR(closed_date)={0} and MONTH(closed_date)={1} \
+                                          and a.last_transaction_date > \"{2}\"\
+                                          group by date(c.closed_date),a.asc_id;".format( year, month, trans_date)
+        elif role == 'dealer':
+            query = " select count(*) as cnt, day(c.closed_date) as day , d.dealer_id as asc_id , e.address, \
+                        f.first_name from gm_coupondata c left outer join gm_serviceadvisor s on\
+                         c.service_advisor_id = s.user_id left outer join gm_authorizedservicecenter a \
+                         on s.asc_id = a.user_id left outer join gm_dealer d on s.dealer_id = d.user_id \
+                         left outer join gm_userprofile e on d.dealer_id=e.user_id left outer join auth_user f \
+                         on d.dealer_id = f.username where YEAR(closed_date)={0} and MONTH(closed_date)={1} \
+                         and d.last_transaction_date > \"{2}\" and d.use_cdms=0\
+                         group by date(c.closed_date) , d.dealer_id;".format(year, month, trans_date)
         details = self.get_sql_data(query)
         return details
         

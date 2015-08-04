@@ -228,3 +228,11 @@ class Brand(object):
         response_data=json.loads(response.content)
         return response_data['objects']
 
+    def search_sbom_data(self, access_token, parameter, value):
+        data = {'parameter': parameter, 'value': value}
+        if parameter=='revision':
+            data['sku_code']='00DH15ZZ'
+        uri = '/v1/bom-plate-parts/search-sbom/'
+        response = client.get(uri, data=data, access_token=access_token)
+        response_data= json.loads(response.content)
+        return response_data['objects']
