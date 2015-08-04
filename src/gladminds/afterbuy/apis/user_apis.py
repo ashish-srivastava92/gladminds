@@ -128,7 +128,8 @@ class ConsumerResource(CustomBaseModelResource):
                                                    password, http_host)
                 if user_auth.is_active:
                     login(request, user_auth)
-                    data = {'status':1 , 'message':'success', 'access_token': access_token}
+                    data = {'status':1 , 'message':'success', 'access_token': access_token,
+                            'consumer_id' : consumer.user.id}
                 else:
                     data = {'status': 0, 'message': "failure"}
             except Exception as ex:
@@ -234,6 +235,12 @@ class ConsumerResource(CustomBaseModelResource):
                     self.send_otp_to_mail(phone_number, email)
                     return HttpResponse(json.dumps({'status':1, 'message' : 'OTP sent successfully'}),
                                         content_type='application/json')
+                else:
+                    self.create_user(False, phone_number, email)
+                    self.send_otp_to_mail(phone_number, email)
+                    return HttpResponse(json.dumps({'status':1, 'message' : 'OTP sent successfully'}),
+                                        content_type='application/json')
+                    
         except Exception as ex:
             logger.info("Exception while registering user whose email exists - {0}".format(ex))
             try:
@@ -249,11 +256,6 @@ class ConsumerResource(CustomBaseModelResource):
                                                                                      ~Q(user__email=email) &
                                                                                      Q(user__is_active=True)    
                                                                                      )
-                    user_obj = consumer_obj.user 
-                    user_obj.is_active = False
-                    user_obj.save(using=settings.BRAND)
-                    consumer_obj.save(using=settings.BRAND)
-                    
                     user_obj = self.create_user(False, phone_number, email)
                     self.send_otp_to_mail(phone_number, email)
                     return HttpResponse(json.dumps({'status':1, 'message' : 'OTP sent successfully'}),
@@ -316,8 +318,12 @@ class ConsumerResource(CustomBaseModelResource):
             if not otp_token or not phone_number or not email:
                 return HttpBadRequest("OTP , phone number , email is mandatory")
             otp_handler.validate_otp(otp_token, email=email)
-            consumer = get_model('Consumer', settings.BRAND).objects.get(user__email=email,
+            
+            consumer = get_model('Consumer', settings.BRAND).objects.select_related('user').get(user__email=email,
                                                                          phone_number=phone_number)
+            user = consumer.user
+            user.is_active = True
+            user.save(using=settings.BRAND)
             consumer.is_email_verified = True
             consumer.save(using=settings.BRAND)
             
@@ -325,46 +331,69 @@ class ConsumerResource(CustomBaseModelResource):
                     select_related('consumer').filter(~Q(consumer__phone_number=phone_number) &
                                                       Q(consumer__user__email=email) &
                                                       Q(consumer__user__is_active=True))
-            for product in user_products:
-                user = product.consumer.user
-                user.is_active =  False
-                user.save(using=settings.BRAND)
-                product.save(using=settings.BRAND)
+            if len(user_products) >0:   
+                for product in user_products:
+                    user = product.consumer.user
+                    user.is_active =  False
+                    user.save(using=settings.BRAND)
+                    product.save(using=settings.BRAND)
+                
+                products = []
+                for product in user_products:
+                    products.append(get_model('UserProduct', settings.BRAND)(consumer=consumer,
+                                                                             nick_name=product.nick_name,
+                                                                             product_type=product.product_type,
+                                                                             purchase_date=product.purchase_date,
+                                                                             brand_product_id=product.brand_product_id,
+                                                                             image_url=product.image_url,
+                                                                             color=product.color,
+                                                                             is_deleted=product.is_deleted,
+                                                                             description=product.description,
+                                                                             is_accepted=product.is_accepted,
+                                                                             service_reminder=product.service_reminder,
+                                                                             details_completed=product.details_completed,
+                                                                             manual_link=product.manual_link,
+                                                                             warranty_year=product.warranty_year,
+                                                                             insurance_year=product.insurance_year))
+                new_products = get_model('UserProduct', settings.BRAND).objects.bulk_create(products)
+                new_products = get_model('UserProduct', settings.BRAND).objects.\
+                        select_related('consumer').filter(Q(consumer__phone_number=phone_number) &
+                                                          Q(consumer__user__email=email))
+    
+                
+                product_dict = {}
+                for user_product in user_products:
+                    product_mapping = filter(lambda product : product.brand_product_id == user_product.brand_product_id,
+                                             new_products)
+                    product_dict[user_product.brand_product_id] = product_mapping[0]
+                
+                insurance_details = get_model('ProductInsuranceInfo', settings.BRAND).objects.filter(product__in=user_products)
+                self.update_product_insurance_warranty(product_dict, insurance_details)
+                
+                warranty_details = get_model('ProductWarrantyInfo', settings.BRAND).objects.filter(product__in=user_products)
+                self.update_product_insurance_warranty(product_dict, warranty_details)
+            else:
+                consumers = get_model('Consumer', settings.BRAND).objects.select_related('user').filter(Q(user__email=email)&
+                                                                                 ~Q(phone_number=phone_number),
+                                                                                 Q(user__is_active=True))
+                for consumer_obj in consumers:
+                    user = consumer_obj.user
+                    user.is_active = False
+                    user.save(using=settings.BRAND)
+                    consumer_obj.save(using=settings.BRAND)
             
-            products = []
-            for product in user_products:
-                products.append(get_model('UserProduct', settings.BRAND)(consumer=consumer,
-                                                                         nick_name=product.nick_name,
-                                                                         product_type=product.product_type,
-                                                                         purchase_date=product.purchase_date,
-                                                                         brand_product_id=product.brand_product_id,
-                                                                         image_url=product.image_url,
-                                                                         color=product.color,
-                                                                         is_deleted=product.is_deleted,
-                                                                         description=product.description,
-                                                                         is_accepted=product.is_accepted,
-                                                                         service_reminder=product.service_reminder,
-                                                                         details_completed=product.details_completed,
-                                                                         manual_link=product.manual_link,
-                                                                         warranty_year=product.warranty_year,
-                                                                         insurance_year=product.insurance_year))
-            new_products = get_model('UserProduct', settings.BRAND).objects.bulk_create(products)
-            new_products = get_model('UserProduct', settings.BRAND).objects.\
-                    select_related('consumer').filter(Q(consumer__phone_number=phone_number) &
-                                                      Q(consumer__user__email=email))
+            
+            all_consumers = get_model('Consumer', settings.BRAND).objects.select_related('user')\
+                                                                            .filter(Q(phone_number=phone_number) &
+                                                                            ~Q(user__email=email) &
+                                                                            Q(user__is_active=True))
+            if len(all_consumers) >0:
+                all_consumers[0].has_discrepancy = True
+                user_obj = all_consumers[0].user
+                user_obj.is_active = False
+                user_obj.save(using=settings.BRAND)
+                all_consumers[0].save(using=settings.BRAND)
 
-            
-            product_dict = {}
-            for user_product in user_products:
-                product_mapping = filter(lambda product : product.brand_product_id == user_product.brand_product_id,
-                                         new_products)
-                product_dict[user_product.brand_product_id] = product_mapping[0]
-            
-            insurance_details = get_model('ProductInsuranceInfo', settings.BRAND).objects.filter(product__in=user_products)
-            self.update_product_insurance_warranty(product_dict, insurance_details)
-            
-            warranty_details = get_model('ProductWarrantyInfo', settings.BRAND).objects.filter(product__in=user_products)
-            self.update_product_insurance_warranty(product_dict, warranty_details)
             access_token = self.generate_access_token(request, consumer)
             return HttpResponse(json.dumps(access_token),
                                     content_type='application/json')
@@ -427,7 +456,7 @@ class ConsumerResource(CustomBaseModelResource):
                 otp = otp_handler.get_otp(user=user_obj)
                 message = afterbuy_utils.get_template('SEND_OTP').format(otp)
                 send_job_to_queue('send_otp', {'phone_number': phone_number,
-                                             'message': message, "sms_client": settings.SMS_CLIENT})
+                                               'message': message, "sms_client": settings.SMS_CLIENT})
                 logger.info('OTP sent to mobile {0}'.format(phone_number))
                 data = {'status': 1, 'message': "OTP sent_successfully"}
                 #Send email if email address exist
@@ -617,3 +646,14 @@ class ServiceResource(CustomBaseModelResource):
                      "service_type": ALL,
                      "is_active": ALL
                      }
+
+class UserMobileInfoResource(CustomBaseModelResource):
+    consumer = fields.ForeignKey(ConsumerResource, 'consumer')
+    
+    class Meta:
+        queryset = get_model('UserMobileInfo', settings.BRAND).objects.all()
+        resource_name = 'user-mobile-info'
+        authentication = AccessTokenAuthentication()
+        authorization = Authorization()
+        always_return_data = True
+        

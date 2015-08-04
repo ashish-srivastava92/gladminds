@@ -6,5 +6,5 @@ class ConsumerManager(models.Manager):
                                                                user__is_active=True)
         
     def get_active_consumers_with_email(self, email):
-        return super(ConsumerManager, self).get_queryset().get(user__email=email,
+        return super(ConsumerManager, self).select_related('user').get(user__email=email,
                                                                user__is_active=True)
