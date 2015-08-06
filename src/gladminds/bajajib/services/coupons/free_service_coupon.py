@@ -54,7 +54,7 @@ def register_owner(sms_dict, phone_number):
             message = templates.get_template('INVALID_REGISTRATION_NUMBER_OR_PURCHASE_DATE').format(phone_number=customer_support)
             return {'message' : message, 'status': False}
             
-        product = models.ProductData.objects.get(registration_number=registration_number)
+        product = models.ProductData.objects.get(veh_reg_no=registration_number)
         all_products = models.ProductData.objects.filter(customer_id__isnull=False).order_by('-customer_id')
         if all_products:
             customer_id = int(all_products[0].customer_id) + 1
@@ -102,7 +102,7 @@ def register_rider(sms_dict, phone_number):
     rider_phone_number = sms_dict['phone_number']
     try:
         customer_support = models.Constant.objects.get(constant_name='customer_support_number_uganda').constant_value
-        product = models.ProductData.objects.get(registration_number=registration_number)
+        product = models.ProductData.objects.get(veh_reg_no=registration_number)
         if product:
             riders = models.FleetRider.objects.filter(product=product, is_active=True, phone_number=rider_phone_number)
             if not riders:
