@@ -48,15 +48,28 @@ class RegionalManager(base_models.RegionalManager):
     class Meta(base_models.RegionalManager.Meta):
         app_label = _APP_NAME
 
+class Territory(base_models.Territory):
+    '''List of territories'''
+    
+    class Meta(base_models.Territory.Meta):
+        app_label = _APP_NAME
+
+class State(base_models.State):
+    ''' List of states mapped to territory'''
+    territory = models.ForeignKey(Territory, null=True, blank=True)
+ 
+    class Meta(base_models.State.Meta):
+        app_label = _APP_NAME
+
 
 class AreaSalesManager(base_models.AreaSalesManager):
     '''details of Area Sales Manager'''
     user =  models.OneToOneField(UserProfile, null=True, blank=True)
     rm = models.ForeignKey(RegionalManager, null=True, blank=True)
+    state = models.ManyToManyField(State)
     
     class Meta(base_models.AreaSalesManager.Meta):
         app_label = _APP_NAME
-
 
 class AreaServiceManager(base_models.AreaServiceManager):
     '''details of Area Service Manager'''
@@ -404,18 +417,6 @@ class ContainerTracker(base_models.ContainerTracker):
         app_label = _APP_NAME
 
 #######################LOYALTY MODELS#################################
-class Territory(base_models.Territory):
-    '''List of territories'''
-    
-    class Meta(base_models.Territory.Meta):
-        app_label = _APP_NAME
-
-class State(base_models.State):
-    ''' List of states mapped to territory'''
-    territory = models.ForeignKey(Territory, null=True, blank=True)
- 
-    class Meta(base_models.State.Meta):
-        app_label = _APP_NAME
 
 class City(base_models.City):
     ''' List of cities mapped to states'''

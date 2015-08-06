@@ -180,7 +180,6 @@ class RegionalManager(BaseModel):
 
 class AreaSalesManager(BaseModel):
     '''details of Area Sales Manager'''
-    area = models.CharField(max_length=100, null=True, blank=True)
     
     class Meta:
         abstract = True
