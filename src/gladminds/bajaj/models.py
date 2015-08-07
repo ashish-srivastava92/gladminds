@@ -34,7 +34,7 @@ class ZonalServiceManager(base_models.ZonalServiceManager):
 
 class CircleHead(base_models.CircleHead):
     '''details of Circle Heads'''
-    user =  models.OneToOneField(UserProfile, null=False, blank=False)
+    user =  models.OneToOneField(UserProfile)
     
     class Meta(base_models.CircleHead.Meta):
         app_label = _APP_NAME
@@ -42,7 +42,7 @@ class CircleHead(base_models.CircleHead):
         
 class RegionalManager(base_models.RegionalManager):
     '''details of Regional Manager'''
-    user =  models.OneToOneField(UserProfile, null=True, blank=True)
+    user =  models.OneToOneField(UserProfile)
     circle_head = models.ForeignKey(CircleHead, null=True, blank=True)
 
     class Meta(base_models.RegionalManager.Meta):
@@ -64,7 +64,7 @@ class State(base_models.State):
 
 class AreaSalesManager(base_models.AreaSalesManager):
     '''details of Area Sales Manager'''
-    user =  models.OneToOneField(UserProfile, null=True, blank=True)
+    user =  models.OneToOneField(UserProfile)
     rm = models.ForeignKey(RegionalManager, null=True, blank=True)
     state = models.ManyToManyField(State)
     
