@@ -34,7 +34,7 @@ class ZonalServiceManager(base_models.ZonalServiceManager):
 
 class CircleHead(base_models.CircleHead):
     '''details of Circle Heads'''
-    user =  models.OneToOneField(UserProfile, null=True, blank=True)
+    user =  models.OneToOneField(UserProfile, null=False, blank=False)
     
     class Meta(base_models.CircleHead.Meta):
         app_label = _APP_NAME
