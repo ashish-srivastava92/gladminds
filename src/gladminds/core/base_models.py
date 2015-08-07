@@ -1710,3 +1710,57 @@ class ManufacturingData(models.Model):
     class Meta:
         abstract = True
         db_table = "gm_manufacturingdata"
+        
+        
+#####################################IB models################################################
+
+class Country(BaseModel):
+    '''States under a brand'''
+    name = models.CharField(max_length=30, unique = True)
+    area_code = models.CharField(max_length=10, unique = True)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_country"
+
+    def __unicode__(self):
+        return self.name
+
+class CountryDistributor(BaseModel):
+    '''Details of Main Country Dealer'''
+    distributor_id = models.CharField(
+        max_length=25, blank=False, null=False, unique=True)
+    fleet_enable = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_countrydistributor"
+
+    def __unicode__(self):
+        return self.distributor_id
+   
+class MainCountryDealer(BaseModel):
+    '''Details of Main Country Dealer'''
+    dealer_id = models.CharField(
+        max_length=25, blank=False, null=False, unique=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_maincountrydealer"
+
+    def __unicode__(self):
+        return self.dealer_id
+
+class FleetRider(BaseModel):
+    '''Details of riders'''
+    phone_number = PhoneField()
+    is_active = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_fleetrider"
+
+    def __unicode__(self):
+        return self.dealer_id
+    
+    

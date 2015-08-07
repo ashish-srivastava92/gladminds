@@ -113,3 +113,6 @@ alter table gm_bomvisualization modify column z_coordinate int default 0;
 
 alter table afterbuy_consumer add column has_discrepancy boolean default False;
 alter table afterbuy_consumer add column last_sync_date datetime null;
+
+alter table gm_dealer add column sm_id integer;
+alter table gm_dealer add foreign key(sm_id) references gm_areasalesmanager(id);
