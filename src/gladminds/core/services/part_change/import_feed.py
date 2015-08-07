@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.auth_helper import Roles
@@ -130,9 +130,10 @@ class ECOImplementationFeed(BaseFeed):
                 eco_number_list.append(eco_obj['eco_number'])
                 plate_list.append(eco_obj['parent_part'])
                 added_part_list.append(eco_obj['added_part'])
-            get_model('ECORelease').objects.bulk_create(eco_implementation_list)
-            self.modify_sbom_data(self.data_source, set(eco_number_list), set(plate_list), set(added_part_list))
+            eco_implementation_obj = get_model('ECOImplementation').objects.bulk_create(eco_implementation_list)
+            feed_remark = self.modify_sbom_data(eco_implementation_obj, set(eco_number_list), set(plate_list), set(added_part_list), self.feed_remark)
             mail.send_epc_feed_received_mail(brand=settings.BRAND, template_name='ECO_RELEASE_FEED')
+            self.feed_remark=feed_remark
         except Exception as ex:
             ex="[Exception: ]: ECOImplementationFeed {0}".format(ex)
             logger.error(ex)
@@ -140,83 +141,75 @@ class ECOImplementationFeed(BaseFeed):
         return self.feed_remark
     
     
-    def modify_sbom_data(self, data_source, eco_number_list, plate_list, part_list):
+    def modify_sbom_data(self, data_source, eco_number_list, plate_list, part_list, feed_remark):
         try:
-            sku_code_list=[]
-            eco_sku=[]
-            eco_release = get_model('ECORelease').objects.filter(eco_number__in=eco_number_list)
-            for eco_release_obj in eco_release:
-                sku_code_list.append(eco_release_obj.models_applicable)
-                temp={}
-                temp[eco_release_obj.eco_number]=eco_release_obj.models_applicable
-                eco_sku.append(temp)
-            bom_header = get_model('BOMHeader').objects.filter(sku_code__in=sku_code_list)
-            if not bom_header:
-                raise()
-            revision_number=0
-            bom_header_create=[]
-            for eco_number in eco_number_list:
-                eco_number_exist=filter(lambda bom_obj: bom_obj.eco_number == eco_number, bom_header)
-                if not eco_number_exist:
-                    sku_data=filter(lambda bom_obj: bom_obj.sku_code == eco_sku[eco_number], bom_header)
-                    for sku in sku_data:
-                        if sku.revision_number>revision_number:
-                            revision_number=sku.revision_number
-                    bom_header_create.append(get_model('BOMHeader')(sku_code=sku_data.sku_code,
-                                                        bom_number=sku_data.bom_number,
-                                                        revision_number=revision_number+1,
-                                                        eco_number=eco_number))
-            get_model('BOMHeader').objects.bulk_create(bom_header_create)
-            
-            bom_plates = get_model('BOMPlate').objects.filter(plate_id__in=plate_list)
-            insert_plate_data=[]
-            for plate in plate_list:
-                plate_exist=filter(lambda plate_obj: plate_obj.palte_id == plate, bom_plates)
-                if not plate_exist:
+            with transaction.atomic():
+                sku_code_list=[]
+                eco_sku={}
+                eco_release = get_model('ECORelease').objects.filter(eco_number__in=eco_number_list)
+                for eco_release_obj in eco_release:
+                    sku_code_list.append(eco_release_obj.models_applicable)
+                    eco_sku[eco_release_obj.eco_number]=eco_release_obj.models_applicable
+                bom_header = get_model('BOMHeader').objects.filter(sku_code__in=sku_code_list)
+                if not bom_header:
+                    raise ValueError('Invalid sku codes')
+                bom_header_create=[]
+                for eco_number in eco_number_list:
+                    revision_number=0
+                    eco_number_exist=filter(lambda bom_obj: bom_obj.eco_number == eco_number, bom_header)
+                    if not eco_number_exist:
+                        sku_data=filter(lambda bom_obj: bom_obj.sku_code == eco_sku[str(eco_number)], bom_header)
+                        for sku in sku_data:
+                            if sku.revision_number>revision_number:
+                                revision_number=sku.revision_number
+                        bom_header_create.append(get_model('BOMHeader')(sku_code=sku_data[0].sku_code,
+                                                            bom_number=sku_data[0].bom_number,
+                                                            revision_number=revision_number+1,
+                                                            eco_number=eco_number))
+                get_model('BOMHeader').objects.bulk_create(bom_header_create)
+                
+                bom_plates = get_model('BOMPlate').objects.filter(plate_id__in=plate_list).values_list("plate_id", flat=True)
+                new_plates=plate_list.difference(set(bom_plates))
+                insert_plate_data=[]
+                for plate in new_plates:
                     insert_plate_data.append(get_model('BOMPlate')(plate_id=plate))
-            get_model('BOMPlate').objects.bulk_create(insert_plate_data)
-                    
-            bom_parts = get_model('BOMPlate').objects.filter(part_id__in=part_list)
-            insert_part_data=[]
-            for part in part_list:
-                plate_exist=filter(lambda part_obj: part_obj.aort_id == part, bom_parts)
-                if not plate_exist:
-                    insert_part_data.append(get_model('BOMPart')(plate_id=plate))
-            get_model('BOMPart').objects.bulk_create(insert_part_data)
-            
-            bom_header = get_model('BOMHeader').objects.filter(sku_code__in=sku_code_list)
-            bom_plates = get_model('BOMPlate').objects.filter(plate_id__in=plate_list)
-            bom_parts = get_model('BOMPlate').objects.filter(part_id__in=part_list)
-            
-#             if eco_implementation_obj.added_part:
-#                 try:
-#                     bom_part = get_model('BOMPart').objects.get(part_number=eco_implementation_obj.added_part)
-#                 except Exception as ex:
-#                     ex="[Exception: ]: while adding new part {0}".format(ex)
-#                     logger.error(ex)
-#                     bom_part = get_model('BOMPart')(part_number=eco_implementation_obj.added_part)
-#                     bom_part.save(using=settings.BRAND)
-#                 bom_plate_part = get_model('BOMPlatePart')(bom=bom_header, plate=bom_plate, part=bom_part,
-#                                                                    quantity=eco_implementation_obj.added_part_qty,
-#                                                                    valid_from=eco_implementation_obj.change_date,
-#                                                                    valid_to='9999-12-31',
-#                                                                    change_number=eco_implementation_obj.change_no)
-#                 bom_plate_part.save(using=settings.BRAND)
-#             if eco_implementation_obj.deleted_part:
-#                 try:
-#                     bom_part = get_model('BOMPart').objects.get(part_number=eco_implementation_obj.deleted_part)
-#                     bom_plate_part = get_model('BOMPlatePart').objects.filter(bom__bom_number=bom_header.bom_number,
-#                                                                               plate__plate_id=eco_implementation_obj.parent_part,
-#                                                                               part=bom_part)
-#                     if len(bom_plate_part) > 0:
-#                         bom_plate_part.update(valid_to=eco_implementation_obj.change_date)
-#                 except Exception as ex:
-#                     ex="[Exception] : while deleting a part {0}".format(ex)
-#                     logger.error(ex)
-#         except ObjectDoesNotExist as odne:
-#             ex = "[Exception]: modify sbom data {0}".format(odne)
-#             logger.error(ex)
-#         return
+                get_model('BOMPlate').objects.bulk_create(insert_plate_data)
+                        
+                bom_parts = get_model('BOMPart').objects.filter(part_number__in=part_list).values_list("part_number", flat=True)
+                new_parts=part_list.difference(set(bom_parts))
+                insert_part_data=[]
+                for part in new_parts:
+                    insert_part_data.append(get_model('BOMPart')(part_number=part, revision_number=0))
+                get_model('BOMPart').objects.bulk_create(insert_part_data)
+                
+                bom_header = get_model('BOMHeader').objects.filter(sku_code__in=sku_code_list)
+                bom_plates = get_model('BOMPlate').objects.filter(plate_id__in=plate_list)
+                bom_parts = get_model('BOMPart').objects.filter(part_number__in=part_list)
+                
+                bom_plate_part_list=[]
+                for eco_implementation_obj in data_source:
+                    bom_obj = filter(lambda bom_obj: eco_implementation_obj.eco_number == bom_obj.eco_number, bom_header)
+                    plate_obj = filter(lambda plate_obj: eco_implementation_obj.parent_part == plate_obj.plate_id, bom_plates)
+                    if eco_implementation_obj.added_part:
+                        part_obj = filter(lambda part_obj: eco_implementation_obj.added_part == part_obj.part_number, bom_parts)
+                        bom_plate_part_list.append(get_model('BOMPlatePart')(bom=bom_obj[0], plate=plate_obj[0], part=part_obj[0],
+                                                                       quantity=eco_implementation_obj.added_part_qty,
+                                                                       valid_from=eco_implementation_obj.change_date,
+                                                                       valid_to='9999-12-31',
+                                                                       change_number=eco_implementation_obj.change_no))
+                    if eco_implementation_obj.deleted_part:
+                        part_obj = filter(lambda part_obj: eco_implementation_obj.deleted_part == part_obj.part_number, bom_parts)
+                        if part_obj:
+                            bom_plate_part = get_model('BOMPlatePart').objects.filter(bom=bom_obj[0],
+                                                                                plate=plate_obj[0], part=part_obj[0])
+                            if len(bom_plate_part) > 0:
+                                bom_plate_part.update(valid_to=eco_implementation_obj.change_date)
+                get_model('BOMPlatePart').objects.bulk_create(bom_plate_part_list)
+        except Exception as done:
+            ex = "[Exception]: modify sbom data {0}".format(done)
+            logger.error(ex)
+            feed_remark.fail_remarks(ex)
+        return feed_remark
     
 class ManufactureDataFeed(BaseFeed):    
 
