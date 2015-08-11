@@ -1586,6 +1586,7 @@ class BOMHeader(BaseModel):
     valid_to = models.DateField(null=True, blank= True)
     created_on = models.DateField(null=True, blank= True)
     revision_number = models.IntegerField(default=0)
+    eco_number = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         abstract = True
