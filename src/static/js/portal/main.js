@@ -111,7 +111,7 @@
 		            	}
             			if(userName==='d123'){
                 		    $('.customer-name').val(product.name).attr('readOnly', false);
-                		    $('.purchase-date').val(product.purchased).attr('readOnly', false);
+                		    $('.purchase-date').val(product.purchased).attr('disabled', false);
             			}
             		 }
 		              else{
