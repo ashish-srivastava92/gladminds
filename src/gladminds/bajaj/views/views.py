@@ -173,9 +173,9 @@ def update_pass(request):
     try:
         otp = request.POST['otp']
         password = request.POST['password']
-        utils.update_pass(otp, password)
-        logger.info('Password has been updated.')
-        return HttpResponseRedirect('/aftersell/asc/login?update=true')
+        data = utils.update_pass(otp, password)
+        return HttpResponse(json.dumps(data), content_type='application/json')
+
     except:
         logger.error('Password update failed.')
         return HttpResponseRedirect('/aftersell/asc/login?error=true')
