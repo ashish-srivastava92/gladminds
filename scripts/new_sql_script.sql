@@ -116,9 +116,10 @@ alter table gm_bomheader add column eco_number varchar(20) null;
 alter table afterbuy_consumer add column has_discrepancy boolean default False;
 alter table afterbuy_consumer add column last_sync_date datetime null;
 
-
 alter table gm_retailer add column is_active boolean default True;
 alter table gm_retailer add column approved boolean default False;
 
-
+alter table gm_dealer add column sm_id integer;
+alter table gm_dealer add foreign key(sm_id) references gm_areasalesmanager(id);
+alter table auth_user modify username varchar(250);
 
