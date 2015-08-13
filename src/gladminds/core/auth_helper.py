@@ -49,6 +49,9 @@ class Roles():
     SDREADONLY = 'SdReadOnly'
     AREASERVICEMANAGER = 'AreaServiceManagers'
     ZSM = 'ZonalServiceManagers' 
+    AREASALESMANAGERS = 'AreaSalesManagers'
+    REGIONALMANAGERS = 'RegionalManagers'
+    CIRCLEHEADS = 'CircleHeads' 
     
     LOYALTYSUPERADMINS = 'LoyaltySuperAdmins'
     LOYALTYADMINS = 'LoyaltyAdmins'
