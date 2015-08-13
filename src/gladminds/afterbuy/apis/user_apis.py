@@ -387,7 +387,7 @@ class ConsumerResource(CustomBaseModelResource):
                                                                             .filter(Q(phone_number=phone_number) &
                                                                             ~Q(user__email=email) &
                                                                             Q(user__is_active=True))
-            if len(all_consumers) >0:                                                                
+            if len(all_consumers) >0:
                 all_consumers[0].has_discrepancy = True
                 user_obj = all_consumers[0].user
                 user_obj.is_active = False
