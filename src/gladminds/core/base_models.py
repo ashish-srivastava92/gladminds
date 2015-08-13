@@ -1102,12 +1102,39 @@ class Distributor(BaseModel):
 
     def __unicode__(self):
         return self.distributor_id + ' ' +self.name
+
+class DistributorStaff(BaseModel):
+    '''details of DistributorStaff'''
+    distributor_staff_id = models.CharField(max_length=50)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_distributorstaff"
+        verbose_name_plural = "Distributor Staff"
+
+    def __unicode__(self):
+        return self.distributor_staff_id
+
+class DistributorSalesRep(BaseModel):
+    '''details of DistributorSalesRep'''
+    distributor_sales_id = models.CharField(max_length=50)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_distributorsalesrep"
+        verbose_name_plural = "Distributor Sales Rep"
+
+    def __unicode__(self):
+        return self.distributor_sales_id
     
 class Retailer(BaseModel):
     '''details of Retailer'''
     retailer_name = models.CharField(max_length=50)
     retailer_town = models.CharField(max_length=50, null=True, blank=True)
-    
+    approved = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         abstract = True
@@ -1116,6 +1143,19 @@ class Retailer(BaseModel):
 
     def __unicode__(self):
         return self.retailer_name
+ 
+class DSRWrokAllocation(BaseModel):
+    '''details of DSRWrokAllocation'''
+    status = models.CharField(max_length=12, choices=constants.REDEMPTION_STATUS, default='Open')
+
+    class Meta:
+        abstract = True
+        db_table = "gm_dsrworkallocation"
+        verbose_name_plural = "DSR Work Allocation"
+
+    def __unicode__(self):
+        return self.retailer_name   
+
 
 class Member(BaseModel):
     '''details of Member'''
