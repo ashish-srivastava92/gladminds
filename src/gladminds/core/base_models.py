@@ -162,6 +162,30 @@ class ZonalServiceManager(BaseModel):
     def __unicode__(self):
         return self.zsm_id
 
+class CircleHead(BaseModel):
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_circlehead"
+        verbose_name_plural = "Circle Heads"
+     
+class RegionalManager(BaseModel):
+    '''details of Regional Manager'''
+    region = models.CharField(max_length=100, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_regionalmanager"
+        verbose_name_plural = "Regional Managers"
+
+class AreaSalesManager(BaseModel):
+    '''details of Area Sales Manager'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_areasalesmanager"
+        verbose_name_plural = "Area Sales Managers"
+        
 class AreaServiceManager(BaseModel):
     '''details of Area Service Manager'''
     asm_id = models.CharField(max_length=50, unique=True, null=False, blank=False)
