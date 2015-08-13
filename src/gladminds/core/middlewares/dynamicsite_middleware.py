@@ -46,7 +46,7 @@ class DynamicSitesMiddleware(object):
         BRAND.value = self.get_fields(self.domain)
         
     #Note its a hack which is implemented for tata motors
-        if BRAND.value == 'tata':
+        if BRAND.value == 'tatamotors':
             BRAND.value = 'daimler'
               
         if BRAND.value == 'admin':
