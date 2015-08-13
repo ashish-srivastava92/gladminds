@@ -76,12 +76,12 @@ class Command(BaseCommand):
         self.create_territory()
         self.create_loyalty_admins()
         self.set_afterbuy_permissions()
-        if settings.ENV not in ['prod', 'staging', 'qa']:
+#         if settings.ENV not in ['prod', 'staging', 'qa']:
 #             self.upload_loyalty_user()
 #             self.upload_asm_user()
 #             self.upload_part_data()
 #             self.upload_sbom_data()
-            self.upload_asm_with_rm()
+#             self.upload_asm_with_rm()
         for brand in ALL_BRANDS:
             self.set_brand_permissions(brand)
             
