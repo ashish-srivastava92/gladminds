@@ -1146,7 +1146,7 @@ class Retailer(BaseModel):
  
 class DSRWrokAllocation(BaseModel):
     '''details of DSRWrokAllocation'''
-    status = models.CharField(max_length=12, choices=constants.REDEMPTION_STATUS, default='Open')
+    status = models.CharField(max_length=12, choices=constants.WORKFLOW_STATUS, default='Open')
 
     class Meta:
         abstract = True
