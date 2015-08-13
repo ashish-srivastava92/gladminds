@@ -129,5 +129,5 @@ class Command(BaseCommand):
                 dealer_obj.sm = asm_obj
                 dealer_obj.save()
             except Exception as ex:
-                print "Exception while creating dealer", ex
+                print "Creating dealer", ex
                 
