@@ -24,26 +24,10 @@ alter table gm_bomvisualization add column remarks varchar(500) null;
 
 alter table gm_userprofile add column reset_password boolean default false;
 alter table gm_userprofile add column reset_date datetime null;
-alter table gm_producttype add column overview varchar(512) null;
 
+alter table gm_producttype add column overview varchar(512) null;
 alter table gm_producttype add brand_id integer;
 alter table gm_producttype add foreign key (brand_id) references gm_producttype(id);
-
-alter table afterbuy_userproduct add column is_accepted boolean default false;  
-alter table afterbuy_consumer add column is_phone_verified boolean default false;
-alter table afterbuy_userproduct add column service_reminder int null;
-alter table afterbuy_userproduct add column details_completed int null;
-alter table afterbuy_userproduct add column manual_link varchar(512) null;
-alter table afterbuy_producttype add column overview varchar(512) null;
-
-alter table afterbuy_userproduct drop foreign key `brand_id_refs_id_e5504abf`;
-alter table afterbuy_userproduct drop column brand_id;
-
-alter table afterbuy_producttype add brand_id integer;
-alter table afterbuy_producttype add foreign key (brand_id) references afterbuy_producttype(id);
-
-alter table afterbuy_userproduct drop column nick_name;
-alter table afterbuy_userproduct add column nick_name varchar(100) null;
 
 alter table gm_manufacturingdata add column is_discrepant bool default 0;
 alter table gm_manufacturingdata add column sent_to_sap bool default 0;
@@ -56,43 +40,17 @@ update gm_containerlr new inner join gm_containertracker old on old.transaction_
 
 alter table gm_brandproductrange drop column vertical;
 
-null;
-alter table afterbuy_userproduct add column is_accepted boolean default false;	
-alter table afterbuy_consumer add column is_phone_verified boolean default false;
-alter table afterbuy_userproduct add column service_reminder int null;
-alter table afterbuy_userproduct add column details_completed int null;
-alter table afterbuy_userproduct add column manual_link varchar(512) null;
-alter table afterbuy_producttype add column overview varchar(512) null;
 alter table gm_producttype add column overview varchar(512) null;
---alter table gm_containertracker drop column ib_dispatch_dt ;
---alter table gm_containertracker add column ib_dispatch_dt datetime null;
-
-alter table afterbuy_userproduct drop foreign key `brand_id_refs_id_e5504abf`;
-alter table afterbuy_userproduct drop column brand_id;
-
-alter table afterbuy_producttype add brand_id integer;
-alter table afterbuy_producttype add foreign key (brand_id) references afterbuy_producttype(id);
+alter table gm_containertracker drop column ib_dispatch_dt ;
+alter table gm_containertracker add column ib_dispatch_dt datetime null;
 
 alter table gm_producttype add brand_id integer;
 alter table gm_producttype add foreign key (brand_id) references gm_producttype(id);
 
-alter table afterbuy_userproduct drop column nick_name;
-alter table afterbuy_userproduct add column nick_name varchar(100) null;
-
-alter table afterbuy_userproduct add column warranty_year datetime null;
-alter table afterbuy_userproduct add column insurance_year datetime null;
-
-alter table afterbuy_consumer drop column image_url;
-alter table afterbuy_consumer add column image_url varchar(255) null;
-
-alter table afterbuy_userproduct drop column image_url;
-alter table afterbuy_userproduct add column image_url varchar(255) null;
-
 alter table gm_brand drop column image_url;
 alter table gm_brand add column image_url varchar(255) null;
 
-alter table afterbuy_brand drop column image_url;
-alter table afterbuy_brand add column image_url varchar(255) null;
+
 
 --------------- RUN ONLY IN AFTERBUY---------
 rename table gm_constant to afterbuy_constant;
@@ -100,21 +58,63 @@ rename table gm_constant to afterbuy_constant;
 
 alter table afterbuy_consumer drop index phone_number;
 
-alter table gm_bomheader add column revision_number int default 0;
+alter table afterbuy_userproduct add column is_accepted boolean default false;  
+alter table afterbuy_userproduct add column service_reminder int null;
+alter table afterbuy_userproduct add column details_completed int null;
+alter table afterbuy_userproduct add column manual_link varchar(512) null;
+alter table afterbuy_userproduct drop foreign key `brand_id_refs_id_e5504abf`;
+alter table afterbuy_userproduct drop column brand_id;
+alter table afterbuy_userproduct drop column nick_name;
+alter table afterbuy_userproduct add column nick_name varchar(100) null;
+
+alter table afterbuy_producttype add column overview varchar(512) null;
+alter table afterbuy_producttype add brand_id integer;
+alter table afterbuy_producttype add foreign key (brand_id) references afterbuy_producttype(id);
+
+alter table afterbuy_userproduct add column is_accepted boolean default false;	
+alter table afterbuy_userproduct add column service_reminder int null;
+alter table afterbuy_userproduct add column details_completed int null;
+alter table afterbuy_userproduct add column manual_link varchar(512) null;
+alter table afterbuy_userproduct drop foreign key `brand_id_refs_id_e5504abf`;
+alter table afterbuy_userproduct drop column brand_id;
+alter table afterbuy_userproduct drop column nick_name;
+alter table afterbuy_userproduct add column nick_name varchar(100) null;
+alter table afterbuy_userproduct add column warranty_year datetime null;
+alter table afterbuy_userproduct add column insurance_year datetime null;
+alter table afterbuy_userproduct drop column image_url;
+alter table afterbuy_userproduct add column image_url varchar(255) null;
+
+alter table afterbuy_consumer add column is_phone_verified boolean default false;
+alter table afterbuy_consumer drop column image_url;
+alter table afterbuy_consumer add column image_url varchar(255) null;
+alter table afterbuy_consumer add column is_phone_verified boolean default false;
+alter table afterbuy_consumer add column has_discrepancy boolean default False;
+alter table afterbuy_consumer add column last_sync_date datetime null;
+
+alter table afterbuy_producttype add brand_id integer;
+alter table afterbuy_producttype add foreign key (brand_id) references afterbuy_producttype(id);
+alter table afterbuy_producttype add column overview varchar(512) null;
+
+alter table afterbuy_brand drop column image_url;
+alter table afterbuy_brand add column image_url varchar(255) null;
 
 alter table afterbuy_usermobileinfo add column brand varchar(50) null;
 alter table afterbuy_usermobileinfo add column mac_address varchar(100) null;
 alter table afterbuy_usermobileinfo add column network_provider varchar(100) null;
 alter table afterbuy_usermobileinfo add column total_memory double null;
 alter table afterbuy_usermobileinfo add column available_memory double null;
+
+--------------------------------------------------------------------------------------------
+alter table gm_bomheader add column revision_number int default 0;
+
 alter table gm_bomvisualization modify column x_coordinate int default 0;
 alter table gm_bomvisualization modify column y_coordinate int default 0;
 alter table gm_bomvisualization modify column z_coordinate int default 0;
 
 alter table gm_bomheader add column eco_number varchar(20) null;
 
-alter table afterbuy_consumer add column has_discrepancy boolean default False;
-alter table afterbuy_consumer add column last_sync_date datetime null;
+alter table gm_retailer add column is_active boolean default True;
+alter table gm_retailer add column approved boolean default False;
 
 alter table gm_dealer add column sm_id integer;
 alter table gm_dealer add foreign key(sm_id) references gm_areasalesmanager(id);
