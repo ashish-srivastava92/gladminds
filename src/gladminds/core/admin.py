@@ -1,5 +1,6 @@
 import copy
 import datetime
+
 from django import forms
 from django.contrib.admin import AdminSite, TabularInline
 from django.contrib.auth.models import User, Group
@@ -7,7 +8,6 @@ from django.contrib.admin import ModelAdmin
 from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib.admin import DateFieldListFilter
 from django import forms
-
 
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
@@ -21,6 +21,7 @@ from gladminds.core import constants
 
 class CoreAdminSite(AdminSite):
     pass
+
 
 class UserProfileAdmin(GmModelAdmin):
     search_fields = ('user__username', 'phone_number')
