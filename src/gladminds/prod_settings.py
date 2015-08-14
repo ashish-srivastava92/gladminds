@@ -162,5 +162,11 @@ ADMIN_DETAILS = {GmApps.BAJAJ: {'user': 'bajaj001', 'password': 'bajaj001'},
 #     }
 # }
 
-COUPON_URL = 'bajaj.gladminds.co'
+# BRAND_BASE_URL = 'bajaj.gladminds.co'
+
 API_FLAG = True 
+
+BRAND_META = {
+               "bajaj" : {"base_url": "bajaj.gladminds.co"},
+               "bajajcv" : {"base_url": "bajajcv.gladminds.co"},
+               }
