@@ -176,8 +176,6 @@ class CoreLoyaltyService(Services):
         LOG.error('[download_redemption_detail]: Download of redemption request data by user {0}'.format(request.user))
         return response
     
-    
-    
     def download_accumulation_detail(self, request, choice):
         '''Download list of accumulation '''
         file_name=choice+'_accumulation_details_' + datetime.now().strftime('%d_%m_%y')
@@ -203,6 +201,8 @@ class CoreLoyaltyService(Services):
                     data.append(accumulation.total_points)
                 elif field=='created_date':
                     data.append(accumulation.created_date)
+                elif field=='member_id':
+                    data.append(accumulation.member.id)
                 else:
                     data.append(getattr(member, field)) 
             csvwriter.writerow(data)
@@ -219,7 +219,6 @@ class CoreLoyaltyService(Services):
         accumulation = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs).select_related('member__state', 'upcs')
         return accumulation
         
-    
     def send_welcome_sms(self, mech):
         '''Send welcome sms to mechanics when registered'''
         phone_number=utils.get_phone_number_format(mech.phone_number)
