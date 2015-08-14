@@ -1,7 +1,6 @@
 import copy
 import datetime
 
-
 from django import forms
 from django.contrib.admin import AdminSite, TabularInline
 from django.contrib.auth.models import User, Group
