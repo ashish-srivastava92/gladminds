@@ -3,9 +3,10 @@ from django.contrib import admin
 from django.contrib.admin import AdminSite
 from django.core.handlers.wsgi import WSGIRequest
 from django.core.urlresolvers import reverse, resolve
-from suit.templatetags.suit_menu import Menu, get_admin_site
+from suit.templatetags.suit_menu import Menu
 from django.conf import settings
 from importlib import import_module
+
 try:
     from django.utils.six import string_types
 except ImportError:
@@ -17,6 +18,14 @@ from suit.config import get_config
 
 register = template.Library()
 
+
+def get_admin_site(current_app):
+    try:
+        admin_module = import_module('gladminds.{0}.admin'.format(current_app))
+    except:
+        admin_module = import_module('gladminds.core.admin'.format(current_app))
+    return admin_module.get_admin_site_custom(current_app)    
+    
 
 @register.assignment_tag(takes_context=True)
 def get_menu(context, request):

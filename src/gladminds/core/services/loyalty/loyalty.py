@@ -1,18 +1,13 @@
 '''Handlers for loyalty service logic'''
 
-import logging
 from gladminds.core.services.services import Services
 import logging
 import json
 from datetime import datetime,timedelta
-from constance import config
 import StringIO
 import csv
 from django.http import HttpResponse
-from django.core.servers.basehttp import FileWrapper
-
 from django.conf import settings
-from django.http.response import HttpResponse
 from gladminds.core.auth_helper import Roles
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.core.model_fetcher import get_model
@@ -33,11 +28,12 @@ class CoreLoyaltyService(Services):
     def __init__(self):
         Services.__init__(self)
 
-    def save_comment(self, type, message, transaction_id, user):
+    def save_comment(self, comment_type, message, transaction_id, user):
+        '''Saves comment for welcome kit and redemption request'''
         redemption=welcome_kit=None
-        if type=='redemption':
+        if comment_type=='redemption':
             redemption = transaction_id
-        elif type=='welcome_kit':
+        elif comment_type=='welcome_kit':
             welcome_kit = transaction_id
         comment_thread = get_model('CommentThread')(user=user,
                                               message=message,
@@ -46,7 +42,8 @@ class CoreLoyaltyService(Services):
         comment_thread.save(using=settings.BRAND)
         return comment_thread
 
-    def get_mechanics_detail(self, request, choice):
+    def get_mechanics_detail(self, request, choice, model_name):
+        '''Fetches the details of the mechanics based on args'''
         kwargs={}
         if choice=='new':
             kwargs['download_detail'] = False
@@ -55,27 +52,49 @@ class CoreLoyaltyService(Services):
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm_state_list=get_model('AreaSparesManager').objects.get(user__user=request.user).state.all()
             kwargs['state__in'] = asm_state_list
-        mechanics = get_model('Member').objects.using(settings.BRAND).filter(**kwargs)
+        mechanics = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs).select_related('state', 'registered_by_distributor')
         return mechanics
+    
+    def get_welcome_redemption_detail(self, request, choice, model_name):
+        '''Fetches the details of the welcome/redemption based on args'''
+        kwargs={}
+        if choice!='all':
+            kwargs['status'] = choice
+        if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=get_model('AreaSparesManager').objects.get(user__user=request.user).state.all()
+            kwargs['member__state__in'] = asm_state_list
+        elif request.user.groups.filter(name=Roles.RPS).exists():
+            kwargs['packed_by'] = request.user.username
+        elif request.user.groups.filter(name=Roles.LPS).exists():
+            kwargs['partner__user'] = request.user
+        welcome_kits = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs).select_related('member__state', 'product')
+        return welcome_kits
         
-    def check_complete_forms(self, request, choice):
+    def check_details(self, request, model, choice):
+        '''Before download checks if there is any valid data to be download'''
         response = {'status': False}
-        mechanics = self.get_mechanics_detail(request, choice)
-        if mechanics:
+        request_handler={'Member': 'get_mechanics_detail',
+                         'WelcomeKit': 'get_welcome_redemption_detail',
+                         'RedemptionRequest': 'get_welcome_redemption_detail'
+                         }
+        handler_funtion=getattr(self, request_handler[model])
+        details = handler_funtion(request, choice, model)
+        if details:
             response['status']=True
         return HttpResponse(json.dumps(response),
                             content_type='application/json')
         
-    def download_welcome_kit(self, request, choice):
+    def download_member_detail(self, request, choice):
         '''Download list of new or all registered member'''
         file_name=choice+'_member_details_' + datetime.now().strftime('%d_%m_%y')
-        headers=constants.WELCOME_KIT_MECHANIC_FIELDS
+        headers=[]
+        headers=headers+constants.DOWNLOAD_MECHANIC_FIELDS
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(headers)
         if not request.user.groups.filter(name__in=[Roles.RPS, Roles.LPS]).exists():  
             headers.append('form_status')
-        mechanics = self.get_mechanics_detail(request, choice)
+        csvwriter.writerow(headers)
+        mechanics = self.get_mechanics_detail(request, choice, 'Member')
         for mechanic in mechanics:
             data=[]
             for field in headers:
@@ -83,8 +102,15 @@ class CoreLoyaltyService(Services):
                     image_url="{0}/{1}".format(settings.S3_BASE_URL, mechanic.image_url)
                     data.append(image_url)
                 elif field=='state':
-                    state = mechanic.state.state_name
-                    data.append(state)
+                    if mechanic.state:
+                        data.append(mechanic.state.state_name)
+                    else:
+                        data.append(mechanic.state)
+                elif field=='registered_by_distributor':
+                    if mechanic.registered_by_distributor:
+                        data.append(mechanic.registered_by_distributor.distributor_id)
+                    else:
+                        data.append(mechanic.registered_by_distributor)
                 else:
                     data.append(getattr(mechanic, field))
             csvwriter.writerow(data)
@@ -92,7 +118,60 @@ class CoreLoyaltyService(Services):
             mechanics.using(settings.BRAND).update(download_detail=True)
         response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
-        LOG.error('[download_welcome_kit]: Download of mechanic data by user {0}'.format(request.user))
+        LOG.error('[download_member_detail]: Download of mechanic data by user {0}'.format(request.user))
+        return response
+
+    def download_welcome_kit_detail(self, request, choice):
+        '''Download list of new or all welcome kit'''
+        file_name=choice+'_welcome_kit_details_' + datetime.now().strftime('%d_%m_%y')
+        headers=constants.DOWNLOAD_WELCOME_KIT_FIELDS
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(headers)
+        welcome_kits = self.get_welcome_redemption_detail(request, choice, 'WelcomeKit')
+        for kit in welcome_kits:
+            data=[]
+            for field in headers:
+                member=kit.member
+                if field=='image_url':
+                    image_url="{0}/{1}".format(settings.S3_BASE_URL, member.image_url)
+                    data.append(image_url)
+                elif field=='state':
+                    data.append(member.state.state_name)
+                elif field=='delivery_address':
+                    data.append(kit.delivery_address)
+                else:
+                    data.append(getattr(member, field))
+            csvwriter.writerow(data)
+        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        LOG.error('[download_welcome_kit]: Download of welcome kit data by user {0}'.format(request.user))
+        return response
+
+    def download_redemption_detail(self, request, choice):
+        '''Download list of new or all redemption request'''
+        file_name=choice+'_redemption_request_details_' + datetime.now().strftime('%d_%m_%y')
+        headers=constants.DOWNLOAD_REDEMPTION_FIELDS
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(headers)
+        redemptions = self.get_welcome_redemption_detail(request, choice, 'RedemptionRequest')
+        for redemption in redemptions:
+            data=[]
+            for field in headers:
+                member=redemption.member
+                if field=='state':
+                    data.append(member.state.state_name)
+                elif field=='delivery_address':
+                    data.append(redemption.delivery_address)
+                elif field=='product':
+                    data.append(redemption.product.product_id)
+                else:
+                    data.append(getattr(member, field))
+            csvwriter.writerow(data)
+        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        LOG.error('[download_redemption_detail]: Download of redemption request data by user {0}'.format(request.user))
         return response
 
 
@@ -100,7 +179,8 @@ class CoreLoyaltyService(Services):
         '''Send welcome sms to mechanics when registered'''
         phone_number=utils.get_phone_number_format(mech.phone_number)
         message=get_template('COMPLETE_FORM').format(
-                        mechanic_name=mech.first_name)
+                        mechanic_name=mech.first_name,
+                        member_id=mech.permanent_id)
         sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
         self.queue_service(send_loyalty_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
@@ -155,18 +235,28 @@ class CoreLoyaltyService(Services):
         
     def initiate_welcome_kit(self, mechanic_obj):
         '''Saves the welcome kit request for processing'''
-        delivery_address = ', '.join(filter(None, (mechanic_obj.shop_number,
-                                                   mechanic_obj.shop_name,
-                                                   mechanic_obj.shop_address)))
-        partner=None
-        partner_list = get_model('Partner').objects.using(settings.BRAND).all()
-        if len(partner_list)==1:
-            partner=partner_list[0]
-        welcome_kit=get_model('WelcomeKit')(member=mechanic_obj,
-                                    delivery_address=delivery_address,
-                                    partner=partner)
-        welcome_kit.save(using=settings.BRAND)
-        self.send_welcome_kit_mail_to_partner(welcome_kit)
+        welcome_kit=get_model('WelcomeKit').objects.filter(member=mechanic_obj)
+        if not welcome_kit:
+            delivery_address = ', '.join(filter(None, (mechanic_obj.shop_number,
+                                                       mechanic_obj.shop_name,
+                                                       mechanic_obj.shop_address)))
+            partner=None
+            packed_by=None
+            partner_list = get_model('Partner').objects.using(settings.BRAND).all()
+            if len(partner_list)==1:
+                partner=partner_list[0]
+                packed_by=partner.user.user.username
+            date = self.set_date('Welcome Kit', 'Open')
+            welcome_kit=get_model('WelcomeKit')(member=mechanic_obj,
+                                        delivery_address=delivery_address,
+                                        partner=partner,
+                                        packed_by=packed_by,
+                                        due_date=date['due_date'],
+                                        expected_delivery_date=date['expected_delivery_date'])
+            welcome_kit.save(using=settings.BRAND)
+            self.send_welcome_kit_mail_to_partner(welcome_kit)
+        else:
+            welcome_kit=welcome_kit[0]
         return welcome_kit
 
     def send_mail_to_partner(self, redemption_obj):
@@ -288,31 +378,40 @@ class CoreLoyaltyService(Services):
             elif mechanic and  mechanic[0].form_status=='Incomplete':
                 message=get_template('INCOMPLETE_FORM')
                 raise ValueError('Incomplete user details')
+            state_code= mechanic[0].state.state_code
             spares = get_model('SparePartUPC').objects.get_spare_parts(unique_product_codes)
             added_points=0
+            spare_upc_part_map={}
             total_points=mechanic[0].total_points
             if spares:
-                accumulation_log=get_model('AccumulationRequest')(member=mechanic[0],
-                                                        points=0,total_points=0)
-                accumulation_log.save(using=settings.BRAND)
                 for spare in spares:
                     valid_product_number.append(spare.part_number)
-                    valid_upc.append(spare.unique_part_code.upper())
-                    accumulation_log.upcs.add(spare)
-                spare_points = get_model('SparePartPoint').objects.get_part_number(valid_product_number)
-                for spare_point in spare_points:
-                    added_points=added_points+spare_point.points
-                total_points=self.update_points(mechanic[0],
+                    if not spare_upc_part_map.has_key(spare.part_number):
+                        spare_upc_part_map[spare.part_number]=[]
+                    spare_upc_part_map[spare.part_number].append(spare.unique_part_code.upper())
+                spare_points = get_model('SparePartPoint').objects.get_part_number(valid_product_number, state_code)
+                if spare_points:
+                    accumulation_log=get_model('AccumulationRequest')(member=mechanic[0],
+                                                            points=0,total_points=0)
+                    accumulation_log.save(using=settings.BRAND)
+                    for spare_point in spare_points:
+                        added_points=added_points+(len(spare_upc_part_map[spare_point.part_number]) * spare_point.points)
+                        valid_upc.extend(spare_upc_part_map[spare_point.part_number])
+                    total_points=self.update_points(mechanic[0],
                                     accumulate=added_points)
-                accumulation_log.points=added_points
-                spares.using(settings.BRAND).update(is_used=True)
-                accumulation_log.total_points=total_points
-                accumulation_log.save(using=settings.BRAND)
+
+                    valid_spares = get_model('SparePartUPC').objects.get_spare_parts(valid_upc)
+                    for spare in valid_spares:
+                        accumulation_log.upcs.add(spare)
+                    accumulation_log.points=added_points
+                    accumulation_log.total_points=total_points
+                    accumulation_log.save(using=settings.BRAND)
+                    valid_spares.using(settings.BRAND).update(is_used=True)
             invalid_upcs = list(set(unique_product_codes).difference(valid_upc))
             if invalid_upcs:
                 invalid_upcs_message=' Invalid Entry... {0} does not exist in our records.'.format(
                                               (', '.join(invalid_upcs)))
-                used_upcs = get_model('SparePartUPC').objects.get_spare_parts(invalid_upcs, is_used=True) 
+                used_upcs = get_model('SparePartUPC').objects.get_spare_parts(invalid_upcs, is_used=True)
                 if used_upcs:
                     accumulation_requests = get_model('AccumulationRequest').objects.using(settings.BRAND).filter(upcs__in=used_upcs).prefetch_related('upcs').select_related('upcs')
                     accumulation_dict = {}
@@ -395,6 +494,7 @@ class CoreLoyaltyService(Services):
         return {'status': True, 'message': message}
 
     def set_date(self,action,status):
+        '''Sets date of SLA based on action and status'''
         loyalty_sla_obj = get_model('LoyaltySLA').objects.using(settings.BRAND).get(action=action, status=status)
         total_seconds = get_time_in_seconds(loyalty_sla_obj.resolution_time, loyalty_sla_obj.resolution_unit)
         due_date = datetime.now() + timedelta(seconds=total_seconds)

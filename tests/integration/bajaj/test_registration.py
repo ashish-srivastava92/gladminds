@@ -6,7 +6,7 @@ from integration.bajaj.test_system_logic import System
 
 client  =  Client(SERVER_NAME='bajaj')
 
-class TestDealerRegistration(BaseTestCase):
+class DealerRegistrationTest(BaseTestCase):
     multi_db=True
     
     def setUp(self):
@@ -19,7 +19,7 @@ class TestDealerRegistration(BaseTestCase):
         dealer.dealer_login()
 
 
-class TestCustomerRegistration(BaseTestCase):
+class CustomerRegistrationTest(BaseTestCase):
     multi_db=True
     
     def setUp(self):
@@ -30,8 +30,8 @@ class TestCustomerRegistration(BaseTestCase):
         self.system = System(self)
         self.client = Client(SERVER_NAME='bajaj')
         self.create_user(username='gladminds', email='gladminds@gladminds.co', password='gladminds')
+        self.create_user(username='bajaj', email='bajaj@gladminds.co', password='bajaj', brand='bajaj')
         brand.send_dispatch_feed()
-        brand.send_purchase_feed()
         '''This both feed will create product data, product type ,brand database'''
 
     def test_temp_customer_registration(self):
@@ -42,11 +42,12 @@ class TestCustomerRegistration(BaseTestCase):
     def test_update_cutomer_mobile(self):
         dealer = self.system
         brand = self.brand
-        product_obj = dealer.get_product_details(product_id='XXXXXXXXXX')
-        dealer.verify_result(input=product_obj.customer_phone_number, output='+91666666')
+        brand.send_purchase_feed()
+        product_obj = dealer.get_product_details(product_id='12345678901232792')
+        dealer.verify_result(input=product_obj.customer_phone_number, output='+917777777777')
         brand.send_purchase_feed_with_diff_cust_num()
-        product_obj = dealer.get_product_details(product_id='XXXXXXXXXX')
-        dealer.verify_result(input=product_obj.customer_phone_number, output='+919845340297')
+        product_obj = dealer.get_product_details(product_id='12345678901232792')
+        dealer.verify_result(input=product_obj.customer_phone_number, output='+918888888888')
  
     def test_asc_registration_by_self(self):
         dealer = self.system

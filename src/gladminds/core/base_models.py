@@ -4,12 +4,12 @@ from django.core.exceptions import ValidationError
 from composite_field.base import CompositeField
 from django.conf import settings
 from django.utils.translation import gettext as _
-from constance import config
 
 from gladminds.core.managers import user_manager, coupon_manager,\
     service_desk_manager
-from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
-from gladminds.core.model_helpers import PhoneField
+from gladminds.core.model_helpers import PhoneField, set_plate_image_path,\
+    set_plate_with_part_image_path, set_brand_product_image_path,\
+    set_brand_image
 from gladminds.core import constants
 from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_id,\
     generate_nsm_id,generate_asm_id
@@ -19,6 +19,8 @@ from gladminds.core.model_helpers import set_service_training_material_path,\
     set_welcome_kit_pod_path
 from gladminds.core.managers.mail import sent_password_reset_link,\
     send_email_activation
+from gladminds.core.constants import SBOM_STATUS
+from gladminds.core.managers.email_token_manager import EmailTokenManager
 
 try:
     from django.utils.timezone import now as datetime_now
@@ -57,6 +59,8 @@ class UserProfile(BaseModel):
     image_url = models.FileField(upload_to=set_user_pic_path,
                                   max_length=200, null=True, blank=True,
                                   validators=[validate_image])
+    reset_password = models.BooleanField(default=False)
+    reset_date = models.DateTimeField(null=True, blank=True)
         
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
@@ -98,9 +102,16 @@ class Industry(BaseModel):
 class Brand(BaseModel):
     '''Details of brands signed up'''
     name = models.CharField(max_length=250)
-    image_url = models.CharField(max_length=200, null=True, blank=True)
+    image_url = models.FileField(upload_to=set_brand_image,
+                              max_length=255, null=True, blank=True,
+                              validators=[validate_image])
     is_active = models.BooleanField(default=True)
     description = models.TextField(null=True, blank=True)
+    
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'Brand Image'
+    image_tag.allow_tags = True
 
     class Meta:
         abstract = True
@@ -151,6 +162,30 @@ class ZonalServiceManager(BaseModel):
     def __unicode__(self):
         return self.zsm_id
 
+class CircleHead(BaseModel):
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_circlehead"
+        verbose_name_plural = "Circle Heads"
+     
+class RegionalManager(BaseModel):
+    '''details of Regional Manager'''
+    region = models.CharField(max_length=100, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_regionalmanager"
+        verbose_name_plural = "Regional Managers"
+
+class AreaSalesManager(BaseModel):
+    '''details of Area Sales Manager'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_areasalesmanager"
+        verbose_name_plural = "Area Sales Managers"
+        
 class AreaServiceManager(BaseModel):
     '''details of Area Service Manager'''
     asm_id = models.CharField(max_length=50, unique=True, null=False, blank=False)
@@ -232,6 +267,7 @@ class ProductType(BaseModel):
     image_url = models.CharField(
                    max_length=200, blank=True, null=True)
     is_active = models.BooleanField(default=True)
+    overview = models.CharField(max_length=512, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -574,7 +610,8 @@ class EmailToken(models.Model):
                     'base_url':settings.DOMAIN_BASE_URL}
         if trigger_mail == 'forgot-password':
             ctx_dict = {'activation_key': self.activation_key,
-                    'link': settings.FORGOT_PASSWORD_LINK[settings.BRAND]}
+                    'link': settings.FORGOT_PASSWORD_LINK[settings.BRAND],
+                    'base_url': settings.COUPON_URL}
             sent_password_reset_link(reciever_email, ctx_dict)
         else:
             send_email_activation(reciever_email, ctx_dict)
@@ -708,6 +745,7 @@ class Activity(BaseModel):
         verbose_name_plural = "Activity info"
 
 class BrandDepartment(BaseModel):
+    '''Details of departments under a brand'''
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=100, null=True, blank=True)
     
@@ -720,6 +758,7 @@ class BrandDepartment(BaseModel):
         return self.name
     
 class DepartmentSubCategories(BaseModel):
+    '''Details of subcategories under a department'''
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=100, null=True, blank=True)
     
@@ -776,6 +815,7 @@ class Comment(BaseModel):
         verbose_name_plural = "Comment info"
 
 class FeedbackEvent(BaseModel):
+    '''details of events for a feedback'''
     class Meta:
         abstract = True
         db_table = "gm_feedbackevent"
@@ -783,10 +823,12 @@ class FeedbackEvent(BaseModel):
 
     
 class Duration(CompositeField):
+    '''Sla time and unit'''
     time = models.PositiveIntegerField()
     unit = models.CharField(max_length=12, choices=constants.TIME_UNIT, verbose_name = 'unit')
 
 class SLA(models.Model):
+    '''Sla for feedback'''
     response = Duration()
     reminder = Duration()
     resolution = Duration()
@@ -817,6 +859,7 @@ class SLA(models.Model):
         verbose_name_plural = "SLA info"
 
 class ServiceType(models.Model):
+    ''' Contains all the services types '''
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
 
@@ -829,6 +872,7 @@ class ServiceType(models.Model):
         return self.name
         
 class Service(models.Model):
+    ''' Contains all the services provided '''
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
     training_material_url = models.FileField(upload_to=set_service_training_material_path,
@@ -862,96 +906,41 @@ class Constant(BaseModel):
     def __unicode__(self):
         return self.constant_name
 
-class BOMHeader(BaseModel):
-    '''Detaills of  Header fields BOM'''
-    sku_code = models.CharField(max_length=20, null=True, blank=True)
-    plant = models.CharField(max_length=10, null=True, blank=True)
-    bom_type = models.CharField(max_length=10, null=True, blank=True)
-    bom_number = models.CharField(max_length=10, null=True, blank=True)
-    valid_from = models.DateField(null=True, blank= True)
-    valid_to = models.DateField(null=True, blank= True)
-    created_on = models.DateField(null=True, blank= True)
+
+class DateDimension(models.Model):
+    '''date dimension for reporting'''
+    date_id = models.BigIntegerField(primary_key=True)
+    date = models.DateField(unique=True)
+    timestamp = models.DateTimeField()
+    weekend = models.CharField(max_length=10)
+    day_of_week = models.CharField(max_length=10)
+    month = models.CharField(max_length=10)
+    month_day = models.IntegerField()
+    year = models.IntegerField()
+    week_starting_monday = models.CharField(max_length=2)
 
     class Meta:
         abstract = True
-        db_table = "gm_bomheader"
-        verbose_name_plural = "Bills of Material "
-
-class BOMItem(BaseModel):
-    '''Detaills of  Service Billing of Material'''
-    timestamp = models.DateTimeField(default=datetime.now)
+        db_table = "gm_datedimension"
     
-    bom_number = models.CharField(max_length=10, null=True, blank=True)
-    part_number = models.CharField(max_length=20, null=True, blank=True)
-    revision_number = models.CharField(max_length=10, null=True, blank=True)
-    quantity = models.CharField(max_length=20, null=True, blank=True)
-    uom = models.CharField(max_length=100, null=True, blank=True)
-    valid_from = models.DateField(null=True, blank= True)
-    valid_to = models.DateField(null=True, blank= True)
-    plate_id = models.CharField(max_length=40, null=True, blank=True)
-    plate_txt = models.CharField(max_length=40, null=True, blank=True)
-    serial_number = models.CharField(max_length=20, null=True, blank=True)
-    change_number = models.CharField(max_length=12, null=True, blank=True)
-    change_number_to = models.CharField(max_length=12, null=True, blank=True)
-    item = models.CharField(max_length=10, null=True, blank=True)    
-    item_id = models.CharField(max_length=10, null=True, blank=True)
+    def __str__(self):
+        return str(self.date)
+
+class CouponFact(models.Model):
+    '''coupon fact for reporting'''
+    closed = models.BigIntegerField()
+    inprogress = models.BigIntegerField()
+    expired = models.BigIntegerField()
+    unused = models.BigIntegerField()
+    exceeds = models.BigIntegerField()
+    data_type = models.CharField(max_length=20, default='DAILY')
 
     class Meta:
         abstract = True
-        db_table = "gm_bomitem"
-        verbose_name_plural = "Bills of Material "
+        db_table = "gm_couponfact"
 
-class ECORelease(BaseModel):
-    ''' details of ECO release'''
-    eco_number  = models.CharField(max_length=20, null=True, blank=True)
-    eco_release_date = models.DateField(max_length=20, null=True, blank=True)
-    eco_description = models.CharField(max_length=40, null=True, blank=True)
-    action = models.CharField(max_length=20, null=True, blank=True)
-    parent_part = models.CharField(max_length=20, null=True, blank=True)
 
-    add_part = models.CharField(max_length=20, null=True, blank=True)
-    add_part_qty = models.FloatField(max_length=20, null=True, blank=True)
-    add_part_rev = models.CharField(max_length=20, null=True, blank=True)
-    add_part_loc_code = models.CharField(max_length=90, null=True, blank=True)
-    
-    del_part = models.CharField(max_length=20, null=True, blank=True)
-    del_part_qty = models.FloatField(max_length=20, null=True, blank=True)
-    del_part_rev = models.FloatField(max_length=20, null=True, blank=True)
-    del_part_loc_code = models.CharField(max_length=90, null=True, blank=True)
-    
-    models_applicable = models.CharField(max_length=90, null=True, blank=True)
-    serviceability = models.CharField(max_length=20, null=True, blank=True)
-    interchangebility = models.CharField(max_length=20, null=True, blank=True)
-    reason_for_change = models.CharField(max_length=90, null=True, blank=True)
-
-    class Meta:
-        abstract = True
-        db_table = "gm_ecorelease"
-        verbose_name_plural = "ECO Release"
-
-class ECOImplementation(BaseModel):
-    ''' details of ECO Implementation'''
-    change_no = models.CharField(max_length=20, null=True, blank=True)
-    change_date = models.DateField(max_length=20, null=True, blank=True)
-    change_time = models.TimeField(max_length=20, null=True, blank=True)
-    plant = models.CharField(max_length=20, null=True, blank=True)
-    action = models.CharField(max_length=20, null=True, blank=True)
-    
-    parent_part = models.CharField(max_length=20, null=True, blank=True)
-    added_part = models.CharField(max_length=20, null=True, blank=True)
-    added_part_qty = models.FloatField(max_length=20, null=True, blank=True)
-    deleted_part = models.CharField(max_length=20, null=True, blank=True)
-    deleted_part_qty = models.FloatField(max_length=20, null=True, blank=True)
-    
-    chassis_number = models.CharField(max_length=20, null=True, blank=True)
-    engine_number = models.CharField(max_length=20, null=True, blank=True)
-    eco_number = models.CharField(max_length=20, null=True, blank=True)
-    reason_code = models.CharField(max_length=20, null=True, blank=True)
-    remarks = models.CharField(max_length=20, null=True, blank=True)
-    
-    class Meta:
-        abstract = True
-        verbose_name_plural = "ECO Implementation"
+############################### CTS MODELS ###################################################
 
 class Supervisor(BaseModel):
     ''' details of Supervisor'''
@@ -979,6 +968,56 @@ class Transporter(BaseModel):
     def __unicode__(self):
         return self.transporter_id
 
+class ContainerIndent(BaseModel):
+    ''' details of Container Indent'''
+    
+    indent_num = models.CharField(max_length=30, unique=True)
+    no_of_containers = models.IntegerField(default=0)
+    status = models.CharField(max_length=12, choices=constants.CONSIGNMENT_STATUS, default='Open')
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_containerindent"
+        verbose_name_plural = "Container Indent"
+    
+    def __unicode__(self):
+        return str(self.indent_num)
+
+class ContainerLR(BaseModel):
+    ''' details of Container LR'''
+    
+    transaction_id = models.AutoField(primary_key=True)
+    consignment_id = models.CharField(max_length=30, null=True, blank=True)
+    truck_no = models.CharField(max_length=30, null=True, blank=True)
+    lr_number = models.CharField(max_length=20, null=True, blank=True)
+    lr_date = models.DateField(max_length=10, null=True, blank=True)
+    do_num = models.CharField(max_length=30, null=True, blank=True)
+    gatein_date = models.DateField(max_length=10, null=True, blank=True)
+    gatein_time = models.TimeField(max_length=10, null=True, blank=True)
+    seal_no = models.CharField(max_length=40, null=True, blank=True)
+    container_no = models.CharField(max_length=40, null=True, blank=True)
+
+    shippingline_id = models.CharField(max_length=50, null=True, blank=True)
+    ib_dispatch_dt = models.DateField(null=True, blank=True)
+    cts_created_date = models.DateField(null=True, blank=True)
+    submitted_by = models.CharField(max_length=50, null=True, blank=True)
+    status = models.CharField(max_length=12, choices=constants.CONSIGNMENT_STATUS, default='Open')
+    sent_to_sap = models.BooleanField(default=False)
+    partner_name = models.CharField(max_length=50, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_containerlr"
+        verbose_name_plural = "Container LR"
+    
+    def __unicode__(self):
+        return str(self.transaction_id)
+    
+    def save(self, *args, **kwargs):
+        if not self.submitted_by:
+            self.submitted_by = None
+        super(ContainerLR, self).save(*args, **kwargs)
+
 class ContainerTracker(BaseModel):
     ''' details of Container Tracker'''
     
@@ -992,10 +1031,15 @@ class ContainerTracker(BaseModel):
     gatein_date = models.DateField(max_length=10, null=True, blank=True)
     gatein_time = models.TimeField(max_length=10, null=True, blank=True)
     status = models.CharField(max_length=12, choices=constants.CONSIGNMENT_STATUS, default='Open')
-    seal_no = models.CharField(max_length=20, null=True, blank=True)
-    container_no = models.CharField(max_length=20, null=True, blank=True)
+    seal_no = models.CharField(max_length=40, null=True, blank=True)
+    container_no = models.CharField(max_length=40, null=True, blank=True)
     sent_to_sap = models.BooleanField(default=False)
     submitted_by = models.CharField(max_length=50, null=True, blank=True)
+
+    shippingline_id = models.CharField(max_length=50, null=True, blank=True)
+    ib_dispatch_dt = models.DateField(null=True, blank=True)
+    cts_created_date = models.DateField(null=True, blank=True)
+    no_of_containers = models.IntegerField(default=0)
 
     class Meta:
         abstract = True
@@ -1004,9 +1048,13 @@ class ContainerTracker(BaseModel):
     
     def __unicode__(self):
         return str(self.transaction_id)
+    
+    def save(self, *args, **kwargs):
+        if not self.submitted_by:
+            self.submitted_by = None
+        super(ContainerTracker, self).save(*args, **kwargs)
 
-
-#######################LOYALTY TABLES#################################
+#######################LOYALTY MODELS#################################
 
 class NationalSparesManager(BaseModel):
     '''details of National Spares Manager'''
@@ -1054,12 +1102,39 @@ class Distributor(BaseModel):
 
     def __unicode__(self):
         return self.distributor_id + ' ' +self.name
+
+class DistributorStaff(BaseModel):
+    '''details of DistributorStaff'''
+    distributor_staff_id = models.CharField(max_length=50)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_distributorstaff"
+        verbose_name_plural = "Distributor Staff"
+
+    def __unicode__(self):
+        return self.distributor_staff_id
+
+class DistributorSalesRep(BaseModel):
+    '''details of DistributorSalesRep'''
+    distributor_sales_id = models.CharField(max_length=50)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_distributorsalesrep"
+        verbose_name_plural = "Distributor Sales Rep"
+
+    def __unicode__(self):
+        return self.distributor_sales_id
     
 class Retailer(BaseModel):
     '''details of Retailer'''
     retailer_name = models.CharField(max_length=50)
     retailer_town = models.CharField(max_length=50, null=True, blank=True)
-    
+    approved = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         abstract = True
@@ -1068,6 +1143,19 @@ class Retailer(BaseModel):
 
     def __unicode__(self):
         return self.retailer_name
+ 
+class DSRWrokAllocation(BaseModel):
+    '''details of DSRWrokAllocation'''
+    status = models.CharField(max_length=12, choices=constants.WORKFLOW_STATUS, default='Open')
+
+    class Meta:
+        abstract = True
+        db_table = "gm_dsrworkallocation"
+        verbose_name_plural = "DSR Work Allocation"
+
+    def __unicode__(self):
+        return self.retailer_name   
+
 
 class Member(BaseModel):
     '''details of Member'''
@@ -1368,6 +1456,7 @@ class DiscrepantAccumulation(BaseModel):
         verbose_name_plural = "Discrepant Request"
 
 class LoyaltySLA(models.Model):
+    '''SLA for welcomekit and redemption request'''
     status = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_STATUS)
     action = models.CharField(max_length=12, choices=constants.LOYALTY_SLA_ACTION)
     reminder = Duration()
@@ -1400,6 +1489,7 @@ class LoyaltySLA(models.Model):
         return str(self.status)
 
 class Territory(BaseModel):
+    '''Territories under a brand'''
     territory = models.CharField(max_length=20, unique = True)
     
     class Meta:
@@ -1412,6 +1502,7 @@ class Territory(BaseModel):
 
 
 class State(BaseModel):
+    '''States under a brand'''
     state_name = models.CharField(max_length=30, unique = True)
     state_code = models.CharField(max_length=10, unique = True)
     
@@ -1424,6 +1515,7 @@ class State(BaseModel):
         return self.state_name
     
 class City(BaseModel):
+    '''Cities under a brand'''
     city = models.CharField(max_length=50, unique = True)
     
     class Meta:
@@ -1434,35 +1526,228 @@ class City(BaseModel):
     def __unicode__(self):
         return self.city
 
-class DateDimension(models.Model):
-    date_id = models.BigIntegerField(primary_key=True)
-    date = models.DateField(unique=True)
-    timestamp = models.DateTimeField()
-    weekend = models.CharField(max_length=10)
-    day_of_week = models.CharField(max_length=10)
-    month = models.CharField(max_length=10)
-    month_day = models.IntegerField()
-    year = models.IntegerField()
-    week_starting_monday = models.CharField(max_length=2)
+############################### EPC MODELS ###################################################
+
+class ECORelease(BaseModel):
+    ''' details of ECO release'''
+    eco_number  = models.CharField(max_length=20, null=True, blank=True)
+    eco_release_date = models.DateField(max_length=20, null=True, blank=True)
+    eco_description = models.CharField(max_length=40, null=True, blank=True)
+    action = models.CharField(max_length=20, null=True, blank=True)
+    parent_part = models.CharField(max_length=20, null=True, blank=True)
+
+    add_part = models.CharField(max_length=20, null=True, blank=True)
+    add_part_qty = models.FloatField(max_length=20, null=True, blank=True)
+    add_part_rev = models.CharField(max_length=20, null=True, blank=True)
+    add_part_loc_code = models.CharField(max_length=90, null=True, blank=True)
+    
+    del_part = models.CharField(max_length=20, null=True, blank=True)
+    del_part_qty = models.FloatField(max_length=20, null=True, blank=True)
+    del_part_rev = models.FloatField(max_length=20, null=True, blank=True)
+    del_part_loc_code = models.CharField(max_length=90, null=True, blank=True)
+    
+    models_applicable = models.CharField(max_length=90, null=True, blank=True)
+    serviceability = models.CharField(max_length=20, null=True, blank=True)
+    interchangebility = models.CharField(max_length=20, null=True, blank=True)
+    reason_for_change = models.CharField(max_length=90, null=True, blank=True)
 
     class Meta:
         abstract = True
-        db_table = "gm_datedimension"
-    
-    def __str__(self):
-        return str(self.date)
+        db_table = "gm_ecorelease"
+        verbose_name_plural = "ECO Release"
 
-class CouponFact(models.Model):
-    closed = models.BigIntegerField()
-    inprogress = models.BigIntegerField()
-    expired = models.BigIntegerField()
-    unused = models.BigIntegerField()
-    exceeds = models.BigIntegerField()
-    data_type = models.CharField(max_length=20, default='DAILY')
+class ECOImplementation(BaseModel):
+    ''' details of ECO Implementation'''
+    change_no = models.CharField(max_length=20, null=True, blank=True)
+    change_date = models.DateField(max_length=20, null=True, blank=True)
+    change_time = models.TimeField(max_length=20, null=True, blank=True)
+    plant = models.CharField(max_length=20, null=True, blank=True)
+    action = models.CharField(max_length=20, null=True, blank=True)
+    
+    parent_part = models.CharField(max_length=20, null=True, blank=True)
+    added_part = models.CharField(max_length=20, null=True, blank=True)
+    added_part_qty = models.FloatField(max_length=20, null=True, blank=True)
+    deleted_part = models.CharField(max_length=20, null=True, blank=True)
+    deleted_part_qty = models.FloatField(max_length=20, null=True, blank=True)
+    
+    chassis_number = models.CharField(max_length=20, null=True, blank=True)
+    engine_number = models.CharField(max_length=20, null=True, blank=True)
+    eco_number = models.CharField(max_length=20, null=True, blank=True)
+    reason_code = models.CharField(max_length=20, null=True, blank=True)
+    remarks = models.CharField(max_length=20, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_ecoimplementation"
+        verbose_name_plural = "ECO Implementation"
+
+class BrandVertical(BaseModel):
+    '''Stores the different vertical
+    a brand can have'''
+    name = models.CharField(max_length=200)
+    description = models.TextField(null=True, blank=True)
 
     class Meta:
         abstract = True
-        db_table = "gm_couponfact"
+        db_table = "gm_brandvertical"
+        verbose_name_plural = "Brand Vertical"
+    
+    def __unicode__(self):
+        return self.name
+
+
+class BrandProductRange(BaseModel):
+    '''Different range of product a brand provides'''
+    sku_code = models.CharField(max_length=50, unique=True)
+    description = models.TextField(null=True, blank=True)
+    image_url = models.FileField(upload_to=set_brand_product_image_path,
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_image])
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'Brand Product Image'
+    image_tag.allow_tags = True
+
+    class Meta:
+        db_table = "gm_brandproductrange"
+        abstract = True
+        verbose_name_plural = "Product Range"
+    
+    def __unicode__(self):
+        return self.sku_code
+    
+class BOMHeader(BaseModel):
+    '''Details of  Header fields BOM'''
+    sku_code = models.CharField(max_length=20, null=True, blank=True)
+    plant = models.CharField(max_length=10, null=True, blank=True)
+    bom_type = models.CharField(max_length=10, null=True, blank=True)
+    bom_number = models.CharField(max_length=10, null=True, blank=True)
+    valid_from = models.DateField(null=True, blank= True)
+    valid_to = models.DateField(null=True, blank= True)
+    created_on = models.DateField(null=True, blank= True)
+    revision_number = models.IntegerField(default=0)
+    eco_number = models.CharField(max_length=20, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_bomheader"
+        verbose_name_plural = "Bills of Material "
+    
+    def __unicode__(self):
+        return self.sku_code
+        
+class BOMPlate(BaseModel):
+    '''Details of BOM Plates'''
+    plate_id = models.CharField(max_length=50, unique=True)
+    plate_txt = models.CharField(max_length=200, null=True, blank=True)
+    plate_image = models.FileField(upload_to=set_plate_image_path,
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_image])
+    plate_image_with_part = models.FileField(upload_to=set_plate_with_part_image_path,
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_image])
+    def plate_image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.plate_image)
+    plate_image_tag.short_description = 'Plate Image'
+    plate_image_tag.allow_tags = True
+    
+    def plate_image_with_part_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.plate_image_with_part)
+    plate_image_with_part_tag.short_description = 'Plate with Part Image'
+    plate_image_with_part_tag.allow_tags = True
+
+    class Meta:
+        db_table = "gm_bomplate"
+        abstract = True
+        verbose_name_plural = "BOM Plates"
+    
+    def __unicode__(self):
+        return self.plate_id
+        
+class BOMPart(BaseModel):
+    '''Details of  BOM Parts'''
+    timestamp = models.DateTimeField(default=datetime.now)
+    
+    part_number = models.CharField(max_length=20, null=True, blank=True)
+    revision_number = models.CharField(max_length=10, null=True, blank=True)
+    description = models.CharField(max_length=200, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_bompart"
+        verbose_name_plural = "BOM Parts "
+        
+    def __unicode__(self):
+        return self.part_number
+        
+class BOMPlatePart(BaseModel):
+    '''Details of BOM Plates and part relation'''
+    quantity = models.CharField(max_length=20, null=True, blank=True)
+    valid_from = models.DateField(null=True, blank= True)
+    valid_to = models.DateField(null=True, blank= True)
+    uom = models.CharField(max_length=100, null=True, blank=True)
+    serial_number = models.CharField(max_length=20, null=True, blank=True)
+    change_number = models.CharField(max_length=12, null=True, blank=True)
+    change_number_to = models.CharField(max_length=12, null=True, blank=True)
+    item = models.CharField(max_length=10, null=True, blank=True)    
+    item_id = models.CharField(max_length=10, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_bomplatepart"
+        verbose_name_plural = "BOM plate Parts"
+        
+class BOMVisualization(BaseModel):
+    '''Details of BOM Plates coordinates'''
+    x_coordinate  = models.IntegerField(default=0)
+    y_coordinate  = models.IntegerField(default=0)
+    z_coordinate  = models.IntegerField(default=0)
+    serial_number = models.IntegerField(default=0)
+    part_href = models.CharField(max_length=200)
+    status =  models.CharField(max_length=25, choices=SBOM_STATUS,
+                              blank=True, null=True)
+    published_date = models.DateTimeField(null=True, blank=True)
+    remarks = models.CharField(max_length=500, null=True, blank=True)
 
     
+    class Meta:
+        abstract = True
+        db_table = "gm_bomvisualization"
+        verbose_name_plural = "BOM Visualization"
+        
+class ServiceCircular(models.Model):
+    '''Save the service circular created for a product'''
+    product_type = models.CharField(max_length=100, null=True, blank=True)
+    type_of_circular = models.CharField(max_length=50, null=True, blank=True)
+    change_no = models.CharField(max_length=50, null=True, blank=True)
+    new_circular = models.CharField(max_length=50, null=True, blank=True)
+    buletin_no = models.CharField(max_length=50, null=True, blank=True)
+    circular_date = models.DateTimeField(null=True, blank=True)
+    from_circular = models.CharField(max_length=50, null=True, blank=True)
+    to_circular = models.CharField(max_length=50, null=True, blank=True)
+    cc_circular = models.CharField(max_length=50, null=True, blank=True)
+    circular_subject = models.CharField(max_length=50, null=True, blank=True)
+    part_added = models.CharField(max_length=50, null=True, blank=True)
+    circular_title = models.CharField(max_length=50, null=True, blank=True)
+    part_deleted = models.CharField(max_length=50, null=True, blank=True)
+    part_changed = models.CharField(max_length=50, null=True, blank=True)
+    model_name = models.CharField(max_length=50, null=True, blank=True)
+    sku_description = models.CharField(max_length=250, null=True, blank=True)
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_servicecircular"
 
+class ManufacturingData(models.Model):
+    '''Manufacturing data of a product'''
+    product_id = models.CharField(max_length=100, null=True, blank=True)
+    material_number = models.CharField(max_length=100, null=True, blank=True)
+    plant = models.CharField(max_length=100, null=True, blank=True)
+    engine = models.CharField(max_length=100, null=True, blank=True)
+    vehicle_off_line_date =  models.DateField(null=True, blank= True)
+    is_discrepant = models.BooleanField(default=False)
+    sent_to_sap = models.BooleanField(default=False)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_manufacturingdata"

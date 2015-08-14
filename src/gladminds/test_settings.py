@@ -11,6 +11,7 @@ warnings.filterwarnings("ignore", category=exceptions.RuntimeWarning, module='dj
 OUT_DIR = os.path.join(BASE_DIR, "out")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/testdata")
 
+# DATABASES[GmApps.BAJAJ]['OPTIONS'] = {"init_command": "SET storage_engine=INNODB" }
 DATABASES[GmApps.GM]['ENGINE'] = 'django.db.backends.sqlite3'
 DATABASES[GmApps.GM]['NAME'] = os.path.join(OUT_DIR, 'test.db')  # "/tmp/test.db"
 DATABASES[GmApps.BAJAJ]['ENGINE'] = 'django.db.backends.sqlite3'
@@ -26,6 +27,9 @@ DATABASES[GmApps.DAIMLER]['NAME'] = os.path.join(OUT_DIR, 'daimler.db')
 DATABASES[GmApps.BAJAJCV]['NAME'] = os.path.join(OUT_DIR, 'bajajcv.db')
 DATABASES[GmApps.DAIMLER]['ENGINE'] = 'django.db.backends.sqlite3'
 DATABASES[GmApps.DAIMLER]['NAME'] = os.path.join(OUT_DIR, 'bajajcv.db')
+DATABASES[GmApps.PROBIKING]['ENGINE'] = 'django.db.backends.sqlite3'
+DATABASES[GmApps.PROBIKING]['NAME'] = os.path.join(OUT_DIR, 'bajajcv.db')
+
 
 TEST_IGNORE_APPS = ()
 
@@ -61,9 +65,9 @@ FEED_TYPE = 'CSV'
 LOGGING['handlers']['gladminds_logs']['filename'] = 'log/test_case.log'
 LOGGING['handlers']['afterbuy_logs']['filename'] = 'log/test_case.log'
 LOGGING['handlers']['sql']['filename'] = 'log/sql.log'
-LOGGING['loggers']['gladminds']['handlers'] = ['gladminds_logs'] 
-LOGGING['loggers']['spyne']['handlers'] = ['gladminds_logs'] 
-LOGGING['loggers']['afterbuy']['handlers'] = ['afterbuy_logs'] 
+LOGGING['loggers']['gladminds']['handlers'] = ['gladminds_logs', 'console'] 
+LOGGING['loggers']['spyne']['handlers'] = ['gladminds_logs', 'console'] 
+LOGGING['loggers']['afterbuy']['handlers'] = ['afterbuy_logs', 'console'] 
 
 FEED_FAILURE_MAIL_ENABLED = False
 

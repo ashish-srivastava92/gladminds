@@ -115,10 +115,28 @@ def set_mechanic_image_path(instance,filename):
     return create_upload_path('mechanics', instance, filename)
 
 def set_product_catalog_image_path(instance,filename):
-    return create_upload_path('product', instance, filename)
+    return create_upload_path('redeem_product', instance, filename)
 
 def set_redemption_pod_path(instance,filename):
     return create_upload_path('redemption', instance, filename)
 
 def set_welcome_kit_pod_path(instance,filename):
     return create_upload_path('welcome', instance, filename)
+
+def set_plate_image_path(instance,filename):
+    return create_upload_path('plates', instance, filename)
+
+def set_plate_with_part_image_path(instance,filename):
+    return create_upload_path('plates_with_part', instance, filename)
+
+def set_brand_product_image_path(instance,filename):
+    return create_upload_path('brand_product', instance, filename)
+
+def set_afterbuy_consumer_image(instance, filename):
+    return create_upload_path('afterbuy_consumer', instance, filename)
+
+def set_afterbuy_user_product_image(instance, filename):
+    return create_upload_path('afterbuy_user_product', instance, filename)
+
+def set_brand_image(instance, filename):
+    return create_upload_path('brand_image', instance, filename)

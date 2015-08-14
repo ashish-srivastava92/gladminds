@@ -46,7 +46,7 @@ TEMPLATE_DIRS = (
 ENABLE_AMAZON_SQS = False
 
 FILE_CACHE_DURATION = 0
-SMS_CLIENT = "AIRTEL"
+SMS_CLIENT = "KAP"
 
 ########################SQS Queue Name
 SQS_QUEUE_NAME = "gladminds-dev"

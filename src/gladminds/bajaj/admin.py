@@ -9,6 +9,7 @@ from django.contrib.admin import DateFieldListFilter
 from django import forms
 
 from gladminds.bajaj import models
+from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
 from gladminds.core.auth_helper import GmApps, Roles
@@ -832,13 +833,13 @@ class ConstantAdmin(GmModelAdmin):
     
 
 class TransporterAdmin(GmModelAdmin):
-    list_display = ('transporter_id', 'get_transporter_name')
+    list_display = ('transporter_id', 'get_transporter_username', 'get_transporter_name')
 
 class SupervisorAdmin(GmModelAdmin):
-    list_display = ('supervisor_id', 'get_supervisor_name', 'get_supervisor_first_name', 'get_supervisor_last_name')
+    list_display = ('supervisor_id', 'get_supervisor_username', 'get_supervisor_name', 'get_transporter')
 
 class ContainerTrackerAdmin(GmModelAdmin):
-    list_display = ('zib_indent_num', 'lr_number', 'consignment_id',
+    list_display = ('zib_indent_num', 'lr_number', 'consignment_id', 'container_no',
                     'seal_no', 'status', 'gatein_date',
                     'get_transporter', 'submitted_by')
 
@@ -852,44 +853,88 @@ class ContainerTrackerAdmin(GmModelAdmin):
         if css_class:
             return {'class': css_class}
 
+class ContainerIndentAdmin(GmModelAdmin):
+    list_display = ('indent_num',
+                    'no_of_containers',
+                    'status')
 
-brand_admin = BajajAdminSite(name=GmApps.BAJAJ)
+    def suit_row_attributes(self, obj):
+        class_map = {
+            'Open': 'success',
+            'Closed': 'warning',
+            'Inprogress': 'info',
+        }
+        css_class = class_map.get(str(obj.status))
+        if css_class:
+            return {'class': css_class}
 
-brand_admin.register(User, UserAdmin)
-brand_admin.register(Group, GroupAdmin)
-brand_admin.register(models.UserProfile, UserProfileAdmin)
 
-brand_admin.register(models.ZonalServiceManager, ZonalServiceManagerAdmin)
-brand_admin.register(models.AreaServiceManager, AreaServiceManagerAdmin)
+class ContainerLRAdmin(GmModelAdmin):
+    list_display = ('lr_number', 'zib_indent_num',
+                    'get_indent_status',
+                    'consignment_id', 'container_no',
+                    'seal_no', 'gatein_date',
+                    'get_transporter', 'submitted_by')
+    
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('status','sent_to_sap')
+        form = super(ContainerLRAdmin, self).get_form(request, obj, **kwargs)
+        form.current_user=request.user
+        return form
 
-brand_admin.register(models.Dealer, DealerAdmin)
-brand_admin.register(models.AuthorizedServiceCenter, AuthorizedServiceCenterAdmin)
-brand_admin.register(models.ServiceAdvisor, ServiceAdvisorAdmin)
+    def suit_row_attributes(self, obj):
+        class_map = {
+            'Open': 'success',
+            'Closed': 'warning',
+            'Inprogress': 'info',
+        }
+        css_class = class_map.get(str(obj.zib_indent_num.status))
+        if css_class:
+            return {'class': css_class}
 
-brand_admin.register(models.BrandProductCategory, BrandProductCategoryAdmin)
-brand_admin.register(models.ProductType, ProductTypeAdmin)
-brand_admin.register(DispatchedProduct, ListDispatchedProduct)
-brand_admin.register(models.ProductData, ProductDataAdmin)
-brand_admin.register(models.CouponData, CouponAdmin)
+def get_admin_site_custom(brand):
+    brand_admin = BajajAdminSite(name=brand)
+    
+    brand_admin.register(User, UserAdmin)
+    brand_admin.register(Group, GroupAdmin)
+    brand_admin.register(get_model("UserProfile", brand), UserProfileAdmin)
+    
+    brand_admin.register(get_model("Dealer", brand), DealerAdmin)
+    brand_admin.register(get_model("AuthorizedServiceCenter", brand), AuthorizedServiceCenterAdmin)
+    brand_admin.register(get_model("ServiceAdvisor", brand), ServiceAdvisorAdmin)
+    
+    brand_admin.register(get_model("BrandProductCategory", brand), BrandProductCategoryAdmin)
+    brand_admin.register(get_model("ProductType", brand), ProductTypeAdmin)
+    brand_admin.register(DispatchedProduct, ListDispatchedProduct)
+    brand_admin.register(get_model("ProductData", brand), ProductDataAdmin)
+    brand_admin.register(get_model("CouponData", brand), CouponAdmin)
+    
+    brand_admin.register(get_model("ASCTempRegistration", brand), ASCTempRegistrationAdmin)
+    brand_admin.register(get_model("SATempRegistration", brand), SATempRegistrationAdmin)
+    brand_admin.register(get_model("CustomerTempRegistration", brand), CustomerTempRegistrationAdmin)
+        
+    brand_admin.register(get_model("SMSLog", brand), SMSLogAdmin)
+    brand_admin.register(get_model("EmailLog", brand), EmailLogAdmin)
+    brand_admin.register(get_model("DataFeedLog", brand), FeedLogAdmin)
+    brand_admin.register(get_model("FeedFailureLog", brand))
+    
+    brand_admin.register(get_model("EmailTemplate", brand), EmailTemplateAdmin)
+    brand_admin.register(get_model("MessageTemplate", brand), MessageTemplateAdmin)
+    brand_admin.register(get_model("SLA", brand), SlaAdmin)
+    brand_admin.register(get_model("ServiceDeskUser", brand), ServiceDeskUserAdmin)
+    brand_admin.register(get_model("Service", brand), ServiceAdmin)
+    brand_admin.register(get_model("ServiceType", brand))
+    brand_admin.register(get_model("Constant", brand), ConstantAdmin)
+    brand_admin.register(get_model("Feedback", brand))
+    brand_admin.register(get_model("Territory", brand))
+    brand_admin.register(get_model("BrandDepartment", brand))
+    brand_admin.register(get_model("DepartmentSubCategories", brand))
+    brand_admin.register(get_model("ContainerTracker", brand), ContainerTrackerAdmin)
+    brand_admin.register(get_model("Transporter", brand), TransporterAdmin)
+    brand_admin.register(get_model("Supervisor", brand), SupervisorAdmin)
+    brand_admin.register(get_model("ContainerIndent", brand), ContainerIndentAdmin)
+    brand_admin.register(get_model("ContainerLR", brand), ContainerLRAdmin)
 
-brand_admin.register(models.SMSLog, SMSLogAdmin)
-brand_admin.register(models.EmailLog, EmailLogAdmin)
-brand_admin.register(models.DataFeedLog, FeedLogAdmin)
-brand_admin.register(models.FeedFailureLog)
+    return brand_admin
 
-brand_admin.register(models.ASCTempRegistration, ASCTempRegistrationAdmin)
-brand_admin.register(models.SATempRegistration, SATempRegistrationAdmin)
-brand_admin.register(models.CustomerTempRegistration, CustomerTempRegistrationAdmin)
-
-brand_admin.register(models.EmailTemplate, EmailTemplateAdmin)
-brand_admin.register(models.MessageTemplate, MessageTemplateAdmin)
-brand_admin.register(models.SLA, SlaAdmin)
-brand_admin.register(models.ServiceDeskUser, ServiceDeskUserAdmin)
-brand_admin.register(models.Service, ServiceAdmin)
-brand_admin.register(models.ServiceType)
-brand_admin.register(models.Constant, ConstantAdmin)
-brand_admin.register(models.Feedback)
-brand_admin.register(models.Territory)
-brand_admin.register(models.Transporter, TransporterAdmin)
-brand_admin.register(models.Supervisor, SupervisorAdmin)
-brand_admin.register(models.ContainerTracker, ContainerTrackerAdmin)
+brand_admin = get_admin_site_custom(GmApps.BAJAJ)

@@ -2,9 +2,7 @@ import csv
 import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
 from gladminds.core.model_fetcher import get_model
-from gladminds.core.utils import generate_temp_id, mobile_format
 APP='bajajcv'
 
 class Command(BaseCommand):
@@ -21,13 +19,14 @@ class Command(BaseCommand):
             return int(value)
 
     def upload_part_master_data(self):
+        '''Upload data of the part master'''
         print "Started uploading part master..."
         file_list = ['PART_MASTER_DATA.csv']
         spare_list = []
         spare_master = get_model('SparePartMasterData', APP)
         spare_type = get_model('ProductType', APP)
         for i in range(0, 1):
-            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+            with open(settings.PROJECT_DIR + '/upload_data/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:
@@ -62,13 +61,14 @@ class Command(BaseCommand):
                 spare_object.save(using=APP)
     
     def upload_part_upc_data(self):
+        '''Upload data of the part UPC'''
         print "Started uploading part upc..."
         file_list = ['PART_UPC_DATA.csv']
         spare_list = []
         spare_master = get_model('SparePartMasterData', APP)
         spare_upc = get_model('SparePartUPC', APP)
         for i in range(0, 1):
-            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+            with open(settings.PROJECT_DIR + '/upload_data/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:
@@ -87,13 +87,14 @@ class Command(BaseCommand):
                 spare_object.save(using=APP)
 
     def upload_part_point_data(self):
+        '''Upload data of the part point'''
         print "Started uploading part points..."
         file_list = ['PART_POINTS_DATA.csv']
         spare_list = []
         spare_master = get_model('SparePartMasterData', APP)
         spare_part = get_model('SparePartPoint', APP)
         for i in range(0, 1):
-            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+            with open(settings.PROJECT_DIR + '/upload_data/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:

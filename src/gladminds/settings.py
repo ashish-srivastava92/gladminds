@@ -25,10 +25,10 @@ ALLOWED_KEYWORDS = {'register': 'gcp_reg', 'service':
                     'check_point_balance':'chkbal'}
 
 ADMINS = (
-    ('pavan', 'pavankumar.s@hashedin.com'),
     ('naureen', 'naureen.razi@hashedin.com'),
     ('priyanka', 'priyanka.n@hashedin.com')
 )
+
 API_FLAG = False
 COUPON_VALID_DAYS = 30
 # BRAND_BASE_URL = 'local.bajaj.gladminds.co'
@@ -51,6 +51,7 @@ SDFILE_BUCKET = 'gladminds'
 
 FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/qa/'
 FEED_FAILURE_BUCKET = 'gladminds'
+MAX_USERNAME_LENGTH = 250
 
 S3_ID = 'AKIAIL7IDCSTNCG2R6JA'
 S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
@@ -138,8 +139,10 @@ SUIT_CONFIG = {
                      'label': 'Transporter'},
                     {'model': 'supervisor',
                      'label': 'Supervisor'},
-                   {'model': 'containertracker',
-                     'label': 'Container Tracker'},
+                   {'model': 'containerindent',
+                     'label': 'Container Indent'},
+                   {'model': 'containerlr',
+                     'label': 'Container LR'},
                    )},
         {'app': 'bajaj', 'label': 'User Registrations', 'icon': ' icon-folder-open',
          'models':(
@@ -170,6 +173,7 @@ class GmApps():
     DEMO = 'demo'
     GM = 'default'
     DAIMLER = 'daimler'
+    PROBIKING = 'probiking'
 
 # Mapping is first app name then db name
 DATABASE_APPS_MAPPING = {
@@ -179,6 +183,7 @@ DATABASE_APPS_MAPPING = {
                          GmApps.AFTERBUY:'afterbuy',
                          GmApps.BAJAJCV:'bajajcv',
                          GmApps.DAIMLER:'daimler',
+                         GmApps.PROBIKING : 'probiking'
                     }
 
 db_common = {
@@ -353,7 +358,7 @@ ALL_APPS = (
     # 'django.contrib.admindocs',
 )
 
-INSTALLED_APPS = ALL_APPS
+INSTALLED_APPS = ("longerusername",) + ALL_APPS
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
@@ -476,14 +481,14 @@ CUSTOMER_PHONE_NUMBER_UPDATE = {
 PHONE_NUMBER_UPDATE_COUNT_EXCEEDED_MAIL_TO_ASM = {
 
     "sender": "feed-report@gladminds.co",
-    "receiver": ["karishma.c@hashedin.com"],
+    "receiver": ["priyanka.n@hashedin.com"],
     "subject": "Limit for updating Gladminds customer phone number exceeded",
     "body": """""",
 }
 
-POLICY_DISCREPANCY_MAIL_TO_MANAGER = {
+DISCREPANCY_MAIL_TO_MANAGER = {
     "sender": "feed-report@gladminds.co",
-    "receiver": ["pavankumar.s@hashedin.com", "suresh@hashedin.com"],
+    "receiver": ["naureen.razi@hashedin.com",],
     "subject": "Gladminds customer phone number update",
     "body": """""",
 }
@@ -620,6 +625,7 @@ BRANDS = OUTSIDE_BRANDS + ['afterbuy']
 ###############################################
 AIRTEL_IP = '54.84.243.77'
 SMS_CLIENT = "MOCK"
+BRAND_SMS_GATEWAY={'bajaj':'AIRTEL', 'daimler':'KAP', 'bajajcv': 'AIRTEL', 'afterbuy': 'KAP'}
 SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                               'pass':'bajaj',
                               'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
@@ -645,14 +651,15 @@ ADMIN_DETAILS = {GmApps.BAJAJ: {'user': 'bajaj', 'password': 'bajaj'},
           GmApps.AFTERBUY: {'user': 'afterbuy', 'password': 'afterbuy'},
           GmApps.GM: {'user': 'gladminds', 'password': 'gladminds'},
           GmApps.BAJAJCV: {'user': 'bajajcv', 'password': 'bajajcv'},
-          GmApps.DAIMLER: {'user': 'daimler', 'password': 'daimler'}
+          GmApps.DAIMLER: {'user': 'daimler', 'password': 'daimler'},
+          GmApps.PROBIKING: {'user': 'probiking', 'password': 'probiking'}
           }
 ##################################################################################################
 ENABLE_SERVICE_DESK = True
 
 DEFAULT_IMAGE_ID = 'guest.png'
 
-FORGOT_PASSWORD_LINK = {'bajaj':'x'}
+FORGOT_PASSWORD_LINK = {'bajaj':'/v1/gm-users/forgot-password/email/'}
 CONSTANCE_CONFIG = {
     'DEFAULT_IMAGE': ('guest.png', 'Default image to be used by any app'),
     'AFTERBUY_FORGOT_PASSWORD_URL': ('http://afterbuy.co/demo/staging_qw741qaz5/change-password.php', 'Afterbuy forgot password url'),
@@ -669,16 +676,16 @@ SAP_CRM_DETAIL = {
                   }
 FILE_CACHE_DURATION = 0
 
-COUPON_WSDL = 'qa_coupon_redeem.wsdl'
-CUSTOMER_REGISTRATION_WSDL = 'qa_customer_registration.wsdl'
-VIN_SYNC_WSDL='qa_vin_sync.wsdl'
-PURCHASE_SYNC_WSDL='qa_purchase_sync_feed.wsdl'
-CTS_WSDL = 'qa_container_tracker_feed.wsdl'
+COUPON_WSDL = 'qa_wsdl/qa_coupon_redeem.wsdl'
+CUSTOMER_REGISTRATION_WSDL = 'qa_wsdl/qa_customer_registration.wsdl'
+VIN_SYNC_WSDL='qa_wsdl/qa_vin_sync.wsdl'
+PURCHASE_SYNC_WSDL='qa_wsdl/qa_purchase_sync_feed.wsdl'
+CTS_WSDL = 'qa_wsdl/qa_container_tracker_feed.wsdl'
 
-MEMBER_SYNC_WSDL='qa_member_sync_feed.wsdl'
-ACCUMULATION_SYNC_WSDL = 'qa_accumulation_feed.wsdl'
-REDEMPTION_SYNC_WSDL = 'qa_redemption_feed.wsdl'
-DISTRIBUTOR_SYNC_WSDL = 'qa_distributor_sync_feed.wsdl'                
+MEMBER_SYNC_WSDL='qa_wsdl/qa_member_sync_feed.wsdl'
+ACCUMULATION_SYNC_WSDL = 'qa_wsdl/qa_accumulation_feed.wsdl'
+REDEMPTION_SYNC_WSDL = 'qa_wsdl/qa_redemption_feed.wsdl'
+DISTRIBUTOR_SYNC_WSDL = 'qa_wsdl/qa_distributor_sync_feed.wsdl'                
 
 COUPON_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/coupon-redeem/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/customer-feed/?wsdl&v0"
@@ -704,8 +711,8 @@ BRAND_META = {
                }
 
 HOME_URLS = {
-             "bajaj": { "AuthorisedServiceCenters" :[{"DFSC":"/aftersell/register/asc"}, {"SERVICE DESK":"/aftersell/helpdesk"}],
-                       "Dealers" :[{"DFSC":"/aftersell/register/asc"}, {"SERVICE DESK":"/aftersell/helpdesk"}],
+             "bajaj": { "AuthorisedServiceCenters" :[{"DFSC":"/aftersell/register/asc"}],
+                       "Dealers" :[{"DFSC":"/aftersell/register/asc"}],
                        "SdManagers" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        "SdOwners" :[{"SERVICE DESK":"/aftersell/helpdesk"}],
                        },

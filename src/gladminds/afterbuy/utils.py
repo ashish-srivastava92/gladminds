@@ -1,14 +1,17 @@
 from datetime import datetime
 from random import randint
-from django.utils import timezone
-from gladminds.core.exceptions import OtpFailedException
-from gladminds.afterbuy import models as common
-from gladminds.afterbuy import models as afterbuy_model
-from django_otp.oath import TOTP
-from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
+from django.db import connections
+from django.conf import settings
 from django.contrib.auth.models import User
-import pytz
+from django.utils import timezone
 from django.utils.timezone import get_current_timezone_name
+from django_otp.oath import TOTP
+import pytz
+
+from gladminds.afterbuy import models as afterbuy_model
+from gladminds.core.exceptions import OtpFailedException
+from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
+
 
 def save_otp(token, **kwargs):
     if 'user' in kwargs.keys():
@@ -58,9 +61,33 @@ def get_template(template_key):
     return object.template
 
 
-def get_date_from_string(date, fmt="%d-%m-%YT%H:%M:%S", timezone=None):
+def get_date_from_string(date, fmt="%Y-%m-%dT%H:%M:%S", timezone=None):
     if timezone is None:
         timezone = get_current_timezone_name()
     date_object = datetime.strptime(date, fmt)
     date_object.replace(tzinfo=pytz.timezone(timezone))
     return date_object
+
+
+def mobile_format(phone_number):
+    '''
+        GM store numbers in +91 format
+        And when airtel pull message from customer
+        or service advisor we will check that number in +91 format'''
+    return '+91' + phone_number[-10:]
+
+def dictfetchall(cursor):
+    "Returns all rows from a cursor as a dict"
+    desc = cursor.description
+    return [
+        dict(zip([col[0] for col in desc], row))
+        for row in cursor.fetchall()
+    ]
+
+def get_sql_data(query):
+    conn = connections[settings.BRAND]
+    cursor = conn.cursor()
+    cursor.execute(query)
+    data = dictfetchall(cursor)
+    conn.close()
+    return data

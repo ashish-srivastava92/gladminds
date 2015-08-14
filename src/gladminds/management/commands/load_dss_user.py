@@ -1,14 +1,11 @@
 import csv
 import logging
-import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
 from gladminds.core.model_fetcher import get_model
-# from gladminds.core.utils import generate_temp_id, mobile_format
-from gladminds.core.auth_helper import Roles, GmApps
+from gladminds.core.auth_helper import Roles
 from django.contrib.auth.models import Group, User
-from django.core.exceptions import ObjectDoesNotExist
 APP='bajaj'
 logger = logging.getLogger("gladminds")
 _BAJAJ_ZSM = [('mspendharkar@bajajauto.co.in', 'mspendharkar@bajajauto.co.in', 'milindpendharkar@123', 'Milind Pendharkar')]
@@ -76,6 +73,7 @@ class Command(BaseCommand):
             raise Exception('{0} id is not provided.'.format(str(group)))   
 
     def create_zonal_managers(self):
+        '''Upload data of the ZSM'''
         print ''' Started uploading Zonal Service Manager data'''
         file_list = ['DSS_ZSM_DATA.csv']
         zsm_list = []
@@ -83,7 +81,7 @@ class Command(BaseCommand):
         USER_PROFILE = get_model('UserProfile', APP)
         
         for i in range(0, 1):
-            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+            with open(settings.PROJECT_DIR + '/upload_data/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:
@@ -113,6 +111,7 @@ class Command(BaseCommand):
             print "[create zsm ]" , ex
 
     def upload_asm_data(self):
+        '''Upload data of the ASM'''
         print ''' Started uploading Area Service Manager data'''
         file_list = ['DSS_ASM_DATA.csv']
         asm_list = []
@@ -121,7 +120,7 @@ class Command(BaseCommand):
         USER_PROFILE = get_model('UserProfile', APP)
         
         for i in range(0, 1):
-            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+            with open(settings.PROJECT_DIR + '/upload_data/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:
@@ -156,6 +155,7 @@ class Command(BaseCommand):
             print "[create asm ]" , ex, asm
 
     def upload_asm_dealer_data(self):
+        '''Upload data of the dealers with their associated ASM'''
         print ''' Started uploading Area Service Manager data'''
         file_list = ['DSSS_ASM_DEALER_MAP.csv']
         dealer_list = []
@@ -165,7 +165,7 @@ class Command(BaseCommand):
         USER_PROFILE = get_model('UserProfile', APP)
         
         for i in range(0, 1):
-            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+            with open(settings.PROJECT_DIR + '/upload_data/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:

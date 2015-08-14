@@ -28,6 +28,7 @@ from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_mess
 from gladminds.core.managers.mail import sent_otp_email,\
     send_recovery_email_to_admin, send_mail_when_vin_does_not_exist
 from gladminds.bajaj.services.coupons.import_feed import SAPFeed
+from gladminds.core.apis.coupon_apis import CouponDataResource
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
@@ -43,6 +44,8 @@ from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
 from gladminds.core.auth import otp_handler
 from django.core.serializers.json import DjangoJSONEncoder
+from django.template import loader
+from django.template.context import Context
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -127,12 +130,12 @@ def generate_otp(request):
             user_profile_obj = models.UserProfile.objects.filter(user=user)
             if user_profile_obj:
                 phone_number = user_profile_obj[0].phone_number
-            logger.info('OTP request received . username: {0}'.format(username))
-            token = otp_handler.get_otp(user=user)
-            message = get_template('SEND_OTP').format(token)
-            send_job_to_queue(send_otp, {'phone_number': phone_number, 'message': message,
+                logger.info('OTP request received . username: {0}'.format(username))
+                token = otp_handler.get_otp(user=user)
+                message = get_template('SEND_OTP').format(token)
+                send_job_to_queue(send_otp, {'phone_number': phone_number, 'message': message,
                                          'sms_client': settings.SMS_CLIENT})
-            logger.info('OTP sent to mobile {0}'.format(phone_number))
+                logger.info('OTP sent to mobile {0}'.format(phone_number))
 #             #Send email if email address exist
             if user.email:
                 sent_otp_email(data=token, receiver=user.email, subject='Forgot Password')
@@ -140,7 +143,7 @@ def generate_otp(request):
             return HttpResponseRedirect('/aftersell/users/otp/validate?username='+username)
         
         except Exception as ex:
-            logger.error('Invalid details, mobile {0}'.format(phone_number))
+            logger.error('Invalid details, mobile {0}'.format(ex))
             return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')    
     
     elif request.method == 'GET':
@@ -170,9 +173,9 @@ def update_pass(request):
     try:
         otp = request.POST['otp']
         password = request.POST['password']
-        utils.update_pass(otp, password)
-        logger.info('Password has been updated.')
-        return HttpResponseRedirect('/aftersell/asc/login?update=true')
+        data = utils.update_pass(otp, password)
+        return HttpResponse(json.dumps(data), content_type='application/json')
+
     except:
         logger.error('Password update failed.')
         return HttpResponseRedirect('/aftersell/asc/login?error=true')
@@ -188,6 +191,9 @@ def register(request, menu):
 
     if request.method == 'GET':
         user_id = request.user
+        reset_password =  models.UserProfile.objects.get(user=request.user).reset_password
+        if not reset_password:
+            return render(request, 'portal/change_password.html')
         if Roles.DEALERS in groups:
             use_cdms=models.Dealer.objects.get(user__user=user_id).use_cdms
         return render(request, TEMPLATE_MAPPING.get(menu, 'portal/404.html'), {'active_menu' : ACTIVE_MENU.get(menu)\
@@ -450,14 +456,14 @@ def get_customer_info(data):
     except Exception as ex:
         logger.info(ex)
         message = "The Chassis {0} is not available in the current database, please wait while the Main database is being scanned.".format(data['vin'])
-        return {'message': message, 'status': 'fail', 'vin': data['vin']}
+        return {'message': message, 'status': 0}
     if product_obj.purchase_date:
         product_data = format_product_object(product_obj)
         product_data['group'] = data['groups'][0] 
-        return product_data
+        return {'product': product_data, 'status': 1}
     else:
         message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
-        return {'message': message}
+        return {'message': message, 'status': 1}
 
 @login_required()
 def exceptions(request, exception=None):
@@ -548,7 +554,13 @@ def trigger_sqs_tasks(request):
         'send-reminder': 'send_reminder',
         'export-customer-registered': 'export_customer_reg_to_sap',
         'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk',
-        'send_mail_for_policy_discrepency':'send_mail_for_policy_discrepency',
+        'export_purchase_feed_sync_to_sap': 'export_purchase_feed_sync_to_sap',
+        'send_mail_for_policy_discrepency': 'send_mail_for_policy_discrepency',
+        'export_cts_to_sap': 'export_cts_to_sap',
+        'send_mail_for_feed_failure': 'send_mail_for_feed_failure',
+        'send_mail_for_customer_phone_number_update':'send_mail_for_customer_phone_number_update',
+        'send_mail_for_manufacture_data_discrepancy': 'send_mail_for_manufacture_data_discrepancy',
+        'send_vin_sync_feed_details': 'send_vin_sync_feed_details'
     }
 
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
@@ -584,8 +596,9 @@ def reports(request):
             report_data['params']['status']='2'
             template_rendered = 'portal/credit_note_report.html'
         report_data['records'] = create_reconciliation_report(report_data['params'], request.user)
+        if '_download' in request.POST:
+            return download_reconcilation_reports(report_data)
     return render(request, template_rendered, report_data)
-
 
 @log_time
 def create_reconciliation_report(query_params, user):
@@ -608,7 +621,7 @@ def create_reconciliation_report(query_params, user):
 
     if query_params['type']=='credit': 
         filter['credit_date__range'] = input_date_range
-    elif status==4:
+    elif status=='4':
         filter['actual_service_date__range'] = input_date_range
     else:
         filter['closed_date__range'] = input_date_range
@@ -618,7 +631,7 @@ def create_reconciliation_report(query_params, user):
         if status=='2':
             args = [Q(status=2),Q(status=6)]
     all_coupon_data = models.CouponData.objects.filter(reduce(operator.or_, args), reduce(operator.or_, coupon_filter), **filter).order_by('-actual_service_date')
-    map_status = {'6': 'Closed', '4': 'In Progress', '2':'Closed'}
+    map_status = {'6': 'Old FSC Closed', '4': 'In Progress', '2':'DFSC Closed'}
     for coupon_data in all_coupon_data:
         coupon_data_dict = {}
         coupon_data_dict['vin'] = coupon_data.product.product_id
@@ -644,133 +657,31 @@ def create_reconciliation_report(query_params, user):
             coupon_data_dict['service_type'] = coupon_data.service_type
             coupon_data_dict['special_case'] = coupon_data.special_case
         report_data.append(coupon_data_dict)
+        
     return report_data
-
-
-@check_service_active(Services.FREE_SERVICE_COUPON)
-def brand_details(requests, role=None):
-    data = requests.GET.copy()
-    data_list = []
-    data_dict = {}
-    limit = data.get('limit', 20)
-    offset = data.get('offset', 0)
-    limit = int(limit)
-    offset = int(offset)
-    function_mapping = {
-            'asc': get_asc_info,
-            'sa': get_sa_info,
-            'customers': get_customers_info,
-            'active-asc': get_active_asc_info,
-            'not-active-asc': get_not_active_asc_info
-        }
-    get_data = requests.GET
-    data = function_mapping[role](data, limit, offset , data_dict, data_list)
-    return HttpResponse(json.dumps(data), mimetype="application/json")
-
-
-def get_asc_info(data, limit, offset, data_dict, data_list):
-    '''get city and state from parameter'''
-    asc_details = {}
-    if data.has_key('city') and data.has_key('state'):
-        asc_details['user__address'] = ', '.join([data['city'].upper(), data['state'].upper()])
-    asc_data = models.AuthorizedServiceCenter.objects.filter(**asc_details)
-    data_dict['total_count'] = len(asc_data)
-    for asc in asc_data[offset:limit]:
-        asc_detail = OrderedDict();
-        asc_detail['id'] = asc.dealer.dealer_id
-        asc_detail['address'] = asc.user.address
-        utils.get_state_city(asc_detail, asc.user.address)
-        data_list.append(asc_detail)
-    data_dict['asc'] = data_list
-    return data_dict
-
-
-def get_sa_info(data, limit, offset, data_dict, data_list):
-    sa_details = {}
-    if data.has_key('phone_number'):
-        sa_details['user__phone_number'] = utils.mobile_format(str(data['phone_number']))
-    sa_data = models.ServiceAdvisor.objects.filter(**sa_details)
-    data_dict['total_count'] = len(sa_data)
-    for sa in sa_data[offset:limit]:
-        sa_detail = OrderedDict();
-        sa_detail['id'] = sa.service_advisor_id
-        sa_detail['name'] = sa.user.user.first_name
-        sa_detail['phone_number'] = sa.user.phone_number
-        sa_detail = get_sa_details(sa_detail, sa)
-        data_list.append(sa_detail)
-    data_dict['sa'] = data_list
-    return data_dict
-
-
-def get_customers_info(data, limit, offset, data_dict, data_list):
-    kwargs = {}
-    if data.has_key('sap_id'):
-        kwargs['customer_id'] = data['sap_id']
-    args = {~Q(product_purchase_date=None)}
-    customer_products = models.ProductData.objects.filter(*args, **kwargs)[offset:limit]
-    for customer in customer_products:
-        customer_detail = OrderedDict();
-        customer_detail['sap_id'] = customer.customer_id
-        customer_detail['vin'] = customer.product_id
-        customer_detail['name'] = customer.customer_name
-        customer_detail['phone_number'] = customer.customer_phone_number
-        customer_detail['city'] = customer.customer_city
-        customer_detail['state'] = customer.customer_state
-        data_list.append(customer_detail)
-    data_dict['customers'] = data_list
-    return data_dict
-
-
- 
-def get_active_asc_info(data, limit, offset, data_dict, data_list):
-    '''get city and state from parameter'''
-    asc_details = utils.get_asc_data(data)
-    active_asc_list = asc_details.filter(~Q(date_joined=F('last_login')))
-    active_ascs = active_asc_list.values_list('username', flat=True)
-    asc_obj = models.Dealer.objects.filter(dealer_id__in=active_ascs)
-    for asc_data in asc_obj[offset:limit]:
-        active_ascs = OrderedDict();
-        active_ascs['id'] = asc_data.dealer_id
-        active_ascs['address'] = asc_data.address
-        active_ascs = utils.get_state_city(active_ascs, asc_data.address)
-        active_ascs['coupon_closed'] = utils.asc_cuopon_data(asc_data, 2)
-        active_ascs['coupon_inprogress'] = utils.asc_cuopon_data(asc_data, 4)
-        active_ascs['coupon_closed_old_fsc'] = utils.asc_cuopon_data(asc_data, 6)
-        data_list.append(active_ascs)
-    data_dict['count'] = len(active_asc_list)
-    data_dict['active-asc'] = data_list
-    return data_dict
-
 
 #FIXME: Refactor the code
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def get_active_asc_report(request, role=None):
-    '''get city and state from parameter'''
-    data = request.GET.copy()
-    if data.has_key('month'):
-        month = MONTHS.index(data['month']) + 1
-        year = data['year']
-    else:
-        now = datetime.datetime.now()
-        year = now.year
-        month = now.month
-    port = request.META['SERVER_PORT']
-    access_token = request.META['QUERY_STRING'] 
-    no_of_days = utils.get_number_of_days(year, month)
+    '''get number of tickets closed by ASC'''
     if request.method != 'GET':
         return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
     try:
-        query = '/v1/coupons/closed-ticket-count?'+ access_token
-        query = query + '&year='+ str(year) + '&month=' + str(month)
-        if not settings.API_FLAG:
-            asc_query_list = requests.get('http://'+BRAND_META[settings.BRAND]['base_url']+':'+port+query)
+        role = request.path.split('/')[3]
+        data = request.GET.copy()
+        if data.has_key('month'):
+            month = MONTHS.index(data['month']) + 1
+            year = data['year']
         else:
-            asc_query_list = requests.get('http://'+BRAND_META[settings.BRAND]['base_url']+query)
-        
+            now = datetime.datetime.now()
+            year = now.year
+            month = now.month
+        no_of_days = utils.get_number_of_days(year, month)
+        coupon_resource = CouponDataResource()
+        asc_query=coupon_resource.closed_ticket(year, month, role)
+
         asc_list = []
-        x=json.loads(asc_query_list.content)
-        for asc in x:
-            
+        for asc in asc_query:
             active = filter(lambda active: active['id']==asc['asc_id'], asc_list)
             if not active:
                 temp= {}
@@ -802,30 +713,18 @@ def get_active_asc_report(request, role=None):
                    "cyear": str(year),
                    "role": role
                    })
-
-def get_not_active_asc_info(data, limit, offset, data_dict, data_list):
-    '''get city and state from parameter'''
-    asc_details = utils.get_asc_data(data)
-    not_active_asc_list = asc_details.filter(date_joined=F('last_login'))
-    not_active_ascs = not_active_asc_list.values_list('username', flat=True)
-    not_asc_obj = models.AuthorizedServiceCenter.objects.filter(asc_id__in=not_active_ascs)
-    for asc in not_asc_obj[offset:limit]:
-        not_active_ascs = OrderedDict();
-        not_active_ascs['id'] = asc.asc_id
-        not_active_ascs['address'] = asc.user.address
-        not_active_ascs = utils.get_state_city(not_active_ascs, asc.user.address)
-        data_list.append(not_active_ascs)
-    data_dict['count'] = len( not_active_asc_list)
-    data_dict['not-active-asc'] = data_list
-    return data_dict
-
-def get_sa_details(sa_details, id):
-    sa_detail = models.ServiceAdvisor.objects.filter(service_advisor_id=id)
-    if sa_detail:
-        if sa_detail.dealer:
-            sa_details['dealer'] = sa_detail.dealer.dealer_id
-        elif sa_detail.asc:
-            sa_details['asc'] = sa_detail.asc.asc_id
+    
+'''Download the reconciliation report under the filter criteria'''
+    
+def download_reconcilation_reports(download_data):
+    response = HttpResponse(content_type='text/excel')
+    response['Content-Disposition'] = 'attachment; filename="ReportList.xlsx"'
+    if download_data['params']['type']== 'credit':
+        template = loader.get_template('portal/reconciliation_credit_download.html')
     else:
-        sa_details['dealer/asc'] = 'Null'
-    return sa_details
+        template = loader.get_template('portal/reconciliation_download.html')
+    c = Context({
+        'data': download_data['records'],
+    })
+    response.write(template.render(c))
+    return response

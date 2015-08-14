@@ -2,13 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from gladminds.core import base_models, constants
 from gladminds.core.auth_helper import GmApps
-from django.conf import settings
-from django.utils.translation import gettext as _
-from constance import config
-from gladminds.core.managers.email_token_manager import EmailTokenManager
-from gladminds.core.model_helpers import validate_image, validate_file
-from gladminds.core.managers.mail import sent_password_reset_link,\
-    send_email_activation
 import datetime
 
 _APP_NAME = GmApps.BAJAJ
@@ -37,7 +30,46 @@ class ZonalServiceManager(base_models.ZonalServiceManager):
     user = models.OneToOneField(UserProfile, null=True, blank=True)
     
     class Meta(base_models.ZonalServiceManager.Meta):
-        app_label = _APP_NAME 
+        app_label = _APP_NAME
+
+class CircleHead(base_models.CircleHead):
+    '''details of Circle Heads'''
+    user =  models.OneToOneField(UserProfile)
+    
+    class Meta(base_models.CircleHead.Meta):
+        app_label = _APP_NAME
+        
+        
+class RegionalManager(base_models.RegionalManager):
+    '''details of Regional Manager'''
+    user =  models.OneToOneField(UserProfile)
+    circle_head = models.ForeignKey(CircleHead, null=True, blank=True)
+
+    class Meta(base_models.RegionalManager.Meta):
+        app_label = _APP_NAME
+
+class Territory(base_models.Territory):
+    '''List of territories'''
+    
+    class Meta(base_models.Territory.Meta):
+        app_label = _APP_NAME
+
+class State(base_models.State):
+    ''' List of states mapped to territory'''
+    territory = models.ForeignKey(Territory, null=True, blank=True)
+ 
+    class Meta(base_models.State.Meta):
+        app_label = _APP_NAME
+
+
+class AreaSalesManager(base_models.AreaSalesManager):
+    '''details of Area Sales Manager'''
+    user =  models.OneToOneField(UserProfile)
+    rm = models.ForeignKey(RegionalManager, null=True, blank=True)
+    state = models.ManyToManyField(State)
+    
+    class Meta(base_models.AreaSalesManager.Meta):
+        app_label = _APP_NAME
 
 class AreaServiceManager(base_models.AreaServiceManager):
     '''details of Area Service Manager'''
@@ -51,6 +83,7 @@ class Dealer(base_models.Dealer):
     user = models.OneToOneField(UserProfile, primary_key=True,
                                 related_name='bajaj_registered_dealer')
     asm = models.ForeignKey(AreaServiceManager, null=True, blank=True)
+    sm = models.ForeignKey(AreaSalesManager, null=True, blank=True)
 
     class Meta(base_models.Dealer.Meta):
         app_label = _APP_NAME
@@ -328,27 +361,24 @@ class Constant(base_models.Constant):
     ''' contains all the constants'''
     class Meta(base_models.Constant.Meta):
         app_label = _APP_NAME
-        
-class BOMItem(base_models.BOMItem):
-    '''Details of  Service Billing of Material'''
-    class Meta(base_models.BOMItem.Meta):
+
+class DateDimension(base_models.DateDimension):
+    '''
+    Date dimension table
+    '''
+    class Meta(base_models.DateDimension.Meta):
         app_label = _APP_NAME
 
-class BOMHeader(base_models.BOMHeader):
-    '''Details of Header BOM'''
-class Meta(base_models.BOMHeader.Meta):
-        app_label = _APP_NAME
 
-class ECORelease(base_models.ECORelease):
-    '''Details of ECO Release'''
-    class Meta(base_models.ECORelease.Meta):
-        app_label = _APP_NAME
+class CouponFact(base_models.CouponFact):
+    '''Coupon Fact Table for reporting'''
+    date = models.ForeignKey(DateDimension)
 
-class ECOImplementation(base_models.ECOImplementation):
-    '''Details of ECO Implementation'''
-    class Meta:
+    class Meta(base_models.CouponFact.Meta):
         app_label = _APP_NAME
+        unique_together = ("date", "data_type")
 
+############################### CTS MODELS ###################################################
 class Transporter(base_models.Transporter):
     '''details of Transporter'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
@@ -365,6 +395,19 @@ class Supervisor(base_models.Supervisor):
     class Meta(base_models.Supervisor.Meta):
         app_label = _APP_NAME 
 
+class ContainerIndent(base_models.ContainerIndent):
+    ''' details of Container Indent'''
+
+    class Meta(base_models.ContainerIndent.Meta):
+        app_label = _APP_NAME
+
+class ContainerLR(base_models.ContainerLR):
+    ''' details of Container LR'''
+    zib_indent_num = models.ForeignKey(ContainerIndent)
+    transporter = models.ForeignKey(Transporter)
+
+    class Meta(base_models.ContainerLR.Meta):
+        app_label = _APP_NAME
 
 class ContainerTracker(base_models.ContainerTracker):
     ''' details of Container Tracker'''
@@ -373,19 +416,7 @@ class ContainerTracker(base_models.ContainerTracker):
     class Meta(base_models.ContainerTracker.Meta):
         app_label = _APP_NAME
 
-#######################LOYALTY TABLES#################################
-class Territory(base_models.Territory):
-    '''List of territories'''
-    
-    class Meta(base_models.Territory.Meta):
-        app_label = _APP_NAME
-
-class State(base_models.State):
-    ''' List of states mapped to territory'''
-    territory = models.ForeignKey(Territory, null=True, blank=True)
- 
-    class Meta(base_models.State.Meta):
-        app_label = _APP_NAME
+#######################LOYALTY MODELS#################################
 
 class City(base_models.City):
     ''' List of cities mapped to states'''
@@ -422,11 +453,34 @@ class Distributor(base_models.Distributor):
     class Meta(base_models.Distributor.Meta):
         app_label = _APP_NAME
 
+class DistributorStaff(base_models.DistributorStaff):
+    '''details of Distributor'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    
+    class Meta(base_models.DistributorStaff.Meta):
+        app_label = _APP_NAME
+
+class DistributorSalesRep(base_models.DistributorSalesRep):
+    '''details of Distributor Sales Rep'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    
+    class Meta(base_models.DistributorSalesRep.Meta):
+        app_label = _APP_NAME
 
 class Retailer(base_models.Retailer):
     '''details of retailer'''
 
     class Meta(base_models.Retailer.Meta):
+        app_label = _APP_NAME
+
+class DSRWrokAllocation(base_models.DSRWrokAllocation):
+    '''details of DSR work allocation'''
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    retailer = models.ForeignKey(Retailer, null=True, blank=True)
+    
+    class Meta(base_models.DSRWrokAllocation.Meta):
         app_label = _APP_NAME
 
 class Member(base_models.Member):
@@ -510,22 +564,6 @@ class CommentThread(base_models.CommentThread):
 
     class Meta(base_models.CommentThread.Meta):
         app_label = _APP_NAME
-
-class DateDimension(base_models.DateDimension):
-    '''
-    Date dimension table
-    '''
-    class Meta(base_models.DateDimension.Meta):
-        app_label = _APP_NAME
-
-
-class CouponFact(base_models.CouponFact):
-    '''Coupon Fact Table for reporting'''
-    date = models.ForeignKey(DateDimension)
-
-    class Meta(base_models.CouponFact.Meta):
-        app_label = _APP_NAME
-        unique_together = ("date", "data_type")
         
 class LoyaltySLA(base_models.LoyaltySLA):
 
@@ -535,6 +573,8 @@ class LoyaltySLA(base_models.LoyaltySLA):
 
         
 class EmailToken(base_models.EmailToken):
+    user = models.ForeignKey(UserProfile)
+
     class Meta(base_models.EmailToken.Meta):
         verbose_name_plural = 'email_tokens'
 
@@ -546,3 +586,70 @@ class DiscrepantAccumulation(base_models.DiscrepantAccumulation):
      
     class Meta(base_models.DiscrepantAccumulation.Meta):
         app_label = _APP_NAME
+
+############################### ECO MODELS ###################################################      
+
+class ECORelease(base_models.ECORelease):
+    '''Details of ECO Release'''
+    class Meta(base_models.ECORelease.Meta):
+        app_label = _APP_NAME
+
+class ECOImplementation(base_models.ECOImplementation):
+    '''Details of ECO Implementation'''
+    class Meta(base_models.ECOImplementation.Meta):
+        app_label = _APP_NAME
+
+class BrandVertical(base_models.BrandVertical):
+    '''Stores the different vertical
+    a brand can have'''
+    class Meta(base_models.BrandVertical.Meta):
+        app_label = _APP_NAME
+        
+class BrandProductRange(base_models.BrandProductRange):
+    '''Different range of product a brand provides'''
+    class Meta(base_models.BrandProductRange.Meta):
+            app_label = _APP_NAME
+
+class BOMHeader(base_models.BOMHeader):
+    '''Details of Header BOM'''
+    class Meta(base_models.BOMHeader.Meta):
+            app_label = _APP_NAME
+            
+class BOMPlate(base_models.BOMPlate):
+    '''Details of BOM Plates'''
+    class Meta(base_models.BOMPlate.Meta):
+        app_label = _APP_NAME
+        
+class BOMPart(base_models.BOMPart):
+    '''Details of  BOM Parts'''
+    class Meta(base_models.BOMPart.Meta):
+            app_label = _APP_NAME
+        
+class BOMPlatePart(base_models.BOMPlatePart):
+    '''Details of BOM Plates and part relation'''
+    bom = models.ForeignKey(BOMHeader)
+    plate = models.ForeignKey(BOMPlate)
+    part = models.ForeignKey(BOMPart)
+
+    class Meta(base_models.BOMPlatePart.Meta):
+        app_label = _APP_NAME
+
+class BOMVisualization(base_models.BOMVisualization):
+    '''Details of BOM Plates cordinates'''
+    bom = models.ForeignKey(BOMPlatePart)
+    
+    class Meta(base_models.BOMVisualization.Meta):
+        app_label = _APP_NAME
+            
+class ServiceCircular(base_models.ServiceCircular):
+    '''Save the service circular created for a product'''
+    model_sku_code = models.ManyToManyField(BrandProductRange)
+    
+    class Meta(base_models.ServiceCircular.Meta):
+        app_label = _APP_NAME
+
+class ManufacturingData(base_models.ManufacturingData):
+    '''Manufacturing data of a product'''
+    class Meta(base_models.ManufacturingData.Meta):
+        app_label = _APP_NAME
+

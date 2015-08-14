@@ -8,7 +8,7 @@ from django.template import Context, Template
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
 from gladminds.core.managers import audit_manager
-from gladminds.core.auth_helper import GmApps
+from gladminds.core.auth_helper import GmApps, Roles
 from gladminds.core.model_fetcher import get_model
 
 logger = logging.getLogger("gladminds")
@@ -19,11 +19,8 @@ def get_email_template(key, brand=None):
     return template_object[0]
 
 def get_mail_receiver(template_name, mail_detail):
-    if (settings.ENV not in settings.IGNORE_ENV):
-        receivers = template_name['receiver']
-    else:
-        receivers = []
-        receivers.append(mail_detail['receiver'])
+    receivers = []
+    receivers.append(mail_detail['receiver'])
     return receivers
 
 def send_email_with_file_attachment(sender, receiver, subject, body, filename, content, brand='bajaj'):
@@ -144,7 +141,7 @@ def discrepant_coupon_update(csv_file, brand=None):
     try:
         yesterday = datetime.now().date() - timedelta(days=1)
         mail_detail = get_email_template('POLICY_DISCREPANCY_MAIL_TO_MANAGER', brand)
-        receivers = get_mail_receiver(settings.POLICY_DISCREPANCY_MAIL_TO_MANAGER, mail_detail)
+        receivers = get_mail_receiver(settings.DISCREPANCY_MAIL_TO_MANAGER, mail_detail)
         send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'],
                                           mail_detail['body'].format(date=yesterday.strftime("%b %d %Y")), 
                                           'discrepant_coupon_update_', csv_file)
@@ -319,7 +316,7 @@ def send_feedback_received(data, receiver_email):
         body = template.render(context)
         send_email(sender = data['sender'], receiver = receiver_email, 
                    subject = data['newsubject'], body = body, message=data['content'],
-                   smtp_server = settings.MAIL_SERVER)
+                   smtp_server = settings.MAIL_SERVER, title='gm_support')
     except Exception as ex:
         logger.info("[Exception feedback received email]: {0}".format(ex))
 
@@ -332,7 +329,7 @@ def send_due_date_exceeded(data, receiver_email):
         body = template.render(context)
         send_email(sender = data['sender'], receiver = receiver_email, 
                    subject = data['subject'], body = body, message=data['content'],
-                   smtp_server = settings.MAIL_SERVER)
+                   smtp_server = settings.MAIL_SERVER, title='gm_support')
     except Exception as ex:
         logger.info("[Exception due date exceeded email]: {0}".format(ex))
 
@@ -346,7 +343,7 @@ def send_due_date_reminder(data, receiver_email):
         body = template.render(context)
         send_email(sender = data['sender'], receiver = receiver_email, 
                    subject = data['subject'], body = body, message=data['content'],
-                   smtp_server = settings.MAIL_SERVER)
+                   smtp_server = settings.MAIL_SERVER, title='gm_support')
     except Exception as ex:
         logger.info("[Exception due date reminder email]: {0}".format(ex))
         
@@ -354,7 +351,8 @@ def send_servicedesk_feedback(data, reporter_email_id):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                            data, receiver= reporter_email_id, message=data['content'])
+                            data, receiver= reporter_email_id,
+                            message=data['content'], title='gm_support')
     except Exception as ex:
         logger.info("[Exception feedback initiator email]  {0}".format(ex))
 
@@ -367,7 +365,7 @@ def send_dealer_feedback(data, dealer_email):
         body = template.render(context)
         send_email(sender = data['sender'], receiver = dealer_email, 
                    subject = data['subject'], body = body, message=data['content'],
-                   smtp_server = settings.MAIL_SERVER)
+                   smtp_server = settings.MAIL_SERVER, title='gm_support')
     except Exception as ex:
         logger.info("[Exception dealer feedback email]: {0}".format(ex))
         
@@ -376,7 +374,8 @@ def send_email_to_assignee(data, assignee_email):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                             data, receiver = assignee_email, message=data['content'])
+                             data, receiver = assignee_email,
+                             message=data['content'], title='gm_support')
     except Exception as ex:
         logger.info("[Exception feedback receiver email]  {0}".format(ex)) 
         
@@ -384,7 +383,8 @@ def send_email_to_initiator_after_issue_assigned(data, reporter_email):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                            data, receiver=reporter_email, message=data['content'])
+                            data, receiver=reporter_email,
+                            message=data['content'], title='gm_support')
     except Exception as ex:
         logger.info("[Exception feedback initiator after issue assigned email]  {0}".format(ex)) 
 
@@ -392,7 +392,8 @@ def send_email_to_dealer_after_issue_assigned(data, dealer_email):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                            data, receiver=dealer_email, message=data['content'])
+                            data, receiver=dealer_email,
+                            message=data['content'], title='gm_support')
     except Exception as ex:
         logger.info("[Exception feedback initiator after issue assigned email]  {0}".format(ex)) 
 
@@ -403,7 +404,8 @@ def send_email_to_initiator_after_issue_resolved(data, feedback_obj, host, repor
                             "url":host,
                             })
         send_template_email("initiator_feedback_resolved.html", context,
-                            data, receiver=reporter_email, message=data['content'])
+                            data, receiver=reporter_email,
+                            message=data['content'], title='gm_support')
     except Exception as ex:
         logger.info("[Exception feedback initiator after issue resloved email]  {0}".format(ex))
 
@@ -411,15 +413,17 @@ def send_email_to_initiator_when_due_date_is_changed(data, reporter_email):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                            data, receiver=reporter_email, message=data['content'])
+                            data, receiver=reporter_email,
+                            message=data['content'], title='gm_support')
     except Exception as ex:
         logger.info("[Exception feedback initiator on change of due date]  {0}".format(ex)) 
 
         
-def send_email_to_bajaj_after_issue_resolved(data):
+def send_email_to_brand_after_issue_resolved(data):
     try:
         context = Context({"content": data['content']})
-        send_template_email("base_email_template.html", context, data, message=data['content'])
+        send_template_email("base_email_template.html", context, data,
+                            message=data['content'], title='gm_support')
     except Exception as ex:
         logger.info("[Exception fail to send mail to bajaj]  {0}".format(ex)) 
 
@@ -427,7 +431,8 @@ def send_email_to_manager_after_issue_resolved(data, manager_obj):
     try:
         context = Context({"content": data['content']})
         send_template_email("base_email_template.html", context,
-                             data, receiver = manager_obj.email_id, message=data['content'])
+                             data, receiver = manager_obj.email_id,
+                             message=data['content'], title='gm_support')
     except Exception as ex:
         logger.info("[Exception fail to send mail to manager]  {0}".format(ex))
         
@@ -468,7 +473,7 @@ def send_email_to_welcomekit_escaltion_group(data, welcomekit_escaltion_email):
     except Exception as ex:
         logger.info("[Exception fail to send mail to welcome kit escalation group ]  {0}".format(ex))        
 
-def send_template_email(template_name, context, mail_detail,receiver=None, message=None): 
+def send_template_email(template_name, context, mail_detail,receiver=None, message=None, title='GCP_Bajaj_FSC_Feeds'): 
     '''generic function use for send mail for any html template'''
     
     file_stream = open(settings.EMAIL_DIR+'/'+ template_name)
@@ -479,7 +484,7 @@ def send_template_email(template_name, context, mail_detail,receiver=None, messa
         receiver =  mail_detail['receiver']
     send_email(sender =  mail_detail['sender'], receiver = receiver, 
                subject = mail_detail['newsubject'], body = body, message=message,
-               smtp_server = settings.MAIL_SERVER)
+               smtp_server = settings.MAIL_SERVER, title=title)
     logger.info("Mail sent successfully")
     #TODO We have to remove hard code receiver
 
@@ -542,3 +547,36 @@ def send_phone_number_update_count_exceeded(update_details=None, brand=None):
         logger.info("Sending out customer phone number update exceeds emails")
     except Exception as ex:
         logger.info("[Exception customer phone number update]: {0}".format(ex))
+
+
+def send_epc_feed_received_mail(brand, template_name):
+    try:
+        data = get_email_template(template_name, brand)
+        file_stream = open(settings.EMAIL_DIR+'/base_email_template.html')
+        feed_temp = file_stream.read()
+        template = Template(feed_temp)
+        context = Context({"content": data['body']})
+        body = template.render(context)
+        epc_users = get_model('UserProfile').objects.filter(user__groups__name=Roles.VISUALIZATIONUSER)
+        receiver_email = []
+        for user in epc_users:
+            receiver_email.append(user.user.email)
+
+        send_email(sender = data['sender'], receiver = receiver_email, 
+                   subject = data['subject'], body = body, message=data['body'],
+                   smtp_server = settings.MAIL_SERVER)
+    except Exception as ex:
+        logger.info("[Exception while sending {0} email]: {1} ".format(template_name, ex))
+        
+def discrepant_manufacture_data(csv_file, brand=None):
+    try:
+        yesterday = datetime.now().date() - timedelta(days=1)
+        mail_detail = get_email_template('MANUFACTURE_DISCREPANCY_MAIL_TO_MANAGER', brand)
+        receivers = get_mail_receiver(settings.DISCREPANCY_MAIL_TO_MANAGER, mail_detail)
+        send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'],
+                                          mail_detail['body'].format(date=yesterday.strftime("%b %d %Y")), 
+                                          'discrepant_manufacture_data_', csv_file)
+
+        logger.info("Sending out discrepant manufacture data emails")
+    except Exception as ex:
+        logger.info("[Exception discrepant manufacture data while sending mail]: {0}".format(ex))

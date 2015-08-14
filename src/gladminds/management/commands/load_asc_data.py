@@ -12,13 +12,14 @@ class Command(BaseCommand):
         self.upload_asc_data()
 
     def upload_asc_data(self):
+        '''Uplaod ASC data'''
         print "Started running function..."
         file_list = ['new_asc_list.csv']
         file = open("newfile.txt", "w")
         asc_list = []
         
         for i in range(0, 1):
-            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+            with open(settings.PROJECT_DIR + '/upload_data/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:

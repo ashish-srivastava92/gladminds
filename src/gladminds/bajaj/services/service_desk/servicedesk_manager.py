@@ -302,8 +302,8 @@ def modify_feedback(feedback_obj, data, user, host):
                     send_mail_to_dealer(feedback_obj, dealer_asc_obj.user.email, 'DUE_DATE_MAIL_TO_DEALER')
                 else:
                     LOG.info("Dealer / Asc emailId not found.")
-
-            send_sms('INITIATOR_FEEDBACK_DUE_DATE_CHANGE', reporter_phone_number,
+            if reporter_phone_number:
+                send_sms('INITIATOR_FEEDBACK_DUE_DATE_CHANGE', reporter_phone_number,
                  feedback_obj)
     
     if feedback_obj.priority:
@@ -327,7 +327,8 @@ def modify_feedback(feedback_obj, data, user, host):
                     send_mail_to_dealer(feedback_obj, dealer_asc_obj.user.email, 'DUE_DATE_MAIL_TO_DEALER')
                 else:
                     LOG.info("Dealer / Asc emailId not found.")
-            send_sms('INITIATOR_FEEDBACK_DUE_DATE_CHANGE', reporter_phone_number,
+            if reporter_phone_number:
+                send_sms('INITIATOR_FEEDBACK_DUE_DATE_CHANGE', reporter_phone_number,
                  feedback_obj)
         
     if assign is None:
@@ -387,8 +388,9 @@ def modify_feedback(feedback_obj, data, user, host):
                                                          dealer_asc_obj.user.email)
             else:
                 LOG.info("Dealer / Asc emailId not found.")
-
-        send_sms('INITIATOR_FEEDBACK_DETAILS', reporter_phone_number,
+                
+        if reporter_phone_number:
+            send_sms('INITIATOR_FEEDBACK_DETAILS', reporter_phone_number,
                  feedback_obj)
 
     if data['comments']:
@@ -426,11 +428,12 @@ def modify_feedback(feedback_obj, data, user, host):
                     
         context = create_context('TICKET_RESOLVED_DETAIL_TO_BAJAJ',
                                  feedback_obj)
-        mail.send_email_to_bajaj_after_issue_resolved(context)
+        mail.send_email_to_brand_after_issue_resolved(context)
         context = create_context('TICKET_RESOLVED_DETAIL_TO_MANAGER',
                                  feedback_obj)
         mail.send_email_to_manager_after_issue_resolved(context, servicedesk_obj_all[0])
-        send_sms('INITIATOR_FEEDBACK_STATUS', reporter_phone_number,
+        if reporter_phone_number:
+            send_sms('INITIATOR_FEEDBACK_STATUS', reporter_phone_number,
                  feedback_obj)
     
     if previous_status != feedback_obj.status:

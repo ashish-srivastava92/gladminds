@@ -31,6 +31,7 @@ from gladminds.core.core_utils.utils import dictfetchall
 from gladminds.core.managers.mail import get_email_template
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from django.forms.models import model_to_dict   
+from gladminds.core.model_fetcher import get_model
 
 logger = logging.getLogger('gladminds')
 
@@ -143,18 +144,29 @@ def validate_otp(user, otp, phone):
 def update_pass(otp, password):
     token_obj = models.OTPToken.objects.filter(token=otp)[0]
     user = token_obj.user.user
-    token_obj.delete()
-    user.set_password(password)
-    user.save()
-    return True
+    invalid_password = check_password(password)
+
+    if (invalid_password):
+        data = {'message':"password does not match the rules",'status':False}
+    else:    
+        user.set_password(str(password))
+        user.save(using=settings.BRAND)
+        user_obj =  get_model('UserProfile').objects.get(user=user)
+        user_obj.reset_password = True
+        user_obj.reset_date = datetime.datetime.now()
+        user_obj.save(using=settings.BRAND)
+        data = {'message': 'Password Changed successfully', 'status': True}
+        token_obj.delete()
+
+    return data
 
 
 def format_product_object(product_obj):
-    purchase_date = product_obj.purchase_date.strftime('%d/%m/%Y')
+    purchase_date = convert_utc_to_local_time(product_obj.purchase_date).strftime('%d/%m/%Y')
     return {'id': product_obj.customer_id,
             'phone': get_phone_number_format(str(product_obj.customer_phone_number)), 
             'name': product_obj.customer_name, 
-            'purchase_date': purchase_date,
+            'purchased': purchase_date,
             'vin': product_obj.product_id}
 
 def get_sa_list_for_login_dealer(user):
@@ -242,7 +254,7 @@ def create_purchase_feed_data(post_data, product_data, temp_customer_id):
     data = {}
     data['sap_customer_id'] = temp_customer_id
     product_purchase_date = format_date_string(post_data['purchase-date'])
-    data['product_purchase_date'] = product_purchase_date.replace(tzinfo=pytz.utc)  
+    data['product_purchase_date'] = product_purchase_date
     data['customer_phone_number'] = mobile_format(post_data['customer-phone'])
     data['customer_name'] = post_data['customer-name']
     data['engine'] = product_data.engine
@@ -367,7 +379,7 @@ def set_wait_time(feedback_data):
     wait = end_date - start_date
     wait_time = wait.total_seconds()
     previous_wait = feedback_data.wait_time
-    models.Feedback.objects.filter(id = feedback_data.id).update(wait_time = wait_time+previous_wait)
+    get_model('Feedback').objects.filter(id = feedback_data.id).update(wait_time = wait_time+previous_wait)
 
 
 def services_search_details(data):

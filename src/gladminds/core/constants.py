@@ -162,7 +162,7 @@ FORM_STATUS_CHOICES = (
                        ('Incomplete', 'Incomplete'),
                        )
 
-FEED_TYPES = ['Dispatch Feed', 'Purchase Feed', 'Credit Note Feed', 'CDMS Feed', 'Old Fsc Feed', 'ContainerTracker Feed']
+FEED_TYPES = ['Dispatch Feed', 'Purchase Feed', 'Credit Note Feed', 'CDMS Feed', 'Old Fsc Feed', 'ContainerTracker Feed', 'Manufacture data Feed']
 
 STATUS_TO_NOTIFY = ['Approved', 'Rejected', 'Accepted', 'Shipped', 'Delivered']
 
@@ -232,7 +232,10 @@ class TicketStatus():
     RESOLVED = 'Resolved'
     PENDING = 'Pending'
 
-WELCOME_KIT_MECHANIC_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'last_name', 'phone_number', 'date_of_birth', 'address_line_1', 'address_line_2', 'address_line_3', 'address_line_4', 'address_line_5', 'address_line_6','shop_name', 'shop_address', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url',]
+DOWNLOAD_MECHANIC_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'last_name', 'phone_number', 'date_of_birth', 'address_line_1', 'address_line_2', 'address_line_3', 'address_line_4', 'address_line_5', 'address_line_6','shop_number', 'shop_name', 'shop_address', 'district', 'state', 'pincode', 'registered_by_distributor', 'image_url',]
+DOWNLOAD_WELCOME_KIT_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'last_name', 'phone_number', 'delivery_address', 'district', 'state', 'pincode', 'image_url']
+DOWNLOAD_REDEMPTION_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'last_name', 'phone_number', 'delivery_address', 'district', 'state', 'pincode', 'product']
+
 
 LOYALTY_ACCESS = {
                 'query_field' : {
@@ -267,3 +270,15 @@ CONSIGNMENT_STATUS = (
     )
 
 KTM_VIN ='VBK'
+SBOM_STATUS = (('Reject', 'Reject'),
+               ('Publish', 'Publish'))
+
+SERVICE_STATUS = (('Pending', 'Pending'),
+                  ('Confirmed', 'Confirmed'),
+                  ('Completed', 'Completed'),
+                  ('Cancelled', 'Cancelled'))
+
+WORKFLOW_STATUS = (
+        ('Open', 'Open'),
+        ('Completed', 'Completed')
+    )

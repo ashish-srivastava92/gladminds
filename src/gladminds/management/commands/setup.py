@@ -12,8 +12,10 @@ from gladminds.core.model_fetcher import get_model
 from gladminds.management.commands.load_state import Command as state_cmd
 from gladminds.management.commands.load_mech_data import Command as mech_cmd
 from gladminds.management.commands.load_part_data import Command as part_cmd
-from gladminds.management.commands.load_area_service_manager_data import Command as asm_cmd
-from gladminds.bajaj.models import ZonalServiceManager
+from gladminds.management.commands.load_asc_with_asm import Command as asm_cmd
+from gladminds.management.commands.load_sbom_data import Command as sbom_cmd
+from gladminds.management.commands.load_asm_with_rm import Command as sm_cmd
+
 
 _DEMO = GmApps.DEMO
 _BAJAJ = GmApps.BAJAJ
@@ -21,6 +23,7 @@ _AFTERBUY = GmApps.AFTERBUY
 _GM = GmApps.GM
 _BAJAJCV = GmApps.BAJAJCV
 _DAIMLER = GmApps.DAIMLER
+_PROBIKING = GmApps.PROBIKING
 
 _ALL_APPS = ALL_APPS
 
@@ -59,6 +62,7 @@ class Command(BaseCommand):
         call_command('syncdb', database=_AFTERBUY, interactive=False)
         call_command('syncdb', database=_BAJAJCV, interactive=False)
         call_command('syncdb', database=_DAIMLER, interactive=False)
+        call_command('syncdb', database=_PROBIKING, interactive=False)
         call_command('syncdb', interactive=False)
         self.define_groups()
         self.upload_state()
@@ -67,14 +71,17 @@ class Command(BaseCommand):
         self.create_admin(_GM)
         self.create_admin(_BAJAJCV)
         self.create_admin(_DAIMLER)
+        self.create_admin(_PROBIKING)
         self.create_afterbuy_admins()
-        self.create_territory_state()
+        self.create_territory()
         self.create_loyalty_admins()
         self.set_afterbuy_permissions()
-        if settings.ENV not in ['qa', 'prod', 'staging']:
-            self.upload_loyalty_user()
-            self.upload_asm_user()
-            self.upload_part_data()
+#         if settings.ENV not in ['prod', 'staging', 'qa']:
+#             self.upload_loyalty_user()
+#             self.upload_asm_user()
+#             self.upload_part_data()
+#             self.upload_sbom_data()
+#             self.upload_asm_with_rm()
         for brand in ALL_BRANDS:
             self.set_brand_permissions(brand)
             
@@ -92,7 +99,7 @@ class Command(BaseCommand):
         for group in AFTERBUY_GROUPS:
             self.add_group(GmApps.AFTERBUY, group)
 
-        for app in [GmApps.BAJAJ, GmApps.DEMO, GmApps.GM, GmApps.DAIMLER, GmApps.BAJAJCV]:
+        for app in [GmApps.BAJAJ, GmApps.DEMO, GmApps.GM, GmApps.DAIMLER, GmApps.BAJAJCV, GmApps.PROBIKING]:
             for group in OTHER_GROUPS:
                 self.add_group(app, group)
 
@@ -128,14 +135,14 @@ class Command(BaseCommand):
         for details in _AFTERBUY_SUPERADMINS:
             self.create_consumer(details, Roles.SUPERADMINS)
             
-    def create_territory_state(self):
-       from gladminds.core.models import Territory, State
-       for territory in _BAJAJ_LOYALTY_TERRITORY:
-           try:
-               territory_obj = Territory.objects.using(GmApps.BAJAJCV).get(territory=territory)
-           except:
-               territory_obj = Territory(territory=territory)
-               territory_obj.save(using=GmApps.BAJAJCV)
+    def create_territory(self):
+        from gladminds.core.models import Territory
+        for territory in _BAJAJ_LOYALTY_TERRITORY:
+            try:
+                territory_obj = Territory.objects.using(GmApps.BAJAJCV).get(territory=territory)
+            except:
+                territory_obj = Territory(territory=territory)
+                territory_obj.save(using=GmApps.BAJAJCV)
         
     
     @atomic
@@ -250,6 +257,23 @@ class Command(BaseCommand):
             asm_data.handle()
         except Exception as ex:
             print "[upload_asm_user]: ", ex
+    
+    def upload_asm_with_rm(self):
+        ''' Upload asm with rm data'''
+        try:
+            asm_data = sm_cmd()
+            asm_data.handle()
+        except Exception as ex:
+            print "[Upload sales manager ]:", ex
+    def upload_sbom_data(self):
+        '''
+        Uploads distributor and mechanic data
+        '''
+        try:
+            sbom_data = sbom_cmd()
+            sbom_data.handle()
+        except Exception as ex:
+            print "[upload_sbom_data]: ", ex
 
     def upload_part_data(self):
         '''

@@ -14,6 +14,7 @@ class Command(BaseCommand):
         self.upload_mech_data()
     
     def upload_dist_data(self):
+        '''Upload data of the distributors'''
         print "Started uploading distributor..."
         file_list = ['DIST_DATA.csv']
         dealer_list = []
@@ -22,7 +23,7 @@ class Command(BaseCommand):
         user_profile = get_model('UserProfile', APP)
 
         for i in range(0, 1):
-            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+            with open(settings.PROJECT_DIR + '/upload_data/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:
@@ -69,6 +70,7 @@ class Command(BaseCommand):
             return int(value)
 
     def upload_mech_data(self):
+        '''Upload data of the mechanic'''
         print "Started uploading mech data..."
         file_list = ['MECHANIC_DATA.csv']
         mech_list = []
@@ -78,7 +80,7 @@ class Command(BaseCommand):
         mech = get_model('Member', APP)
         State = get_model('State', APP)
         for i in range(0, 1):
-            with open(settings.PROJECT_DIR + '/' + file_list[i], 'r') as csvfile:
+            with open(settings.PROJECT_DIR + '/upload_data/' + file_list[i], 'r') as csvfile:
                 spamreader = csv.reader(csvfile, delimiter=',')
                 next(spamreader)
                 for row_list in spamreader:

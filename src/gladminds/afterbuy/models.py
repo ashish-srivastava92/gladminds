@@ -1,16 +1,22 @@
-from uuid import uuid4
 import datetime
-from django.db import models
-from django.contrib.auth.models import User
+from uuid import uuid4
+
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.db import models
 from django.utils.translation import gettext as _
-from gladminds.core import base_models
-from gladminds.core.constants import GENDER_CHOICES, SIZE_CHOICES, FUEL_CHOICES
-from gladminds.core.model_helpers import PhoneField
-from gladminds.core.auth_helper import GmApps
+
 from gladminds.afterbuy.managers.email_token_manager import EmailTokenManager
-from gladminds.core.managers.mail import send_email_activation,\
+from gladminds.core import base_models
+from gladminds.core.auth_helper import GmApps
+from gladminds.core.constants import GENDER_CHOICES, SIZE_CHOICES, FUEL_CHOICES,\
+    SERVICE_STATUS
+from gladminds.core.managers.mail import send_email_activation, \
     sent_password_reset_link
+from gladminds.core.model_helpers import PhoneField, set_afterbuy_consumer_image, \
+    validate_image, set_afterbuy_user_product_image
+from gladminds.afterbuy.managers import user_manager
+
 
 try:
     from django.utils.timezone import now as datetime_now
@@ -34,6 +40,8 @@ class Brand(base_models.Brand):
         app_label = _APP_NAME
         verbose_name_plural = "Brands"
 
+    def __unicode__(self):
+        return self.name
 
 class BrandProductCategory(base_models.BrandProductCategory):
     brand = models.ForeignKey(Brand)
@@ -44,19 +52,22 @@ class BrandProductCategory(base_models.BrandProductCategory):
 
 
 class ProductType(base_models.ProductType):
+    brand = models.ForeignKey(Brand)
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Product Types"
 
-
+    def __unicode__(self):
+        return self.product_type
+    
 class Consumer(base_models.BaseModel):
-    user = models.OneToOneField(User, primary_key=True)
-    consumer_id = models.CharField(
-        max_length=50, unique=True, default=uuid4)
-    phone_number = PhoneField(unique=True)
-    image_url = models.CharField(
-                   max_length=200, default=settings.DEFAULT_IMAGE_ID)
+    user = models.OneToOneField(User, primary_key=True, related_name='afterbuy_consumer')
+    consumer_id = models.CharField(max_length=50, unique=True, default=uuid4)
+    phone_number = PhoneField()
+    image_url = models.FileField(upload_to=set_afterbuy_consumer_image,
+                              max_length=255, null=True, blank=True,
+                              validators=[validate_image])
     address = models.TextField(blank=True, null=True)
     state = models.CharField(max_length=255, null=True, blank=True)
     country = models.CharField(max_length=255, null=True, blank=True)
@@ -69,6 +80,15 @@ class Consumer(base_models.BaseModel):
     tshirt_size = models.CharField(max_length=2, choices=SIZE_CHOICES,
                                    blank=True, null=True)
     is_email_verified = models.BooleanField(default=False)
+    is_phone_verified = models.BooleanField(default=False)
+    has_discrepancy = models.BooleanField(default=False)
+    last_sync_date = models.DateTimeField(null=True, blank=True) 
+    objects = user_manager.ConsumerManager()
+    
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'Consumer Image'
+    image_tag.allow_tags = True
 
     class Meta:
         app_label = _APP_NAME
@@ -80,20 +100,35 @@ class Consumer(base_models.BaseModel):
 
 class UserProduct(base_models.BaseModel):
     consumer = models.ForeignKey(Consumer)
-    brand = models.ForeignKey(Brand)
-    nick_name = models.CharField(max_length=100, default="")
+    nick_name = models.CharField(max_length=100, null=True, blank=True)
     product_type = models.ForeignKey(ProductType)
     purchase_date = models.DateTimeField(null=True, blank=True)
     brand_product_id = models.CharField(max_length=100, null=True, blank=True)
-    image_url = models.CharField(
-                   max_length=200, blank=True, null=True)
-    color = models.CharField(max_length=50)
+    image_url = models.FileField(upload_to=set_afterbuy_user_product_image,
+                              max_length=255, null=True, blank=True,
+                              validators=[validate_image])
+
+    color = models.CharField(max_length=50, null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
     description = models.TextField(null=True, blank=True)
+    is_accepted = models.BooleanField(default=False)
+    service_reminder = models.IntegerField(blank=True, null=True)
+    details_completed = models.IntegerField(blank=True, null=True)
+    manual_link = models.CharField(max_length=512, blank=True, null=True)
+    warranty_year = models.DateTimeField(null=True, blank=True)
+    insurance_year = models.DateTimeField(null=True, blank=True)
+    
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+    image_tag.short_description = 'User Product Image'
+    image_tag.allow_tags = True
 
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "User Products"
+    
+    def __unicode__(self):
+        return self.brand_product_id
 
 
 class ProductSupport(base_models.BaseModel):
@@ -217,6 +252,33 @@ class Support (base_models.BaseModel):
         app_label = _APP_NAME
         verbose_name_plural = "support"
 
+class ProductSpecification(base_models.BaseModel):
+    product_type = models.ForeignKey(ProductType)
+    key = models.CharField(max_length=255, null=True, blank=True)
+    value = models.CharField(max_length=255, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Product Specifications"
+        
+class ProductFeature(base_models.BaseModel):
+    description = models.CharField(max_length=512, null=True, blank=True)
+    product_type = models.ForeignKey(ProductType)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Product Features"
+        
+class RecommendedPart(base_models.BaseModel):
+    product_type = models.ManyToManyField(ProductType)
+    part_id = models.CharField(max_length=30, null=True, blank=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    material = models.CharField(max_length=255, null=True, blank=True)
+    price = models.CharField(max_length=255, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Recommended Parts"
 
 class OTPToken(base_models.OTPToken):
     user = models.ForeignKey(Consumer, blank=True, null=True)
@@ -247,11 +309,15 @@ class UserMobileInfo(base_models.BaseModel):
     operating_system = models.CharField(max_length=50, null=True, blank=True)
     version = models.CharField(max_length=50, null=True, blank=True)
     model = models.CharField(max_length=50, null=True, blank=True)
-
+    brand = models.CharField(max_length=50, null=True, blank=True)
+    total_memory = models.FloatField(null=True, blank=True)
+    available_memory = models.FloatField(null=True, blank=True)
+    mac_address = models.CharField(max_length=100, null=True, blank=True)
+    network_provider = models.CharField(max_length=100, null=True, blank=True)
+    
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Mobile Details"
-
 
 class UserPreference(base_models.UserPreference):
     consumer = models.ForeignKey(Consumer)
@@ -359,6 +425,12 @@ class AuditLog(base_models.AuditLog):
     class Meta:
         app_label = _APP_NAME
         verbose_name_plural = "Audit Log"
+        
+class Constant(base_models.Constant):
+    ''' contains all the constants'''
+    class Meta():
+        app_label = _APP_NAME
+        verbose_name_plural = 'Constants'
 
 
 class EmailToken(models.Model):
@@ -445,3 +517,38 @@ class EmailToken(models.Model):
         else:
             send_email_activation(receiver_email, data=ctx_dict,
                                   brand=GmApps.AFTERBUY)
+
+class ServiceCenterLocation(base_models.BaseModel):
+    brand = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, null=True, blank=True)
+    phone_number = PhoneField(null=True, blank=True)
+    address = models.TextField(blank=True, null=True)
+    state = models.CharField(max_length=255, null=True, blank=True)
+    country = models.CharField(max_length=255, null=True, blank=True)
+    pincode = models.CharField(max_length=15, null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Service Center Locations"
+    
+    def __unicode__(self):
+        return self.name
+
+class ServiceHistory(base_models.BaseModel):
+    service_center_location = models.ForeignKey(ServiceCenterLocation, null=True, blank=True)
+    consumer = models.ForeignKey(Consumer, null=True, blank=True)
+    asc_id = models.CharField(max_length=50, null=True, blank=True)
+    product_id = models.CharField(max_length=50, null=True, blank=True)
+    service_date = models.DateTimeField(null=True, blank=True)
+    actual_service_date = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=50, choices=SERVICE_STATUS, default='Pending')
+    comments = models.CharField(max_length=512, null=True, blank=True)
+    
+    class Meta:
+        app_label = _APP_NAME
+        verbose_name_plural = "Service History"
+        
+    def __unicode__(self):
+        return self.asc_id

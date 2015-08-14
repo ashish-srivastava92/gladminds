@@ -8,7 +8,7 @@ logger = logging.getLogger('gladminds')
 client = Client()
 
 
-class TestSQSTasks(base_integration.BrandResourceTestCase):
+class SQSTaskTest(base_integration.BrandResourceTestCase):
 
     def setUp(self):
         pass
@@ -41,6 +41,7 @@ class TestSQSTasks(base_integration.BrandResourceTestCase):
         data = {
             "task_name": "send_on_product_purchase",
             "params": {
+                "brand": "bajaj",
                 "phone_number": "9845350297",
                 "message": "Dear testuser, Congrats on your purchase of Bajaj bike. Your customer id is 23232. Refer this id during servicing."
             }

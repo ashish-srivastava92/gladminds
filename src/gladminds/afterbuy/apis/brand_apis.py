@@ -1,4 +1,4 @@
-from tastypie.authorization import DjangoAuthorization
+from tastypie.authorization import DjangoAuthorization, Authorization
 from tastypie import fields
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
 
@@ -11,8 +11,8 @@ class IndustryResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.Industry.objects.all()
         resource_name = 'industries'
-        authorization = DjangoAuthorization()
         authentication = AccessTokenAuthentication()
+        authorization = Authorization()
         always_return_data = True
         filtering = {
                      "name": ALL
@@ -25,7 +25,7 @@ class BrandResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.Brand.objects.all()
         resource_name = "brands"
-        authorization = DjangoAuthorization()
+        authorization = Authorization()
         authentication = AccessTokenAuthentication()
         always_return_data = True
         filtering = {
@@ -40,6 +40,6 @@ class BrandProductCategoryResource(CustomBaseModelResource):
     class Meta:
         queryset = afterbuy_models.BrandProductCategory.objects.all()
         resource_name = "brand-categories"
-        authorization = DjangoAuthorization()
+        authorization = Authorization()
         authentication = AccessTokenAuthentication()
         always_return_data = True

@@ -61,23 +61,31 @@ class GmModelAdmin(ModelAdmin):
     def get_mechanic_name(self, obj):
         return obj.member.first_name
 
-    def get_transporter_name(self, obj):
+    def get_transporter_username(self, obj):
         return obj.user.user.username
     
-    def get_supervisor_name(self, obj):
-        return obj.user.user.username
-
-    def get_supervisor_first_name(self, obj):
+    def get_transporter_name(self, obj):
         return obj.user.user.first_name
     
-    def get_supervisor_last_name(self, obj):
-        return obj.user.user.last_name
+    def get_supervisor_username(self, obj):
+        return obj.user.user.username
 
+    def get_supervisor_name(self, obj):
+        return obj.user.user.first_name
+        
     def get_mechanic_pincode(self, obj):
         return obj.member.pincode
 
     def get_mechanic_district(self, obj):
         return obj.member.district
+    
+    def get_asm(self, obj):
+        asm_obj = models.AreaSparesManager.objects.filter(state=obj.member.state)
+        if asm_obj:
+            asm_list = []
+            for asm in asm_obj:
+                asm_list.append(str(asm.name))
+        return asm_list
 
     def get_mechanic_state(self, obj):
         return obj.member.state.state_name
@@ -85,20 +93,23 @@ class GmModelAdmin(ModelAdmin):
     def get_transporter(self, obj):
         return obj.transporter.transporter_id
     
+    def get_indent_status(self, obj):
+        return obj.zib_indent_num.status
+    
+    get_indent_status.short_description = 'Status'
     get_mechanic_id.short_description = 'Mechanic ID'
     get_mechanic_name.short_description = 'Name'
     get_mechanic_pincode.short_description = 'PIN code'
     get_mechanic_district.short_description = 'City'
     get_mechanic_state.short_description = 'State'
+    get_transporter_username.short_description = 'Username'
     get_transporter_name.short_description = 'Name'
-    get_supervisor_first_name.short_description = 'First Name'
-    get_supervisor_last_name.short_description = 'Last Name'
-    get_supervisor_name.short_description = 'Username'
+    get_supervisor_username.short_description = 'Username'
+    get_supervisor_name.short_description = 'Name'
     get_transporter.short_description = 'Transporter ID'
+    get_asm.short_description = "ASM "
     
     def get_part_description(self, obj):
         return obj.part_number.description
-    
-    
-    
+
     get_part_description.short_description = 'Description'

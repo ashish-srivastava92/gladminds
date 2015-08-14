@@ -1,26 +1,20 @@
 from datetime import datetime, timedelta, date
 import json
 import logging
-
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.db.models.aggregates import Count, Sum
 from django.http.response import HttpResponse
-from django.core.serializers.json import DjangoJSONEncoder
-
 from tastypie.utils.urls import trailing_slash
 from tastypie import fields,http
 from tastypie.http import HttpBadRequest
-from tastypie.authentication import MultiAuthentication
 from tastypie.authorization import Authorization
 from tastypie.authorization import DjangoAuthorization
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
-
 from gladminds.core import constants
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-
 from gladminds.core.apis.authorization import MultiAuthorization,\
     LoyaltyCustomAuthorization,\
      ZSMCustomAuthorization, DealerCustomAuthorization
@@ -30,22 +24,24 @@ from gladminds.core.auth.access_token_handler import create_access_token, \
 from gladminds.core.auth_helper import Roles
 from gladminds.core.managers.user_manager import RegisterUser
 from gladminds.core.model_fetcher import models
-
 from gladminds.sqs_tasks import send_otp
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.auth import otp_handler
 from django.contrib.sites.models import RequestSite
 from gladminds.core.model_helpers import format_phone_number
 from tastypie.exceptions import ImmediateHttpResponse
-from gladminds.core.managers.mail import send_reset_link_email
-from gladminds.core.utils import get_sql_data
+from gladminds.core.utils import check_password
 from gladminds.afterbuy import utils as core_utils
+from gladminds.core.model_fetcher import get_model
 
 logger = logging.getLogger('gladminds')
 
 register_user = RegisterUser()
 
 class UserResource(CustomBaseModelResource):
+    '''
+    Auth user resource
+    '''
     class Meta:
         queryset = User.objects.all()
         resource_name = 'users'
@@ -53,7 +49,7 @@ class UserResource(CustomBaseModelResource):
         authorization = Authorization()
 #         authentication = AccessTokenAuthentication()
 #         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         filtering = {
                      "is_active": ALL,
                      "username" : ALL,
@@ -64,6 +60,9 @@ class UserResource(CustomBaseModelResource):
         ordering = ['username', 'email']
 
 class UserProfileResource(CustomBaseModelResource):
+    '''
+    Extended user profile resource
+    '''
     user = fields.ForeignKey(UserResource, 'user', null=True, blank=True, full=True)
 
     class Meta:
@@ -72,7 +71,7 @@ class UserProfileResource(CustomBaseModelResource):
         authorization = Authorization()
 #         authorization = MultiAuthorization(DjangoAuthorization())
 #         authentication = AccessTokenAuthentication()
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         filtering = {
                      "user":  ALL_WITH_RELATIONS,
                      "phone_number": ALL,
@@ -114,10 +113,53 @@ class UserProfileResource(CustomBaseModelResource):
                 self.wrap_view('validate_otp'), name="validate_otp"),
             url(r"^(?P<resource_name>%s)/logout%s" % (self._meta.resource_name,
                                                       trailing_slash()),
-                self.wrap_view('logout'), name="logout")
+                self.wrap_view('logout'), name="logout"),
+            url(r"^(?P<resource_name>%s)/change-password%s" % 
+                (self._meta.resource_name, trailing_slash()), self.wrap_view
+                ('change_password'), name="change_password"),
+            url(r"^(?P<resource_name>%s)/reset-password%s" % 
+                (self._meta.resource_name, trailing_slash()), self.wrap_view
+                ('reset_password'), name="reset_password"),
+
         ]
     
+    def reset_password(self, request, **kwargs):
+        '''
+           The function resets the function of a user.
+           params:
+              oldPassword: earlier password
+              newPassword : new password
+        '''        
+        try:
+            new_password = request.POST['newPassword']
+            old_password = request.POST['oldPassword'] 
+            user = User.objects.get(username=request.user)
+            check_pass = user.check_password(str(old_password))
+            if check_pass:
+                invalid_password = check_password(new_password)
+                if (invalid_password):
+                    data = {'message':"password does not match the rules",'status':False}
+                else:    
+                    user.set_password(str(new_password))
+                    user.save(using=settings.BRAND)
+                    user_obj =  get_model('UserProfile').objects.get(user=user)
+                    user_obj.reset_password = True
+                    user_obj.reset_date = datetime.now()
+                    user_obj.save(using=settings.BRAND)
+                    data = {'message': 'Password Changed successfully', 'status': True}
+            else:
+                data = {'message': 'Old password wrong', 'status': False}
+            return HttpResponse(json.dumps(data), content_type='application/json')
+        except Exception as ex:
+            logger.error('Exception while changing password {0}'.format(ex))
+        return HttpBadRequest()
+    
     def sent_otp_user_phone_number(self, request, **kwargs):
+        '''
+           Send OTP to a registered number
+           params:
+               phone_number: the number to send OTP
+        '''
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
         try:
@@ -140,6 +182,9 @@ class UserProfileResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def activate_email(self, request, **kwargs):
+        '''
+           verify and email based on the activation key
+        '''
         activation_key = request.GET['activation_key']
         activated_user = models.EmailToken.objects.activate_user(activation_key)
         if activated_user:
@@ -149,6 +194,12 @@ class UserProfileResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def validate_user_phone_number(self,phone_number, otp):
+        '''
+           Validate OTP of a phone number
+           params:
+               phone_number: number to validate
+               otp: token to validate
+        '''
         if not otp and not phone_number :
             return HttpBadRequest("otp and phone_number required")
         try:
@@ -161,6 +212,11 @@ class UserProfileResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def authenticate_user_email_id(self, request, **kwargs):
+        '''
+           Authenticates if an email belongs to a valid user
+           params:
+               email: email id to be authenticated
+        '''
         try:
             load = json.loads(request.body)
         except:
@@ -170,7 +226,7 @@ class UserProfileResource(CustomBaseModelResource):
         if not email_id:
             return HttpBadRequest("email id is required")
         try:
-            models.UserProfile.objects.get(user__email=email_id, is_email_verified=True)
+            models.UserProfile.objects.get(user__email=email_id)
             data = {'status': 1, 'message': "email id verified"}
             return HttpResponse(json.dumps(data), content_type="application/json")
         except Exception as ex:
@@ -180,13 +236,19 @@ class UserProfileResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def authenticate_user_send_otp(self, request, **kwargs):
+        '''
+           Authenticates if a user by sending OTP
+           params:
+               email: email id to be authenticated
+               phone_number: phone number to be authenticated
+        '''
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
         try:
             load = json.loads(request.body)
         except:
             return HttpResponse(content_type="application/json", status=404)
-        email = load.get('email_id')
+        email = load.get('email')
         phone_number = load.get('phone_number')
         if not phone_number and not email:
             return HttpBadRequest("phone_number or email is required")
@@ -197,28 +259,35 @@ class UserProfileResource(CustomBaseModelResource):
                 user_obj = models.UserProfile.objects.get(phone_number=phone_number).user
                 otp = otp_handler.get_otp(user=user_obj)
                 message = core_utils.get_template('SEND_OTP').format(otp)
-                send_job_to_queue('send_otp', {'phone_number': phone_number,
-                                             'message': message, "sms_client": settings.SMS_CLIENT})
+                
+                send_job_to_queue(send_otp, {'phone_number': phone_number,
+                                             'message': message, "sms_client": settings.SMS_CLIENT},
+                                  brand=settings.BRAND)
                 logger.info('OTP sent to mobile {0}'.format(phone_number))
                 data = {'status': 1, 'message': "OTP sent_successfully"}
                 #Send email if email address exist
             if email:
                 try:
-                    user_obj = models.UserProfile.objects.get(user__email=email, is_email_verified=True)
+                    user_obj = models.UserProfile.objects.get(user__email=email)
                     site = RequestSite(request)
-                    models.EmailToken.objects.create_email_token(user_obj, email, site, trigger_mail='forgot-password')
+                    get_model('EmailToken').objects.create_email_token(user_obj, email, site, trigger_mail='forgot-password')
                     data = {'status': 1, 'message': "Password reset link sent successfully"}
                     return HttpResponse(json.dumps(data), content_type="application/json")
                 except Exception as ex:
-                        log_message = "new user :{0}".format(ex)
-                        logger.info(log_message)
-                        data = {'status': 0, 'message': "Either your email is not verified or its not exist"}
+                    log_message = "Send email for forgot password :{0}".format(ex)
+                    logger.info(log_message)
+                    data = {'status': 0, 'message': "Either your email is not verified or its not exist"}
         except Exception as ex:
             logger.error('Invalid details, mobile {0} and exception {1}'.format(request.POST.get('phone_number', ''),ex))
             data = {'status': 0, 'message': "inavlid phone_number/email_id"}
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def generate_reset_link(self,request, **kwargs):
+        '''
+           Generate password reset link on forgot password
+           params:
+               email: email id to send the link
+        '''
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
         try:
@@ -227,7 +296,7 @@ class UserProfileResource(CustomBaseModelResource):
             return HttpResponse(content_type="application/json", status=404)
         email = load.get('email')
         try:
-            user_obj = models.UserProfile.objects.get(user__email=email, is_email_verified=True)
+            user_obj = models.UserProfile.objects.get(user__email=email)
         except Exception as ex:
             return HttpBadRequest("Either your email is not verified or its not exist")
         site = RequestSite(request)
@@ -237,6 +306,12 @@ class UserProfileResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def change_user_password(self, request, **kwargs):
+        '''
+           Change password of a user
+           params:
+              password1: new password
+              password2 : retyped password
+        '''
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
         try:
@@ -250,8 +325,9 @@ class UserProfileResource(CustomBaseModelResource):
         if password != repassword:
             return HttpBadRequest("password1 and password2 not matched")
         try:
-            user_obj = models.UserProfile.objects.get(user__email=email, is_email_verified=True)
-        except Exception:
+            user_obj = models.UserProfile.objects.get(user__email=email)
+        except Exception as ex:
+            logger.info("[Exception while changing password]:{0}".format(ex))
             raise ImmediateHttpResponse(
                 response=http.HttpBadRequest('invalid authentication key!'))
         user_details['email'] = user_obj.user.email
@@ -260,8 +336,55 @@ class UserProfileResource(CustomBaseModelResource):
         user.save()
         data = {'status': 1, 'message': "password updated successfully"}
         return HttpResponse(json.dumps(data), content_type="application/json")
+    
+    def change_password(self, request, **kwargs):
+        '''
+           Change password of a user
+           params:
+              old_password: earlier password
+              new_password : new password
+              confirm_password : retyped new password
+        '''
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        email = load.get('email_id')
+        old_password = load.get('old_password')
+        password = load.get('new_password')
+        repassword = load.get('confirm_password')
+
+        user_details = {}
+        try:
+            user_obj = models.UserProfile.objects.get(user__email=email)
+            user_auth = authenticate(username=str(user_obj.user.username),
+                            password=old_password)
+            if not user_auth:
+                data = {"status":0, "message" : "Old password is wrong"}
+            else:
+                if password != repassword:
+                    return HttpBadRequest("Passwords do not match")
+                user_details['email'] = user_obj.user.email
+                user = User.objects.filter(**user_details)[0]
+                user.set_password(password)
+                user.save()
+                data = {'status': 1, 'message': "password updated successfully"}
+        except Exception as ex:
+            logger.info("[Exception while changing password]:{0}".format(ex))
+            raise ImmediateHttpResponse(
+                response=http.HttpBadRequest('invalid authentication key!'))
+        return HttpResponse(json.dumps(data), content_type="application/json")
 
     def login(self, request, **kwargs):
+        '''
+           Logs in valid users and generates access token
+           params:
+               email: registered email ID
+               username: registered mobile number
+               password: valid password
+        '''
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
         try:
@@ -274,34 +397,42 @@ class UserProfileResource(CustomBaseModelResource):
         password = load.get('password')
         if not phone_number and not email_id and not username:
             return HttpBadRequest("phone_number/email/username required.")
-        if phone_number:
-            user_obj = models.UserProfile.objects.get(phone_number
-                                             =phone_number,is_phone_verified=True).user
-        elif email_id:
-            user_obj = models.UserProfile.objects.using(settings.BRAND).get(user__email=
-                                                                  email_id,is_email_verified=True).user
-        elif username:
-            user_obj = User.objects.using(settings.BRAND).get(username=
-                                                                  username)
-
-        http_host = request.META.get('HTTP_HOST', 'localhost')
-        user_auth = authenticate(username=str(user_obj.username),
-                            password=password)
-
-        if user_auth is not None:
-            access_token = create_access_token(user_auth, http_host)
-            user_groups = []
-            if user_auth.is_active:
-                for group in user_auth.groups.values():
-                    user_groups.append(group['name'])
-                login(request, user_auth)
-                data = {'status': 1, 'message': "login successfully",
-                        'access_token': access_token, "user_id": user_auth.id, "user_groups" : user_groups}
-        else:
-            data = {'status': 0, 'message': "login unsuccessful"}
+        try:
+            if phone_number:
+                user_obj = models.UserProfile.objects.get(phone_number
+                                                 =phone_number,is_phone_verified=True).user
+            elif email_id:
+                user_obj = models.UserProfile.objects.using(settings.BRAND).get(user__email=
+                                                                      email_id,is_email_verified=True).user
+            elif username:
+                user_obj = User.objects.using(settings.BRAND).get(username=
+                                                                      username)
+    
+            http_host = request.META.get('HTTP_HOST', 'localhost')
+            user_auth = authenticate(username=str(user_obj.username),
+                                password=password)
+    
+            if user_auth is not None:
+                access_token = create_access_token(user_auth, http_host)
+                user_groups = []
+                if user_auth.is_active:
+                    for group in user_auth.groups.values():
+                        user_groups.append(group['name'])
+                    login(request, user_auth)
+                    data = {'status': 1, 'message': "login successfully",
+                            'access_token': access_token, "user_id": user_auth.id, "user_groups" : user_groups}
+            else:
+                data = {'status': 0, 'message': "login unsuccessful"}
+        except Exception as ex:
+            logger.error(ex)
+            data = {'status': 0, 'message': "user is not registered"}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
     def logout(self, request, **kwargs):
+        '''
+           logs out the logged in user and
+           delete the access token
+        '''
         access_token = request.GET.get('access_token')
         try:
             delete_access_token(access_token)
@@ -313,6 +444,9 @@ class UserProfileResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
 
 class ZonalServiceManagerResource(CustomBaseModelResource):
+    '''
+       Zonal service manager resource
+    '''
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
 
     class Meta:
@@ -320,7 +454,7 @@ class ZonalServiceManagerResource(CustomBaseModelResource):
         resource_name = "zonal-service-managers"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get', 'delete']
+        allowed_methods = ['get', 'delete']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "zsm_id": ALL,
@@ -337,6 +471,14 @@ class ZonalServiceManagerResource(CustomBaseModelResource):
     
     
     def register_zonal_service_manager(self, request, **kwargs):
+        '''
+           Register a new ZSM
+           params:
+               id: id of the ZSM
+               phone_number: number of the dealer
+               name: name of the dealer
+               regional-office: region under the asm
+        '''
         self.is_authenticated(request)
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
@@ -370,6 +512,14 @@ class ZonalServiceManagerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def update_zonal_service_manager(self, request, **kwargs):
+        '''
+           Update an existing ZSM
+           params:
+               zsm_id: id of the ZSM to be updated
+               phone_number: number of the dealer
+               name: name of the dealer
+               regional-office: region under the asm
+        '''
         self.is_authenticated(request)
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
@@ -400,6 +550,9 @@ class ZonalServiceManagerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
 
 class AreaServiceManagerResource(CustomBaseModelResource):
+    '''
+       Area service managers resource
+    '''
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
     zsm = fields.ForeignKey(ZonalServiceManagerResource, 'zsm')
 
@@ -408,7 +561,7 @@ class AreaServiceManagerResource(CustomBaseModelResource):
         resource_name = "area-service-managers"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization(), ZSMCustomAuthorization())
-        detail_allowed_methods = ['get', 'delete']
+        allowed_methods = ['get', 'delete']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "asm_id": ALL, 
@@ -427,6 +580,16 @@ class AreaServiceManagerResource(CustomBaseModelResource):
     
     
     def register_area_service_manager(self, request, **kwargs):
+        '''
+           Register a new asm
+           params:
+               id: ID of the ASM
+               email: email of the asm
+               phone_number: number of the dealer
+               name: name of the dealer
+               area: region under the asm
+               zsm_id: zsm under which asm belongs
+        '''
         self.is_authenticated(request)
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
@@ -463,6 +626,15 @@ class AreaServiceManagerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def update_area_service_manager(self, request, **kwargs):
+        '''
+           Update the details of an existing asm
+           params:
+               asm_id: ID of the asm to be updated
+               phone_number: number of the dealer
+               name: name of the dealer
+               area: region under the asm
+               zsm_id: zsm under which asm belongs
+        '''
         self.is_authenticated(request)
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
@@ -498,6 +670,9 @@ class AreaServiceManagerResource(CustomBaseModelResource):
 
 
 class DealerResource(CustomBaseModelResource):
+    '''
+       Dealers under a brand resource
+    '''
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
     asm = fields.ForeignKey(AreaServiceManagerResource, 'asm', full=True, null=True)
     
@@ -506,7 +681,7 @@ class DealerResource(CustomBaseModelResource):
         resource_name = "dealers"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization(), DealerCustomAuthorization())
-        detail_allowed_methods = ['get', 'post', 'delete']
+        allowed_methods = ['get', 'post']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "dealer_id": ALL,
@@ -527,6 +702,15 @@ class DealerResource(CustomBaseModelResource):
     
     
     def register_dealer(self, request, **kwargs):
+        '''
+           Registers a new dealer.
+           params:
+               username: ID of the dealer
+               phone_number: number of the dealer
+               email: email ID of the dealer
+               name: name of the dealer
+               asm_id: asm under which dealer belongs
+        '''
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
                                 status=400)
@@ -558,29 +742,28 @@ class DealerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def get_active_dealer(self, request, **kwargs):
+        '''
+           Get the count of active dealers of the day
+        '''
         result = []
         active_today = models.Dealer.objects.filter(last_transaction_date__startswith=date.today()).count()
         today = {}
         today['count_on'] = 'Today'
         today['active'] = active_today
         result.append(today)
-        try:
-            load = request.GET
-        except Exception as ex:
-            return HttpResponse(content_type="application/json", status=404)
-        
-#         month = load.get('month', None)
-#         year = load.get('year', None)
-#         if month and year:
-#             actual = str(year) + "-" + str(month) + "%"
-#             active_count = get_sql_data("select count(*) as cnt from gm_dealer where last_transaction_date\
-#              like '%s' " %actual)
-# #             active_count = models.Dealer.objects.filter(last_transaction_date__year=year,
-# #                                                         last_transaction_date__month=month).count()
         return HttpResponse(content=json.dumps(result), 
                             content_type='application/json')
         
     def update_dealer(self, request, **kwargs):
+        '''
+           Update the details of an existing dealer
+           params:
+               dealer_id: ID of the dealer to be updated
+               phone_number: number of the dealer
+               email: email ID of the dealer
+               name: name of the dealer
+               asm_id: asm under which dealer belongs
+        '''
         self.is_authenticated(request)
         if request.method != 'POST':
             return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
@@ -589,7 +772,10 @@ class DealerResource(CustomBaseModelResource):
         try:
             dealer_obj = models.Dealer.objects.get(user__user__id=dealer_id)
             load = json.loads(request.body)
-            
+            asm = load.get('asm_id', None)
+            if asm:
+                asm = models.AreaServiceManager.objects.get(asm_id=asm)
+                dealer_obj.asm=asm
             dealer_profile = dealer_obj.user
             dealer_profile.phone_number = load.get('phone-number')
             
@@ -607,6 +793,9 @@ class DealerResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(data), content_type="application/json")
     
 class AuthorizedServiceCenterResource(CustomBaseModelResource):
+    '''
+       Authorized service centers who service the vehicles resource
+    '''
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
     dealer = fields.ForeignKey(DealerResource, 'dealer', null=True, blank=True, full=True)
 
@@ -615,7 +804,7 @@ class AuthorizedServiceCenterResource(CustomBaseModelResource):
         resource_name = "authorized-service-centers"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "asc_id": ALL,
@@ -625,6 +814,9 @@ class AuthorizedServiceCenterResource(CustomBaseModelResource):
 
 
 class ServiceAdvisorResource(CustomBaseModelResource):
+    '''
+       Service advisors who service the vehicles resource
+    '''
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
     dealer = fields.ForeignKey(DealerResource, 'dealer', null=True, blank=True, full=True)
     asc = fields.ForeignKey(AuthorizedServiceCenterResource, 'asc', null=True, blank=True, full=True)
@@ -634,7 +826,7 @@ class ServiceAdvisorResource(CustomBaseModelResource):
         resource_name = "service-advisors"
         authentication = AccessTokenAuthentication()
         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "dealer": ALL_WITH_RELATIONS,
@@ -644,12 +836,15 @@ class ServiceAdvisorResource(CustomBaseModelResource):
                      }
         always_return_data = True
 
-class TerritoryResource(CustomBaseModelResource):    
+class TerritoryResource(CustomBaseModelResource): 
+    '''
+       Territories under loyalty resource
+    '''   
     class Meta:
         queryset = models.Territory.objects.all()
         resource_name = "territories"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'put', 'delete']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "territory":ALL
@@ -657,24 +852,30 @@ class TerritoryResource(CustomBaseModelResource):
 
 
 class StateResource(CustomBaseModelResource):
+    '''
+       States under loyalty resource
+    '''
     territory = fields.ForeignKey(TerritoryResource, 'territory')
     class Meta:
         queryset = models.State.objects.all()
         resource_name = "states"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
-                     "state_name":ALL_WITH_RELATIONS, 
+                     "state_name":ALL, 
                      }
 
 class CityResource(CustomBaseModelResource):
+    '''
+       Cities under loyalty resource
+    '''
     state = fields.ForeignKey(StateResource, 'state')
     class Meta:
         queryset = models.City.objects.all()
         resource_name = "cities"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put', 'delete']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "city":ALL,
@@ -683,51 +884,74 @@ class CityResource(CustomBaseModelResource):
 
 
 class NationalSparesManagerResource(CustomBaseModelResource):
+    '''
+       National spares managers resource
+    '''
     class Meta:
         queryset = models.NationalSparesManager.objects.all()
         resource_name = "national-spares-managers"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        authentication = AccessTokenAuthentication()
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         
         
 class AreaSparesManagerResource(CustomBaseModelResource):
+    '''
+       Area spares managers resource
+    '''
     class Meta:
         queryset = models.AreaSparesManager.objects.all()
         resource_name = "area-spares-managers"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        authentication = AccessTokenAuthentication()
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         
 class PartnerResource(CustomBaseModelResource):
+    '''
+       Partners for loaylty redemption resource
+    '''
     class Meta:
         queryset = models.Partner.objects.all()
         resource_name = "partners"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        authentication = AccessTokenAuthentication()
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
 
 class DistributorResource(CustomBaseModelResource):
+    '''
+       Ditributors under loyalty resource
+    '''
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
     asm = fields.ForeignKey(AreaSparesManagerResource, 'asm', full=True)
     class Meta:
         queryset = models.Distributor.objects.all()
         resource_name = "distributors"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        authentication = AccessTokenAuthentication()
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
 
 class RetailerResource(CustomBaseModelResource):
+    '''
+       Spare part retailers resource
+    '''
     class Meta:
         queryset = models.Retailer.objects.all()
         resource_name = "retailers"
         authorization = Authorization()
-        detail_allowed_methods = ['get', 'post', 'put']
+        authentication = AccessTokenAuthentication()
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
 
 class MemberResource(CustomBaseModelResource):
+    '''
+       Members under loyalty resource
+    '''
     distributor = fields.ForeignKey(DistributorResource, 'registered_by_distributor', null=True, blank=True, full=True) 
     preferred_retailer = fields.ForeignKey(RetailerResource, 'preferred_retailer', null=True, blank=True, full=True)
     state = fields.ForeignKey(StateResource, 'state', full=True)
@@ -738,7 +962,7 @@ class MemberResource(CustomBaseModelResource):
         args = constants.LOYALTY_ACCESS
         authorization = MultiAuthorization(Authorization(), LoyaltyCustomAuthorization(query_field=args['query_field']))
         authentication = AccessTokenAuthentication()
-        detail_allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "state": ALL_WITH_RELATIONS,
@@ -770,6 +994,10 @@ class MemberResource(CustomBaseModelResource):
    
 
     def get_active_member(self, request, **kwargs):
+        '''
+           Get active member counts and
+           registered member count based on region
+        '''
         self.is_authenticated(request)
         args={}
         try:
@@ -802,6 +1030,10 @@ class MemberResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(member_report), content_type="application/json")
 
     def get_total_points(self, request, **kwargs):
+        '''
+           get total accumulated points
+           and redeemed points of the member
+        '''
         self.is_authenticated(request)
         args={}
         try:
@@ -830,11 +1062,14 @@ class MemberResource(CustomBaseModelResource):
         return HttpResponse(json.dumps(member_report), content_type="application/json")
 
 class BrandDepartmentResource(CustomBaseModelResource):
+    '''
+       Brand Department resource
+    '''
     class Meta:
         queryset = models.BrandDepartment.objects.all()
         resource_name = "brand-departments"
         authorization = Authorization()
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         always_return_data = True
         filtering = {
                      "id" : ALL,
@@ -843,13 +1078,16 @@ class BrandDepartmentResource(CustomBaseModelResource):
 
 
 class DepartmentSubCategoriesResource(CustomBaseModelResource):
+    '''
+       Department sub categories resource
+    '''
     department = fields.ForeignKey(BrandDepartmentResource, 'department', full=True, null=True, blank=True)
 
     class Meta:
         queryset = models.DepartmentSubCategories.objects.all()
         resource_name = "department-sub-categories"
         authorization = Authorization()
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         always_return_data = True
         filtering = { 
                      "department": ALL_WITH_RELATIONS,
@@ -859,7 +1097,7 @@ class DepartmentSubCategoriesResource(CustomBaseModelResource):
 
 class ServiceDeskUserResource(CustomBaseModelResource):
     '''
-    Service Desk User Resource
+       Service desk user resource
     '''
     user = fields.ForeignKey(UserProfileResource, 'user_profile',
                                         full=True, null=True, blank=True)
@@ -872,7 +1110,7 @@ class ServiceDeskUserResource(CustomBaseModelResource):
 #         authorization = MultiAuthorization(DjangoAuthorization())
 #         authentication = MultiAuthentication(AccessTokenAuthentication())
         authorization = Authorization()
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         always_return_data = True
         filtering = {
                         "user": ALL_WITH_RELATIONS,
@@ -881,24 +1119,30 @@ class ServiceDeskUserResource(CustomBaseModelResource):
                      }
 
 class TransporterResource(CustomBaseModelResource):
+    '''
+       Tranporters for CTS resource
+    '''
     user = fields.ForeignKey(UserProfileResource, 'user', full=True, null=True, blank=True)
     class Meta:
         queryset = models.Transporter.objects.all()
         resource_name = 'transporters'
         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         always_return_data = True
         filtering = {
                      'user':ALL_WITH_RELATIONS
                      }
 
 class SupervisorResource(CustomBaseModelResource):
+    '''
+       Supervisors for CTS resource
+    '''
     transporter = fields.ForeignKey(TransporterResource, 'transporter', full=True, null=True, blank=True)
     class Meta:
         queryset = models.Supervisor.objects.all()
         resource_name = 'supervisors'
         authorization = MultiAuthorization(DjangoAuthorization())
-        detail_allowed_methods = ['get']
+        allowed_methods = ['get']
         always_return_data = True
         filtering = {
                      'transporter': ALL_WITH_RELATIONS

@@ -236,6 +236,35 @@ class ServiceDeskCustomAuthorization(Authorization):
                 return False
         return True
     
+class ContainerIndentCustomAuthorization(Authorization):
+
+    def get_indents_query(self, object_list, bundle):
+        query_set=[]
+        if bundle.request.user.groups.filter(name=Roles.TRANSPORTER):
+            query_set = get_model('ContainerLR').objects.filter(transporter__user__user_id=bundle.request.user.id)
+            
+        elif bundle.request.user.groups.filter(name=Roles.SUPERVISOR):
+            supervisor = get_model('Supervisor').objects.get(user__user_id=bundle.request.user.id)
+            query_set = get_model('ContainerLR').objects.filter(Q(submitted_by=supervisor.supervisor_id) | Q(submitted_by=None) 
+                                                                        & Q(transporter=supervisor.transporter))
+        return query_set
+        
+    def read_list(self, object_list, bundle):
+        query_set = self.get_indents_query(object_list, bundle)
+        if query_set:
+            submitted_indents=query_set.values_list('zib_indent_num_id', flat=True)
+            object_list = object_list.filter(id__in=submitted_indents)
+        return object_list
+
+class ContainerLRCustomAuthorization(Authorization):
+    def read_list(self, object_list, bundle):
+        if bundle.request.user.groups.filter(name=Roles.TRANSPORTER):
+            object_list = object_list.filter(transporter__user__user_id=int(bundle.request.user.id))
+        elif bundle.request.user.groups.filter(name=Roles.SUPERVISOR):
+            supervisor = get_model('Supervisor').objects.get(user__user_id=bundle.request.user.id)
+            object_list = object_list.filter(Q(submitted_by=supervisor.supervisor_id) | Q(submitted_by=None) 
+                                                                        & Q(transporter=supervisor.transporter))
+        return object_list
 
 class CTSCustomAuthorization(Authorization):
     def read_list(self, object_list, bundle):
@@ -243,20 +272,11 @@ class CTSCustomAuthorization(Authorization):
             object_list = object_list.filter(transporter__user__user_id=int(bundle.request.user.id))
         elif bundle.request.user.groups.filter(name=Roles.SUPERVISOR):
             supervisor = get_model('Supervisor').objects.get(user__user_id=bundle.request.user.id)
+            
             object_list = object_list.filter(Q(transporter=supervisor.transporter)
                                              & (Q(submitted_by=supervisor.supervisor_id) | Q(submitted_by=None)))
         return object_list
 
-    def read_detail(self, object_list, bundle):
-        if bundle.request.user.groups.filter(name=Roles.TRANSPORTER):
-            if bundle.obj.transporter.user.user_id != bundle.request.user.id:
-                return False
-        elif bundle.request.user.groups.filter(name=Roles.SUPERVISOR):
-            transporter = get_model('Supervisor').objects.get(user__user_id=bundle.request.user.id).transporter
-            if bundle.obj.transporter.user.user_id != transporter.user.user_id:
-                return False
-        
-        return True
 
 class ZSMCustomAuthorization(Authorization):
     def read_list(self, object_list, bundle):

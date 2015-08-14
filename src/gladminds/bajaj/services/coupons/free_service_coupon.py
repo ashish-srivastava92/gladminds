@@ -65,6 +65,7 @@ def register_customer(sms_dict, phone_number):
 @log_time
 def send_customer_detail(sms_dict, phone_number):
     keyword = sms_dict['params']
+    keyword = keyword.lower()
     value = sms_dict['message']
     kwargs = {}
     kwargs['customer_phone_number__endswith'] = utils.get_phone_number_format(phone_number)

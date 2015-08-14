@@ -7,7 +7,7 @@ from django.test.client import Client
 from gladminds.bajaj.models import AuditLog, Feedback, SMSLog
 from gladminds.core.auth_helper import Roles
 
-client = Client(SERVER_NAME='bajaj')
+client = Client(SERVER_NAME='bajajcv')
 
 
 class System(BaseTestCase):
@@ -83,7 +83,16 @@ class System(BaseTestCase):
                 "type":"Problem", "summary":"hello" }
         response = client.post("/aftersell/servicedesk/helpdesk", data=data)
         self.tester.assertEqual(response.status_code, 200)
-
+    
+    def post_ticket(self, access_token):
+        data = {'username': 'dealer', 'password': '123'}
+        response = client.post("/aftersell/dealer/login/", data=data)
+        self.tester.assertEqual(response.status_code, 302)
+        data = {"description":"test","advisorMobile":"dealer",
+                "type":"Problem", "summary":"hello" }
+        response = client.post("/v1/feedbacks/add-ticket/?access_token="+access_token, data=data)
+        self.tester.assertEqual(response.status_code, 200)
+        
     def login(self, **kwargs):
         create_mock_data = {'username': kwargs['username'], 'password': kwargs['password']}
         response = client.post("/aftersell/"+ kwargs['provider'] +"/login/", data=create_mock_data)
@@ -129,7 +138,7 @@ class System(BaseTestCase):
                     'customer-phone': '9999999999',
                     'customer-name': 'TestUser',
                     'purchase-date': '11/5/2014',
-                    'customer-vin': 'XXXXXXXXXX',
+                    'customer-vin': '12345678901232792',
                     'customer-id': 'GMCUSTOMER01',
                 }
         response = self.tester.client.post('/aftersell/register/customer', data=data)
