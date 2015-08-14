@@ -31,7 +31,7 @@ ADMINS = (
 
 API_FLAG = False
 COUPON_VALID_DAYS = 30
-COUPON_URL = 'local.bajaj.gladminds.co'
+# BRAND_BASE_URL = 'local.bajaj.gladminds.co'
 TOTP_SECRET_KEY = '93424'
 OTP_VALIDITY = 120
 HARCODED_OTPS = ['000000']
@@ -700,13 +700,14 @@ DISTRIBUTOR_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/distrib
 
 
 BRAND_META = {
-               "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/"},
+               "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/", 
+                         "base_url": "local.bajaj.gladminds.co"},
                "demo": {"title": "Daimler", "logo": "daimler/img/Daimler-logo.png", "tagline": "2015 Daimler AG",
                         "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
               "daimler": {"title": "Daimler", "logo": "daimler/img/Daimler-logo.png", "tagline": "2015 Daimler AG",
                         "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
             "bajajcv": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/",
-                        "basecss": "/css/portal.css"},
+                        "basecss": "/css/portal.css", "base_url": "local.bajajcv.gladminds.co"},
                }
 
 HOME_URLS = {

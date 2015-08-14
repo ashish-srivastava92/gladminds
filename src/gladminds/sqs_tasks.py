@@ -30,6 +30,8 @@ import textwrap
 import StringIO
 import csv
 from gladminds.core.cron_jobs.taskmanager import add_product
+import requests
+import json
 
 
 logger = logging.getLogger("gladminds")
@@ -571,6 +573,22 @@ def update_coupon_history_data(*args, **kwargs):
 #     except Exception as ex:
 #         logger.info("update_coupon_history_data: {0}".format(ex))
 
+@shared_task
+def push_sms_to_queue(*args, **kwargs):
+    brand= kwargs.get('brand', None)
+    phone_number= kwargs.get('phone_number', None)
+    message = kwargs.get('message', None)
+    data = {'phoneNumber':phone_number, 'text':message}
+    url = '/v1/messages'
+    try:
+        if not settings.API_FLAG:
+            url = 'http://' + settings.BRAND_META[brand]['base_url'] +':8000'+ url
+        else:
+            url = 'http://' + settings.BRAND_META[brand]['base_url'] + url
+        requests.post(url=url, data=data)
+    except Exception as ex:
+        logger.info("[Exception in push_sms_to_queue]: {0}".format(ex))
+        
 def send_sms(template_name, phone_number, feedback_obj, comment_obj=None, brand=None):
     created_date = convert_utc_to_local_time(feedback_obj.created_date, True)
     try:
