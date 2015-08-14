@@ -22,7 +22,6 @@ from gladminds.core import constants
 class CoreAdminSite(AdminSite):
     pass
 
-
 class UserProfileAdmin(GmModelAdmin):
     search_fields = ('user__username', 'phone_number')
     list_display = ('user', 'phone_number', 'status', 'address',
