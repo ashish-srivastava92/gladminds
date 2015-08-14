@@ -8,6 +8,7 @@ from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib.admin import DateFieldListFilter
 from django import forms
 
+
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
