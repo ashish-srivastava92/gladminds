@@ -236,6 +236,8 @@ DOWNLOAD_MECHANIC_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'last_n
 DOWNLOAD_WELCOME_KIT_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'last_name', 'phone_number', 'delivery_address', 'district', 'state', 'pincode', 'image_url']
 DOWNLOAD_REDEMPTION_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'last_name', 'phone_number', 'delivery_address', 'district', 'state', 'pincode', 'product']
 DOWNLOAD_ACCUMULATION_FIELDS = ['member_id', 'first_name', 'middle_name', 'last_name', 'phone_number', 'state','shop_name', 'points', 'total_points', 'upcs', 'created_date']
+MEMBER_FIELDS = ['first_name', 'middle_name', 'last_name', 'phone_number', 'state', 'shop_name']
+
 
 LOYALTY_ACCESS = {
                 'query_field' : {

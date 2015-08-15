@@ -188,27 +188,17 @@ class CoreLoyaltyService(Services):
         for accumulation in accumulations:
             data=[]
             for field in headers:
-                member=accumulation.member
-                if field=='state':
-                    data.append(member.state.state_name)
-                elif field=='upcs':
+                if field == 'upcs':
                     upcs_data = accumulation.upcs.all()
                     ' , '.join([str(upc.unique_part_code) for upc in upcs_data])
                     data.append((upcs_data))
-                elif field=='points':
-                    data.append(accumulation.points)
-                elif field=='total_points':
-                    data.append(accumulation.total_points)
-                elif field=='created_date':
-                    data.append(accumulation.created_date)
-                elif field=='member_id':
-                    data.append(accumulation.member.id)
+                elif field in constants.MEMBER_FIELDS:
+                    data.append(getattr(accumulation.member, field))
                 else:
-                    data.append(getattr(member, field)) 
+                    data.append(getattr(accumulation, field))
             csvwriter.writerow(data)
         response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
-        LOG.error('[download_accumulation_detail]: Download of accumulation data by user {0}'.format(request.user))
         return response
     
     def get_accumulation_detail(self, request, choice, model_name):
