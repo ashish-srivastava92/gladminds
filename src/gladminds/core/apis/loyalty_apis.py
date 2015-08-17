@@ -154,6 +154,9 @@ class AccumulationResource(CustomBaseModelResource):
         always_return_data = True
         filtering = {
                      "member":ALL_WITH_RELATIONS,
+                     "asm" : ALL_WITH_RELATIONS,
+                     "upcs" : ALL_WITH_RELATIONS,
+                     "created_date" : ALL
                      }
 
 class WelcomeKitResource(CustomBaseModelResource):
