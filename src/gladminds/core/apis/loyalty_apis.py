@@ -68,7 +68,8 @@ class RedemptionResource(CustomBaseModelResource):
         filtering = {
                      "member": ALL_WITH_RELATIONS,
                      "resolution_flag":ALL,
-                     "status":ALL
+                     "status":ALL,
+                     "created_date" : ALL
                      }
         ordering = ["created_date", "status", "member"]
 

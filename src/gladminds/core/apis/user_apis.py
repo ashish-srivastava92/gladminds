@@ -973,7 +973,7 @@ class MemberResource(CustomBaseModelResource):
                      "distributor" : ALL_WITH_RELATIONS,
                      "locality":ALL,
                      "district":ALL,
-                     "last_transaction_date":['gte', 'lte'],
+                     "last_transaction_date":ALL,
                      "total_accumulation_req":ALL,
                      "total_accumulation_points":ALL,
                      "total_redemption_points":ALL,
