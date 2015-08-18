@@ -183,7 +183,6 @@ class BOMPlatePartResource(CustomBaseModelResource):
             LOG.error('Exception while fetching plate images : {0}'.format(ex))
             return HttpResponseBadRequest()
     
-    #TODO: FIXME - remove n+1 query
     def save_plate_part(self, request, **kwargs):
         '''
            Parses the uploaded CSV and adds the

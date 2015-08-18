@@ -402,15 +402,6 @@ class ASMAdmin(GmModelAdmin):
                      'phone_number', 'state')
     list_display = ('asm_id', 'name', 'email',
                      'phone_number', 'get_state', 'nsm')
-    
-
-    def get_state(self, obj):
-        states = obj.state.all()
-        if states:
-            return ' | '.join([str(state.state_name) for state in states])
-        else:
-            return None
-    get_state.short_description = 'State'
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('asm_id',)
