@@ -113,3 +113,11 @@ class GmModelAdmin(ModelAdmin):
         return obj.part_number.description
 
     get_part_description.short_description = 'Description'
+
+    def get_state(self, obj):
+        states = obj.state.all()
+        if states:
+            return ' | '.join([str(state.state_name) for state in states])
+        else:
+            return None
+    get_state.short_description = 'State'

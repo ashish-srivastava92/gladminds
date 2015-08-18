@@ -4,17 +4,13 @@
 import logging
 
 from django.conf.urls import url
-from django.db import transaction
 from django.conf import settings
-from tastypie.http import HttpBadRequest
 from tastypie.resources import Resource
-from tastypie.exceptions import ImmediateHttpResponse
+from tastypie.http import HttpBadRequest
 
-from gladminds.core.managers import sms_parser
-from gladminds.core.managers.audit_manager import sms_log
-# from gladminds.sqs_tasks import send_invalid_keyword_message
-from gladminds.core import utils
-from time import time
+from gladminds.core.managers.sms_parser import sms_processing
+from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
+from gladminds.sqs_tasks import send_invalid_keyword_message
 
 LOGGER = logging.getLogger('gladminds')
 ANGULAR_FORMAT = lambda x: x.replace('{', '<').replace('}', '>')
@@ -29,38 +25,6 @@ class SMSResources(Resource):
         return [
             url(r"^messages", self.wrap_view('render_sms'))
         ]
-
-    def sms_processing(self, phone_number, message, brand):
-        sms_dict = {}
-        error_template = None
-        phone_number = utils.get_phone_number_format(phone_number)
-        message = utils.format_message(message)
-        sms_log(brand, action='RECEIVED', sender=phone_number,
-                receiver='+1 469-513-9856', message=message)
-        LOGGER.info('Received Message from phone number: {0} and message: {1}'.format(phone_number, message))
-        try:
-            sms_dict = sms_parser.sms_parser(message=message)
-        except sms_parser.InvalidKeyWord as ink:
-            error_template = ink.template
-            error_message = ink.message
-        except sms_parser.InvalidMessage as inm:
-            error_template = inm.template
-            error_message = inm.message
-        except sms_parser.InvalidFormat as inf:
-            error_template = ANGULAR_FORMAT('CORRECT FORMAT: ' + inf.template)
-            error_message = inf.message
-        if error_template:
-            sms_log(brand, receiver=phone_number,
-                    action=AUDIT_ACTION, message=error_template)
-#             send_job_to_queue(send_invalid_keyword_message, {"phone_number":phone_number, "message":error_template, "sms_client":settings.SMS_CLIENT})
-            raise ImmediateHttpResponse(HttpBadRequest(error_message))
-        to_be_serialized = {}
-        handler = utils.get_handler(sms_dict['handler'])
-        with transaction.atomic():
-            to_be_serialized = handler(sms_dict,
-                            utils.mobile_format(phone_number))
-        return to_be_serialized
-        
         
     def render_sms(self, request, **kwargs):
         phone_number = ""
@@ -88,10 +52,12 @@ class SMSResources(Resource):
                     ucn, settings.ALLOWED_KEYWORDS['close'].upper())
                 LOGGER.info('Message to send: ' + message)
         try:    
-            to_be_serialized=self.sms_processing(phone_number, message, settings.BRAND)
-        except Exception as ex:
+            to_be_serialized=sms_processing(phone_number, message, settings.BRAND)
+        except Exception as invalid_keyword:
             LOGGER.info("The database failed to perform {0}:{1}".format(
-                                            request.POST.get('action'), ex))
+                                            request.POST.get('action'), invalid_keyword))
+            send_job_to_queue(send_invalid_keyword_message, {"phone_number":phone_number, "message":invalid_keyword, "sms_client":settings.SMS_CLIENT})
+            return HttpBadRequest(invalid_keyword)
         return self.create_response(request, data=to_be_serialized)
         
     

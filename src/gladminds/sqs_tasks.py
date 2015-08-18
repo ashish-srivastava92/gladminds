@@ -7,7 +7,8 @@ from gladminds.core.model_fetcher import get_model
 from gladminds.core import utils, export_file
 from gladminds.core.managers.audit_manager import sms_log, feed_log
 from gladminds.core.managers.sms_client_manager import load_gateway, MessageSentFailed
-from gladminds.core.managers import mail, sms_handler
+from gladminds.core.managers import mail
+from gladminds.core.managers.sms_parser import sms_processing
 from gladminds.core.cron_jobs import taskmanager
 from gladminds.bajaj.services.coupons import import_feed, export_feed
 from gladminds.core.services.loyalty import export_feed as loyalty_export
@@ -579,8 +580,7 @@ def push_sms_to_queue(*args, **kwargs):
     phone_number= kwargs.get('phone_number', None)
     message = kwargs.get('message', None)
     try:
-        sms_resource=sms_handler.sms_resource
-        response=sms_resource.sms_processing(phone_number, message, brand)
+        response = sms_processing(phone_number, message, brand)
     except Exception as ex:
         logger.info("[Exception in push_sms_to_queue]: {0}".format(ex))
         

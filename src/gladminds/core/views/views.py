@@ -527,9 +527,7 @@ def trigger_sqs_tasks(request):
         'export_cts_to_sap': 'export_cts_to_sap',
         'send_mail_for_feed_failure': 'send_mail_for_feed_failure',
         'send_mail_for_manufacture_data_discrepancy': 'send_mail_for_manufacture_data_discrepancy',
-        'send_vin_sync_feed_details': 'send_vin_sync_feed_details',
-        'push_sms_to_queue': 'push_sms_to_queue'
-        
+        'send_vin_sync_feed_details': 'send_vin_sync_feed_details'        
     }
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
     taskqueue.add(sqs_tasks[request.POST['task']], settings.BRAND)

@@ -78,6 +78,8 @@ SUIT_CONFIG = {
                      'label': 'Zonal Service Manager'},
                     {'model': 'areaservicemanager',
                      'label': 'Area Service Manager'},
+                    {'model': 'areasalesmanager',
+                     'label': 'Area Sales Manager'},
                     {'model': 'dealer',
                      'label': 'Dealer'},
                     {'model': 'authorizedservicecenter',
