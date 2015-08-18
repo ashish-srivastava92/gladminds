@@ -581,7 +581,6 @@ def push_sms_to_queue(*args, **kwargs):
     try:
         sms_resource=sms_handler.sms_resource
         response=sms_resource.sms_processing(phone_number, message, brand)
-        print "#4444444444444444444444444", response
     except Exception as ex:
         logger.info("[Exception in push_sms_to_queue]: {0}".format(ex))
         

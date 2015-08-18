@@ -533,9 +533,6 @@ def trigger_sqs_tasks(request):
     }
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
     taskqueue.add(sqs_tasks[request.POST['task']], settings.BRAND)
-#     from gladminds.sqs_tasks import push_sms_to_queue
-#     push_sms_to_queue(phone_number='9535216081', message='A GMCUSTOMER01 251 2', brand=settings.BRAND)
-#     print "$3333333333333333333"
     return HttpResponse()
 
 
