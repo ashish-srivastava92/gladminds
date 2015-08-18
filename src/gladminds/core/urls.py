@@ -149,4 +149,5 @@ urlpatterns = patterns('',
     url(r'^member-download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_member_detail, name='download_member_detail'),
     url(r'^kit-download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_welcome_kit_detail, name='download_welcome_kit_detail'),
     url(r'^redemption-download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_redemption_detail, name='download_redemption_detail'),
+    url(r'^accumulation-download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_accumulation_detail, name='download_accumulation_detail'),
 )
