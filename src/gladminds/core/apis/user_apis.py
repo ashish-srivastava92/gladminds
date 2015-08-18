@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.db.models.aggregates import Count, Sum
 from django.http.response import HttpResponse
+from django.db.models.query_utils import Q
 from tastypie.utils.urls import trailing_slash
 from tastypie import fields,http
 from tastypie.http import HttpBadRequest
@@ -934,6 +935,9 @@ class DistributorResource(CustomBaseModelResource):
         authentication = AccessTokenAuthentication()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
+        filtering = {
+                     "distributor_id" : ALL
+                     }
 
 
 class RetailerResource(CustomBaseModelResource):
@@ -966,9 +970,10 @@ class MemberResource(CustomBaseModelResource):
         always_return_data = True
         filtering = {
                      "state": ALL_WITH_RELATIONS,
+                     "distributor" : ALL_WITH_RELATIONS,
                      "locality":ALL,
                      "district":ALL,
-                     "last_transaction_date":['gte', 'lte'],
+                     "last_transaction_date":ALL,
                      "total_accumulation_req":ALL,
                      "total_accumulation_points":ALL,
                      "total_redemption_points":ALL,
@@ -976,11 +981,40 @@ class MemberResource(CustomBaseModelResource):
                      "first_name":ALL,
                      "middle_name":ALL,
                      "last_name":ALL,
-                     "registered_date":ALL
+                     "registered_date":ALL,
+                     "member_id" : ALL,
+                     "permanent_id" : ALL,
+                     "mechanic_id" : ALL,
+                     "phone_number" : ALL
                      }
         ordering = ["state", "locality", "district", "registered_date",
                     "created_date", "mechanic_id", "last_transaction_date", "total_accumulation_req"
                     "total_accumulation_points", "total_redemption_points", "total_redemption_req" ]
+    
+    def build_filters(self, filters=None):
+        if filters is None:
+            filters = {}
+        orm_filters = super(MemberResource, self).build_filters(filters)
+        
+        if 'member_id' in filters:
+            query = filters['member_id']
+            qset = (
+                    Q(mechanic_id=query)|
+                    Q(permanent_id=query)
+                      )
+            orm_filters.update({'custom':  qset})
+        return orm_filters  
+                     
+            
+    def apply_filters(self, request, applicable_filters):
+        if 'custom' in applicable_filters:
+            custom = applicable_filters.pop('custom')
+        else:
+            custom = None
+        
+        semi_filtered = super(MemberResource, self).apply_filters(request, applicable_filters)
+        
+        return semi_filtered.filter(custom) if custom else semi_filtered
         
     def prepend_urls(self):
         return [
