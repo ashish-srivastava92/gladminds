@@ -220,6 +220,8 @@ class BOMPlatePartResource(CustomBaseModelResource):
         plate_id = post_data.get('plateId')
         plate_image=request.FILES['platImage']
         plate_map=request.FILES['plateMap']
+        dashboard_image=request.FILES['dashboardImage']
+        plate_name=request.FILES['plateName']
         sbom_part_mapping=[]
         try:
             bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
@@ -243,7 +245,10 @@ class BOMPlatePartResource(CustomBaseModelResource):
                 sbom_part_mapping.append(temp)
 
             plate_obj=bom_queryset[0].plate
+            plate_obj.plate_image.save(plate_image.name, dashboard_image)
             plate_obj.plate_image_with_part.save(plate_image.name, plate_image)
+            plate_obj.plate_txt = plate_name
+            plate_obj.save(using=settings.BRAND)
             data={'plate_id':plate_id, 'sku_code':sku_code,
                   'bom_number':bom_number,
                   'model':model, 'part':[]}
