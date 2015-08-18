@@ -527,11 +527,15 @@ def trigger_sqs_tasks(request):
         'export_cts_to_sap': 'export_cts_to_sap',
         'send_mail_for_feed_failure': 'send_mail_for_feed_failure',
         'send_mail_for_manufacture_data_discrepancy': 'send_mail_for_manufacture_data_discrepancy',
-        'send_vin_sync_feed_details': 'send_vin_sync_feed_details'
+        'send_vin_sync_feed_details': 'send_vin_sync_feed_details',
+        'push_sms_to_queue': 'push_sms_to_queue'
         
     }
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
     taskqueue.add(sqs_tasks[request.POST['task']], settings.BRAND)
+#     from gladminds.sqs_tasks import push_sms_to_queue
+#     push_sms_to_queue(phone_number='9535216081', message='A GMCUSTOMER01 251 2', brand=settings.BRAND)
+#     print "$3333333333333333333"
     return HttpResponse()
 
 
