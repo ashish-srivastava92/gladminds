@@ -52,7 +52,6 @@ class DynamicSitesMiddleware(object):
         if BRAND.value == 'admin':
             request.urlconf = 'gladminds.urls'
             return
-        BRAND.value ='gm'
         try:
             import_module('gladminds.{0}.urls'.format(BRAND.value))
             request.urlconf = 'gladminds.{0}.urls'.format(BRAND.value)
