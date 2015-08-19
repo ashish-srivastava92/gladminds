@@ -423,6 +423,7 @@ class UserProfileResource(CustomBaseModelResource):
                     data = {'status': 1, 'message': "login successfully",
                             'access_token': access_token, "user_id": user_auth.id, "user_groups" : user_groups}
             else:
+                logger.error('[login]: {0} {1} {2}', user_auth, user_obj.username, password)
                 data = {'status': 0, 'message': "login unsuccessful"}
         except Exception as ex:
             logger.error(ex)
