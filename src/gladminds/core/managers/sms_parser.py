@@ -1,6 +1,7 @@
 import logging
 logger = logging.getLogger('gladminds')
 from parse import *
+from django.conf import settings
 from django.db import transaction
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.core import utils
@@ -60,6 +61,7 @@ def sms_processing(phone_number, message, brand):
     error_template = None
     phone_number = utils.get_phone_number_format(phone_number)
     message = utils.format_message(message)
+    logger.info('[sms_processing]: settings brand {0}'.format(settings.BRAND))
     sms_log(brand, action='RECEIVED', sender=phone_number,
             receiver='+1 469-513-9856', message=message)
     LOGGER.info('Received Message from phone number: {0} and message: {1}'.format(phone_number, message))

@@ -45,13 +45,14 @@ class DynamicSitesMiddleware(object):
         self.domain, self.port = self.get_domain_and_port()
         BRAND.value = self.get_fields(self.domain)
         
-    #Note its a hack which is implemented for tata motors
+    #Note: its a hack which is implemented for tata motors
         if BRAND.value == 'tatamotors':
             BRAND.value = 'daimler'
               
         if BRAND.value == 'admin':
             request.urlconf = 'gladminds.urls'
             return
+        BRAND.value ='gm'
         try:
             import_module('gladminds.{0}.urls'.format(BRAND.value))
             request.urlconf = 'gladminds.{0}.urls'.format(BRAND.value)

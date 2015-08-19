@@ -1,7 +1,13 @@
 from celery import shared_task
-from django.conf import settings
 from datetime import datetime, timedelta
 import operator
+import logging
+import StringIO
+import csv
+
+from django.conf import settings
+from django.db.models import Q
+from django.contrib.auth.models import User
 
 from gladminds.core.model_fetcher import get_model
 from gladminds.core import utils, export_file
@@ -13,26 +19,18 @@ from gladminds.core.cron_jobs import taskmanager
 from gladminds.bajaj.services.coupons import import_feed, export_feed
 from gladminds.core.services.loyalty import export_feed as loyalty_export
 from gladminds.core.services import  message_template as templates
-import pytz
-import logging
+
 from gladminds.core.managers.mail import send_due_date_exceeded,\
     send_due_date_reminder, send_email_to_asc_customer_support
-from django.contrib.auth.models import User
 from gladminds.core.constants import DATE_FORMAT, FEED_TYPES
-from gladminds.core.cron_jobs.queue_utils import get_task_queue,\
-    send_job_to_queue
+from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
 from gladminds.core.cron_jobs.update_fact_tables import update_coupon_history_table
 from gladminds.core.managers.mail import get_email_template,send_email_to_redeem_escaltion_group,\
     send_email_to_welcomekit_escaltion_group
 from gladminds.core.auth_helper import Roles, GmApps
-from django.db.models import Q
-import textwrap
-import StringIO
-import csv
 from gladminds.core.cron_jobs.taskmanager import add_product
-import requests
-import json
+from gladminds.core.middlewares.dynamicsite_middleware import make_tls_property
 
 
 logger = logging.getLogger("gladminds")
@@ -573,17 +571,6 @@ def update_coupon_history_data(*args, **kwargs):
 #         update_coupon_history_table()
 #     except Exception as ex:
 #         logger.info("update_coupon_history_data: {0}".format(ex))
-
-@shared_task
-def push_sms_to_queue(*args, **kwargs):
-    brand= kwargs.get('brand', None)
-    phone_number= kwargs.get('phone_number', None)
-    message = kwargs.get('message', None)
-    logger.info("brand:{0} , phone: {1}, message: {2}".format(brand, phone_number, message))
-    try:
-        response = sms_processing(phone_number, message, brand)
-    except Exception as ex:
-        logger.info("[Exception in push_sms_to_queue]: {0}".format(ex))
         
 def send_sms(template_name, phone_number, feedback_obj, comment_obj=None, brand=None):
     created_date = convert_utc_to_local_time(feedback_obj.created_date, True)
@@ -879,6 +866,18 @@ def brand_sync_to_afterbuy(*args, **kwargs):
     
     return
 
+@shared_task
+def push_sms_to_queue(*args, **kwargs):
+    brand= kwargs.get('brand', None)
+    phone_number= kwargs.get('phone_number', None)
+    message = kwargs.get('message', None)
+    logger.info("brand:{0} , phone: {1}, message: {2}".format(brand, phone_number, message))
+    try:
+        BRAND = settings.__dict__['_wrapped'].__class__.BRAND = make_tls_property()
+        BRAND.value=brand
+        response = sms_processing(phone_number, message, brand)
+    except Exception as ex:
+        logger.info("[Exception in push_sms_to_queue]: {0}".format(ex))
 
 _tasks_map = {"send_registration_detail": send_registration_detail,
 
