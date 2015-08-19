@@ -124,7 +124,5 @@ ENV = "staging"
 API_FLAG = True 
 LOGAN_ACTIVE = True
 
-BRAND_META = {
-               "bajaj" : {"base_url": "staging.bajaj.gladminds.co"},
-               "bajajcv" : {"base_url": "staging.bajajcv.gladminds.co"},
-               }
+BRAND_META["bajaj"]["base_url"]= "staging.bajaj.gladminds.co"
+BRAND_META["bajajcv"]["base_url"]= "staging.bajajcv.gladminds.co"

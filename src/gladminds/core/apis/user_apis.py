@@ -856,7 +856,7 @@ class StateResource(CustomBaseModelResource):
     '''
        States under loyalty resource
     '''
-    territory = fields.ForeignKey(TerritoryResource, 'territory')
+    territory = fields.ForeignKey(TerritoryResource, 'territory', null=True, blank=True)
     class Meta:
         queryset = models.State.objects.all()
         resource_name = "states"
