@@ -579,6 +579,7 @@ def push_sms_to_queue(*args, **kwargs):
     brand= kwargs.get('brand', None)
     phone_number= kwargs.get('phone_number', None)
     message = kwargs.get('message', None)
+    logger.info("brand:{0} , phone: {1}, message: {2}".format(brand, phone_number, message))
     try:
         response = sms_processing(phone_number, message, brand)
     except Exception as ex:
