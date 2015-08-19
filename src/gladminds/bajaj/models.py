@@ -70,6 +70,9 @@ class AreaSalesManager(base_models.AreaSalesManager):
     
     class Meta(base_models.AreaSalesManager.Meta):
         app_label = _APP_NAME
+    
+    def __unicode__(self):
+        return self.user.user.username
 
 class AreaServiceManager(base_models.AreaServiceManager):
     '''details of Area Service Manager'''

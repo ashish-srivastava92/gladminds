@@ -83,6 +83,8 @@ SUIT_CONFIG = {
                      'label': 'Country Distributor'},
                     {'model': 'maincountrydealer',
                      'label': 'Main Country Dealer'},
+                    {'model': 'areasalesmanager',
+                     'label': 'Area Sales Manager'},
                     {'model': 'dealer',
                      'label': 'Dealer'},
                     {'model': 'authorizedservicecenter',
