@@ -438,7 +438,7 @@ class UserProfileResource(CustomBaseModelResource):
         access_token = request.GET.get('access_token')
         try:
             delete_access_token(access_token)
-            data = {'status': 0, 'message': "logout successfully"}
+            data = {'status': 1, 'message': "logout successfully"}
         except Exception as ex:
             data = {'status': 0, 'message': "access_token_not_valid"}
             logger.info("[Exception get_user_login_information]:{0}".

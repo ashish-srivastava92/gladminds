@@ -123,7 +123,7 @@ class ExportAccumulationFeed(BaseExportFeed):
 #                         transaction_id_list.append(accumulation['TANSSID'])
 #                     results = get_model('AccumulationRequest').objects.using(brand).filter(transaction_id__in=transaction_id_list)
 #                     results.using(brand).update(sent_to_sap=True)
-#                     logger.error("[ExportAccumulationFeed]: Sent details o SAP")
+#                     logger.error("[ExportAccumulationFeed]: Sent details to SAP")
 #                 else:
 #                     total_failed = total_failed + len(item)
 #                     logger.error("[ExportAccumulationFeed]: Not received success from sap")
@@ -147,7 +147,7 @@ class ExportAccumulationFeed(BaseExportFeed):
                         accumulation_detail = models.AccumulationRequest.objects.get(transaction_id=item['TANSSID'])
                         accumulation_detail.sent_to_sap = True
                         accumulation_detail.save()
-                        logger.info("[ExportAccumulationFeed]: Sent the details of member {0} to sap".format(item['TANSSID']))
+                        logger.info("[ExportAccumulationFeed]: Sent the details of accumulation {0} to sap".format(item['TANSSID']))
                         export_status = True
                     except Exception as ex:
                         logger.error("[ExportAccumulationFeed]: Error in sending accumulation:{0}::{1}".format(item['TANSSID'], ex))
