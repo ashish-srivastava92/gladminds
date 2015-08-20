@@ -1048,6 +1048,8 @@ class MemberResource(CustomBaseModelResource):
                 area = self._meta.args['query_field'][user_group]['area']
                 region = self._meta.args['query_field'][user_group]['group_region']
                 args = LoyaltyCustomAuthorization.get_filter_query(user=request.user, q_user=area, query=args)
+            else:
+                region='state__state_name'
             registered_member = models.Member.objects.filter(**args).values(region).annotate(count= Count('mechanic_id'))
             args['last_transaction_date__gte']=datetime.now()-timedelta(int(active_days))
             active_member = models.Member.objects.filter(**args).values(region).annotate(count= Count('mechanic_id'))
