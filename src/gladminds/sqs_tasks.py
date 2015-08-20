@@ -868,18 +868,25 @@ def brand_sync_to_afterbuy(*args, **kwargs):
 
 @shared_task
 def push_sms_to_queue(*args, **kwargs):
+    '''
+       A sqs tasks that pulls sms from the queue
+       and process it.
+       Note: we have done we middleware sms client
+       setting here as these are not set in the worker machine.
+       and extra log can be removed after smooth trial
+    '''
     brand= kwargs.get('brand', None)
     phone_number= kwargs.get('phone_number', None)
     message = kwargs.get('message', None)
     source_client = kwargs.get('__gm_source', None)
     
-    logger.info("brand:{0} , phone: {1}, message: {2}".format(brand, phone_number, message))
+    logger.info("brand:{0} , phone: {1}, message: {2} source: {3}".format(brand, phone_number, message, source_client))
     try:
         BRAND = settings.__dict__['_wrapped'].__class__.BRAND = make_tls_property()
         BRAND.value=brand
         SMS_CLIENT = settings.__dict__['_wrapped'].__class__.SMS_CLIENT =  make_tls_property()
         
-        logger.info("ENV".format(settings.ENV))
+        logger.info("ENV: {0}".format(settings.ENV))
         if settings.ENV in ['local', 'test', 'staging']:
             SMS_CLIENT.value = None
             return
@@ -892,6 +899,7 @@ def push_sms_to_queue(*args, **kwargs):
             except:
                 SMS_CLIENT.value = "AIRTEL"
         response = sms_processing(phone_number, message, brand)
+        logger.info("[push_sms_to_queue]: {0}".format(response))
     except Exception as ex:
         logger.info("[Exception in push_sms_to_queue]: {0}".format(ex))
 
