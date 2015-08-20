@@ -873,13 +873,13 @@ def push_sms_to_queue(*args, **kwargs):
     message = kwargs.get('message', None)
     source_client = kwargs.get('__gm_source', None)
     
-    logger.info("brand:{0} , phone: {1}, message: {2}".format(brand, phone_number, message))
+    logger.info("brand:{0} , phone: {1}, message: {2} source: {3}".format(brand, phone_number, message, source_client))
     try:
         BRAND = settings.__dict__['_wrapped'].__class__.BRAND = make_tls_property()
         BRAND.value=brand
         SMS_CLIENT = settings.__dict__['_wrapped'].__class__.SMS_CLIENT =  make_tls_property()
         
-        logger.info("ENV".format(settings.ENV))
+        logger.info("ENV: {0}".format(settings.ENV))
         if settings.ENV in ['local', 'test', 'staging']:
             SMS_CLIENT.value = None
             return
