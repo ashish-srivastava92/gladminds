@@ -70,5 +70,21 @@
       "constant_name":"service_center_count",
       "constant_value":"3"
     }
-  }
+  },
+    {
+    "model": "gladminds.constant",
+    "pk": 10,
+    "fields": {
+      "constant_name":"customer_support_number_uganda",
+      "constant_value":"000000000"
+    }
+ },
+ {
+    "model": "gladminds.constant",
+    "pk": 11,
+    "fields": {
+      "constant_name":"customer_id",
+      "constant_value":"8000001"
+    }
+ }
 ]

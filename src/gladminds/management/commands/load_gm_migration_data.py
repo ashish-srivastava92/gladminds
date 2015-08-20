@@ -11,6 +11,8 @@ from gladminds.bajaj.services.coupons import import_feed
 from gladminds.core.auth_helper import ALL_APPS, Roles
 from gladminds.core.model_fetcher import get_model
 
+
+ALL_APPS = ALL_APPS + ['bajajib']
 BASIC_FEED = import_feed.BaseFeed()
 TODAY = datetime.datetime.now()
 
