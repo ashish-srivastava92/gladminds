@@ -80,6 +80,7 @@ DISTRIBUTOR_SYNC_WSDL_URL = "http://staging.bajaj.gladminds.co/api/v1/distributo
 
 WSDL_TNS="http://staging.bajaj.gladminds.co/api/v1/feed/"
 CORE_WSDL_TNS="http://staging.bajajcv.gladminds.co/api/v1/feed/"
+IB_WSDL_TNS="http://staging.bajajib.gladminds.co:8000/api/v1/feed/"
 
 ENABLE_AMAZON_SQS = True
 
@@ -125,3 +126,4 @@ API_FLAG = True
 
 BRAND_META["bajaj"]["base_url"]= "staging.bajaj.gladminds.co"
 BRAND_META["bajajcv"]["base_url"]= "staging.bajajcv.gladminds.co"
+BRAND_META["bajajib"]["base_url"]= "staging.bajajib.gladminds.co"

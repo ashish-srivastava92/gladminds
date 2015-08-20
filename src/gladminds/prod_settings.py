@@ -156,6 +156,7 @@ ENV = "prod"
 
 WSDL_TNS="http://bajaj.gladminds.co/api/v1/feed/"
 CORE_WSDL_TNS="http://bajajcv.gladminds.co/api/v1/feed/"
+IB_WSDL_TNS="http://bajajib.gladminds.co/api/v1/feed/"
 
 ADMIN_DETAILS = {GmApps.BAJAJ: {'user': 'bajaj001', 'password': 'bajaj001'},
           GmApps.DEMO: {'user': 'demo', 'password': 'demo'},
@@ -180,3 +181,5 @@ API_FLAG = True
 
 BRAND_META["bajaj"]["base_url"]= "bajaj.gladminds.co"
 BRAND_META["bajajcv"]["base_url"]= "bajajcv.gladminds.co"
+BRAND_META["bajajib"]["base_url"]= "bajajib.gladminds.co"
+

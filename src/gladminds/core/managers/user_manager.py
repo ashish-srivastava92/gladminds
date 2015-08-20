@@ -23,6 +23,8 @@ class DealerManager(models.Manager):
     def count(self):
         return super(DealerManager, self).get_query_set().all().count()
 
+    def active_dealer(self, phone_number):
+        return super(DealerManager, self).get_query_set().filter(user__phone_number=phone_number, user__status="Y")
 
 class AuthorizedServiceCenterManager(models.Manager):
     def active_count(self):
