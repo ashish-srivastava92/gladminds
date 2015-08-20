@@ -118,7 +118,8 @@ ENV = "qa"
 #     }
 # }
 
-COUPON_URL = 'qa.bajaj.gladminds.co'
+# BRAND_BASE_URL = 'qa.bajaj.gladminds.co'
 API_FLAG = True 
-LOGAN_ACTIVE = True
 
+BRAND_META["bajaj"]["base_url"]= "qa.bajaj.gladminds.co"
+BRAND_META["bajajcv"]["base_url"]= "qa.bajajcv.gladminds.co"
