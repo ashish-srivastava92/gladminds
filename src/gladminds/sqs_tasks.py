@@ -871,10 +871,26 @@ def push_sms_to_queue(*args, **kwargs):
     brand= kwargs.get('brand', None)
     phone_number= kwargs.get('phone_number', None)
     message = kwargs.get('message', None)
+    source_client = kwargs.get('__gm_source', None)
+    
     logger.info("brand:{0} , phone: {1}, message: {2}".format(brand, phone_number, message))
     try:
         BRAND = settings.__dict__['_wrapped'].__class__.BRAND = make_tls_property()
         BRAND.value=brand
+        SMS_CLIENT = settings.__dict__['_wrapped'].__class__.SMS_CLIENT =  make_tls_property()
+        
+        logger.info("ENV".format(settings.ENV))
+        if settings.ENV in ['local', 'test', 'staging']:
+            SMS_CLIENT.value = None
+            return
+
+        if source_client == settings.SMS_CLIENT_DETAIL['KAP']['params']:
+            SMS_CLIENT.value = "KAP"
+        else :
+            try:
+                SMS_CLIENT.value = settings.BRAND_SMS_GATEWAY.get(settings.BRAND)
+            except:
+                SMS_CLIENT.value = "AIRTEL"
         response = sms_processing(phone_number, message, brand)
     except Exception as ex:
         logger.info("[Exception in push_sms_to_queue]: {0}".format(ex))
