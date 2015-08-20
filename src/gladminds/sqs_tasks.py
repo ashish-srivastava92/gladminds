@@ -868,6 +868,13 @@ def brand_sync_to_afterbuy(*args, **kwargs):
 
 @shared_task
 def push_sms_to_queue(*args, **kwargs):
+    '''
+       A sqs tasks that pulls sms from the queue
+       and process it.
+       Note: we have done we middleware sms client
+       setting here as these are not set in the worker machine.
+       and extra log can be removed after smooth trial
+    '''
     brand= kwargs.get('brand', None)
     phone_number= kwargs.get('phone_number', None)
     message = kwargs.get('message', None)
@@ -892,6 +899,7 @@ def push_sms_to_queue(*args, **kwargs):
             except:
                 SMS_CLIENT.value = "AIRTEL"
         response = sms_processing(phone_number, message, brand)
+        logger.info("[push_sms_to_queue]: {0}".format(response))
     except Exception as ex:
         logger.info("[Exception in push_sms_to_queue]: {0}".format(ex))
 
