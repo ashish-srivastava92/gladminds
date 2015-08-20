@@ -111,10 +111,7 @@ def register_rider(sms_dict, phone_number):
                 rider = models.FleetRider(product=product, is_active=True, phone_number=rider_phone_number)
                 rider.save()
             else:
-                for rider_obj in riders:
-                    if not rider_obj.is_active:
-                        rider_obj.is_active = True
-                        rider_obj.save()
+                riders.update(is_active=True)
                     
             riders = models.FleetRider.objects.filter(Q(product=product),~Q(phone_number=rider_phone_number))
             riders.update(is_active=False)
