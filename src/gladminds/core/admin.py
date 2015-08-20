@@ -1,5 +1,6 @@
 import copy
 import datetime
+
 from django import forms
 from django.contrib.admin import AdminSite, TabularInline
 from django.contrib.auth.models import User, Group
@@ -401,15 +402,6 @@ class ASMAdmin(GmModelAdmin):
                      'phone_number', 'state')
     list_display = ('asm_id', 'name', 'email',
                      'phone_number', 'get_state', 'nsm')
-    
-
-    def get_state(self, obj):
-        states = obj.state.all()
-        if states:
-            return ' | '.join([str(state.state_name) for state in states])
-        else:
-            return None
-    get_state.short_description = 'State'
 
     def get_form(self, request, obj=None, **kwargs):
         self.exclude = ('asm_id',)
@@ -507,7 +499,7 @@ class AccumulationRequestAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.LOYALTYADMINS, Roles.LOYALTYSUPERADMINS]
     search_fields = ('member__mechanic_id', 'upcs__unique_part_code')
     list_display = ( 'member',  'get_mechanic_name', 'get_mechanic_district',
-                     'asm', 'get_upcs', 'points',
+                     'get_asm', 'get_upcs', 'points',
                      'total_points', 'created_date')
     
     def get_upcs(self, obj):

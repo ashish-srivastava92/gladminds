@@ -32,7 +32,7 @@ ADMINS = (
 
 API_FLAG = False
 COUPON_VALID_DAYS = 30
-COUPON_URL = 'local.bajaj.gladminds.co'
+# BRAND_BASE_URL = 'local.bajaj.gladminds.co'
 TOTP_SECRET_KEY = '93424'
 OTP_VALIDITY = 120
 HARCODED_OTPS = ['000000']
@@ -52,6 +52,7 @@ SDFILE_BUCKET = 'gladminds'
 
 FEED_FAILURE_DIR = 'aftersell/{0}/feed-logs/qa/'
 FEED_FAILURE_BUCKET = 'gladminds'
+MAX_USERNAME_LENGTH = 250
 
 S3_ID = 'AKIAIL7IDCSTNCG2R6JA'
 S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
@@ -82,6 +83,8 @@ SUIT_CONFIG = {
                      'label': 'Country Distributor'},
                     {'model': 'maincountrydealer',
                      'label': 'Main Country Dealer'},
+                    {'model': 'areasalesmanager',
+                     'label': 'Area Sales Manager'},
                     {'model': 'dealer',
                      'label': 'Dealer'},
                     {'model': 'authorizedservicecenter',
@@ -367,7 +370,7 @@ ALL_APPS = (
     # 'django.contrib.admindocs',
 )
 
-INSTALLED_APPS = ALL_APPS
+INSTALLED_APPS = ("longerusername",) + ALL_APPS
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
@@ -710,7 +713,8 @@ DISTRIBUTOR_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/distrib
 
 
 BRAND_META = {
-               "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/"},
+               "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/", 
+                         "base_url": "local.bajaj.gladminds.co"},
                "demo": {"title": "Daimler", "logo": "daimler/img/Daimler-logo.png", "tagline": "2015 Daimler AG",
                         "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
               "daimler": {"title": "Daimler", "logo": "daimler/img/Daimler-logo.png", "tagline": "2015 Daimler AG",
