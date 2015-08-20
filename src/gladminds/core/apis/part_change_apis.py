@@ -217,7 +217,7 @@ class BOMPlatePartResource(CustomBaseModelResource):
         sku_code = post_data.get('skuCode')
         bom_number = post_data.get('bomNumber')
         plate_id = post_data.get('plateId')
-        plate_image=request.FILES['platImage']
+        plate_image=request.FILES['plateImage']
         plate_map=request.FILES['plateMap']
         dashboard_image=request.FILES['dashboardImage']
         plate_name=request.FILES['plateName']
