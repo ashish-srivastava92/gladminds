@@ -20,6 +20,9 @@ ENVIRONMENT_NAME = 'gladminds-web-prod-2-1'#Replace this with the elastic beanst
 NEVER_FAIL = False
 CAPTURE = False
 
+ACCESS_KEY = 'AKIAIL7IDCSTNCG2R6JA'
+SECRET_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
+
 def _execute(cmd):
     if NEVER_FAIL:
         cmd = '%s; echo "Done"' % cmd
@@ -154,7 +157,7 @@ def create_new_staging_version(version):
     update_environment(ENVIRONMENT_NAME, version)
 
 def upload_to_s3(bucket_name, key, file_name):
-    conn = boto.connect_s3()
+    conn = boto.connect_s3(ACCESS_KEY, SECRET_KEY)
     bucket = conn.get_bucket(bucket_name)
     k = Key(bucket)
     k.key = key
@@ -162,11 +165,11 @@ def upload_to_s3(bucket_name, key, file_name):
 
 
 def create_version(application, version):
-    beanstalk = boto.connect_beanstalk()
+    beanstalk = boto.connect_beanstalk(ACCESS_KEY, SECRET_KEY)
     beanstalk.create_application_version(application, version, s3_bucket=BUCKET_NAME, s3_key=version)
 
 def update_environment(environment, version):
-    beanstalk = boto.connect_beanstalk()
+    beanstalk = boto.connect_beanstalk(ACCESS_KEY, SECRET_KEY)
     beanstalk.update_environment(environment_name=environment, version_label=version)
 
 
