@@ -118,7 +118,7 @@ class BOMPlatePartResource(CustomBaseModelResource):
         queryset = get_model('BOMPlatePart').objects.all()
         resource_name = 'bom-plate-parts'
         authorization = Authorization()
-#         authentication = AccessTokenAuthentication()
+        authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post']
         always_return_data = True
         include_resource_uri = False
