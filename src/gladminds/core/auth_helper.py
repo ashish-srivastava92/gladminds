@@ -15,6 +15,7 @@ class GmApps():
     GM = 'default'
     DAIMLER = 'daimler'
     PROBIKING = 'probiking'
+    BAJAJIB = 'bajajib'
 
 ALL_BRANDS = [getattr(GmApps, x) for x in dir(GmApps) if (not x.startswith("__") and getattr(GmApps, x)
                                                           not in [GmApps.AFTERBUY, GmApps.GM])]
@@ -61,7 +62,10 @@ class Roles():
     LPS = 'LogisticPartners'
     WELCOMEKITESCALATION = 'WelcomeKitEscalation'
     REDEEMESCALATION = 'RedemptionEscalation'
-    
+
+    COUNTRYDISTRIBUTOR = 'CountryDistributors'
+    MAINCOUNTRYDEALER = 'MainCountryDealer'
+
     VISUALIZATIONADMIN = 'VisualizationAdmins'
     VISUALIZATIONSTAFF = 'VisualizationStaffs'
     VISUALIZATIONUSER = 'VisualizationUsers'
