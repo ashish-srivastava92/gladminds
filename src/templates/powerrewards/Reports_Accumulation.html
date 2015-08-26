@@ -100,7 +100,7 @@
 				<div class="portlet portlet-default">
 	                <div class="portlet-heading">
 	                    <div class="portlet-title">
-	                        <h4>Point Accumulation Report</h4>
+	                        <h4>Accumulation Report</h4>
 	                     </div>
 	                    <div class="clearfix"></div>
 	                </div>
@@ -146,7 +146,7 @@
 	                         				else{
 	                         					if(col=='' && val=='')
 		                         				{
-		                         					url="/v1/accumulations/?access_token=d"+access_token+"&created_date__gte="+from+"&created_date__gte="+to;
+		                         					url="/v1/accumulations/?access_token=d"+access_token+"&created_date__gte="+from+"&created_date__lte="+to;
 		                         				}
 		                         				else if((col=='' && val!='')||(col!='' && val==''))
 		                         				{
@@ -154,7 +154,7 @@
 		                         					return false;
 		                         				}
 		                         				else{
-	                         						url="/v1/accumulations/?access_token=d"+access_token+"&"+col+"="+val+"&created_date__gte="+from+"&created_date__gte="+to;
+	                         						url="/v1/accumulations/?access_token=d"+access_token+"&"+col+"="+val+"&created_date__gte="+from+"&created_date__lte="+to;
 	                         					}
 	                         				}
                          				}
