@@ -146,7 +146,7 @@
 	                         				else{
 	                         					if(col=='' && val=='')
 		                         				{
-		                         					url="/v1/accumulations/?access_token=d"+access_token+"&created_date__gte="+from+"&created_date__lte="+to;
+		                         					url="/v1/accumulations/?access_token="+access_token+"&created_date__gte="+from+"&created_date__lte="+to;
 		                         				}
 		                         				else if((col=='' && val!='')||(col!='' && val==''))
 		                         				{
@@ -154,7 +154,7 @@
 		                         					return false;
 		                         				}
 		                         				else{
-	                         						url="/v1/accumulations/?access_token=d"+access_token+"&"+col+"="+val+"&created_date__gte="+from+"&created_date__lte="+to;
+	                         						url="/v1/accumulations/?access_token="+access_token+"&"+col+"="+val+"&created_date__gte="+from+"&created_date__lte="+to;
 	                         					}
 	                         				}
                          				}
