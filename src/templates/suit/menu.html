@@ -51,7 +51,7 @@
     {% for app in app_list %}
        {% if 'Loyalty' in app.label and  app.models  %}
        <li {{ model.is_active|yesno:' class=active,' }}>
-        <a href="http://bajajcv.gladminds.co/powerrewards/Reports_Registration.html" target="_blank"><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>Reports
+        <a href="/loyalty/report" target="_blank"><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>Reports
 	    </a>
        </li> 
      {% endif %}

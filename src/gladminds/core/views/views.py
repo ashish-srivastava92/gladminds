@@ -652,3 +652,8 @@ def get_active_asc_report(request):
                    "mon": MONTHS[month-1],
                    "cyear": str(year),
                    })
+
+def get_loyalty_reports(request):
+    if settings.ENV in settings.IGNORE_ENV or ['qa']:
+        return HttpResponseRedirect("http://bajajcv.gladminds.co/powerrewards/Reports_Registration.html")
+    return HttpResponseRedirect("http://bajajcv.gladminds.co/powerrewards/Reports_Registration.html")
