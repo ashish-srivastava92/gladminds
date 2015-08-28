@@ -47,11 +47,11 @@
 			    <div data-role="panel" id="myPanel">
 				 	<ul data-role="listview" data-inset="true" data-divider-theme="a" style="margin-top:33%;">
 				 		<li data-role="list-divider">Reports</li>
-				 		<li><a href="Reports_Registration.html" target="_self">Registration  Details</a></li>
-						<li><a href="Reports_Accumulation.html" target="_self">Accumulation Report</a></li>
-						<li><a href="Reports_Redemption.html" target="_self">Redemption Report</a></li>
-						<li><a href="Reports_Product.html" target="_self">Product Fitment</a></li>
-						<li><a href="Reports_Monthly.html" target="_self">Monthly Active Count</a></li>
+						<li><a href="/loyalty/report" target="_self">Registration  Details</a></li>
+						<li><a href="/loyalty/accumulation" target="_self">Accumulation Report</a></li>
+						<li><a href="/loyalty/redemption" target="_self">Redemption Report</a></li>
+						<li><a href="/loyalty/product" target="_self">Product Fitment</a></li>
+						<li><a href="/loyalty/monthly" target="_self">Monthly Active Count</a></li>
 						<li><a href="#" class="active" target="_self">Monthly Inactive Count</a></li>
 					</ul> 
 				</div>
@@ -165,7 +165,7 @@
 										console.log(apiURL)	
 										console.log('//bajajcv.gladminds.co'+apiURL+"&last_transaction_date__lte="+defaultdate)	
 										$.ajax({
-											url : '//bajajcv.gladminds.co'+apiURL+"&last_transaction_date__lte="+defaultdate,
+											url : apiURL+"&last_transaction_date__lte="+defaultdate,
 											type : 'GET',
 											dataType : 'json',
 											success : function(data, status) {
@@ -283,7 +283,7 @@
 		<script src="/static/powerrewards/js/datatables-bs3.js"></script>
 		<!-- THEME SCRIPTS -->
 		<!-- <script src="http://themes.startbootstrap.com/flex-admin-v1.2/js/flex.js"></script> -->
-		<script src="js/advanced-tables-demo.js"></script>
+		<script src="/static/powerrewards/js/advanced-tables-demo.js"></script>
 				
 	  <!--   // <script src="js/inc.js"></script> -->
 

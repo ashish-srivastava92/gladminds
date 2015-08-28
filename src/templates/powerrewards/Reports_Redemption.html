@@ -10,7 +10,7 @@
 		<link rel="stylesheet" href="/static/powerrewards/css/report.css">
 		<link type="text/css" href="/static/powerrewards/css/jquery-ui.css" rel="stylesheet"> 
 		
-	    <link rel="stylesheet" href="css/themes/default/jquery.mobile-1.4.5.min.css">
+	    <link rel="stylesheet" href="/static/powerrewards/css/themes/default/jquery.mobile-1.4.5.min.css">
 	   
 		
 
@@ -41,12 +41,12 @@
 			    <div data-role="panel" id="myPanel">
 				 	<ul data-role="listview" data-inset="true" data-divider-theme="a" style="margin-top:33%;">
 				 		<li data-role="list-divider">Reports</li>
-				 		<li><a href="Reports_Registration.html" target="_self">Registration  Details</a></li>
-						<li><a href="Reports_Accumulation.html" target="_self">Accumulation Report</a></li>
+						<li><a href="/loyalty/report" target="_self">Registration  Details</a></li>
+						<li><a href="/loyalty/accumulation" target="_self">Accumulation Report</a></li>
 						<li><a href="#" class="active" target="_self">Redemption Report</a></li>
-						<li><a href="Reports_Product.html" target="_self">Product Fitment</a></li>
-						<li><a href="Reports_Monthly.html" target="_self">Monthly Active Count</a></li>
-						<li><a href="Reports_Monthly_Not.html" target="_self">Monthly Inactive Count</a></li>
+						<li><a href="/loyalty/product" target="_self">Product Fitment</a></li>
+						<li><a href="/loyalty/monthly" target="_self">Monthly Active Count</a></li>
+						<li><a href="/loyalty/monthlynot" target="_self">Monthly Inactive Count</a></li>
 					</ul> 
 				</div>
 
@@ -190,7 +190,7 @@
 										console.log(apiURL)	
 
 										$.ajax({
-											url : '//bajajcv.gladminds.co'+apiURL,
+											url : apiURL,
 											type : 'GET',
 											dataType : 'json',
 											success : function(data, status) {
