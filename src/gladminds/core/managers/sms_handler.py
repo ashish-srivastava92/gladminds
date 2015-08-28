@@ -57,7 +57,7 @@ class SMSResources(Resource):
         except Exception as invalid_keyword:
             LOGGER.info("The database failed to perform {0}:{1}".format(
                                             request.POST.get('action'), invalid_keyword))
-            send_job_to_queue(send_invalid_keyword_message, {"phone_number":phone_number, "message":invalid_keyword, "sms_client":settings.SMS_CLIENT})
+            send_job_to_queue(send_invalid_keyword_message, {"phone_number":phone_number, "message":invalid_keyword.message, "sms_client":settings.SMS_CLIENT})
             return HttpBadRequest(json.dumps({'status':False, 'message':invalid_keyword.message}))
         return self.create_response(request, data=to_be_serialized)
         
