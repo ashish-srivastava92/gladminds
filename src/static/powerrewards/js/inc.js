@@ -242,10 +242,10 @@ function windowResizer(){
 
 
 function hover(element) {
-    element.setAttribute('src', 'img/play_mo.png');
+    element.setAttribute('src', '/static/powerrewards/img/play_mo.png');
 }
 function unhover(element) {
-    element.setAttribute('src', 'img/play.png');
+    element.setAttribute('src', '/static/powerrewards/img/play.png');
 }
 
 function showimagepreview(input) {
