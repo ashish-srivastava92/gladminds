@@ -159,7 +159,7 @@ $(document).on("pagecreate",function(){
 
 });
 
-qaLoginURL = "//bajajcv.gladminds.co/v1/gm-users/login/";
+qaLoginURL = "/v1/gm-users/login/";
 
 // qaLoginURL = "//bajaj.gladminds.co/v1/gm-users/login/";
 
@@ -195,7 +195,7 @@ $(document).on('click','#signIn',function(e){
 	        		// localStorage.setItem('access_token')=data.access_token;
 	        		localStorage.setItem('access_token', data.access_token)
 	        		$("#csrfmiddlewaretoken").val(data.access_token);
-	        		$("#login-form").attr("action", "//bajajcv.gladminds.co/login/");
+	        		$("#login-form").attr("action", "/login/");
 	        		$("#login-form").submit();
 	        		
 	        	} else {

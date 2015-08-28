@@ -651,6 +651,10 @@ def get_active_asc_report(request):
                    "cyear": str(year),
                    })
 
+def get_loyalty_login(request):
+    template = 'powerrewards/index.html'
+    return render(request, template)
+
 @login_required()
 def get_loyalty_reports(request, report_choice):
     report_templates= {
