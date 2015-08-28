@@ -652,11 +652,19 @@ def get_active_asc_report(request):
                    })
 
 @login_required()
-def get_loyalty_reports(request):
+def get_loyalty_reports(request, report_choice):
+    report_templates= {
+                        'report': 'powerrewards/Reports_Registration.html',
+                        'accumulation': 'powerrewards/Reports_Accumulation.html',
+                        'redemption': 'powerrewards/Reports_Redemption.html',
+                        'product': 'powerrewards/Reports_Product.html',
+                        'monthly': 'powerrewards/Reports_Monthly.html',
+                        'monthlynot': 'powerrewards/Reports_Monthly_Not.html',
+                     }
     http_host = request.META.get('HTTP_HOST', 'localhost')
     try:
         access_token =  AccessToken.objects.using(settings.BRAND).get(user=request.user)
     except Exception as ex:
         access_token = create_access_token(request.user, http_host)
-    template = 'powerrewards/Reports_Registration.html'
+    template = report_templates[report_choice]
     return render(request, template, {'token':access_token})
