@@ -43,10 +43,10 @@ class ProductTypeAdmin(ModelAdmin):
     list_display = ('id', 'product_type',\
                     'image_url', 'is_active')
 
-class DispatchedProduct(models.ProductData):
-
-    class Meta:
-        proxy = True
+# class DispatchedProduct(models.ProductData):
+# 
+#     class Meta:
+#         proxy = True
 
 class ListDispatchedProduct(ModelAdmin):
     search_fields = ('^product_id', '^dealer_id__dealer_id')
@@ -474,7 +474,7 @@ def get_admin_site_custom(brand):
     
     brand_admin.register(models.BrandProductCategory, BrandProductCategoryAdmin)
     brand_admin.register(models.ProductType, ProductTypeAdmin)
-    brand_admin.register(DispatchedProduct, ListDispatchedProduct)
+    brand_admin.register(models.DispatchedProduct, ListDispatchedProduct)
     brand_admin.register(models.ProductData, ProductDataAdmin)
     brand_admin.register(models.CouponData, CouponAdmin)
     

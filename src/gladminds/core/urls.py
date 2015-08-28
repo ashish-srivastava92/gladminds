@@ -111,6 +111,7 @@ urlpatterns = patterns('',
     url(r'^aftersell/sa/(?P<id>[a-zA-Z0-9]+)/$', 'gladminds.core.views.get_sa_under_asc'),
     url(r'^aftersell/reports/reconciliation$', 'gladminds.core.views.reports'),
     url(r'^asc/report/$', 'gladminds.core.views.get_active_asc_report'),
+    url(r'^loyalty/report/$', 'gladminds.core.views.get_loyalty_reports'),
     url(r'^aftersell/servicedesk/save-feedback/$', 'gladminds.core.services.service_desk.servicedesk_views.save_feedback', name='save_feedback'),
     
     url(r'^aftersell/servicedesk/get-subcategories/$', 'gladminds.core.services.service_desk.servicedesk_views.get_subcategories', name='get_subcategories'),
