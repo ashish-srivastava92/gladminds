@@ -149,10 +149,10 @@ class ProductData(base_models.ProductData):
         app_label = _APP_NAME
         verbose_name_plural = "Product Data"
 
-class DispatchedProduct(ProductData):
-
-    class Meta:
-        proxy = True
+# class DispatchedProduct(ProductData):
+# 
+#     class Meta:
+#         proxy = True
 
 
 class CouponData(base_models.CouponData):
