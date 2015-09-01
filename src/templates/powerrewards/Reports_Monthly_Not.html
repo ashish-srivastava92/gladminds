@@ -132,7 +132,7 @@
 										} else {
 											url = url;
 										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
@@ -142,7 +142,7 @@
 										} else {
 											url = url;
 										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
@@ -162,14 +162,14 @@
 										var defaultdate;
 	                    				defaultdate=moment().subtract(val, 'days').format("YYYY-MM-DD");
 
-										console.log(apiURL)	
-										console.log('//bajajcv.gladminds.co'+apiURL+"&last_transaction_date__lte="+defaultdate)	
+										
+											
 										$.ajax({
 											url : '//bajajcv.gladminds.co'+apiURL+"&last_transaction_date__lte="+defaultdate,
 											type : 'GET',
 											dataType : 'json',
 											success : function(data, status) {
-												console.log(data);
+												
 												createTable(data);
 											}, error: function(e) {
 												console.log(e)
@@ -198,8 +198,8 @@
 										for (var i = 0; i < dat.length; i++) {
 
 											var machid=name=district=phone=state=distributor=asm='';
-											if((dat[i]["mechanic_id"]!=null) || (dat[i]["mechanic_id"]!=undefined))
-											 	{var machid=dat[i]["mechanic_id"]}
+											if((dat[i]["permanent_id"]!=null) || (dat[i]["permanent_id"]!=undefined))
+											 	{var machid=dat[i]["permanent_id"]
 											if((dat[i]["first_name"]!=null) || (dat[i]["first_name"]!=undefined))
 											 	{var name=dat[i]["first_name"]}
 											if((dat[i]["district"]!=null) || (dat[i]["district"]!=undefined))
@@ -221,6 +221,7 @@
 		                                                <td class="center ">'+distributor+'</td>\
 		                                                <td class="center ">'+asm+'</td>\
 	                                            </tr>';
+	                                        }
 										}
 		                                table += ' </tbody></table>';	
 		                               $(".table-responsive").html('').append(table);

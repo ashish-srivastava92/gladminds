@@ -132,7 +132,7 @@
 										} else {
 											url = url;
 										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
@@ -142,13 +142,13 @@
 										} else {
 											url = url;
 										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
 
 									function getDataFromAPI(apiURL) {
-										console.log(apiURL)	
+										
 										if($('#day').val()=='')
 											{
 												var val=90;
@@ -165,7 +165,7 @@
 											type : 'GET',
 											dataType : 'json',
 											success : function(data, status) {
-												console.log(data);
+												
 												createTable(data);
 											}, error: function(e) {
 												console.log(e)
@@ -202,7 +202,7 @@
 											if((dat[key]["active_count"]!=null) || (dat[key]["active_count"]!=undefined))
 											 	{var noofmechmsg=dat[key]["active_count"]}
 
-											if(noofmechmsg=0)
+											if(noofmechmsg==0)
 											{
 												active=0;
 											}

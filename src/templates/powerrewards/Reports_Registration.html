@@ -227,8 +227,8 @@
 					                        <tbody role="alert" aria-live="polite" aria-relevant="all">';
 										for (var i = 0; i < dat.length; i++) {
 											machid=name=district=phone=state=distributor=regdt=address='';
-											if((dat[i]["mechanic_id"]!=null) || (dat[i]["mechanic_id"]!=undefined))
-											 	{var machid=dat[i]["mechanic_id"]}
+											if((dat[i]["permanent_id"]!=null) || (dat[i]["permanent_id"]!=undefined))
+											 	{var machid=dat[i]["permanent_id"]
 											if((dat[i]["first_name"]!=null) || (dat[i]["first_name"]!=undefined))
 											 	{var name=dat[i]["first_name"]}
 											if((dat[i]["district"]!=null) || (dat[i]["district"]!=undefined))
@@ -244,22 +244,22 @@
 											 	{var distributor=dat[i]["distributor"]["distributor_id"]}
 											}
 											if((dat[i]["registered_date"]!=null) || (dat[i]["registered_date"]!=undefined))
-											 	{var regdt=dat[i]["registered_date"]}
+											 	{var regdt=moment(dat[i]["registered_date"]).format('LL')}
 
-											if((dat[i]["shop_name"]!=null) || (dat[i]["shop_name"]!=undefined))
+											if((dat[i]["shop_name"]!='') || (dat[i]["shop_name"]!=null) || (dat[i]["shop_name"]!=undefined))
 											 	{var address=dat[i]["shop_name"]}
-											if((dat[i]["shop_number"]!=null) || (dat[i]["shop_number"]!=undefined))
+											if((dat[i]["shop_number"]!='') || (dat[i]["shop_number"]!=null) || (dat[i]["shop_number"]!=undefined))
 											 	{address+=","+dat[i]["shop_number"]}
-											if((dat[i]["shop_address"]!=null) || (dat[i]["shop_address"]!=undefined))
+											if((dat[i]["shop_address"]!='') || (dat[i]["shop_address"]!=null) || (dat[i]["shop_address"]!=undefined))
 											 	{ address+=","+dat[i]["shop_address"]}
-											if((dat[i]["district"]!=null) || (dat[i]["district"]!=undefined))
+											if((dat[i]["district"]!='') || (dat[i]["district"]!=null) || (dat[i]["district"]!=undefined))
 											 	{ address+=","+dat[i]["district"]}
-											 if((dat[i]["state"]!=null) || (dat[i]["state"]!=undefined))
+											 if((dat[i]["state"]!='') || (dat[i]["state"]!=null) || (dat[i]["state"]!=undefined))
 											 	{
-											 	if((dat[i]["state"]["state_name"]!=null) || (dat[i]["state"]["state_name"]!=undefined))
+											 	if((dat[i]["state"]["state_name"]!='') || (dat[i]["state"]["state_name"]!=null) || (dat[i]["state"]["state_name"]!=undefined))
 											 	{ address+=","+dat[i]["state"]["state_name"]}
 											}
-											 if((dat[i]["pincode"]!=null) || (dat[i]["pincode"]!=undefined))
+											 if((dat[i]["pincode"]!='') || (dat[i]["pincode"]!=null) || (dat[i]["pincode"]!=undefined))
 											 	{ address+=","+dat[i]["pincode"]}
 											
 
@@ -271,12 +271,13 @@
 	                                                <td class="center ">'+phone+'</td>\
 	                                                <td class="center ">'+state+'</td>\
 	                                                <td class="center ">'+distributor+'</td>\
-	                                                <td class="center ">'+moment(regdt).format('LL')+'</td>\
+	                                                <td class="center ">'+regdt+'</td>\
 	                                                <td class="center ">'+address+'</td>\
 	                                            </tr>';
 
 
-										}
+												}
+											}
 		                                table += ' </tbody></table>';	
 		                               $(".table-responsive").html('').append(table);
  
