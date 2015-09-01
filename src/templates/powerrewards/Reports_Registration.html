@@ -70,8 +70,8 @@
 				    	
 					    	<form id="datefilter" style="float: right;" class="pull-right">
 						    	<div class="row" style="padding-right: 10px;">
-						    		<div class="col-md-1" style="margin-top:6px;float: left;width: inherit;"><a href="Reports_Registration.html" target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
-						    		<div class="col-md-3" class="" ><select name="select-native-3" id="select-native-3" data-iconpos="left" data-mini="true" required>
+						    		<div class="col-md-1" style="margin-top:6px;float: left;width: inherit;"><a href="." target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
+						    		<div class="col-md-3" style="width: 250px;" class="" ><select name="select-native-3" id="select-native-3" data-iconpos="left" data-mini="true" required>
 						    				<option value="">Select</option>
 									        <option value="member_id">Mechanic ID</option>
 									        <option value="phone_number__endswith">Mobile No</option>
@@ -229,55 +229,55 @@
 											machid=name=district=phone=state=distributor=regdt=address='';
 											if((dat[i]["permanent_id"]!=null) || (dat[i]["permanent_id"]!=undefined))
 											 	{var machid=dat[i]["permanent_id"]
-											if((dat[i]["first_name"]!=null) || (dat[i]["first_name"]!=undefined))
-											 	{var name=dat[i]["first_name"]}
-											if((dat[i]["district"]!=null) || (dat[i]["district"]!=undefined))
-											 	{var district=dat[i]["district"]}
-											if((dat[i]["phone_number"]!=null) || (dat[i]["phone_number"]!=undefined))
-											 	{var phone=dat[i]["phone_number"]}
-											if((dat[i]["state"]!=null) || (dat[i]["state"]!=undefined)){
-											 		if((dat[i]["state"]["state_name"]!=null) || (dat[i]["state"]["state_name"]!=undefined))
-											 	{var state=dat[i]["state"]["state_name"]}
-											}
-											if((dat[i]["distributor"]!=null) || (dat[i]["distributor"]!=undefined)){
-											if((dat[i]["distributor"]["distributor_id"]!=null) || (dat[i]["distributor"]["distributor_id"]!=undefined))
-											 	{var distributor=dat[i]["distributor"]["distributor_id"]}
-											}
-											if((dat[i]["registered_date"]!=null) || (dat[i]["registered_date"]!=undefined))
-											 	{var regdt=moment(dat[i]["registered_date"]).format('LL')}
-
-											if((dat[i]["shop_name"]!='') || (dat[i]["shop_name"]!=null) || (dat[i]["shop_name"]!=undefined))
-											 	{var address=dat[i]["shop_name"]}
-											if((dat[i]["shop_number"]!='') || (dat[i]["shop_number"]!=null) || (dat[i]["shop_number"]!=undefined))
-											 	{address+=","+dat[i]["shop_number"]}
-											if((dat[i]["shop_address"]!='') || (dat[i]["shop_address"]!=null) || (dat[i]["shop_address"]!=undefined))
-											 	{ address+=","+dat[i]["shop_address"]}
-											if((dat[i]["district"]!='') || (dat[i]["district"]!=null) || (dat[i]["district"]!=undefined))
-											 	{ address+=","+dat[i]["district"]}
-											 if((dat[i]["state"]!='') || (dat[i]["state"]!=null) || (dat[i]["state"]!=undefined))
-											 	{
-											 	if((dat[i]["state"]["state_name"]!='') || (dat[i]["state"]["state_name"]!=null) || (dat[i]["state"]["state_name"]!=undefined))
-											 	{ address+=","+dat[i]["state"]["state_name"]}
-											}
-											 if((dat[i]["pincode"]!='') || (dat[i]["pincode"]!=null) || (dat[i]["pincode"]!=undefined))
-											 	{ address+=","+dat[i]["pincode"]}
-											
-
-
-											table += '<tr class="gradeA">\
-	                                                <td class=" sorting_1">'+machid+'</td>\
-	                                                <td class=" ">'+name+'</td>\
-	                                                <td class=" ">'+district+'</td>\
-	                                                <td class="center ">'+phone+'</td>\
-	                                                <td class="center ">'+state+'</td>\
-	                                                <td class="center ">'+distributor+'</td>\
-	                                                <td class="center ">'+regdt+'</td>\
-	                                                <td class="center ">'+address+'</td>\
-	                                            </tr>';
-
-
+												if((dat[i]["first_name"]!=null) || (dat[i]["first_name"]!=undefined))
+												 	{var name=dat[i]["first_name"]}
+												if((dat[i]["district"]!=null) || (dat[i]["district"]!=undefined))
+												 	{var district=dat[i]["district"]}
+												if((dat[i]["phone_number"]!=null) || (dat[i]["phone_number"]!=undefined))
+												 	{var phone=dat[i]["phone_number"]}
+												if((dat[i]["state"]!=null) || (dat[i]["state"]!=undefined)){
+												 		if((dat[i]["state"]["state_name"]!=null) || (dat[i]["state"]["state_name"]!=undefined))
+												 	{var state=dat[i]["state"]["state_name"]}
 												}
+												if((dat[i]["distributor"]!=null) || (dat[i]["distributor"]!=undefined)){
+												if((dat[i]["distributor"]["distributor_id"]!=null) || (dat[i]["distributor"]["distributor_id"]!=undefined))
+												 	{var distributor=dat[i]["distributor"]["distributor_id"]}
+												}
+												if((dat[i]["registered_date"]!=null) || (dat[i]["registered_date"]!=undefined))
+												 	{var regdt=dat[i]["registered_date"]}
+
+												if((dat[i]["shop_name"]!='') || (dat[i]["shop_name"]!=null) || (dat[i]["shop_name"]!=undefined))
+												 	{var address=dat[i]["shop_name"]}
+												if((dat[i]["shop_number"]!='') || (dat[i]["shop_number"]!=null) || (dat[i]["shop_number"]!=undefined))
+												 	{address+=","+dat[i]["shop_number"]}
+												if((dat[i]["shop_address"]!='') || (dat[i]["shop_address"]!=null) || (dat[i]["shop_address"]!=undefined))
+												 	{ address+=","+dat[i]["shop_address"]}
+												if((dat[i]["district"]!='') || (dat[i]["district"]!=null) || (dat[i]["district"]!=undefined))
+												 	{ address+=","+dat[i]["district"]}
+												 if((dat[i]["state"]!='') || (dat[i]["state"]!=null) || (dat[i]["state"]!=undefined))
+												 	{
+												 	if((dat[i]["state"]["state_name"]!='') || (dat[i]["state"]["state_name"]!=null) || (dat[i]["state"]["state_name"]!=undefined))
+												 	{ address+=","+dat[i]["state"]["state_name"]}
+												}
+												 if((dat[i]["pincode"]!='') || (dat[i]["pincode"]!=null) || (dat[i]["pincode"]!=undefined))
+												 	{ address+=","+dat[i]["pincode"]}
+												
+
+
+												table += '<tr class="gradeA">\
+		                                                <td class=" sorting_1">'+machid+'</td>\
+		                                                <td class=" ">'+name+'</td>\
+		                                                <td class=" ">'+district+'</td>\
+		                                                <td class="center ">'+phone+'</td>\
+		                                                <td class="center ">'+state+'</td>\
+		                                                <td class="center ">'+distributor+'</td>\
+		                                                <td class="center ">'+moment(regdt).format('LL')+'</td>\
+		                                                <td class="center ">'+address+'</td>\
+		                                            </tr>';
+
+
 											}
+										}
 		                                table += ' </tbody></table>';	
 		                               $(".table-responsive").html('').append(table);
  
