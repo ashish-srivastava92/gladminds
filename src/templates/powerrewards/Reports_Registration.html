@@ -70,6 +70,7 @@
 				    	
 					    	<form id="datefilter" style="float: right;" class="pull-right">
 						    	<div class="row" style="padding-right: 10px;">
+						    		<div class="col-md-1" style="margin-top:6px;float: left;width: inherit;"><a href="Reports_Registration.html" target="_self" class="ui-btn ui-icon-delete ui-btn-icon-notext ui-corner-all"></a></div>
 						    		<div class="col-md-3" class="" ><select name="select-native-3" id="select-native-3" data-iconpos="left" data-mini="true" required>
 						    				<option value="">Select</option>
 									        <option value="member_id">Mechanic ID</option>
@@ -81,7 +82,7 @@
 									</div>
 						    		<div class="col-md-3" style="height: 35px; padding-left:0px;"><input type="search" name="search-1" id="search-1" value="" placeholder="Search"  style="height: 35px;" required></div>
 						    		
-						    		<div class="col-md-5">
+						    		<div class="col-md-4">
 							    		<div id="sandbox-container" >
 							    			<div class="row pull-right">
 										        <div class="col-md-6" style="padding-left:0px;"><input id="from" class="form-control" type="text" placeholder="From Date" readonly="true"></div>
@@ -173,8 +174,7 @@
 											url = "/v1/members/?access_token="+access_token
 										} else {
 											url = url;
-										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
@@ -184,20 +184,20 @@
 										} else {
 											url = url;
 										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
 
 									function getDataFromAPI(apiURL) {
-										console.log(apiURL)	
+											
 
 										$.ajax({
 											url : '//bajajcv.gladminds.co'+apiURL,
 											type : 'GET',
 											dataType : 'json',
 											success : function(data, status) {
-												console.log(data);
+												
 												createTable(data);
 											}, error: function(e) {
 												console.log(e)
