@@ -72,6 +72,7 @@
 				    	
 					    	<form id="datefilter" style="float: right;" class="pull-right">
 						    	<div class="row" style="padding-right: 10px;">
+						    		<div class="col-md-1" style="margin-top:6px;float: left;width: inherit;"><a href="Reports_Product.html" target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
 						    		<div class="col-md-3" class="" ><select name="select-native-3" id="select-native-3" data-iconpos="left" data-mini="true" required>
 						    				<option value="">Select</option>
 									        <option value="member_id">Mechanic ID</option>
@@ -83,7 +84,7 @@
 									</div>
 						    		<div class="col-md-3" style="height: 35px; padding-left:0px;"><input type="search" name="search-1" id="search-1" value="" placeholder="Search"  style="height: 35px;" required></div>
 						    		
-						    		<div class="col-md-5">
+						    		<div class="col-md-4">
 							    		<div id="sandbox-container" >
 							    			<div class="row pull-right">
 										        <div class="col-md-6" style="padding-left:0px;"><input id="from" class="form-control" type="text" placeholder="From Date" readonly="true"></div>
@@ -173,7 +174,7 @@
 										} else {
 											url = url;
 										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
@@ -183,20 +184,20 @@
 										} else {
 											url = url;
 										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
 
 									function getDataFromAPI(apiURL) {
-										console.log(apiURL)	
+										
 
 										$.ajax({
 											url : apiURL,
 											type : 'GET',
 											dataType : 'json',
 											success : function(data, status) {
-												console.log(data);
+												
 												createTable(data);
 											}, error: function(e) {
 												console.log(e)
@@ -229,8 +230,8 @@
 		                        <tbody role="alert" aria-live="polite" aria-relevant="all">';
 										for (var i = 0; i < dat.length; i++) {
 											var machid=name=district=phone=state=distributor=regdt=points=upc=partdesc=partno='';
-											if((dat[i]["member"]["mechanic_id"]!=null) || (dat[i]["member"]["mechanic_id"]!=undefined))
-											 	{var machid=dat[i]["member"]["mechanic_id"]}
+											if((dat[i]["member"]["permanent_id"]!=null) || (dat[i]["member"]["permanent_id"]!=undefined))
+											 	{var machid=dat[i]["member"]["permanent_id"]
 											if((dat[i]["member"]["first_name"]!=null) || (dat[i]["member"]["first_name"]!=undefined))
 											 	{var name=dat[i]["member"]["first_name"]}
 											if((dat[i]["member"]["district"]!=null) || (dat[i]["member"]["district"]!=undefined))
@@ -265,7 +266,7 @@
 		                                                <td class="center ">'+partdesc+'</td>\<td class="center ">'+points+'</td>\
 		                                                <td class="center ">'+moment(regdt).format('LL')+'</td>\
 		                                            </tr>';
-		                                     
+		                                     	}
 		                                        	
 											}
 		                                table += ' </tbody></table>';	

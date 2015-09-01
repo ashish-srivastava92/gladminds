@@ -78,10 +78,11 @@
 				    		<div class="col-md-5">	
 							    			
 				    		</div>
-				    		<div class="col-md-3" data-role="controlgroup" data-type="horizontal" style="    margin-top: 22px;">	
+				    		<div class="col-md-2" data-role="controlgroup" data-type="horizontal" style="    margin-top: 22px;">	
 							    <!-- <a href="#" class="ui-btn ui-corner-all ">Accumulation</a>
 							    <a href="#" class="ui-btn ui-corner-all ">Redemption</a> 	 -->				
 				    		</div>
+				    		<div class="col-md-1" style="margin-top:22px;float: left;width: inherit;"><a href="Reports_Monthly.html" target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
 				    		<div class="col-md-4">
 				    			<fieldset class="ui-field-contain">
 							        <select name="day" id="day">
@@ -132,7 +133,7 @@
 										} else {
 											url = url;
 										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
@@ -142,13 +143,13 @@
 										} else {
 											url = url;
 										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
 
 									function getDataFromAPI(apiURL) {
-										console.log(apiURL)	
+										
 										if($('#day').val()=='')
 											{
 												var val=90;
@@ -165,7 +166,7 @@
 											type : 'GET',
 											dataType : 'json',
 											success : function(data, status) {
-												console.log(data);
+												
 												createTable(data);
 											}, error: function(e) {
 												console.log(e)
@@ -202,12 +203,12 @@
 											if((dat[key]["active_count"]!=null) || (dat[key]["active_count"]!=undefined))
 											 	{var noofmechmsg=dat[key]["active_count"]}
 
-											if(noofmechmsg=0)
+											if(noofmechmsg==0)
 											{
 												active=0;
 											}
 											else{
-												active=(noofmechmsg*100)/noofmech;
+												active=((noofmechmsg*100)/noofmech).toFixed(2);
 											}
 											
 											table += '<tr class="gradeA">\
