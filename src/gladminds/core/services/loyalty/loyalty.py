@@ -18,7 +18,7 @@ from gladminds.core.managers.mail import get_email_template, \
                        send_email_to_redemption_request_partner
 from  gladminds.core.core_utils.date_utils import get_time_in_seconds
 from gladminds.core.base_models import AreaSparesManager
-from twisted.python.reflect import accumulateClassDict
+# from twisted.python.reflect import accumulateClassDict
 LOG = logging.getLogger('gladminds')
 
 AUDIT_ACTION = 'SEND TO QUEUE'
