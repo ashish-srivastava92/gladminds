@@ -115,7 +115,19 @@
                          			showLoading();
                          			getNextPageData(1);
 
+                         			$('#search-1').bind('input propertychange paste', function() {
+									 
+										    var yourInput = $(this).val();
+												re = /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
+												var isSplChar = re.test(yourInput);
+												if(isSplChar)
+												{
+													var no_spl_char = yourInput.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
+													$(this).val(no_spl_char);
+												}
 									});
+
+								});
 
                          			$("#submit").click(function(){
                          				var col=$('#select-native-3').val();
@@ -228,7 +240,9 @@
 										for (var i = 0; i < dat.length; i++) {
 											machid=name=district=phone=state=distributor=regdt=address='';
 											if((dat[i]["permanent_id"]!=null) || (dat[i]["permanent_id"]!=undefined))
-											 	{var machid=dat[i]["permanent_id"]
+											 	{var machid=dat[i]["permanent_id"]}
+											 else if((dat[i]["mechanic_id"]!=null) || (dat[i]["mechanic_id"]!=undefined))
+											 	{var machid=dat[i]["mechanic_id"]}
 												if((dat[i]["first_name"]!=null) || (dat[i]["first_name"]!=undefined))
 												 	{var name=dat[i]["first_name"]}
 												if((dat[i]["district"]!=null) || (dat[i]["district"]!=undefined))
@@ -276,7 +290,7 @@
 		                                            </tr>';
 
 
-											}
+											
 										}
 		                                table += ' </tbody></table>';	
 		                               $(".table-responsive").html('').append(table);
@@ -295,12 +309,28 @@
 		                               $(".next a").attr('rel',data.meta.next);
 		                               $(".prev a").attr('rel',data.meta.previous);
 
+
+		                               $("#nextBtn").mouseover(function(){
+		                               		if($(this).attr('rel')){
+		                               			}
+		                               		else{
+		                               			$('.prev').addClass('disabled').removeClass('prev');
+		                               		}
+		                               	})
 		                               $("#nextBtn").click(function(){
 		                               		if($(this).attr('rel')){
 		                               			showLoading();
 		                               			getNextPageData($(this).attr('rel'))
 		                               			$(".table-responsive").html('')}
 		                               })
+
+		                               $("#prevBtn").mouseover(function(){
+		                               		if($(this).attr('rel')){
+		                               			}
+		                               		else{
+		                               			$('.prev').addClass('disabled').removeClass('prev');
+		                               		}
+		                               	})
 		                               $("#prevBtn").click(function(){
 		                               		if($(this).attr('rel')){
 		                               			showLoading();
@@ -309,6 +339,14 @@
 		                               })
 
 									}
+
+									function checkSpcialChar(event){
+							            if(!((event.keyCode >= 65) && (event.keyCode <= 90) || (event.keyCode >= 97) && (event.keyCode <= 122) || (event.keyCode >= 48) && (event.keyCode <= 57))){
+							               event.returnValue = false;
+							               return;
+							            }
+							            event.returnValue = true;
+							         }
 								
                             </script>
                         </div>
