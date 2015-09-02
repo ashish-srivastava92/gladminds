@@ -125,6 +125,17 @@
 													$(this).val(no_spl_char);
 												}
 								});
+								$("#search-1").keypress(function(){
+									    var col=$('#select-native-3').val();
+                         				var val=$('#search-1').val();
+                         				if (col==''){
+                         					alert('Select Column you want to search')
+                         					$("#select-native-3").focus();
+                         				}
+                         				else if(col=='member__phone_number__endswith'){
+                         					$("#search-1").attr('maxlength', '10')
+                         				}
+									});
 
 							});
 

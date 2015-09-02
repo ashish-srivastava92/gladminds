@@ -243,6 +243,13 @@
 		                               $(".prev a").attr('rel',data.meta.previous);
 
 		                               
+		                               $("#nextBtn").mouseover(function(){
+		                               		if($(this).attr('rel')){
+		                               			}
+		                               		else{
+		                               			$('.prev').addClass('disabled').removeClass('prev');
+		                               		}
+		                               	})
 		                               $("#nextBtn").click(function(){
 		                               		if($(this).attr('rel')){
 		                               			showLoading();
@@ -250,7 +257,13 @@
 		                               			$(".table-responsive").html('')}
 		                               })
 
-		                               
+		                               $("#prevBtn").mouseover(function(){
+		                               		if($(this).attr('rel')){
+		                               			}
+		                               		else{
+		                               			$('.prev').addClass('disabled').removeClass('prev');
+		                               		}
+		                               	})
 		                               $("#prevBtn").click(function(){
 		                               		if($(this).attr('rel')){
 		                               			showLoading();
