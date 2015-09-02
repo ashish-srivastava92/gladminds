@@ -79,7 +79,7 @@
 				    		<div class="col-md-7">
 				    			
 				    		</div>
-				    		<div class="col-md-1" style="margin-top:22px;float: left;"><a href="Reports_Monthly_Not.html" target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
+				    		<div class="col-md-1" style="margin-top:22px;float: left;"><a href="." target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
 				    		<div class="col-md-4">
 				    			<fieldset class="ui-field-contain">
 				    				
@@ -199,7 +199,9 @@
 
 											var machid=name=district=phone=state=distributor=asm='';
 											if((dat[i]["permanent_id"]!=null) || (dat[i]["permanent_id"]!=undefined))
-											 	{var machid=dat[i]["permanent_id"]
+											 	{var machid=dat[i]["permanent_id"]}
+											 else if((dat[i]["mechanic_id"]!=null) || (dat[i]["mechanic_id"]!=undefined))
+											 	{var machid=dat[i]["mechanic_id"]}
 											if((dat[i]["first_name"]!=null) || (dat[i]["first_name"]!=undefined))
 											 	{var name=dat[i]["first_name"]}
 											if((dat[i]["district"]!=null) || (dat[i]["district"]!=undefined))
@@ -221,7 +223,7 @@
 		                                                <td class="center ">'+distributor+'</td>\
 		                                                <td class="center ">'+asm+'</td>\
 	                                            </tr>';
-	                                        }
+	                                        
 										}
 		                                table += ' </tbody></table>';	
 		                               $(".table-responsive").html('').append(table);
@@ -240,12 +242,15 @@
 		                               $(".next a").attr('rel',data.meta.next);
 		                               $(".prev a").attr('rel',data.meta.previous);
 
+		                               
 		                               $("#nextBtn").click(function(){
 		                               		if($(this).attr('rel')){
 		                               			showLoading();
 		                               			getNextPageData($(this).attr('rel'))
 		                               			$(".table-responsive").html('')}
 		                               })
+
+		                               
 		                               $("#prevBtn").click(function(){
 		                               		if($(this).attr('rel')){
 		                               			showLoading();
