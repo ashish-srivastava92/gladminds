@@ -56,7 +56,7 @@ var date = new Date();
 $('#sandbox-container input').datepicker({
     format: "yyyy-mm-dd",
     autoclose: true,
-    // endDate: '+0d',
+    endDate: '+0d',
     todayHighlight: true
     
 });

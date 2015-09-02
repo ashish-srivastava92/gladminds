@@ -80,6 +80,8 @@
 									        <option value="district">District</option>
 									        <option value="state__state_name">State Name</option>
 									        <option value="distributor__distributor_id">Distributor ID</option>
+									        <option value="upcs__unique_part_code">Unique code Detail</option>
+									        <option value="upcs__part_number__part_number">Part No</option>
 									    </select>
 									</div>
 						    		<div class="col-md-3" style="height: 35px; padding-left:0px;"><input type="search" name="search-1" id="search-1" value="" placeholder="Search"  style="height: 35px;" required></div>
@@ -127,7 +129,21 @@
 											}
 								});
 
+								$("#search-1").keypress(function(){
+									    var col=$('#select-native-3').val();
+                         				var val=$('#search-1').val();
+                         				if (col==''){
+                         					alert('Select Column you want to search')
+                         					$("#select-native-3").focus();
+                         				}
+                         				else if(col=='phone_number__endswith'){
+                         					$("#search-1").attr('maxlength', '10')
+                         				}
+									});
+
 							});
+
+
 
                          			$("#submit").click(function(){
                          				var col=$('#select-native-3').val();
