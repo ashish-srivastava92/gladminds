@@ -986,7 +986,8 @@ class MemberResource(CustomBaseModelResource):
                      "member_id" : ALL,
                      "permanent_id" : ALL,
                      "mechanic_id" : ALL,
-                     "phone_number" : ALL
+                     "phone_number" : ALL,
+                     "created_date" : ALL
                      }
         ordering = ["state", "locality", "district", "registered_date",
                     "created_date", "mechanic_id", "last_transaction_date", "total_accumulation_req"
