@@ -159,7 +159,7 @@ $(document).on("pagecreate",function(){
 
 });
 
-qaLoginURL = "//bajajcv.gladminds.co/v1/gm-users/login/";
+qaLoginURL = "/v1/gm-users/login/";
 
 // qaLoginURL = "//bajaj.gladminds.co/v1/gm-users/login/";
 
@@ -189,15 +189,15 @@ $(document).on('click','#signIn',function(e){
 	        type: "POST",
 	        cache: false,
 	        data: serilizedData,
+	        async: true,
 	        success: function(data, resp){	
 	        	console.log(data)
 	        	if (data.status == 1) {
-	        		// localStorage.setItem('access_token')=data.access_token;
 	        		localStorage.setItem('access_token', data.access_token)
 	        		$("#csrfmiddlewaretoken").val(data.access_token);
-	        		$("#login-form").attr("action", "//bajajcv.gladminds.co/login/");
-	        		$("#login-form").submit();
-	        		
+//	        		$("#login-form").attr("action", "/login/");
+//	        		$("#login-form").submit();
+	        		window.location.replace("/login/");
 	        	} else {
 	                $("#error-msg-login-window").css("display", "block");   
 	                hideLoading();
@@ -242,10 +242,10 @@ function windowResizer(){
 
 
 function hover(element) {
-    element.setAttribute('src', 'img/play_mo.png');
+    element.setAttribute('src', '/static/powerrewards/img/play_mo.png');
 }
 function unhover(element) {
-    element.setAttribute('src', 'img/play.png');
+    element.setAttribute('src', '/static/powerrewards/img/play.png');
 }
 
 function showimagepreview(input) {
