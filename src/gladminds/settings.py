@@ -164,7 +164,7 @@ DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
 DB_USER = os.environ.get('DB_USER', 'root')
 DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
 DB_PORT = os.environ.get('DB_PORT', '3306')
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'admin')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
 
 class GmApps():
     AFTERBUY = 'afterbuy'
@@ -203,6 +203,7 @@ for brand in dir(GmApps):
         else:
             db_common.update({'NAME': getattr(GmApps,brand)})
         DATABASES[getattr(GmApps,brand)] = deepcopy(db_common)
+
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -352,13 +353,24 @@ ALL_APPS = (
     'storages',
     'tastypie_swagger',
     'django_otp',
-    'django_otp.plugins.otp_totp'
-   # 'debug_toolbar',
+    'django_otp.plugins.otp_totp',
+    #'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
 
 INSTALLED_APPS = ("longerusername",) + ALL_APPS
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        #'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        #'rest_framework.authentication.SessionAuthentication',
+        #rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    ),
+}
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 

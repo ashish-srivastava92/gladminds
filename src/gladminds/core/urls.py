@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, url, include
+
 from gladminds.core.cron_jobs.taskqueue import SqsHandler
 from gladminds.sqs_tasks import _tasks_map
 
@@ -95,6 +96,10 @@ admin.autodiscover()
 api_v1.register(SMSResources())
 
 urlpatterns = patterns('',
+                       
+    url(r'^api-token-auth/', 'rest_framework_jwt.views.obtain_jwt_token'),
+    url(r'^get_retailers/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.bajaj.views.apis.get_retailers'),
+    
     url(r'', include(api_v1.urls)),
     url(r'^$', 'gladminds.core.views.home'),
     url(r'^admin/', include(brand_admin.urls)),

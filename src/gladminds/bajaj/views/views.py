@@ -22,7 +22,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import F
 
 from gladminds.bajaj import models
-from gladminds.core import utils
+from gladminds.core import utils, constants
 from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message,\
     send_mail_for_feed_failure,send_mail_customer_phone_number_update_exceeds
 from gladminds.core.managers.mail import sent_otp_email,\
@@ -32,7 +32,7 @@ from gladminds.core.apis.coupon_apis import CouponDataResource
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
-    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS
+    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS, STATUS
 from gladminds.core.utils import get_email_template, format_product_object,\
     get_file_name
 from gladminds.core.auth_helper import Roles
@@ -43,6 +43,7 @@ from gladminds.core.services.message_template import get_template
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
 from gladminds.core.auth import otp_handler
+from gladminds.bajaj.models import Retailer
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template import loader
 from django.template.context import Context
@@ -727,3 +728,21 @@ def download_reconcilation_reports(download_data):
     })
     response.write(template.render(c))
     return response
+
+@login_required
+def rejected_reason(request):
+    '''
+    This method updates the retailer with the reason for rejection by the ASM/admin
+    '''
+    retailer_id = request.POST['retailer_id']
+    rejected_reason = request.POST['rejected_reason']
+    retailer_email = request.POST['retailer_email']
+    Retailer.objects.filter(id=retailer_id).update(approved=STATUS['REJECTED'],\
+                                                 rejected_reason=rejected_reason)
+    try:
+        send_email(sender = constants.FROM_EMAIL_ADMIN, receiver = retailer_email, 
+                   subject = constants.ADD_DISTRIBUTOR_SUBJECT, body = '',
+                   message= constants.ADD_DISTRIBUTOR_MESSAGE)
+    except Exception as e:
+        print 'The exception is ',e
+    return HttpResponseRedirect('/admin/bajaj/retailer/')
