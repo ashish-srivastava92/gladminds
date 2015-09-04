@@ -6,31 +6,31 @@
 
 	    <title>Power Rewards</title>
 
-		<link rel="shortcut icon" href="static/powerrewards/img/favicon.ico">
-		<link rel="stylesheet" href="static/powerrewards/css/report.css">
-		<link type="text/css" href="static/powerrewards/css/jquery-ui.css" rel="stylesheet"> 
+		<link rel="shortcut icon" href="/static/powerrewards/img/favicon.ico">
+		<link rel="stylesheet" href="/static/powerrewards/css/report.css">
+		<link type="text/css" href="/static/powerrewards/css/jquery-ui.css" rel="stylesheet"> 
 		
-	    <link rel="stylesheet" href="static/powerrewards/css/themes/default/jquery.mobile-1.4.5.min.css">
+	    <link rel="stylesheet" href="/static/powerrewards/css/themes/default/jquery.mobile-1.4.5.min.css">
 	   
 		
 
-		<link href="static/powerrewards/css/style1.css" rel="stylesheet">
+		<link href="/static/powerrewards/css/style1.css" rel="stylesheet">
 		
 		
 	    <!-- GLOBAL STYLES - Include these on every page. -->
-	    <link href="static/powerrewards/css/bootstrap.min.css" rel="stylesheet">
+	    <link href="/static/powerrewards/css/bootstrap.min.css" rel="stylesheet">
 	    
 
 	    <!-- THEME STYLES - Include these on every page. -->
 	    <link href="//themes.startbootstrap.com/flex-admin-v1.2/css/plugins/datatables/datatables.css" rel="stylesheet">
-	    <link href="static/powerrewards/css/plugins.css" rel="stylesheet">
+	    <link href="/static/powerrewards/css/plugins.css" rel="stylesheet">
 
 	    <!-- THEME DEMO STYLES - Use these styles for reference if needed. Otherwise they can be deleted. -->
 
-		<script src="static/powerrewards/js/jquery.min.js"></script>
-		<script src="static/powerrewards/js/jquery.mobile-1.4.5.min.js"></script>
-		<link href="static/powerrewards/css/datepicker3.css" rel="stylesheet">
-		<script src="static/powerrewards/js/jquery.dataTables.js"></script>
+		<script src="/static/powerrewards/js/jquery.min.js"></script>
+		<script src="/static/powerrewards/js/jquery.mobile-1.4.5.min.js"></script>
+		<link href="/static/powerrewards/css/datepicker3.css" rel="stylesheet">
+		<script src="/static/powerrewards/js/jquery.dataTables.js"></script>
 		
 		
 
@@ -41,13 +41,13 @@
 			    
 			    <div data-role="panel" id="myPanel">
 				 	<ul data-role="listview" data-inset="true" data-divider-theme="a" style="margin-top:33%;">
-				 		<li data-role="list-divider">Reports</li>
-				 		<li><a href="Reports_Registration.html" target="_self">Registration  Details</a></li>
-						<li><a href="Reports_Accumulation.html" target="_self">Accumulation Report</a></li>
-						<li><a href="Reports_Redemption.html" target="_self">Redemption Report</a></li>
+				 		<li data-role="list-divider">Reports</li>						
+						<li><a href="/loyalty/report" target="_self">Registration  Details</a></li>
+						<li><a href="/loyalty/accumulation" target="_self">Accumulation Report</a></li>
+						<li><a href="/loyalty/redemption" target="_self">Redemption Report</a></li>
 						<li><a href="#" class="active" target="_self">Product Fitment</a></li>
-						<li><a href="Reports_Monthly.html" target="_self">Monthly Active Count</a></li>
-						<li><a href="Reports_Monthly_Not.html" target="_self">Monthly Inactive Count</a></li>
+						<li><a href="/loyalty/monthly" target="_self">Monthly Active Count</a></li>
+						<li><a href="/loyalty/monthlynot" target="_self">Monthly Inactive Count</a></li>
 					</ul> 
 				</div>
 				
@@ -57,7 +57,7 @@
 					        <!-- Brand and toggle get grouped for better mobile display -->
 					        <div class="navbar-header">
 					            <a href="" title="jQuery Mobile Demos home">
-					            	<img src="static/powerrewards/img/power_rewards_logo.png" alt="jQuery Mobile">
+					            	<img src="/static/powerrewards/img/power_rewards_logo.png" alt="jQuery Mobile">
 					            </a>
 					        </div>
 					        
@@ -72,18 +72,21 @@
 				    	
 					    	<form id="datefilter" style="float: right;" class="pull-right">
 						    	<div class="row" style="padding-right: 10px;">
-						    		<div class="col-md-3" class="" ><select name="select-native-3" id="select-native-3" data-iconpos="left" data-mini="true" required>
+						    		<div class="col-md-1" style="margin-top:6px;float: left;width: inherit;"><a href="." target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
+						    		<div class="col-md-3" style="width: 250px;" class="" ><select name="select-native-3" id="select-native-3" data-iconpos="left" data-mini="true" required>
 						    				<option value="">Select</option>
 									        <option value="member_id">Mechanic ID</option>
 									        <option value="phone_number__endswith">Mobile No</option>
 									        <option value="district">District</option>
-									        <option value="state__state_name">State Name</option>
-									        <option value="distributor__distributor_id">Distributor ID</option>
+									        <option value="state__state_name">State</option>
+									        <option value="distributor__distributor_id">Distributor Code</option>
+									        <option value="upcs__unique_part_code">Unique Code Detail</option>
+									        <option value="upcs__part_number__part_number">Part No</option>
 									    </select>
 									</div>
 						    		<div class="col-md-3" style="height: 35px; padding-left:0px;"><input type="search" name="search-1" id="search-1" value="" placeholder="Search"  style="height: 35px;" required></div>
 						    		
-						    		<div class="col-md-5">
+						    		<div class="col-md-4">
 							    		<div id="sandbox-container" >
 							    			<div class="row pull-right">
 										        <div class="col-md-6" style="padding-left:0px;"><input id="from" class="form-control" type="text" placeholder="From Date" readonly="true"></div>
@@ -111,10 +114,50 @@
 	                    var access_token=localStorage.getItem("access_token")
 	                    	$(document).ready(function(){
 
-                         			showLoading();	
-                         			getNextPageData(1);
+                     			showLoading();	
+                     			getNextPageData(1);
 
+                     			$('#select-native-3').bind('change', function() {
+									 
+										    $("#search-1").val('')
 									});
+
+                     			$('#search-1').bind('keypress input propertychange paste', function() {
+								 
+									    var yourInput = $(this).val();
+											re = /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
+											var isSplChar = re.test(yourInput);
+											if(isSplChar)
+											{
+												var no_spl_char = yourInput.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
+												$(this).val(no_spl_char);
+											}
+								
+									    var col=$('#select-native-3').val();
+                         				var val=$('#search-1').val();
+                         				if (col==''){
+                         					alert('Select Column you want to search')
+                         					$("#select-native-3").focus();
+                         				}
+                         				else if(col=='phone_number__endswith'){
+                         					$("#search-1").attr('maxlength', '10')
+                         					var yourInput = $(this).val();
+											re = /[a-zA-Z`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
+											var isnum = re.test(yourInput);
+											if(isnum)
+											{
+												var no_spl_char = yourInput.replace(/[a-zA-Z`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
+												$(this).val(no_spl_char);
+											}
+                         				}
+                         				else {
+                         					$("#search-1").attr('maxlength', '')
+                         				}
+									});
+
+							});
+
+
 
                          			$("#submit").click(function(){
                          				var col=$('#select-native-3').val();
@@ -173,7 +216,7 @@
 										} else {
 											url = url;
 										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
@@ -183,20 +226,20 @@
 										} else {
 											url = url;
 										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
 
 									function getDataFromAPI(apiURL) {
-										console.log(apiURL)	
+										
 
 										$.ajax({
-											url : '//bajajcv.gladminds.co'+apiURL,
+											url : apiURL,
 											type : 'GET',
 											dataType : 'json',
 											success : function(data, status) {
-												console.log(data);
+												
 												createTable(data);
 											}, error: function(e) {
 												console.log(e)
@@ -221,7 +264,7 @@
 	                           			<th class="sorting" role="columnheader" tabindex="0" aria-controls="example-table" rowspan="1" colspan="1" aria-label="Distributor Code" >Distributor Code</th>\
 	                           			<th class="sorting" role="columnheader" tabindex="0" aria-controls="example-table" rowspan="1" colspan="1" aria-label="Unique code detail" >Unique code detail</th>\
 	                           			<th class="sorting" role="columnheader" tabindex="0" aria-controls="example-table" rowspan="1" colspan="1" aria-label="Part No" >Part No</th>\
-	                           			<th class="sorting" role="columnheader" tabindex="0" aria-controls="example-table" rowspan="1" colspan="1" aria-label="Descp" >Descp</th>\
+	                           			<th class="sorting" role="columnheader" tabindex="0" aria-controls="example-table" rowspan="1" colspan="1" aria-label="Descp" >Description</th>\
 	                           			<th class="sorting" role="columnheader" tabindex="0" aria-controls="example-table" rowspan="1" colspan="1" aria-label="Point SMSed" >Point SMSed</th>\
 	                           			<th class="sorting" role="columnheader" tabindex="0" aria-controls="example-table" rowspan="1" colspan="1" aria-label="Date of  SMSing" >Date of  SMSing</th>\
 	                           			</tr>\
@@ -229,7 +272,9 @@
 		                        <tbody role="alert" aria-live="polite" aria-relevant="all">';
 										for (var i = 0; i < dat.length; i++) {
 											var machid=name=district=phone=state=distributor=regdt=points=upc=partdesc=partno='';
-											if((dat[i]["member"]["mechanic_id"]!=null) || (dat[i]["member"]["mechanic_id"]!=undefined))
+											if((dat[i]["member"]["permanent_id"]!=null) || (dat[i]["member"]["permanent_id"]!=undefined))
+											 	{var machid=dat[i]["member"]["permanent_id"]}
+											 else if((dat[i]["member"]["mechanic_id"]!=null) || (dat[i]["member"]["mechanic_id"]!=undefined))
 											 	{var machid=dat[i]["member"]["mechanic_id"]}
 											if((dat[i]["member"]["first_name"]!=null) || (dat[i]["member"]["first_name"]!=undefined))
 											 	{var name=dat[i]["member"]["first_name"]}
@@ -262,10 +307,11 @@
 		                                                <td class="center ">'+distributor+'</td>\
 		                                                <td class="center ">'+upc+'</td>\
 		                                                <td class="center ">'+partno+'</td>\
-		                                                <td class="center ">'+partdesc+'</td>\<td class="center ">'+points+'</td>\
+		                                                <td class="center ">'+partdesc+'</td>\
+		                                                <td class="center ">'+points+'</td>\
 		                                                <td class="center ">'+moment(regdt).format('LL')+'</td>\
 		                                            </tr>';
-		                                     
+		                                     	
 		                                        	
 											}
 		                                table += ' </tbody></table>';	
@@ -285,12 +331,27 @@
 		                               $(".next a").attr('rel',data.meta.next);
 		                               $(".prev a").attr('rel',data.meta.previous);
 
+		                               $("#nextBtn").mouseover(function(){
+		                               		if($(this).attr('rel')){
+		                               			}
+		                               		else{
+		                               			$('.next').addClass('disabled').removeClass('prev');
+		                               		}
+		                               	})
 		                               $("#nextBtn").click(function(){
 		                               		if($(this).attr('rel')){
 		                               			showLoading();
 		                               			getNextPageData($(this).attr('rel'))
 		                               			$(".table-responsive").html('')}
 		                               })
+
+		                               $("#prevBtn").mouseover(function(){
+		                               		if($(this).attr('rel')){
+		                               			}
+		                               		else{
+		                               			$('.prev').addClass('disabled').removeClass('prev');
+		                               		}
+		                               	})
 		                               $("#prevBtn").click(function(){
 		                               		if($(this).attr('rel')){
 		                               			showLoading();
@@ -299,7 +360,13 @@
 		                               })
 
 									}
-
+									function checkSpcialChar(event){
+							            if(!((event.keyCode >= 65) && (event.keyCode <= 90) || (event.keyCode >= 97) && (event.keyCode <= 122) || (event.keyCode >= 48) && (event.keyCode <= 57))){
+							               event.returnValue = false;
+							               return;
+							            }
+							            event.returnValue = true;
+							         }
                             </script>
                         </div>
                     <!-- /.table-responsive -->
@@ -314,29 +381,29 @@
 		</div>
 
 		
-		<script src="static/powerrewards/js/bootstrap.min.js"></script>
-		<script src="static/powerrewards/js/jquery.slimscroll.min.js"></script>
-		<script src="static/powerrewards/js/jquery.popupoverlay.js"></script>
-		<script src="static/powerrewards/js/defaults.js"></script>
+		<script src="/static/powerrewards/js/bootstrap.min.js"></script>
+		<script src="/static/powerrewards/js/jquery.slimscroll.min.js"></script>
+		<script src="/static/powerrewards/js/jquery.popupoverlay.js"></script>
+		<script src="/static/powerrewards/js/defaults.js"></script>
 
 
 		 <!-- <script src="http://themes.startbootstrap.com/flex-admin-v1.2/js/plugins/popupoverlay/logout.js"></script> -->
 		<!-- HISRC Retina Images -->
-		<script src="js/hisrc.js"></script>
+		<script src="/static/powerrewards/js/hisrc.js"></script>
 
 		<!-- PAGE LEVEL PLUGIN SCRIPTS -->
-		<script src="static/powerrewards/js/jquery.dataTables.js"></script>
-		<script src="static/powerrewards/js/datatables-bs3.js"></script>
+		<script src="/static/powerrewards/js/jquery.dataTables.js"></script>
+		<script src="/static/powerrewards/js/datatables-bs3.js"></script>
 		<!-- THEME SCRIPTS -->
 		<!-- <script src="http://themes.startbootstrap.com/flex-admin-v1.2/js/flex.js"></script> -->
-		<script src="static/powerrewards/js/advanced-tables-demo.js"></script>
+		<script src="/static/powerrewards/js/advanced-tables-demo.js"></script>
 				
 	  <!--   // <script src="js/inc.js"></script> -->
 
 
-	  	<script src="static/powerrewards/js/bootstrap-datepicker.js"></script>
-	  	<script src="static/powerrewards/js/report.js"></script>
-	  	<script src="static/powerrewards/js/moment.js"></script>
+	  	<script src="/static/powerrewards/js/bootstrap-datepicker.js"></script>
+	  	<script src="/static/powerrewards/js/report.js"></script>
+	  	<script src="/static/powerrewards/js/moment.js"></script>
 
 	</body>
 </html>
