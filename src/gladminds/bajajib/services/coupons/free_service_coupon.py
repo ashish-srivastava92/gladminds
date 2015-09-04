@@ -194,6 +194,7 @@ def validate_coupon(sms_dict, phone_number):
         except Exception as ax:
             LOG.error('Customer Phone Number is not stored in DB %s' % ax)
         if len(in_progress_coupon) > 0:
+            
             update_inprogress_coupon(in_progress_coupon[0], service_advisor)
             LOG.info("Validate_coupon: Already in progress coupon")
             if (in_progress_coupon[0] == valid_coupon):

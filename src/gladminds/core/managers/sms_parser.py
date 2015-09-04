@@ -22,10 +22,12 @@ class InvalidKeyWord(SmsException): {}
 
 class InvalidFormat(SmsException): {}
 
+#class InvalidMobileNumberFormat(SmsException): {}
+
 def sms_parser(*args, **kwargs):
     message = kwargs['message']
-
     parse_message = parse(templates.RCV_MESSAGE_FORMAT, message)
+    
     #FIXME: Find a generic way to handle message
     if not parse_message:
         message = message + " message"
@@ -71,6 +73,8 @@ def sms_processing(phone_number, message, brand):
         error_template = ink.template
     except InvalidMessage as inm:
         error_template = inm.template
+#     except InvalidMobileNumberFormat as inn:
+#         error_template = inn.template
     except InvalidFormat as inf:
         error_template = ANGULAR_FORMAT('CORRECT FORMAT: ' + inf.template)
     if error_template:
