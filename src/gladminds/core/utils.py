@@ -100,11 +100,6 @@ def mobile_format(phone_number):
         And when airtel pull message from customer
         or service advisor we will check that number in +91 format
     '''
-    if settings.BRAND == 'bajajib':
-        country_code = get_model('Country').objects.values('name').distinct()
-        for c in country_code:
-            if c['name'] == 'Uganda':
-                return '+256' + phone_number[-9:]
     return '+91' + phone_number[-10:]
 
 
@@ -121,15 +116,6 @@ def get_phone_number_format(phone_number):
         This is used when we are sending message through sms client
     '''
     return phone_number[-10:]
-
-# def validate_mobile_number(phone_number):
-#     rule = re.compile(r'/^[0-9]{10,14}$/')
-# 
-#     if not rule.search(phone_number):
-#        # msg = "Invalid mobile number."
-#         return False
-#     return True
-
 
 def save_otp(user, token, email):
     models.OTPToken.objects.filter(user=user).delete()
