@@ -1062,14 +1062,21 @@ class MemberResource(CustomBaseModelResource):
                 region_filter=region
                 args['last_transaction_date__gte']=datetime.now()-timedelta(int(active_days))
                 active_member = get_model('Member').objects.filter(**args).values(region_filter).annotate(count= Count('mechanic_id'))
+            active_asm = get_model('AreaSparesManager').objects.all().values('state__state_name', 'user__user__username')
             member_report={}
             for member in registered_member:
                 member_report[member[region]]={}
                 member_report[member[region]]['registered_count'] = member['count']
                 member_report[member[region]]['active_count']= 0
+                member_report[member[region]]['active_percent']= 0
+                member_report[member[region]]['asm']= ''
                 active = filter(lambda active: active[region_filter] == member[region], active_member)
+                asm = filter(lambda active: active['state__state_name'] == member[region], active_asm)
+                if asm:
+                    member_report[member[region]]['asm']= asm[0]['user__user__username']
                 if active:
                     member_report[member[region]]['active_count']= active[0]['count']
+                    member_report[member[region]]['active_percent']= round(100 * float(active[0]['count'])/float(member['count']), 2)
         except Exception as ex:
             logger.error('Active member count requested by {0}:: {1}'.format(request.user, ex))
             member_report = {'status': 0, 'message': 'could not retrieve the count of active members'}

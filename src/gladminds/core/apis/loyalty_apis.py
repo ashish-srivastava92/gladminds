@@ -72,6 +72,31 @@ class RedemptionResource(CustomBaseModelResource):
                      "created_date" : ALL
                      }
         ordering = ["created_date", "status", "member"]
+    
+    def build_filters(self, filters=None):
+        if filters is None:
+            filters = {}
+        orm_filters = super(RedemptionResource, self).build_filters(filters)
+        
+        if 'member_id' in filters:
+            query = filters['member_id']
+            qset = (
+                    Q(member__mechanic_id=query)|
+                    Q(member__permanent_id=query)
+                      )
+            orm_filters.update({'custom':  qset})
+        return orm_filters  
+                     
+            
+    def apply_filters(self, request, applicable_filters):
+        if 'custom' in applicable_filters:
+            custom = applicable_filters.pop('custom')
+        else:
+            custom = None
+        
+        semi_filtered = super(RedemptionResource, self).apply_filters(request, applicable_filters)
+        
+        return semi_filtered.filter(custom) if custom else semi_filtered
 
     def prepend_urls(self):
         return [
@@ -159,6 +184,31 @@ class AccumulationResource(CustomBaseModelResource):
                      "upcs" : ALL_WITH_RELATIONS,
                      "created_date" : ALL
                      }
+    
+    def build_filters(self, filters=None):
+        if filters is None:
+            filters = {}
+        orm_filters = super(AccumulationResource, self).build_filters(filters)
+        
+        if 'member_id' in filters:
+            query = filters['member_id']
+            qset = (
+                    Q(member__mechanic_id=query)|
+                    Q(member__permanent_id=query)
+                      )
+            orm_filters.update({'custom':  qset})
+        return orm_filters  
+                     
+            
+    def apply_filters(self, request, applicable_filters):
+        if 'custom' in applicable_filters:
+            custom = applicable_filters.pop('custom')
+        else:
+            custom = None
+        
+        semi_filtered = super(AccumulationResource, self).apply_filters(request, applicable_filters)
+        
+        return semi_filtered.filter(custom) if custom else semi_filtered
 
 class WelcomeKitResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
