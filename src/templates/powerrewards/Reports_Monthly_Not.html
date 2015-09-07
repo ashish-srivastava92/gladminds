@@ -76,11 +76,11 @@
 				    <div class="col-md-6"><div style="float: left;"><a href="#myPanel"><button  class="ui-btn ui-icon-bars ui-shadow ui-corner-all ui-btn-icon-notext ui-btn-inline">bars</button></a></div></div>
 				    <div class="col-md-6">
 				    	<div class="row">
-				    	<div class="col-md-7">
+				    		<div class="col-md-7">
 				    			
 				    		</div>
-				    		
-				    		<div class="col-md-5">
+				    		<div class="col-md-1" style="margin-top:22px;float: left;"><a href="." target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
+				    		<div class="col-md-4">
 				    			<fieldset class="ui-field-contain">
 				    				
 							        <select name="day" id="day">
@@ -132,7 +132,7 @@
 										} else {
 											url = url;
 										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
@@ -142,7 +142,7 @@
 										} else {
 											url = url;
 										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
@@ -162,14 +162,14 @@
 										var defaultdate;
 	                    				defaultdate=moment().subtract(val, 'days').format("YYYY-MM-DD");
 
-										console.log(apiURL)	
-										console.log('//bajajcv.gladminds.co'+apiURL+"&last_transaction_date__lte="+defaultdate)	
+										
+											
 										$.ajax({
 											url : apiURL+"&last_transaction_date__lte="+defaultdate,
 											type : 'GET',
 											dataType : 'json',
 											success : function(data, status) {
-												console.log(data);
+												
 												createTable(data);
 											}, error: function(e) {
 												console.log(e)
@@ -198,7 +198,9 @@
 										for (var i = 0; i < dat.length; i++) {
 
 											var machid=name=district=phone=state=distributor=asm='';
-											if((dat[i]["mechanic_id"]!=null) || (dat[i]["mechanic_id"]!=undefined))
+											if((dat[i]["permanent_id"]!=null) || (dat[i]["permanent_id"]!=undefined))
+											 	{var machid=dat[i]["permanent_id"]}
+											 else if((dat[i]["mechanic_id"]!=null) || (dat[i]["mechanic_id"]!=undefined))
 											 	{var machid=dat[i]["mechanic_id"]}
 											if((dat[i]["first_name"]!=null) || (dat[i]["first_name"]!=undefined))
 											 	{var name=dat[i]["first_name"]}
@@ -221,6 +223,7 @@
 		                                                <td class="center ">'+distributor+'</td>\
 		                                                <td class="center ">'+asm+'</td>\
 	                                            </tr>';
+	                                        
 										}
 		                                table += ' </tbody></table>';	
 		                               $(".table-responsive").html('').append(table);
@@ -239,12 +242,28 @@
 		                               $(".next a").attr('rel',data.meta.next);
 		                               $(".prev a").attr('rel',data.meta.previous);
 
+		                               
+		                               $("#nextBtn").mouseover(function(){
+		                               		if($(this).attr('rel')){
+		                               			}
+		                               		else{
+		                               			$('.next').addClass('disabled').removeClass('prev');
+		                               		}
+		                               	})
 		                               $("#nextBtn").click(function(){
 		                               		if($(this).attr('rel')){
 		                               			showLoading();
 		                               			getNextPageData($(this).attr('rel'))
 		                               			$(".table-responsive").html('')}
 		                               })
+
+		                               $("#prevBtn").mouseover(function(){
+		                               		if($(this).attr('rel')){
+		                               			}
+		                               		else{
+		                               			$('.prev').addClass('disabled').removeClass('prev');
+		                               		}
+		                               	})
 		                               $("#prevBtn").click(function(){
 		                               		if($(this).attr('rel')){
 		                               			showLoading();

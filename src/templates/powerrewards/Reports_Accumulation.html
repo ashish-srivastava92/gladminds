@@ -70,20 +70,21 @@
 				    	
 					    	<form id="datefilter" style="float: right;" class="pull-right">
 						    	<div class="row" style="padding-right: 10px;">
-						    		<div class="col-md-3" class="" ><select name="select-native-3" id="select-native-3" data-iconpos="left" data-mini="true" required>
+						    		<div class="col-md-1" style="margin-top:6px;float: left;width: inherit;"><a href="." target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
+						    		<div class="col-md-3" style="width: 250px;" class="" ><select name="select-native-3" id="select-native-3" data-iconpos="left" data-mini="true" required>
 						    				<option value="">Select</option>
 									        <option value="member__mechanic_id">Mechanic ID</option>
 									        <option value="member__phone_number__endswith">Mobile No</option>
 									        <option value="member__district">District</option>
-									        <option value="member__state__state_name">State Name</option>
-									        <option value="member__distributor__distributor_id">Distributor ID</option>
-									        <option value="upcs__unique_part_code">Unique code Detail</option>
+									        <option value="member__state__state_name">State</option>
+									        <option value="member__distributor__distributor_id">Distributor Code</option>
+									        <option value="upcs__unique_part_code">Unique Code Detail</option>
 									       
 									    </select>
 									</div>
 						    		<div class="col-md-3" style="height: 35px; padding-left:0px;"><input type="search" name="search-1" id="search-1" value="" placeholder="Search"  style="height: 35px;" required></div>
 						    		
-						    		<div class="col-md-5">
+						    		<div class="col-md-4">
 							    		<div id="sandbox-container" >
 							    			<div class="row pull-right">
 										        <div class="col-md-6" style="padding-left:0px;"><input id="from" class="form-control" type="text" placeholder="From Date" readonly="true"></div>
@@ -111,10 +112,48 @@
 	                    		var access_token=localStorage.getItem("access_token")
 	                    		$(document).ready(function(){
 
-                         			showLoading();
-                         			getNextPageData(1);
+                     			showLoading();
+                     			getNextPageData(1);
 
+                     			$('#select-native-3').bind('change', function() {
+									 
+										    $("#search-1").val('')
 									});
+
+                     			$('#search-1').bind('keypress input propertychange paste', function() {
+								 
+									    var yourInput = $(this).val();
+											re = /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
+											var isSplChar = re.test(yourInput);
+											if(isSplChar)
+											{
+												var no_spl_char = yourInput.replace(/[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
+												$(this).val(no_spl_char);
+											}
+								
+									    var col=$('#select-native-3').val();
+                         				var val=$('#search-1').val();
+                         				if (col==''){
+                         					alert('Select Column you want to search')
+                         					$("#select-native-3").focus();
+                         				}
+                         				else if(col=='member__phone_number__endswith'){
+                         					$("#search-1").attr('maxlength', '10')
+                         					var yourInput = $(this).val();
+											re = /[a-zA-Z`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
+											var isnum = re.test(yourInput);
+											if(isnum)
+											{
+												var no_spl_char = yourInput.replace(/[a-zA-Z`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi, '');
+												$(this).val(no_spl_char);
+											}
+                         				}
+                         				else {
+                         					$("#search-1").attr('maxlength', '')
+                         				}
+									});
+
+							});
 
                          			$("#submit").click(function(){
                          				var col=$('#select-native-3').val();
@@ -172,7 +211,7 @@
 										} else {
 											url = url;
 										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
@@ -182,20 +221,20 @@
 										} else {
 											url = url;
 										}
-										console.log(url)
+										
 										
 										getDataFromAPI(url)
 									}
 
 									function getDataFromAPI(apiURL) {
-										console.log(apiURL)	
+											
 
 										$.ajax({
 											url : apiURL,
 											type : 'GET',
 											dataType : 'json',
 											success : function(data, status) {
-												console.log(data);
+												
 												createTable(data);
 											}, error: function(e) {
 												console.log(e)
@@ -226,7 +265,9 @@
 		                        <tbody role="alert" aria-live="polite" aria-relevant="all">';
 										for (var i = 0; i < dat.length; i++) {
 											var machid=name=district=phone=state=distributor=regdt=points=upc='';
-											if((dat[i]["member"]["mechanic_id"]!=null) || (dat[i]["member"]["mechanic_id"]!=undefined))
+											if((dat[i]["member"]["permanent_id"]!=null) || (dat[i]["member"]["permanent_id"]!=undefined))
+											 	{var machid=dat[i]["member"]["permanent_id"]}
+											 else if((dat[i]["member"]["mechanic_id"]!=null) || (dat[i]["member"]["mechanic_id"]!=undefined))
 											 	{var machid=dat[i]["member"]["mechanic_id"]}
 											if((dat[i]["member"]["first_name"]!=null) || (dat[i]["member"]["first_name"]!=undefined))
 											 	{var name=dat[i]["member"]["first_name"]}
@@ -286,12 +327,27 @@
 		                               $(".next a").attr('rel',data.meta.next);
 		                               $(".prev a").attr('rel',data.meta.previous);
 
+		                               $("#nextBtn").mouseover(function(){
+		                               		if($(this).attr('rel')){
+		                               			}
+		                               		else{
+		                               			$('.next').addClass('disabled').removeClass('prev');
+		                               		}
+		                               	})
 		                               $("#nextBtn").click(function(){
 		                               		if($(this).attr('rel')){
 		                               			showLoading();
 		                               			getNextPageData($(this).attr('rel'))
 		                               			$(".table-responsive").html('')}
 		                               })
+
+		                               $("#prevBtn").mouseover(function(){
+		                               		if($(this).attr('rel')){
+		                               			}
+		                               		else{
+		                               			$('.prev').addClass('disabled').removeClass('prev');
+		                               		}
+		                               	})
 		                               $("#prevBtn").click(function(){
 		                               		if($(this).attr('rel')){
 		                               			showLoading();
