@@ -1,6 +1,7 @@
-from datetime import datetime, timedelta, date
 import json
 import logging
+from datetime import datetime, timedelta, date
+
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib.auth import authenticate, login
@@ -8,12 +9,16 @@ from django.contrib.auth.models import User
 from django.db.models.aggregates import Count, Sum
 from django.http.response import HttpResponse
 from django.db.models.query_utils import Q
+from django.contrib.sites.models import RequestSite
+
 from tastypie.utils.urls import trailing_slash
 from tastypie import fields,http
 from tastypie.http import HttpBadRequest
 from tastypie.authorization import Authorization
 from tastypie.authorization import DjangoAuthorization
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
+from tastypie.exceptions import ImmediateHttpResponse
+
 from gladminds.core import constants
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import MultiAuthorization,\
@@ -28,9 +33,7 @@ from gladminds.core.model_fetcher import models
 from gladminds.sqs_tasks import send_otp
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from gladminds.core.auth import otp_handler
-from django.contrib.sites.models import RequestSite
 from gladminds.core.model_helpers import format_phone_number
-from tastypie.exceptions import ImmediateHttpResponse
 from gladminds.core.utils import check_password
 from gladminds.afterbuy import utils as core_utils
 from gladminds.core.model_fetcher import get_model

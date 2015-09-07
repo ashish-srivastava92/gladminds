@@ -1,35 +1,28 @@
-#from tastypie.constants import ALL
+import json
+import logging
+
+from django.conf.urls import url
+from django.http.response import HttpResponse
+from django.db.models.aggregates import Count
+from django.db import transaction
+from django.forms.models import model_to_dict
+from django.db.models.query_utils import Q
+
+from tastypie.constants import ALL, ALL_WITH_RELATIONS
+from tastypie.utils.urls import trailing_slash
+from tastypie import fields
+from tastypie.authorization import Authorization
+
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.model_fetcher import models, get_model
 from gladminds.core import constants
 from gladminds.core.apis.authentication import AccessTokenAuthentication
-from tastypie.authorization import Authorization
-from tastypie import fields
-from django.db.models import Count
-from gladminds.core import utils
-from gladminds.core.apis.dashboard_apis import SMSReportResource 
-from gladminds.core.apis.product_apis import ProductTypeResource
-from django.conf.urls import url
-from django.http.response import HttpResponse, HttpResponseBadRequest
-import json
-from django.forms.models import model_to_dict
-from django.db.models.query_utils import Q
-from tastypie.constants import ALL, ALL_WITH_RELATIONS
-from tastypie.utils.urls import trailing_slash
 from gladminds.core.apis.authorization import MultiAuthorization,\
     LoyaltyCustomAuthorization
-import logging
-from django.db import transaction
 from gladminds.core.auth_helper import Roles
-from django.db.models.aggregates import Count, Sum
-import itertools
-from gladminds.core.apis.user_apis import MemberResource, AreaSparesManagerResource, PartnerResource,UserResource,\
-UserProfileResource,DistributorResource,RetailerResource
+from gladminds.core.apis.user_apis import MemberResource, AreaSparesManagerResource, PartnerResource,UserResource
 from gladminds.core.apis.product_apis import ProductCatalogResource,\
     SparePartUPCResource
-from django.conf import settings
-from gladminds.core.core_utils.utils import dictfetchall
-from django.db import connections
 logger = logging.getLogger("gladminds")
 
 class LoyaltySLAResource(CustomBaseModelResource):
