@@ -1065,7 +1065,7 @@ class MemberResource(CustomBaseModelResource):
                 region_filter=region
                 args['last_transaction_date__gte']=datetime.now()-timedelta(int(active_days))
                 active_member = get_model('Member').objects.filter(**args).values(region_filter).annotate(count= Count('mechanic_id'))
-            active_asm = get_model('AreaSparesManager').objects.all().values('state__state_name', 'user__user__username')
+            active_asm = get_model('AreaSparesManager').objects.all().values('state__state_name', 'name')
             member_report={}
             for member in registered_member:
                 member_report[member[region]]={}
@@ -1074,9 +1074,10 @@ class MemberResource(CustomBaseModelResource):
                 member_report[member[region]]['active_percent']= 0
                 member_report[member[region]]['asm']= ''
                 active = filter(lambda active: active[region_filter] == member[region], active_member)
-                asm = filter(lambda active: active['state__state_name'] == member[region], active_asm)
-                if asm:
-                    member_report[member[region]]['asm']= asm[0]['user__user__username']
+                all_asm = filter(lambda active: active['state__state_name'] == member[region], active_asm)
+                if all_asm:
+                    for asm in all_asm:
+                        member_report[member[region]]['asm']= ' , '.join([member_report[member[region]]['asm'],asm['name']])
                 if active:
                     member_report[member[region]]['active_count']= active[0]['count']
                     member_report[member[region]]['active_percent']= round(100 * float(active[0]['count'])/float(member['count']), 2)
