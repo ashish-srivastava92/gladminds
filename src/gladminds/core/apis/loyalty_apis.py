@@ -202,6 +202,25 @@ class AccumulationResource(CustomBaseModelResource):
         semi_filtered = super(AccumulationResource, self).apply_filters(request, applicable_filters)
         
         return semi_filtered.filter(custom) if custom else semi_filtered
+    
+    def alter_list_data_to_serialize(self, request, data):
+        part_numbers = []
+        for object in data['objects']:
+            if object.data.has_key('upcs'):
+                for upc in object.data['upcs']:            
+                    part_numbers.append(upc.data['part_number'].data['id'])
+        
+        points = models.SparePartPoint.objects.filter(part_number__in=part_numbers).values('part_number__id', 'points')
+
+        for object in data['objects']:
+            if object.data.has_key('upcs'):
+                for upc in object.data['upcs']:
+                    part_number = upc.data['part_number'].data['id']
+                    upc_mapping = filter(lambda point: point['part_number__id']==part_number, points)
+                    upc.data['part_number'].data['point'] = upc_mapping[0]['points']
+                    
+        return data
+
 
 class WelcomeKitResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
