@@ -97,5 +97,13 @@
       "country_code" : "UGN"
       
     }
- }
+ },
+ {
+    "model": "gladminds.constant",
+    "pk": 13,
+    "fields": {
+      "constant_name":"phone_number_update_count",
+      "constant_value":"3"
+    }
+  }
 ]

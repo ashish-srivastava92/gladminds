@@ -324,6 +324,7 @@ def register_customer(request, group=None):
                         message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
                         return json.dumps({'message': message})
                     
+                    update_count = models.Constant.objects.get(constant_name='phone_number_update_count').constant_value
                     if models.CustomerTempRegistration.objects.filter(new_number__contains=data_source[0]['customer_phone_number']).count() >= int(update_count):
                         customer_update = models.CustomerUpdateFailure(product_id=product_obj[0],
                                                                        customer_name=data_source[0]['customer_name'],
@@ -371,7 +372,7 @@ def register_customer(request, group=None):
                             send_job_to_queue(send_customer_phone_number_update_message, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
 
             else:
-                update_count = models.Constant.objects.get(constant_name='mobile_number_update_count').constant_value
+                update_count = models.Constant.objects.get(constant_name='phone_number_update_count').constant_value
                 if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']):
                     message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
                     return json.dumps({'message': message})
