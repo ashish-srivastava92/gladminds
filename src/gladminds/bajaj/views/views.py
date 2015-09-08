@@ -304,7 +304,7 @@ def register_customer(request, group=None):
 
     try:
         with transaction.atomic():
-            update_count = models.Constant.objects.get(constant_name='phone_number_update_count').constant_value
+            update_count = models.Constant.objects.get(constant_name='vin_to_mobile_mapping_count').constant_value
             if models.CustomerTempRegistration.objects.filter(new_number__contains=data_source[0]['customer_phone_number']).count() >= int(update_count):
                 message = get_template('PHONE_NUMBER_CANNOT_BE_REGISTERED')
                 return json.dumps({'message' : message})
