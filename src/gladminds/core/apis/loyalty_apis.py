@@ -210,19 +210,14 @@ class AccumulationResource(CustomBaseModelResource):
                 for upc in object.data['upcs']:            
                     part_numbers.append(upc.data['part_number'].data['id'])
         
-        points = models.SparePartPoint.objects.filter(part_number__in=part_numbers)
-        
-        upc_point = {}
-        for part_number in part_numbers:
-            upc_mapping = filter(lambda point: point.part_number.id, points)
-            upc_point[part_number] = int(upc_mapping[0].points)
-        
+        points = models.SparePartPoint.objects.filter(part_number__in=part_numbers).values('part_number__id', 'points')
+
         for object in data['objects']:
             if object.data.has_key('upcs'):
                 for upc in object.data['upcs']:
                     part_number = upc.data['part_number'].data['id']
-                    if upc_point.has_key(part_number):
-                        upc.data['part_number'].data['point'] = upc_point[part_number]
+                    upc_mapping = filter(lambda point: point['part_number__id']==part_number, points)
+                    upc.data['part_number'].data['point'] = upc_mapping[0]['points']
                     
         return data
 
