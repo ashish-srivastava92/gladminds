@@ -1107,6 +1107,7 @@ class DistributorStaff(BaseModel):
     '''details of DistributorStaff'''
     distributor_staff_id = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
+    email = models.EmailField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -1120,6 +1121,7 @@ class DistributorSalesRep(BaseModel):
     '''details of DistributorSalesRep'''
     distributor_sales_id = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
+    email = models.EmailField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -1133,7 +1135,6 @@ class Retailer(BaseModel):
     '''details of Retailer'''
     retailer_name = models.CharField(max_length=50)
     retailer_town = models.CharField(max_length=50, null=True, blank=True)
-    approved = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
     class Meta:

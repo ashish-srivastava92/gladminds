@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#ffffff">
+
+    <LinearLayout
+        android:id="@+id/ll_top"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:orientation="horizontal"
+        android:weightSum="1"
+        android:padding="3dp"
+        android:layout_marginTop="5dp">
+
+        <LinearLayout
+            android:id="@+id/ll_retails_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="0.65"
+            android:gravity="left"
+            android:weightSum="1"
+            android:padding="3dp"
+            android:layout_marginLeft="5dp">
+
+            <TextView
+                android:id="@+id/tv_retail_name"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="left"
+                android:textStyle="normal"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textSize="20sp"
+                android:textColor="#000000"
+                android:text="KORMangla,Bangalore"
+                android:layout_marginTop="10dp"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/tv_retail_contact"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="left|top"
+                android:textStyle="normal"
+                android:textSize="18sp"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="123456"
+                android:maxLines="1"
+                android:textColor="#000000"/>
+
+
+        </LinearLayout>
+
+
+            
+        <LinearLayout
+            android:id="@+id/ll_fare_details"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_weight="0.35"
+            android:gravity="right"
+            android:layout_marginRight="10dp"
+            >
+
+
+            <ImageView
+                android:id="@+id/imv_ph_call"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/new_ph"
+                android:layout_marginTop="10dp"
+                />
+            <ImageView
+                android:id="@+id/imv_mobile_call"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/mob_new"
+                android:layout_marginTop="10dp"/>
+            <ImageView
+                android:id="@+id/imv_email"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/email_new"
+                android:layout_marginTop="10dp"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+</RelativeLayout>

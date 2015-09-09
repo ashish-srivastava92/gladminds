@@ -1,7 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from gladminds.core import base_models, constants
+from gladminds.core.model_helpers import PhoneField
 from gladminds.core.auth_helper import GmApps
+from django import forms
 import datetime
 
 _APP_NAME = GmApps.BAJAJ
@@ -453,9 +455,12 @@ class AreaSparesManager(base_models.AreaSparesManager):
 
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
-    user = models.ForeignKey(UserProfile, null=True, blank=True)
-    asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
-    state = models.ForeignKey(State, null=True, blank=True)
+    user = models.ForeignKey(UserProfile)
+    territory = models.CharField(max_length=15)
+    mobile = models.CharField(max_length=15)
+    profile = models.CharField(max_length=15)
+    language = models.CharField(max_length=10, null=True, blank=True)
+    territory = models.CharField(max_length=10, null=True, blank=True)    
     
     class Meta(base_models.Distributor.Meta):
         app_label = _APP_NAME
@@ -463,7 +468,7 @@ class Distributor(base_models.Distributor):
 class DistributorStaff(base_models.DistributorStaff):
     '''details of Distributor'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
-    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    distributor = models.ForeignKey(Distributor)
     
     class Meta(base_models.DistributorStaff.Meta):
         app_label = _APP_NAME
@@ -471,14 +476,24 @@ class DistributorStaff(base_models.DistributorStaff):
 class DistributorSalesRep(base_models.DistributorSalesRep):
     '''details of Distributor Sales Rep'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
-    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    distributor = models.ForeignKey(Distributor)
     
     class Meta(base_models.DistributorSalesRep.Meta):
         app_label = _APP_NAME
 
 class Retailer(base_models.Retailer):
     '''details of retailer'''
-
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    billing_code = models.CharField(max_length=15)
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    approved = models.PositiveSmallIntegerField(default=constants.STATUS['WAITING_FOR_APPROVAL'])
+    territory = models.CharField(max_length=15)
+    email = models.EmailField(max_length=50, null=True, blank=True)
+    mobile = models.CharField(max_length=15)
+    profile = models.CharField(max_length=15, null=True, blank=True)
+    language = models.CharField(max_length=10, null=True, blank=True)
+    rejected_reason = models.CharField(max_length=300, null=True, blank=True)
+    
     class Meta(base_models.Retailer.Meta):
         app_label = _APP_NAME
 
@@ -494,7 +509,6 @@ class Member(base_models.Member):
     '''details of Member'''
     registered_by_distributor = models.ForeignKey(Distributor, null=True, blank=True)
     preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
-
     state = models.ForeignKey(State)
 
     class Meta(base_models.Member.Meta):
