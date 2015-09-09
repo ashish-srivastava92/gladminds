@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from gladminds.core import base_models
+from gladminds.core import base_models, constants
 from gladminds.core.auth_helper import GmApps
 import datetime
  
@@ -195,4 +195,3 @@ class CustomerUpdateHistory(base_models.CustomerUpdateHistory):
 
     class Meta(base_models.CustomerUpdateHistory.Meta):
         app_label = _APP_NAME
-                
