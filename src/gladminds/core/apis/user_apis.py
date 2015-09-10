@@ -1076,8 +1076,10 @@ class MemberResource(CustomBaseModelResource):
                 active = filter(lambda active: active[region_filter] == member[region], active_member)
                 all_asm = filter(lambda active: active['state__state_name'] == member[region], active_asm)
                 if all_asm:
+                    asm_list=[]
                     for asm in all_asm:
-                        member_report[member[region]]['asm']= ' , '.join([member_report[member[region]]['asm'],asm['name']])
+                        asm_list.append(asm['name'])
+                    member_report[member[region]]['asm']= ' , '.join(asm_list)
                 if active:
                     member_report[member[region]]['active_count']= active[0]['count']
                     member_report[member[region]]['active_percent']= round(100 * float(active[0]['count'])/float(member['count']), 2)
