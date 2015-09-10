@@ -326,7 +326,7 @@
 		                               $("#reportTable").dataTable({"bFilter": false,"iDisplayLength": 20,"bLengthChange": false,"paging": false,"spagingType": "simple"});
 		                               $(".pagination li").removeClass("disabled");
 		                               $(".pagination li.active").remove();
-		                               $(".dataTables_info").remove();
+		                               $(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+(data.meta.offset+20)+' of '+data.meta.total_count+' Records');
 
 		                               
 
@@ -364,6 +364,12 @@
 		                               			showLoading();
 			                               		getPrivPageData($(this).attr('rel'))
 			                               		$(".table-responsive").html('')}
+		                               })
+
+
+		                               $("#reportTable th").click(function(){
+		                               		$(".pagination li").removeClass("disabled");
+		                               		$(".pagination li.active").remove();
 		                               })
 
 									}
