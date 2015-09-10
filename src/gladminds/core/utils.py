@@ -31,7 +31,7 @@ from gladminds.core.core_utils.utils import dictfetchall
 from gladminds.core.managers.mail import get_email_template
 from gladminds.settings import TOTP_SECRET_KEY, OTP_VALIDITY
 from django.forms.models import model_to_dict   
-from gladminds.core.model_fetcher import get_model
+from gladminds.core.model_fetcher import get_model, models
 
 logger = logging.getLogger('gladminds')
 
@@ -98,7 +98,8 @@ def mobile_format(phone_number):
     '''
         GM store numbers in +91 format
         And when airtel pull message from customer
-        or service advisor we will check that number in +91 format'''
+        or service advisor we will check that number in +91 format
+    '''
     return '+91' + phone_number[-10:]
 
 
@@ -115,7 +116,6 @@ def get_phone_number_format(phone_number):
         This is used when we are sending message through sms client
     '''
     return phone_number[-10:]
-
 
 def save_otp(user, token, email):
     models.OTPToken.objects.filter(user=user).delete()
