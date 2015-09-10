@@ -81,7 +81,7 @@ class Command(BaseCommand):
                 if not temp_obj:
                     temp_obj = cons(id=constant['pk'], created_date=TODAY, constant_name=fields['constant_name'],constant_value=fields['constant_value'])
                     temp_obj.save(using=app)
-                    if 'country_name' in fields.keys():
+                    if 'country_name' in fields.keys() and app=='bajajib':
                         country_obj = get_model('Country', app).objects.filter(name=fields['country_name'])
                         if not country_obj:
                             country_obj = get_model('Country', app)(name=fields['country_name'],
