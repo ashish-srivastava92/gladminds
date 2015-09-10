@@ -219,7 +219,7 @@
 		                               $("#reportTable").dataTable({"iDisplayLength": 20,"bLengthChange": false,"paging": false,"spagingType": "simple"});
 		                               $(".pagination li").remove();
 		                               $(".pagination li.active").remove();
-		                               $(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+(data.meta.offset+20)+' of '+data.meta.total_count+' Records');
+		                               $(".dataTables_info").remove();
 									   $(".next a").remove();
 		                               $(".prev a").remove();
 		                               
