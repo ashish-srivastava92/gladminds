@@ -13,6 +13,7 @@ TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
 EMAIL_DIR = os.path.join(TEMPLATE_DIR, "email")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 LOG_BASE_PATH = '/var/log/gladminds'
+UPLOAD_DIR = os.path.join(PROJECT_DIR, "upload_bajaj/")
 
 TIMEZONE = 'Asia/Kolkata'
 
@@ -373,23 +374,21 @@ ALL_APPS = (
 
 INSTALLED_APPS = ("longerusername",) + ALL_APPS
 
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        #'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        #'rest_framework.authentication.SessionAuthentication',
-        #rest_framework.authentication.BasicAuthentication',
-        # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-    ),
-}
-
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
-
 
 LOGIN_REDIRECT_URL = '/register/redirect'
 
 TASTYPIE_SWAGGER_API_MODULE = 'gladminds.urls.api_v1'
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.IsAuthenticated',
+#         ],
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'rest_framework.authentication.BasicAuthentication',            
+#         'rest_framework.authentication.SessionAuthentication',
+#     ),
+# }
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

@@ -320,4 +320,9 @@ ADD_DSR_MESSAGE = "New dsr has been added.\
                                         Your login credentials are username: %s, password: %s "
 
 REJECT_RETAILER_SUBJECT = "retailer is rejected"
-REJECT_RETAILER_MESSAGE = "your retailer membership is rejected.. Please contact the distributor to know the reason"
+REJECT_RETAILER_MESSAGE = "your retailer membership is rejected.. \
+                          Please contact the distributor to know the reason"
+
+APPROVE_RETAILER_SUBJECT = "retailer is approved"
+APPROVE_RETAILER_MESSAGE = "your retailer membership is approved.\
+                           you can login with your registered username and password"

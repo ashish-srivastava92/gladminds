@@ -97,8 +97,10 @@ api_v1.register(SMSResources())
 
 urlpatterns = patterns('',
                        
-    url(r'^api-token-auth/', 'rest_framework_jwt.views.obtain_jwt_token'),
+    #url(r'^api-token-auth/', 'rest_framework_jwt.views.obtain_jwt_token'),
+    url(r'^api-token-auth/', 'gladminds.bajaj.views.apis.authentication'),
     url(r'^get_retailers/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.bajaj.views.apis.get_retailers'),
+    url(r'^get_parts/', 'gladminds.bajaj.views.apis.get_parts'),
     
     url(r'', include(api_v1.urls)),
     url(r'^$', 'gladminds.core.views.home'),

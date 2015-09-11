@@ -1070,6 +1070,21 @@ class NationalSparesManager(BaseModel):
 
     def __unicode__(self):
         return self.name
+    
+#NSM model for SFA    
+class NationalSalesManager(BaseModel):
+    '''details of National Sales Manager'''
+    name = models.CharField(max_length=50, null=True, blank=True)
+    email = models.EmailField(max_length=50, null=True, blank=True)
+    phone_number = PhoneField(skip_check=True, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_nationalsalesmanager"
+        verbose_name_plural = "National Sales Managers"
+
+    def __unicode__(self):
+        return self.name
 
 class AreaSparesManager(BaseModel):
     '''details of Area Spares Manager'''

@@ -378,6 +378,14 @@ class NationalSparesManager(base_models.NationalSparesManager):
 
     class Meta(base_models.NationalSparesManager.Meta):
         app_label = _APP_NAME
+        
+class NationalSalesManager(base_models.NationalSalesManager):
+    '''details of National Sales Manager'''
+    user = models.ForeignKey(UserProfile)
+    territory = models.ManyToManyField(Territory)
+
+    class Meta(base_models.NationalSalesManager.Meta):
+        app_label = _APP_NAME
 
 
 class AreaSparesManager(base_models.AreaSparesManager):

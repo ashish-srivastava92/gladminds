@@ -63,11 +63,21 @@ class State(base_models.State):
     class Meta(base_models.State.Meta):
         app_label = _APP_NAME
 
+class NationalSalesManager(base_models.NationalSalesManager):
+    '''details of National Sales Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    territory = models.ManyToManyField(Territory)
+
+    class Meta(base_models.NationalSalesManager.Meta):
+        app_label = _APP_NAME
 
 class AreaSalesManager(base_models.AreaSalesManager):
     '''details of Area Sales Manager'''
     user =  models.OneToOneField(UserProfile)
-    rm = models.ForeignKey(RegionalManager, null=True, blank=True)
+    name = models.CharField(max_length=50, null=True, blank=True)
+    email = models.EmailField(max_length=50, null=True, blank=True)
+    phone_number = PhoneField(skip_check=True, null=True, blank=True)
+    nsm = models.ForeignKey(NationalSalesManager, null=True, blank=True)
     state = models.ManyToManyField(State)
     
     class Meta(base_models.AreaSalesManager.Meta):
@@ -436,13 +446,12 @@ class City(base_models.City):
 
 class NationalSparesManager(base_models.NationalSparesManager):
     '''details of National Spares Manager'''
-    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    user = models.ForeignKey(UserProfile)
     territory = models.ManyToManyField(Territory)
 
     class Meta(base_models.NationalSparesManager.Meta):
         app_label = _APP_NAME
-
-
+        
 class AreaSparesManager(base_models.AreaSparesManager):
     '''details of Area Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
@@ -451,7 +460,6 @@ class AreaSparesManager(base_models.AreaSparesManager):
 
     class Meta(base_models.AreaSparesManager.Meta):
         app_label = _APP_NAME
-
 
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
@@ -475,7 +483,7 @@ class DistributorStaff(base_models.DistributorStaff):
 
 class DistributorSalesRep(base_models.DistributorSalesRep):
     '''details of Distributor Sales Rep'''
-    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    user = models.ForeignKey(UserProfile)
     distributor = models.ForeignKey(Distributor)
     
     class Meta(base_models.DistributorSalesRep.Meta):
@@ -483,9 +491,9 @@ class DistributorSalesRep(base_models.DistributorSalesRep):
 
 class Retailer(base_models.Retailer):
     '''details of retailer'''
-    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    user = models.ForeignKey(UserProfile)
     billing_code = models.CharField(max_length=15)
-    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    distributor = models.ForeignKey(Distributor)
     approved = models.PositiveSmallIntegerField(default=constants.STATUS['WAITING_FOR_APPROVAL'])
     territory = models.CharField(max_length=15)
     email = models.EmailField(max_length=50, null=True, blank=True)
@@ -499,8 +507,8 @@ class Retailer(base_models.Retailer):
 
 class DSRWrokAllocation(base_models.DSRWrokAllocation):
     '''details of DSR work allocation'''
-    distributor = models.ForeignKey(Distributor, null=True, blank=True)
-    retailer = models.ForeignKey(Retailer, null=True, blank=True)
+    distributor = models.ForeignKey(Distributor)
+    retailer = models.ForeignKey(Retailer)
     
     class Meta(base_models.DSRWrokAllocation.Meta):
         app_label = _APP_NAME
