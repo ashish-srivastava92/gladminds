@@ -125,7 +125,7 @@
 
 									function getNextPageData(url) {
 										if(url == 1) {
-											url = "/v1/members/active/?access_token="+access_token+"&active_days=90"
+											url = "/v1/members/active/?access_token="+access_token+"&active_days"
 										} else {
 											url = url;
 										}
@@ -135,7 +135,7 @@
 									}
 									function getPrivPageData(url) {
 										if(url == 1) {
-											url = "/v1/members/active/?access_token="+access_token+"&active_days=90"
+											url = "/v1/members/active/?access_token="+access_token+"&active_days"
 										} else {
 											url = url;
 										}
@@ -199,13 +199,11 @@
 											if((dat[key]["active_count"]!=null) || (dat[key]["active_count"]!=undefined))
 											 	{var noofmechmsg=dat[key]["active_count"]}
 
-											if(noofmechmsg==0)
-											{
-												active=0;
-											}
-											else{
-												active=((noofmechmsg*100)/noofmech).toFixed(2);
-											}
+											if((dat[key]["active_percent"]!=null) || (dat[key]["active_percent"]!=undefined))
+											 	{var active=dat[key]["active_percent"]}
+
+											if((dat[key]["asm"]!=null) || (dat[key]["asm"]!=undefined))
+											 	{var asm=dat[key]["asm"]}
 											
 											table += '<tr class="gradeA">\
 	                                                <td class=" sorting_1">'+state+'</td>\
@@ -221,7 +219,7 @@
 		                               $("#reportTable").dataTable({"iDisplayLength": 20,"bLengthChange": false,"paging": false,"spagingType": "simple"});
 		                               $(".pagination li").remove();
 		                               $(".pagination li.active").remove();
-		                               $(".dataTables_info").remove();
+		                               $(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+(data.meta.offset+20)+' of '+data.meta.total_count+' Records');
 									   $(".next a").remove();
 		                               $(".prev a").remove();
 		                               
@@ -242,6 +240,11 @@
 		                               			showLoading();
 			                               		getPrivPageData($(this).attr('rel'))
 			                               		$(".table-responsive").html('')}
+		                               })
+
+		                               $("#reportTable th").click(function(){
+		                               		$(".pagination li").removeClass("disabled");
+		                               		$(".pagination li.active").remove();
 		                               })
 
 									}
