@@ -664,7 +664,7 @@ SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                   'KAP_OLD_2': {
                           'login':'gladminds1',
                           'pass':'kap@user!789',
-                          'message_url': 'http://123.63.33.43/blank/sms/user/urlsmstemp.php?',
+                          'message_url': 'http://123.63.33.43/blank/sms/user/urlsmstemp.php',
                           'sender_id': 'GLADMS',
                           'params': 'kap'},
                   'KAP': {

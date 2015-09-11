@@ -272,6 +272,15 @@
 		                        <tbody role="alert" aria-live="polite" aria-relevant="all">';
 										for (var i = 0; i < dat.length; i++) {
 											var machid=name=district=phone=state=distributor=regdt=points=upc=partdesc=partno='';
+
+											part= dat[i]["upcs"];
+												for (var j = 0; j < part.length; j++) {
+													if((part[j]["unique_part_code"]!=null) || (part[j]["unique_part_code"]!=undefined)){upc=part[j]["unique_part_code"]+"<br>"}
+													if((part[j]["part_number"]["part_number"]!=null) || (part[j]["part_number"]["part_number"]!=undefined)){partno=part[j]["part_number"]["part_number"]+"<br>"}
+													if((part[j]["part_number"]["description"]!=null) || (part[j]["part_number"]["description"]!=undefined)){partdesc=part[j]["part_number"]["description"]+"<br>"}
+													if((part[j]["part_number"]["point"]!=null) || (part[j]["part_number"]["point"]!=undefined))
+									 				{var points=part[j]["part_number"]["point"]	}
+														
 											if((dat[i]["member"]["permanent_id"]!=null) || (dat[i]["member"]["permanent_id"]!=undefined))
 											 	{var machid=dat[i]["member"]["permanent_id"]}
 											 else if((dat[i]["member"]["mechanic_id"]!=null) || (dat[i]["member"]["mechanic_id"]!=undefined))
@@ -289,15 +298,9 @@
 											if((dat[i]["created_date"]!=null) || (dat[i]["created_date"]!=undefined))
 											 	{var regdt=dat[i]["created_date"]}
 
-											if((dat[i]["points"]!=null) || (dat[i]["points"]!=undefined))
-											 	{var points=dat[i]["points"]}
+											
 
-												part= dat[i]["upcs"];
-												for (var j = 0; j < part.length; j++) {
-													if((part[j]["unique_part_code"]!=null) || (part[j]["unique_part_code"]!=undefined)){upc+=part[j]["unique_part_code"]+"<br>"}
-													if((part[j]["part_number"]["part_number"]!=null) || (part[j]["part_number"]["part_number"]!=undefined)){partno+=part[j]["part_number"]["part_number"]+"<br>"}
-													if((part[j]["part_number"]["description"]!=null) || (part[j]["part_number"]["description"]!=undefined)){partdesc+=part[j]["part_number"]["description"]+"<br>"}
-														}
+												
 												table += '<tr class="gradeA">\
 		                                                <td class=" sorting_1">'+machid+'</td>\
 		                                                <td class=" ">'+name+'</td>\
@@ -312,12 +315,12 @@
 		                                                <td class="center ">'+moment(regdt).format('LL')+'</td>\
 		                                            </tr>';
 		                                     	
-		                                        	
+		                                        }	
 											}
 		                                table += ' </tbody></table>';	
 		                               $(".table-responsive").html('').append(table);
  
-		                               $("#reportTable").dataTable({"bFilter": false,"iDisplayLength": 20,"bLengthChange": false,"paging": false,"spagingType": "simple"});
+		                               $("#reportTable").dataTable({"bFilter": false,"iDisplayLength": 500,"bLengthChange": false,"paging": false,"spagingType": "simple"});
 		                               $(".pagination li").removeClass("disabled");
 		                               $(".pagination li.active").remove();
 		                               $(".dataTables_info").remove();
@@ -357,6 +360,11 @@
 		                               			showLoading();
 			                               		getPrivPageData($(this).attr('rel'))
 			                               		$(".table-responsive").html('')}
+		                               })
+
+		                               $("#reportTable th").click(function(){
+		                               		$(".pagination li").removeClass("disabled");
+		                               		$(".pagination li.active").remove();
 		                               })
 
 									}
