@@ -64,9 +64,10 @@
 				</div><!-- /header -->
 		
 			<div data-role="content" id="content1">
+				<button id="download_data">Download</button>
 				<div class="row">
 				    <div class="col-md-1"><div style="float: left;"><a href="#myPanel"><button  class="ui-btn ui-icon-bars ui-shadow ui-corner-all ui-btn-icon-notext ui-btn-inline">bars</button></a></div></div>
-				    <div class="col-md-11">
+				    <div class="col-md-11 pull-right">
 				    	
 					    	<form id="datefilter" style="float: right;" class="pull-right">
 						    	<div class="row" style="padding-right: 10px;">
@@ -229,9 +230,10 @@
 										getDataFromAPI(url)
 									}
 
+									download_apiURL = "";
 									function getDataFromAPI(apiURL) {
 											
-
+										download_apiURL = apiURL;
 										$.ajax({
 											url : apiURL,
 											type : 'GET',
@@ -326,7 +328,13 @@
 		                               $("#reportTable").dataTable({"bFilter": false,"iDisplayLength": 20,"bLengthChange": false,"paging": false,"spagingType": "simple"});
 		                               $(".pagination li").removeClass("disabled");
 		                               $(".pagination li.active").remove();
-		                               $(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+(data.meta.offset+20)+' of '+data.meta.total_count+' Records');
+		                               
+		                               if(data.meta.limit>data.meta.total_count)
+		                               {
+		                               		$(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+data.meta.total_count+' of '+data.meta.total_count+' Records');
+		                               }else{
+		                               		$(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+(data.meta.offset+20)+' of '+data.meta.total_count+' Records');
+		                           		}
 
 		                               
 
@@ -372,6 +380,8 @@
 		                               		$(".pagination li.active").remove();
 		                               })
 
+		                               
+
 									}
 
 									function checkSpcialChar(event){
@@ -380,6 +390,162 @@
 							               return;
 							            }
 							            event.returnValue = true;
+							         }
+
+							         $("#download_data").click(function(){
+							          // alert(download_apiURL)
+							          showLoading();
+
+							          $.ajax({
+							           url : '//qa.bajajcv.gladminds.co'+download_apiURL+'&limit=10000',
+							           type : 'GET',
+							           dataType : 'json',
+							           success : function(data, success) {
+							            createCSV(data)
+							           }, error : function(e) {
+							            console.log(e)
+							            hideLoading();
+							            alert("Data can not be downloaded at the moment. Please try again")
+							           }
+							          })
+							         });
+
+							         var link = "";
+							         arrCSV_data = [];
+							         arrInnerInfo = [];
+							         mainArray = [];
+
+
+							         createCSV  = function(csvData) {
+							          for(index=0; index<csvData.objects.length;index++) {
+
+							           if((csvData.objects[index].mechanic_id != null) || (csvData.objects[index].mechanic_id != undefined)) {
+							            var mechanic_id = csvData.objects[index].mechanic_id;
+							           } else {
+							            var mechanic_id = "";
+							           }
+
+
+							           if((csvData.objects[index].distributor.user.user.first_name != null) || (csvData.objects[index].distributor.user.user.first_name != undefined)) {
+							            var mechanic_name = csvData.objects[index].distributor.user.user.first_name;
+							           } else {
+							            var mechanic_name = "";
+							           }
+
+							           // if((csvData.objects[index].member.preferred_retailer.retailer_town != null) || (csvData.objects[index].member.preferred_retailer.retailer_town != undefined)) {
+							           //  var district = csvData.objects[index].member.preferred_retailer.retailer_town;
+							           // } else {
+							           //  var district = "";
+							           // }
+
+							           if((csvData.objects[index].phone_number != null) || (csvData.objects[index].phone_number != undefined)) {
+							            var phone = csvData.objects[index].phone_number;
+							           } else {
+							            var phone = "";
+							           }
+
+							           if((csvData.objects[index].state.state_name != null) || (csvData.objects[index].state.state_name != undefined)) {
+							            var state = csvData.objects[index].state.state_name;
+							           } else {
+							            var state = "";
+							           }
+
+							           if((csvData.objects[index].distributor.distributor_id != null) || (csvData.objects[index].distributor.distributor_id != undefined)) {
+							            var distributor_id = csvData.objects[index].distributor.distributor_id;
+							           } else {
+							            var distributor_id = "";
+							           }
+
+							           if((csvData.objects[index].created_date != null) || (csvData.objects[index].created_date != undefined)) {
+							            var created_date = moment(csvData.objects[index].created_date).format('LL');
+
+							           } else {
+							            var created_date = "";
+							           }
+							          
+							           var workshop_address = ""
+							           if((csvData.objects[index].shop_name != null) || (csvData.objects[index].shop_name != undefined)) {
+							            shop_address = csvData.objects[index].shop_name;
+
+							           } else {
+							            shop_name = "";
+							           }
+
+							           if((csvData.objects[index].shop_number != null) || (csvData.objects[index].shop_number != undefined)) {
+							            shop_number = csvData.objects[index].shop_number;
+
+							           } else {
+							            shop_number = "";
+							           }
+							           
+							           if((csvData.objects[index].shop_address != null) || (csvData.objects[index].shop_address != undefined)) {
+							            shop_address = csvData.objects[index].shop_address;
+
+							           } else {
+							            shop_address = "";
+							           }
+
+							           if((csvData.objects[index].shop_address != null) || (csvData.objects[index].shop_address != undefined)) {
+							            shop_address = csvData.objects[index].shop_address;
+
+							           } else {
+							            shop_address = "";
+							           }
+
+							           if((csvData.objects[index].district != null) || (csvData.objects[index].district != undefined)) {
+							            district = csvData.objects[index].district;
+
+							           } else {
+							            district = "";
+							           }
+
+							           if((csvData.objects[index].pincode != null) || (csvData.objects[index].pincode != undefined)) {
+							            pincode = csvData.objects[index].pincode;
+
+							           } else {
+							            pincode = "";
+							           }
+
+
+
+							           workshop_address = shop_name + ", " +shop_number+ ", " + shop_address+ ", " + district + ", " +state+ ", " + pincode;
+
+
+
+
+							           subArray=[];
+
+							           subArray.push(mechanic_id);
+							           subArray.push(mechanic_name);
+							           subArray.push(phone);
+							           subArray.push(state);
+							           subArray.push(distributor_id);
+
+							           subArray.push(created_date);
+							           subArray.push(workshop_address);
+
+							           mainArray.push(subArray);
+
+							          }
+
+							          console.log(mainArray)
+
+							          var csvContent = "data:text/csv;charset=utf-8,";
+							          mainArray.forEach(function(arrCSV_data, index){
+							             console.log(arrCSV_data)
+							             arrCSV_dataString = arrCSV_data.join(",");
+							             csvContent += index < arrCSV_data.length ? arrCSV_dataString+ "\n" : arrCSV_dataString;
+							             var encodedUri = encodeURI(csvContent);
+
+							           link = document.createElement("a");
+							           link.setAttribute("href", encodedUri);
+							           // link.setAttribute("download", "my_arrCSV_data.csv");
+							           link.download = "Reports_Accumulation.csv";
+							          
+							          }); 
+
+							          link.click();
+							          hideLoading();
 							         }
 								
                             </script>
