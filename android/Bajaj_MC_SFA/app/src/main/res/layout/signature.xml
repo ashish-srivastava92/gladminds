@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/LinearLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="#ffffff"
+    android:orientation="horizontal"
+    android:padding="10dp" >
+
+
+
+    <LinearLayout
+        android:id="@+id/ll_top"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="15dp"
+        >
+
+        <LinearLayout
+            android:id="@+id/ll_HR_OPN1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="left"
+            android:layout_margin="5dp">
+            <TextView
+                android:id="@+id/tv_hr_operation1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textStyle="bold"
+                android:textColor="#ff0099cc"
+                android:textSize="22sp"
+                android:text="Signature Here"
+                android:layout_margin="5dp"
+                />
+
+            <LinearLayout
+                android:id="@+id/ll_fare_details"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:orientation="horizontal"
+                android:gravity="left|center_horizontal"
+                >
+
+            </LinearLayout>
+
+            <TextView android:layout_height="wrap_content" android:id="@+id/textView2"
+                android:text="Your Name" android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_width="wrap_content" android:paddingLeft="10sp"
+                android:layout_gravity="left" />
+
+            <EditText android:layout_height="wrap_content" android:id="@+id/yourName"
+                android:layout_weight="1" android:layout_width="match_parent"
+                android:maxLength="30">
+                <requestFocus />
+            </EditText>
+
+        </LinearLayout>
+
+
+
+        <LinearLayout android:layout_height="wrap_content"
+            android:id="@+id/linearLayout2" android:layout_width="match_parent">
+            <Button android:layout_height="50dp" android:layout_weight=".30"
+                android:text="Cancel" android:layout_width="0dp" android:id="@+id/cancel" />
+            <Button android:layout_height="50dp" android:layout_weight=".35"
+                android:text="Clear" android:layout_width="0dp" android:id="@+id/clear" />
+            <Button android:layout_height="50dp" android:layout_weight=".35"
+                android:text="Save" android:layout_width="0dp" android:id="@+id/getsign" />
+        </LinearLayout>
+
+
+
+
+    </LinearLayout>
+
+
+
+</LinearLayout>

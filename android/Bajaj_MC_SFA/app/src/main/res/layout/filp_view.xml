@@ -1,0 +1,172 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    tools:context="com.parkingrhino.ui.Demo"
+    android:background="#0000">
+
+    <ViewFlipper
+        android:id="@+id/viewFlipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        >
+        <ScrollView
+            android:id="@+id/listView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_below="@+id/tv_price"
+            android:layout_above="@+id/rl_bottom" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <TableLayout
+                    android:id="@+id/tbl_order"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:stretchColumns="true"
+                    android:background="#FFFFFF" >
+
+                </TableLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginRight="20dp"
+                    >
+
+
+
+                    <TextView
+                        android:id="@+id/tv_total_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toLeftOf="@+id/tv_total_amount"
+                        android:text=" Total "
+                        android:textStyle="bold"
+                        android:textSize="18dp"
+                        android:textColor="#000000"
+                        android:layout_marginRight="10dp" />
+
+                    <TextView
+                        android:id="@+id/tv_total_amount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="55dp"
+                        android:minWidth="100dp"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentRight="true"
+                        android:textSize="18dp"
+                        android:textStyle="bold"
+                        android:text="6700"
+                        android:textColor="#000000"
+                        android:gravity="center"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginRight="10dp"
+                    >
+
+                    <TextView
+                        android:id="@+id/tv_total_order"
+                        android:layout_width="130dp"
+                        android:layout_height="60dp"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_marginLeft="10dp"
+                        android:textColor="#247BE4"
+                        android:textSize="20dp"
+                        android:gravity="center"
+                        android:text="+ ADD ITEM"/>
+
+
+                    />
+
+                </RelativeLayout>
+
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginRight="20dp"
+                    >
+
+                    <TextView
+                        android:id="@+id/tv_customer_sig"
+                        android:layout_width="100dp"
+                        android:layout_height="60dp"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_marginLeft="10dp"
+                        android:textColor="#247BE4"
+                        android:textSize="18dp"
+                        android:gravity="center"
+                        android:text="Customer Signatur"/>
+
+                    <ImageView
+                        android:id="@+id/show_my_sig"
+                        android:layout_width="fill_parent"
+                        android:layout_height="100dp"
+                        android:layout_toRightOf="@+id/tv_customer_sig"
+
+
+                        />
+
+                </RelativeLayout>
+
+            </LinearLayout>
+        </ScrollView>
+        <!--  Second View         -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+            android:gravity="left"
+            >
+            <Button
+                android:id="@+id/btn_first_view"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/stop"
+                />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            >
+            <fragment
+                android:layout_height="match_parent"
+                android:layout_width="250px"
+                class="sfa.mc.bajaj.gladminds.com.bajaj_mc_sfa.MenuFragment"
+                android:id="@+id/fragment"/>
+            <fragment
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                class="sfa.mc.bajaj.gladminds.com.bajaj_mc_sfa.TextFragment"
+                android:id="@+id/fragment2"/>
+        </LinearLayout>
+        </LinearLayout>
+    </ViewFlipper>
+
+</RelativeLayout>

@@ -1223,3 +1223,26 @@ body .ui-tooltip {
 	filter: Alpha(Opacity=30); /* support: IE8 */
 	border-radius: 8px;
 }
+#popup
+		{
+		  visibility: hidden;
+		  position: absolute;
+		  left: 300px;
+		  top: 120px;
+		  width:500px;
+		  height:240px;
+		  text-align:center;
+		  border: thin;
+		  background-color: lightgray;
+		}
+.tbl_popup {
+	
+	border-spacing:15px;
+	border-collapse: seperate;
+	margin-left:10px;
+	width:80%;
+	height:150px;
+}
+#txt_rejected_reason {
+	width:200px;
+	height:100px;
