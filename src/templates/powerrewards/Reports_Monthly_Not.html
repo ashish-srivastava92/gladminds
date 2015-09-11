@@ -77,10 +77,10 @@
 				    <div class="col-md-6">
 				    	<div class="row">
 				    		<div class="col-md-7">
-				    			
+				    			<button id="download_data">Download</button>
 				    		</div>
 				    		<div class="col-md-1" style="margin-top:22px;float: left;"><a href="." target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
-				    		<div class="col-md-4">
+				    		<div class="col-md-4" style="margin-top:-15px;">
 				    			<fieldset class="ui-field-contain">
 				    				
 							        <select name="day" id="day">
@@ -147,9 +147,10 @@
 										getDataFromAPI(url)
 									}
 
+									download_apiURL = "";
 									function getDataFromAPI(apiURL) {
 										
-
+										download_apiURL = apiURL;
 										if($('#day').val()=='')
 											{
 												var val=90;
@@ -235,7 +236,7 @@
 		                               if(data.meta.limit>data.meta.total_count)
 		                               {
 		                               		$(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+data.meta.total_count+' of '+data.meta.total_count+' Records');
-		                               }else{}
+		                               }else{
 		                               		$(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+(data.meta.offset+20)+' of '+data.meta.total_count+' Records');
 		                           		}
 
@@ -285,6 +286,110 @@
 
 									}
 
+									$("#download_data").click(function(){
+							          // alert(download_apiURL)
+							          showLoading();
+
+							          $.ajax({
+							           url : '//qa.bajajcv.gladminds.co'+download_apiURL+'&limit=10000',
+							           type : 'GET',
+							           dataType : 'json',
+							           success : function(data, success) {
+							            createCSV(data)
+							           }, error : function(e) {
+							            console.log(e)
+							           }
+							          })
+							         });
+
+							         var link = "";
+							         arrCSV_data = [];
+							         arrInnerInfo = [];
+							         mainArray = [];
+
+							         createCSV  = function(csvData) {
+							          for(index=0; index<csvData.objects.length;index++) {
+
+							           if((csvData.objects[index].mechanic_id != null) || (csvData.objects[index].mechanic_id != undefined)) {
+							            var mechanic_id = csvData.objects[index].mechanic_id;
+							           } else {
+							            var mechanic_id = "";
+							           }
+
+
+							           if((csvData.objects[index].first_name != null) || (csvData.objects[index].first_name != undefined)) {
+							            var mechanic_name = csvData.objects[index].first_name;
+							           } else {
+							            var mechanic_name = "";
+							           }
+
+							           // if((csvData.objects[index].member.preferred_retailer.retailer_town != null) || (csvData.objects[index].member.preferred_retailer.retailer_town != undefined)) {
+							           //  var district = csvData.objects[index].member.preferred_retailer.retailer_town;
+							           // } else {
+							           //  var district = "";
+							           // }
+
+							           if((csvData.objects[index].phone_number != null) || (csvData.objects[index].phone_number != undefined)) {
+							            var phone = csvData.objects[index].phone_number;
+							           } else {
+							            var phone = "";
+							           }
+
+							           if((csvData.objects[index].member.state.state_name != null) || (csvData.objects[index].member.state.state_name != undefined)) {
+							            var state = csvData.objects[index].member.state.state_name;
+							           } else {
+							            var state = "";
+							           }
+
+							           if((csvData.objects[index].distributor.distributor_id != null) || (csvData.objects[index].distributor.distributor_id != undefined)) {
+							            var distributor_id = csvData.objects[index].distributor.distributor_id;
+							           } else {
+							            var distributor_id = "";
+							           }
+
+							           if((csvData.objects[index].distributor.asm.name != null) || (csvData.objects[index].distributor.asm.name != undefined)) {
+							            var name = csvData.objects[index].distributor.asm.name;
+							           } else {
+							            var name = "";
+							           }
+
+							           
+							          
+							           
+							           
+							           subArray=[];
+
+							           subArray.push(mechanic_id);
+							           subArray.push(mechanic_name);
+							           subArray.push(phone);
+							           subArray.push(state);
+							           subArray.push(distributor_id);
+
+							           subArray.push(name);
+
+							           mainArray.push(subArray);
+
+							          }
+
+							          console.log(mainArray)
+
+							          var csvContent = "data:text/csv;charset=utf-8,";
+							          mainArray.forEach(function(arrCSV_data, index){
+							             console.log(arrCSV_data)
+							             arrCSV_dataString = arrCSV_data.join(",");
+							             csvContent += index < arrCSV_data.length ? arrCSV_dataString+ "\n" : arrCSV_dataString;
+							             var encodedUri = encodeURI(csvContent);
+
+							           link = document.createElement("a");
+							           link.setAttribute("href", encodedUri);
+							           // link.setAttribute("download", "my_arrCSV_data.csv");
+							           link.download = "Reports_Accumulation.csv";
+							          
+							          }); 
+
+							          link.click();
+							          hideLoading();
+							         }
                             </script>
                         </div>
                     <!-- /.table-responsive -->

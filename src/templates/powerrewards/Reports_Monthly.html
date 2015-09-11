@@ -76,10 +76,10 @@
 				    <div class="col-md-6">
 				    	<div class="row">
 				    		<div class="col-md-7">	
-							    			
+							    		<button id="download_data">Download</button>	
 				    		</div>
 				    		<div class="col-md-1" style="margin-top:22px;float: left;"><a href="." target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
-				    		<div class="col-md-4">
+				    		<div class="col-md-4" style="margin-top:-15px;">
 				    			<fieldset class="ui-field-contain">
 							        <select name="day" id="day">
 							        	<option value="">Select Days</option>
@@ -144,7 +144,12 @@
 										getDataFromAPI(url)
 									}
 
-									function getDataFromAPI(apiURL) {
+									download_apiURL = "";
+							         function getDataFromAPI(apiURL) {
+							          // console.log(apiURL) 
+							          download_apiURL = apiURL;
+
+
 										
 										if($('#day').val()=='')
 											{
@@ -248,6 +253,88 @@
 		                               })
 
 									}
+
+									$("#download_data").click(function(){
+							          // alert(download_apiURL)
+							          showLoading();
+
+							          $.ajax({
+							           url : '//qa.bajajcv.gladminds.co'+download_apiURL+'&limit=10000',
+							           type : 'GET',
+							           dataType : 'json',
+							           success : function(data, success) {
+							            createCSV(data)
+							           }, error : function(e) {
+							            console.log(e)
+							           }
+							          })
+							         });
+
+							         var link = "";
+							         arrCSV_data = [];
+							         arrInnerInfo = [];
+							         mainArray = [];
+
+							         createCSV  = function(key, objects) {
+							          var arrKey = key;
+							          console.log(arrKey)          
+
+							          $.each(dat, function (key, value){
+							                            
+							           var state=noofmech=noofmechmsg=active=asm='';
+							           if((key!=null) || (key!=undefined))
+							             {var state=key
+							           }
+							           
+							           if((dat[key]["registered_count"]!=null) || (dat[key]["registered_count"]!=undefined))
+							             {var noofmech=dat[key]["registered_count"]}
+
+							           if((dat[key]["active_count"]!=null) || (dat[key]["active_count"]!=undefined))
+							             {var noofmechmsg=dat[key]["active_count"]}
+
+							           if((dat[key]["active_percent"]!=null) || (dat[key]["active_percent"]!=undefined))
+							             {var active=dat[key]["active_percent"]}
+
+							           if((dat[key]["asm"]!=null) || (dat[key]["asm"]!=undefined))
+							             {var asm=dat[key]["asm"]}
+							           
+							           
+							           
+							          
+							           
+							           
+							           subArray=[];
+
+							           subArray.push(state);
+							           subArray.push(noofmech);
+							           subArray.push(active);
+							           subArray.push(asm);
+							           
+
+							           mainArray.push(subArray);
+							          });
+
+							          
+
+							          console.log(mainArray)
+
+							          var csvContent = "data:text/csv;charset=utf-8,";
+							          mainArray.forEach(function(arrCSV_data, index){
+							             console.log(arrCSV_data)
+							             arrCSV_dataString = arrCSV_data.join(",");
+							             csvContent += index < arrCSV_data.length ? arrCSV_dataString+ "\n" : arrCSV_dataString;
+							             var encodedUri = encodeURI(csvContent);
+
+							           link = document.createElement("a");
+							           link.setAttribute("href", encodedUri);
+							           // link.setAttribute("download", "my_arrCSV_data.csv");
+							           link.download = "Reports_Accumulation.csv";
+							          
+							          }); 
+
+							          link.click();
+							          hideLoading();
+							         }
                             </script>
                         </div>
                     <!-- /.table-responsive -->
