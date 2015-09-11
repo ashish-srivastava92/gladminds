@@ -194,9 +194,9 @@ class CoreLoyaltyService(Services):
                     upcs_data = accumulation.upcs.all()
                     upc_data_list = ' , '.join([str(upc.unique_part_code) for upc in upcs_data])
                     data.append((upc_data_list))
-                elif field == 'asm_id':
+                elif field == 'ams':
                     if accumulation.asm:
-                        data.append(getattr(accumulation.asm, field))
+                        data.append(getattr(accumulation.asm.name, field))
                     else:
                         data.append(None)
                 elif field in constants.MEMBER_FIELDS:
