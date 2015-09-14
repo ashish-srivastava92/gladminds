@@ -2066,3 +2066,9 @@ input[type="checkbox"]:checked::after,
         margin-left: 0;
     }
 }
+
+#download_data {
+    float: right;
+    margin-right: 15px;
+    width: 140px;
+}

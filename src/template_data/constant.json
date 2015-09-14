@@ -97,5 +97,13 @@
       "country_code" : "UGN"
       
     }
- }
+ },
+ {
+    "model": "gladminds.constant",
+    "pk": 13,
+    "fields": {
+      "constant_name":"vin_to_mobile_mapping_count",
+      "constant_value":"3"
+    }
+  }
 ]
