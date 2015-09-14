@@ -86,5 +86,16 @@
       "constant_name":"customer_id",
       "constant_value":"8000001"
     }
+ },
+ {
+    "model": "gladminds.constant",
+    "pk": 12,
+    "fields": {
+      "constant_name":"purchase_date_format",
+      "constant_value":"%m-%d-%Y",
+      "country_name" : "Uganda",
+      "country_code" : "UGN"
+      
+    }
  }
 ]
