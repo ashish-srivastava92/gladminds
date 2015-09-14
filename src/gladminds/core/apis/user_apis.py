@@ -18,7 +18,8 @@ from gladminds.core import constants
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import MultiAuthorization,\
     LoyaltyCustomAuthorization,\
-     ZSMCustomAuthorization, DealerCustomAuthorization
+     ZSMCustomAuthorization, DealerCustomAuthorization,\
+     RMCustomAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.auth.access_token_handler import create_access_token, \
     delete_access_token
@@ -445,6 +446,60 @@ class UserProfileResource(CustomBaseModelResource):
                         format(ex))
         return HttpResponse(json.dumps(data), content_type="application/json")
 
+class CircleHeadResource(CustomBaseModelResource):
+        '''
+           Circle head resource
+        '''
+        user = fields.ForeignKey(UserProfileResource, 'user', full=True)
+        class Meta:
+            queryset = models.CircleHead.objects.all()
+            resource_name = "circle_head"
+            authentication = AccessTokenAuthentication()
+            authorization = MultiAuthorization(DjangoAuthorization())
+            allowed_methods = ['get']
+            filtering = {
+                     "user": ALL_WITH_RELATIONS,
+                     }
+            always_return_data = True
+
+class RegionalManagerResource(CustomBaseModelResource):
+    '''
+       Regional sales manager resource
+    '''
+    user = fields.ForeignKey(UserProfileResource, 'user', full=True)
+    circle_head = fields.ForeignKey(CircleHeadResource, 'circle_head')
+    class Meta:
+        queryset = models.RegionalManager.objects.all()
+        resource_name = "regional-sales-managers"
+        authentication = AccessTokenAuthentication()
+        authorization = MultiAuthorization(DjangoAuthorization())
+        allowed_methods = ['get']
+        filtering = {
+                     "user": ALL_WITH_RELATIONS,
+                     "region": ALL,
+                     "circle_head": ALL_WITH_RELATIONS,
+                     }
+        always_return_data = True
+        
+    
+class AreaSalesManagerResource(CustomBaseModelResource):
+        '''
+           Area sales manager resource
+        '''
+        user = fields.ForeignKey(UserProfileResource, 'user', full=True)
+        rm = fields.ForeignKey(RegionalManagerResource, 'rm')
+        class Meta:
+            queryset = models.AreaSalesManager.objects.all()
+            resource_name = "area-sales-managers"
+            authentication = AccessTokenAuthentication()
+            authorization = MultiAuthorization(DjangoAuthorization(), RMCustomAuthorization())
+            allowed_methods = ['get']
+            filtering = {
+                     "user": ALL_WITH_RELATIONS, 
+                     "rm": ALL_WITH_RELATIONS,
+                     }
+            always_return_data = True
+
 class ZonalServiceManagerResource(CustomBaseModelResource):
     '''
        Zonal service manager resource
@@ -677,6 +732,7 @@ class DealerResource(CustomBaseModelResource):
     '''
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
     asm = fields.ForeignKey(AreaServiceManagerResource, 'asm', full=True, null=True)
+    sm = fields.ForeignKey(AreaSalesManagerResource, 'sm', full=True, null=True)
     
     class Meta:
         queryset = models.Dealer.objects.all()
@@ -688,6 +744,7 @@ class DealerResource(CustomBaseModelResource):
                      "user": ALL_WITH_RELATIONS,
                      "dealer_id": ALL,
                      "asm":ALL_WITH_RELATIONS,
+                     "sm":ALL_WITH_RELATIONS,
                      }
         always_return_data = True
         ordering = ['user']
