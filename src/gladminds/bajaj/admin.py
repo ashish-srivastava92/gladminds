@@ -416,30 +416,29 @@ class NSMAdmin(GmModelAdmin):
         obj.phone_number = utils.mobile_format(obj.phone_number)
         super(NSMAdmin, self).save_model(request, obj, form, change)
 
-# class ASMAdmin(GmModelAdmin):
-#     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-#     search_fields = ('asm_id', 'nsm__name',
-#                      'phone_number', 'state')
-#     list_display = ('asm_id', 'name', 'email',
-#                      'phone_number', 'get_state', 'nsm')
-#     
-# 
-#     def get_state(self, obj):
-#         states = obj.state.all()
-#         if states:
-#             return ' | '.join([str(state.state_name) for state in states])
-#         else:
-#             return None
-#     get_state.short_description = 'State'
-# 
-#     def get_form(self, request, obj=None, **kwargs):
-#         self.exclude = ('asm_id',)
-#         form = super(ASMAdmin, self).get_form(request, obj, **kwargs)
-#         return form
-# 
-#     def save_model(self, request, obj, form, change):
-#         obj.phone_number = utils.mobile_format(obj.phone_number)
-#         super(ASMAdmin, self).save_model(request, obj, form, change)
+class ASMAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('asm_id', 'nsm__name',
+                     'phone_number', 'state')
+    list_display = ('asm_id', 'name', 'email',
+                     'phone_number', 'get_state', 'nsm')
+    
+    def get_state(self, obj):
+        states = obj.state.all()
+        if states:
+            return ' | '.join([str(state.state_name) for state in states])
+        else:
+            return None
+    get_state.short_description = 'State'
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('asm_id',)
+        form = super(ASMAdmin, self).get_form(request, obj, **kwargs)
+        return form
+
+    def save_model(self, request, obj, form, change):
+        obj.phone_number = utils.mobile_format(obj.phone_number)
+        super(ASMAdmin, self).save_model(request, obj, form, change)
         
 class NationalSalesManagerAdmin(GmModelAdmin):
     search_fields = ('name', 'phone_number')

@@ -786,7 +786,7 @@ def bulk_upload_retailer(request):
             userprofile.pincode = row['pincode']
             userprofile.state = row['state']
             userprofile.address = row['address']
-            #userprofile.save()
+            userprofile.save()
             #get the retailer data and save it in retailer model
             retailer = Retailer()
             retailer.retailer_name = row['retailer name']
@@ -804,6 +804,6 @@ def bulk_upload_retailer(request):
             else:
                 retailer.distributor = \
                         Distributor.objects.get(user__user = request.user)
-            #retailer.save()
+            retailer.save()
     return HttpResponseRedirect('/admin/bajaj/retailer/')
     

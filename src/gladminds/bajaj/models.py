@@ -85,7 +85,7 @@ class AreaSalesManager(base_models.AreaSalesManager):
     
     def __unicode__(self):
         return self.user.user.username
-
+    
 class AreaServiceManager(base_models.AreaServiceManager):
     '''details of Area Service Manager'''
     user = models.OneToOneField(UserProfile, null=True, blank=True)
@@ -499,6 +499,8 @@ class Retailer(base_models.Retailer):
     email = models.EmailField(max_length=50, null=True, blank=True)
     mobile = models.CharField(max_length=15)
     profile = models.CharField(max_length=15, null=True, blank=True)
+    latitude = models.DecimalField(max_digits = 10, decimal_places=6)
+    longitude = models.DecimalField(max_digits = 11, decimal_places=6)
     language = models.CharField(max_length=10, null=True, blank=True)
     rejected_reason = models.CharField(max_length=300, null=True, blank=True)
     
@@ -529,7 +531,16 @@ class SparePartMasterData(base_models.SparePartMasterData):
     class Meta(base_models.SparePartMasterData.Meta):
         app_label = _APP_NAME
 
-
+class OrderPart(base_models.BaseModel):
+    part = models.ForeignKey(SparePartMasterData)
+    quantity = models.CharField(max_length=10)
+    total_price = models.CharField(max_length=15)
+    dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
+    retailer = models.ForeignKey(Retailer)
+    fullfill = models.BooleanField()
+    delivered = models.IntegerField()
+    no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
+        
 class SparePartUPC(base_models.SparePartUPC):
     '''details of Spare Part UPC'''
     part_number = models.ForeignKey(SparePartMasterData)
