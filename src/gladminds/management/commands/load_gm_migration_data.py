@@ -43,7 +43,7 @@ class Command(BaseCommand):
             mt = get_model('MessageTemplate', app)
             for message_temp in message_templates:
                 fields = message_temp['fields']
-                temp_obj=mt.objects.using(app).filter(template=fields['template_key'])
+                temp_obj=mt.objects.using(app).filter(template_key=fields['template_key'])
                 if not temp_obj:
                     temp_obj = mt(id=message_temp['pk'], created_date=TODAY, template_key=fields['template_key']\
                                , template=fields['template'], description=fields['description'])
