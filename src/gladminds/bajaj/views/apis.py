@@ -31,8 +31,10 @@ def authentication(request):
         if user.is_active:
             #the user is active.He should be a dsr or retailer 
             authenticated_user = DistributorSalesRep.objects.filter(user = user)
+            login_type = "dsr"
             if not authenticated_user:
                 authenticated_user = Retailer.objects.filter(user = user)
+                login_type = "retailer"
             if not authenticated_user:
                 return Response({'message': 'you are not \
                                  a DSR or retailer. Please contact your distributor', 'status':0})
@@ -40,8 +42,9 @@ def authentication(request):
             jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
             jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
             payload = jwt_payload_handler(user)
-            data = {'Id': authenticated_user[0].id, 'token': jwt_encode_handler(payload), 'status':1}
-            return Response(json.dumps(data), content_type="application/json")
+            data = {"Id": authenticated_user[0].id,
+                    "token": jwt_encode_handler(payload), "status":1, "login_type":login_type}
+            return Response(data, content_type="application/json")
         else:
          return Response({'message': 'you are not active. Please contact your distributor', 'status':0})   
     else:
@@ -70,6 +73,8 @@ def get_retailers(request, dsr_id):
     return Response(retailer_list)
 
 @api_view(['GET'])
+@authentication_classes((JSONWebTokenAuthentication,))
+@permission_classes((IsAuthenticated,))
 def get_parts(request):
     parts = SparePartMasterData.objects.all()
     parts_list =[]
