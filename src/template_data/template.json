@@ -180,7 +180,7 @@
   	"pk": 20,
   	"fields": {
   		"template_key": "SEND_CUSTOMER_SUPPORTED_KEYWORD",
-  		"template": "Supported keyword: 1.AC 2.RD 3.CHKBAL",
+  		"template": "Supported keyword: 1.A 2.C 3.SD 4.R",
   		"description": "Send supported message format to customer"
   	}
   },
