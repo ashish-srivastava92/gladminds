@@ -180,7 +180,7 @@
   	"pk": 20,
   	"fields": {
   		"template_key": "SEND_CUSTOMER_SUPPORTED_KEYWORD",
-  		"template": "Supported keyword: 1.A 2.C 3.SD 4.R 5.AC 6.RD 7.CHKBAL",
+  		"template": "Supported keyword: 1.AC 2.RD 3.CHKBAL",
   		"description": "Send supported message format to customer"
   	}
   },
@@ -695,6 +695,15 @@
       "template_key": "PHONE_NUMBER_CANNOT_BE_REGISTERED",
       "template": "This mobile number cannot be registered and exceeds maximum limit. Please contact customer support: +91-7847011011.",
       "description": "Send this message when vin cannot be registered"
+    }
+  },
+  {
+    "model": "gladminds.messagetemplate",
+    "pk": 78,
+    "fields": {
+      "template_key": "OWNER_MOBILE_NUMBER_UPDATE",
+      "template": "Dear {customer_name}, your registered mobile number has been changed to {new_number}. If you notice any discrepancy please contact {phone_number}",
+      "description": "Send this message when owner phone number is updated"
     }
   }
 ]
