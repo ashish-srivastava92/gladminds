@@ -110,6 +110,7 @@
 	                	
 	                    <div class="table-responsive">
 	                    	<script type="text/javascript">
+	                    		var col=val='';
 	                    		var access_token=localStorage.getItem("access_token")
 	                    		$(document).ready(function(){
 
@@ -157,8 +158,8 @@
 							});
 
                          			$("#submit").click(function(){
-                         				var col=$('#select-native-3').val();
-                         				var val=$('#search-1').val();
+                         				col=$('#select-native-3').val();
+                         				val=$('#search-1').val();
                          				var from=$('#from').val();
                          				var to=$('#to').val();
                          				
