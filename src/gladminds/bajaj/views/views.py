@@ -755,7 +755,7 @@ def rejected_reason(request):
                    subject = constants.REJECT_RETAILER_SUBJECT, body = '',
                    message = constants.REJECT_RETAILER_MESSAGE)
     except Exception as e:
-        print 'The exception is ',e
+        logger.error('Mail is not sent. Exception occurred', e)
     return HttpResponseRedirect('/admin/bajaj/retailer/')
 
 def handle_uploaded_file(uploaded_file):

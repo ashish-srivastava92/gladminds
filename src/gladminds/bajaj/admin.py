@@ -1,5 +1,5 @@
 import copy
-import datetime
+import datetime, logging
 from django import forms
 from django.contrib.admin import AdminSite, TabularInline
 from django.contrib.auth.models import User, Group
@@ -22,6 +22,8 @@ from gladminds.core.auth_helper import Roles
 from gladminds.core import constants
 from django.forms.widgets import TextInput
 from gladminds.core.managers.mail import send_email
+
+logger = logging.getLogger('gladminds')
 
 class BajajAdminSite(AdminSite):
     pass
@@ -484,6 +486,7 @@ class DistributorForm(forms.ModelForm):
             'placeholder': 'Distributor'})
 
 class DistributorAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = DistributorForm
     search_fields = ('asm__asm_id',
                      'phone_number', 'city')
@@ -498,7 +501,7 @@ class DistributorAdmin(GmModelAdmin):
                    subject = constants.ADD_DISTRIBUTOR_SUBJECT, body = '',
                    message= constants.ADD_DISTRIBUTOR_MESSAGE)
         except Exception as e:
-            print 'The exception is ',e
+            logger.error('Mail is not sent. Exception occurred',e)
     
     def distributor_code(self, obj):
         return obj.distributor_id
@@ -544,6 +547,7 @@ class DistributorSalesRepForm(forms.ModelForm):
                                     Distributor.objects.filter(user__user = self.request.user)
     
 class DistributorSalesRepAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('distributor_sales_id', 'user_id')
     list_display = ('sales_representative_code', 'sales_representative_name', 'is_active')
     form = DistributorSalesRepForm
@@ -567,7 +571,7 @@ class DistributorSalesRepAdmin(GmModelAdmin):
                    subject = constants.ADD_DSR_SUBJECT, body = '',
                    message= constants.ADD_DSR_MESSAGE)
         except Exception as e:
-            print 'The exception is ',e
+            logger.error('Mail is not sent. Exception occurred',e)
             
     def sales_representative_code(self, obj):
         return obj.distributor_sales_id
@@ -591,6 +595,7 @@ class DistributorStaffForm(forms.ModelForm):
         self.fields['distributor'].queryset = Distributor.objects.filter(user_id = self.request.user.id)
     
 class DistributorStaffAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('distributor_staff_id', 'user_id')
     list_display = ('distributor_staff_id', 'staff_name', 'is_active')
     form = DistributorStaffForm
@@ -614,7 +619,7 @@ class DistributorStaffAdmin(GmModelAdmin):
                    subject = constants.ADD_DISTRIBUTOR_STAFF_SUBJECT, body = '',
                    message= constants.ADD_DISTRIBUTOR_STAFF_MESSAGE)
         except Exception as e:
-            print 'The exception is ',e
+            logger.error('Mail is not sent. Exception occurred',e)
     
     def staff_name(self, obj):
         return obj.user.user.first_name + obj.user.user.last_name
@@ -638,6 +643,7 @@ class RetailerForm(forms.ModelForm):
             'placeholder': 'Retailer'})
     
 class RetailerAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = RetailerForm
     search_fields = ('retailer_name', 'retailer_town', 'billing_code', 'user__territory')
     list_display = ('billing_code', 'retailer_name', 'territory', 'pincode', 'phone',
@@ -678,7 +684,7 @@ class RetailerAdmin(GmModelAdmin):
                        subject = constants.APPROVE_RETAILER_SUBJECT, body = '',
                        message = constants.APPROVE_RETAILER_MESSAGE)
             except:
-                print 'The exception is ',e
+                logger.error('Mail is not sent. Exception occurred ',e)
     approve.short_description = 'Approve Selected Retailers'
     
     def pincode(self, obj):

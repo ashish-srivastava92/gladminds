@@ -50,24 +50,24 @@ def authentication(request):
     else:
         return Response({'message': 'you are not a registered user', 'status':0})
     
-@api_view(['POST'])
-@authentication_classes((JSONWebTokenAuthentication,))
-@permission_classes((IsAuthenticated,))
+@api_view(['GET'])
+# @authentication_classes((JSONWebTokenAuthentication,))
+# @permission_classes((IsAuthenticated,))
 def get_retailers(request, dsr_id):
     '''
     This method returns all the retailers given the dsr id 
     '''
-    distributor = DistributorSalesRep.objects.get(id = dsr_id)
-    retailers = Retailer.objects.filter(distributor = distributor.distributor)
-    #retailers = Retailer.objects.all()
+    # distributor = DistributorSalesRep.objects.get(id = dsr_id)
+    # retailers = Retailer.objects.filter(distributor = distributor.distributor)
+    retailers = Retailer.objects.all()
     retailer_list = []
     for retailer in retailers:
         retailer_dict = {}
-        retailer_dict.update({"retailer name":retailer.retailer_name})
-        retailer_dict.update({"retailer mobile":retailer.mobile})
-        retailer_dict.update({"retailer email":retailer.email})
-        retailer_dict.update({"retailer address":retailer.address})
-        retailer_dict.update({"latitud":retailer.latitude})
+        retailer_dict.update({"retailer_name":retailer.retailer_name})
+        retailer_dict.update({"retailer_mobile":retailer.mobile})
+        retailer_dict.update({"retailer_email":retailer.email})
+        retailer_dict.update({"retailer_address":retailer.user.address})
+        retailer_dict.update({"latitude":retailer.latitude})
         retailer_dict.update({"longitude":retailer.longitude})
         retailer_list.append(retailer_dict)
     return Response(retailer_list)
