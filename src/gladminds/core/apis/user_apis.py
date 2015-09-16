@@ -725,7 +725,7 @@ class AreaSalesManagerResource(CustomBaseModelResource):
             rm_user_id = load.get('rm_user_id')
             try:
                 user = models.AreaSalesManager.objects.get(user__user__username=email)
-                data = {'status': 0 , 'message' : 'Area sales manager with this phone number and username already exists'}
+                data = {'status': 0 , 'message' : 'Area sales manager with this username already exists'}
             except Exception as ex:
                 logger.info("[register_area_sales_manager]: New SM registration:: {0}".format(ex))
                 user_data = register_user.register_user(Roles.AREASALESMANAGERS,
