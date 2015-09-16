@@ -64,7 +64,7 @@
 				</div><!-- /header -->
 		
 			<div data-role="content" id="content1">
-				<button id="download_data">Download</button>
+				<!-- <button id="download_data">Download</button> -->
 				<div class="row">
 				    <div class="col-md-1"><div style="float: left;"><a href="#myPanel"><button  class="ui-btn ui-icon-bars ui-shadow ui-corner-all ui-btn-icon-notext ui-btn-inline">bars</button></a></div></div>
 				    <div class="col-md-11 pull-right">
@@ -102,6 +102,9 @@
 	                    <div class="portlet-title">
 	                        <h4>Registration Details</h4>
 	                     </div>
+	                  <!--   <div class="ui-nodisc-icon ui-alt-icon" style="float: right;">
+	                        <a title="Download" id="download_data" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-notext ui-btn-inline ui-icon-arrow-d"></a>
+	                    </div> -->
 	                    <div class="clearfix"></div>
 	                </div>
 	                <div class="portlet-body">
@@ -123,7 +126,7 @@
 										    $("#search-1").val('')
 									});
 
-                         			$('#search-1').bind('keypress input propertychange paste', function() {
+                         			$('#search-1').bind('input', function() {
 									 
 										    var yourInput = $(this).val();
 												re = /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi;
@@ -138,6 +141,7 @@
                          				var val=$('#search-1').val();
                          				if (col==''){
                          					alert('Select Column you want to search')
+                         					$('#search-1').val('');
                          					$("#select-native-3").focus();
                          				}
                          				else if(col=='phone_number__endswith'){
