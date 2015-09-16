@@ -691,6 +691,8 @@ class AreaSalesManagerResource(CustomBaseModelResource):
                      }
             always_return_data = True
         
+        #TO-DO : verify about state
+        
         def prepend_urls(self):
             return [
                     url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),
