@@ -61,11 +61,12 @@
 					    <nav role="navigation" class="navbar navbar-default">
 					        <!-- Brand and toggle get grouped for better mobile display -->
 					        <div class="navbar-header">
-					            <a href="" title="jQuery Mobile Demos home">
+					            
 					            	<img src="/static/powerrewards/img/power_rewards_logo.png" alt="jQuery Mobile">
-					            </a>
+					          
 					        </div>
-					        
+					        <div class='username' style="float: right;margin-top: 5px;margin-right: 5px;">
+					        </div>
 					    </nav>
 					</div>
 				</div><!-- /header -->
@@ -98,15 +99,18 @@
 	                    <div class="portlet-title">
 	                        <h4>Monthly Active Count</h4>
 	                     </div>
-	                   <!--  <div class="ui-nodisc-icon ui-alt-icon" style="float: right;">
+	                    <div class="ui-nodisc-icon ui-alt-icon" style="float: right;">
 	                        <a title="Download All Data" id="download_data" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-notext ui-btn-inline ui-icon-arrow-d"></a>
-	                    </div> -->
+	                    </div>
 	                    <div class="clearfix"></div>
 	                </div>
 	                <div class="portlet-body">
 	                	
 	                    <div class="table-responsive">
 	                    <script type="text/javascript">
+
+	                    var email=localStorage.getItem("email")
+	                    		$(".username").html(email);
 	                    var access_token=localStorage.getItem("access_token")
 
 	                    	$(document).ready(function(){
@@ -289,7 +293,7 @@
 
 							         createCSV  = function(key, objects) {
 							          var arrKey = key;
-							          console.log(arrKey)          
+							          // console.log(arrKey)          
 
 							          $.each(dat, function (key, value){
 							                            
@@ -326,11 +330,11 @@
 
 							          
 
-							          console.log(mainArray)
+							          // console.log(mainArray)
 
 							          var csvContent = "data:text/csv;charset=utf-8,";
 							          mainArray.forEach(function(arrCSV_data, index){
-							             console.log(arrCSV_data)
+							             // console.log(arrCSV_data)
 							             arrCSV_dataString = arrCSV_data.join(",");
 							             csvContent += arrCSV_dataString+ "\n";
 							             var encodedUri = encodeURI(csvContent);

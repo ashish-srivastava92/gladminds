@@ -54,11 +54,12 @@
 					    <nav role="navigation" class="navbar navbar-default">
 					        <!-- Brand and toggle get grouped for better mobile display -->
 					        <div class="navbar-header">
-					            <a href="" title="jQuery Mobile Demos home">
+					            
 					            	<img src="/static/powerrewards/img/power_rewards_logo.png" alt="jQuery Mobile">
-					            </a>
+					            
 					        </div>
-					        
+					        <div class='username' style="float: right;margin-top: 5px;margin-right: 5px;">
+					        </div>
 					    </nav>
 					</div>
 				</div><!-- /header -->
@@ -102,9 +103,9 @@
 	                    <div class="portlet-title">
 	                        <h4>Registration Details</h4>
 	                     </div>
-	                  <!--   <div class="ui-nodisc-icon ui-alt-icon" style="float: right;">
+	                    <div class="ui-nodisc-icon ui-alt-icon" style="float: right;">
 	                        <a title="Download" id="download_data" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-notext ui-btn-inline ui-icon-arrow-d"></a>
-	                    </div> -->
+	                    </div>
 	                    <div class="clearfix"></div>
 	                </div>
 	                <div class="portlet-body">
@@ -112,6 +113,8 @@
 	                	
 	                    <div class="table-responsive">
 	                    	<script type="text/javascript">
+	                    		var email=localStorage.getItem("email")
+	                    		$(".username").html(email);
 	                           var accessToken = '{{token}}';
 	                           localStorage.setItem('access_token', accessToken);
 	                           
@@ -435,7 +438,9 @@
 								         createCSV  = function(csvData) {
 								          for(index=0; index<csvData.objects.length;index++) {
 
-								           if((csvData.objects[index].mechanic_id != null) || (csvData.objects[index].mechanic_id != undefined)) {
+								           if((csvData.objects[index].permanent_id != null) || (csvData.objects[index].permanent_id != undefined)) {
+								            var mechanic_id = csvData.objects[index].permanent_id;
+								           } else if((csvData.objects[index].mechanic_id != null) || (csvData.objects[index].mechanic_id != undefined)) {
 								            var mechanic_id = csvData.objects[index].mechanic_id;
 								           } else {
 								            var mechanic_id = "";
@@ -473,7 +478,7 @@
 								           }
 
 								           if((csvData.objects[index].created_date != null) || (csvData.objects[index].created_date != undefined)) {
-								            var created_date = moment(csvData.objects[index].created_date).format('l');
+								            var created_date = moment(csvData.objects[index].created_date).format('LL');
 
 								           } else {
 								            var created_date = "";
