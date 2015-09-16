@@ -495,9 +495,11 @@ class CircleHeadResource(CustomBaseModelResource):
             name = load.get('name')
             phone_number = load.get('phone_number')
             email = load.get('email')
+            
+            
             try:
-                user = models.CircleHead.objects.filter(user__phone_number=phone_number,user__user__username=email)
-                data = {'status': 0 , 'message' : 'Circle head with this phone number and username already exists'}
+                user = models.CircleHead.objects.get(user__user__username=email)
+                data = {'status': 0 , 'message' : 'Circle head with this username already exists'}
             except Exception as ex:
                 logger.info("[register_circle_head]:New circle_head registration")
                 user_data = register_user.register_user(Roles.CIRCLEHEADS,username=email,
@@ -517,6 +519,7 @@ class CircleHeadResource(CustomBaseModelResource):
                user_id: id of the CH to be updated
                phone_number: number of the CH
                name: name of the CH
+               email: email id of CH
                
             '''
         
@@ -537,6 +540,7 @@ class CircleHeadResource(CustomBaseModelResource):
 
                 ch_user= ch_obj.user.user
                 ch_user.first_name=load.get('name')
+                ch_user.email=load.get('email')
             
                 ch_user.save(using=settings.BRAND)
                 ch_profile.save()
@@ -582,7 +586,7 @@ class RegionalManagerResource(CustomBaseModelResource):
                phone_number: number of the dealer
                name: name of the dealer
                regional-office: region under the rm
-               circle_head: details of Circle Head, incharge of RM
+               circle_head_user_id: user_id of Circle Head, incharge of RM
         '''
         self.is_authenticated(request)
         if request.method != 'POST':
@@ -602,10 +606,10 @@ class RegionalManagerResource(CustomBaseModelResource):
         name = load.get('name')
         phone_number = load.get('phone_number')
         email = load.get('email')
-        circle_head_user_id = request.user.id
+        circle_head_user_id = load.get('circle_head_user_id')
         try:
-            user = models.RegionalManager.objects.get(user__phone_number=phone_number,user__user__username=email)
-            data = {'status': 0 , 'message' : 'Regional Manager with this phone number and username already exists'}
+            user = models.RegionalManager.objects.get(user__user__username=email)
+            data = {'status': 0 , 'message' : 'Regional Manager with this username already exists'}
         except Exception as ex:
             logger.info("[register_regional_sales_manager]:New RM registration")
             user_data = register_user.register_user(Roles.REGIONALMANAGERS,username=email,
@@ -619,13 +623,9 @@ class RegionalManagerResource(CustomBaseModelResource):
                 rm_data.save()
                 data = {"status": 1 , "message" : "Regional sales manager registered successfully"}
             except Exception as ex:
-                if request.user.is_superuser:
-                    rm_data = models.RegionalManager(region=region, user=user_data, circle_head=None)
-                    rm_data.save()
-                    data = {"status": 1 , "message" : "Regional sales manager registered successfully"}
-                else:
-                    data = {'status': 0 , 'message' : 'Circle head with given user details is not registered'}
-               
+                logger.info("[register_regional_sales_manager]: Invalid CH User ID provided :: {0}".format(ex))
+                return HttpResponse(json.dumps({"message" : "Invalid CH User ID provided "}),content_type="application/json", status=404)
+                 
         return HttpResponse(json.dumps(data), content_type="application/json")
     
     def update_regional_sales_manager(self, request, **kwargs):
@@ -636,6 +636,7 @@ class RegionalManagerResource(CustomBaseModelResource):
                phone_number: number of the RM
                name: name of the RM
                regional-office: region under the RM
+               email: email id of RM
                ch_user_id: User id of CH incharge of RM
         '''
         self.is_authenticated(request)
@@ -655,6 +656,7 @@ class RegionalManagerResource(CustomBaseModelResource):
             
             rm_user= rm_obj.user.user
             rm_user.first_name=load.get('name')
+            rm_user.email=load.get('email')
             
             rm_obj.region = load.get('regional-office')
             ch_user_id = load.get('ch_user_id')
@@ -706,6 +708,7 @@ class AreaSalesManagerResource(CustomBaseModelResource):
                    email: email of the sm
                    phone_number: number of the sm
                    name: name of the sm
+                   rm_user_id: user_id of rm incharge of sm
             '''
             self.is_authenticated(request)
             if request.method != 'POST':
@@ -721,8 +724,9 @@ class AreaSalesManagerResource(CustomBaseModelResource):
             name = load.get('name')
             phone_number = load.get('phone_number')
             email = load.get('email')
+            rm_user_id = load.get('rm_user_id')
             try:
-                user = models.AreaSalesManager.objects.get(user__phone_number=phone_number,user__user__username=email)
+                user = models.AreaSalesManager.objects.get(user__user__username=email)
                 data = {'status': 0 , 'message' : 'Area sales manager with this phone number and username already exists'}
             except Exception as ex:
                 logger.info("[register_area_sales_manager]: New SM registration:: {0}".format(ex))
@@ -734,17 +738,13 @@ class AreaSalesManagerResource(CustomBaseModelResource):
                                                         APP=settings.BRAND)
                 try:
                     id = request.user.id
-                    rm_data = models.RegionalManager.objects.get(user__user_id=id)
+                    rm_data = models.RegionalManager.objects.get(user__user_id=rm_user_id)
                     sm_data = models.AreaSalesManager(user=user_data,rm=rm_data)
                     sm_data.save()
                     data = {"status": 1 , "message" : "Area sales manager registered successfully"}
                 except Exception as ex:
-                    if request.user.is_superuser or request.user.groups.filter(name=Roles.CIRCLEHEADS).exists():
-                        sm_data = models.AreaSalesManager(user=user_data,rm=None)
-                        sm_data.save()
-                        data = {"status": 1 , "message" : "Area sales manager registered successfully"}
-                    else:
-                        data = {'status': 0 , 'message' : 'Regional sales manager with given user details is not registered'}
+                    logger.info("[register_area_sales_manager]: Invalid RM User ID provided :: {0}".format(ex))
+                    return HttpResponse(json.dumps({"message" : "Invalid RM User ID provided "}),content_type="application/json", status=404)
             return HttpResponse(json.dumps(data), content_type="application/json")
         
         def update_area_sales_manager(self, request, **kwargs):
@@ -754,6 +754,7 @@ class AreaSalesManagerResource(CustomBaseModelResource):
                    user_id: User ID of the sm to be updated
                    phone_number: number of the sm
                    name: name of the sm
+                   email: email id of sm
                    rm_user_id: user_id of rm incharge of sm
             '''
             self.is_authenticated(request)
@@ -773,6 +774,7 @@ class AreaSalesManagerResource(CustomBaseModelResource):
             
                 sm_user= sm_obj.user.user
                 sm_user.first_name=load.get('name')
+                sm_user.email=load.get('email')
 
                 #TO-DO: confirm about state
                 
@@ -841,6 +843,7 @@ class ZonalServiceManagerResource(CustomBaseModelResource):
         except:
             return HttpResponse(content_type="application/json", status=404)
         zsm_id = load.get('id')
+
         try:
             zsm_data = models.ZonalServiceManager.objects.get(zsm_id=zsm_id)
             data = {'status': 0 , 'message' : 'Regional service manager with this id already exists'}
