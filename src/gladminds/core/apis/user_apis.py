@@ -601,8 +601,6 @@ class RegionalManagerResource(CustomBaseModelResource):
             return HttpResponse(content_type="application/json", status=404)
         region = load.get('regional-office')
         
-        #TO-DO : Circle head - check logic
-        
         name = load.get('name')
         phone_number = load.get('phone_number')
         email = load.get('email')
@@ -737,7 +735,6 @@ class AreaSalesManagerResource(CustomBaseModelResource):
                                                         email = email,
                                                         APP=settings.BRAND)
                 try:
-                    id = request.user.id
                     rm_data = models.RegionalManager.objects.get(user__user_id=rm_user_id)
                     sm_data = models.AreaSalesManager(user=user_data,rm=rm_data)
                     sm_data.save()
@@ -776,8 +773,6 @@ class AreaSalesManagerResource(CustomBaseModelResource):
                 sm_user.first_name=load.get('name')
                 sm_user.email=load.get('email')
 
-                #TO-DO: confirm about state
-                
                 rm_user_id=load.get('rm_user_id')
                 try:
                     rm_data = models.RegionalManager.objects.get(user__user_id=rm_user_id)
