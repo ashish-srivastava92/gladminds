@@ -59,6 +59,8 @@ class GmModelAdmin(ModelAdmin):
     get_user.short_description = 'Name'
     
     def get_members_mechanic_id(self,obj):
+        if obj.member.permanent_id:
+            return obj.member.permanent_id
         return obj.member.mechanic_id
     
     def get_mechanic_name(self, obj):

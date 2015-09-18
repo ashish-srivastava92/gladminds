@@ -456,7 +456,7 @@ class CircleHeadResource(CustomBaseModelResource):
         user = fields.ForeignKey(UserProfileResource, 'user', full=True)
         class Meta:
             queryset = models.CircleHead.objects.all()
-            resource_name = "circle_head"
+            resource_name = "circle-heads"
             authentication = AccessTokenAuthentication()
             authorization = MultiAuthorization(DjangoAuthorization())
             allowed_methods = ['get']
@@ -710,11 +710,12 @@ class AreaSalesManagerResource(CustomBaseModelResource):
                    name: name of the sm
                    rm_user_id: user_id of rm incharge of sm
             '''
+            list_of_allowed_users = [Roles.CIRCLEHEADS,Roles.REGIONALMANAGERS]
             self.is_authenticated(request)
             if request.method != 'POST':
                 return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
                                     status=400)
-            if not request.user.is_superuser and not (request.user.groups.filter(name=Roles.CIRCLEHEADS).exists() or request.user.groups.filter(name=Roles.REGIONALMANAGERS).exists()):
+            if not request.user.is_superuser and not request.user.groups.filter(name__in=list_of_allowed_users).exists():
                 return HttpResponse(json.dumps({"message" : "Not Authorized to add SM"}), content_type= "application/json",
                                     status=401)
             try:
@@ -756,11 +757,12 @@ class AreaSalesManagerResource(CustomBaseModelResource):
                    email: email id of sm
                    rm_user_id: user_id of rm incharge of sm
             '''
+            list_of_allowed_users = [Roles.CIRCLEHEADS,Roles.REGIONALMANAGERS]
             self.is_authenticated(request)
             if request.method != 'POST':
                 return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
                                     status=400)
-            if not request.user.is_superuser and not (request.user.groups.filter(name=Roles.CIRCLEHEADS).exists() or request.user.groups.filter(name=Roles.REGIONALMANAGERS).exists()):
+            if not request.user.is_superuser and not request.user.groups.filter(name__in=list_of_allowed_users).exists():
                 return HttpResponse(json.dumps({"message" : "Not Authorized to edit SM"}), content_type= "application/json",
                                     status=401)
             user_id=kwargs['user_id']
