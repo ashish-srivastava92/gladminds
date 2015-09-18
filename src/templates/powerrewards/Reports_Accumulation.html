@@ -54,11 +54,12 @@
 					    <nav role="navigation" class="navbar navbar-default">
 					        <!-- Brand and toggle get grouped for better mobile display -->
 					        <div class="navbar-header">
-					            <a href="" title="jQuery Mobile Demos home">
+					            
 					            	<img src="/static/powerrewards/img/power_rewards_logo.png" alt="jQuery Mobile">
-					            </a>
+					            
 					        </div>
-					        
+					        <div class='username' style="float: right;margin-top: 5px;margin-right: 5px;">
+					        </div>
 					    </nav>
 					</div>
 				</div><!-- /header -->
@@ -74,7 +75,7 @@
 						    		<div class="col-md-1" style="margin-top:6px;float: left;width: inherit;"><a href="." target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
 						    		<div class="col-md-3" style="width: 250px;" class="" ><select name="select-native-3" id="select-native-3" data-iconpos="left" data-mini="true" required>
 						    				<option value="">Select</option>
-									        <option value="member__mechanic_id">Mechanic ID</option>
+									        <option value="member_id">Mechanic ID</option>
 									        <option value="member__district">District</option>
 									        <option value="member__phone_number__endswith">Mobile No</option>
 									        <option value="member__state__state_name">State</option>
@@ -104,15 +105,17 @@
 	                    <div class="portlet-title">
 	                        <h4>Accumulation Report</h4>
 	                     </div>
-	                    <!-- <div class="ui-nodisc-icon ui-alt-icon" style="float: right;">
+	                    <div class="ui-nodisc-icon ui-alt-icon" style="float: right;">
 	                        <a title="Download" id="download_data" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-notext ui-btn-inline ui-icon-arrow-d"></a>
-	                    </div> -->
+	                    </div>
 	                    <div class="clearfix"></div>
 	                </div>
 	                <div class="portlet-body">
 	                	
 	                    <div class="table-responsive">
 	                    	<script type="text/javascript">
+	                    	var email=localStorage.getItem("email")
+	                    		$(".username").html(email);
 	                    		var col=val='';
 	                    		var access_token=localStorage.getItem("access_token")
 	                    		$(document).ready(function(){
@@ -434,7 +437,9 @@
 								         createCSV  = function(csvData) {
 								          for(index=0; index<csvData.objects.length;index++) {
 
-								           if((csvData.objects[index].member.mechanic_id != null) || (csvData.objects[index].member.mechanic_id != undefined)) {
+								           if((csvData.objects[index].member.permanent_id != null) || (csvData.objects[index].member.permanent_id != undefined)) {
+								            var mechanic_id = csvData.objects[index].member.permanent_id;
+								           } else if((csvData.objects[index].member.mechanic_id != null) || (csvData.objects[index].member.mechanic_id != undefined)) {
 								            var mechanic_id = csvData.objects[index].member.mechanic_id;
 								           } else {
 								            var mechanic_id = "";
@@ -472,7 +477,7 @@
 								           }
 
 								           if((csvData.objects[index].created_date != null) || (csvData.objects[index].created_date != undefined)) {
-								            var created_date = moment(csvData.objects[index].created_date).format('l');
+								            var created_date = moment(csvData.objects[index].created_date).format('LL');
 
 								           } else {
 								            var created_date = "";
@@ -495,26 +500,49 @@
 								             var unique_part_code = "";
 								            }
 								            
-								           }
-
-								           subArray.push(mechanic_id);
-								           subArray.push(mechanic_name);
-								           subArray.push(district);
-								           subArray.push(phone);
-								           subArray.push(state);
-								           subArray.push(distributor_id);
-
-								           subArray.push(unique_part_code);
-								           subArray.push(point);
-								           subArray.push(created_date);
+								            	if(col=='upcs__unique_part_code')
+													{ 
 
 
-								           mainArray.push(subArray);
-								           subArray=[]
+														if(val==part[j]["unique_part_code"]){
+															
+															subArray.push(mechanic_id);
+												           subArray.push(mechanic_name);
+												           subArray.push(district);
+												           subArray.push(phone);
+												           subArray.push(state);
+												           subArray.push(distributor_id);
 
+												           subArray.push(unique_part_code);
+												           subArray.push(point);
+												           subArray.push(created_date);
+
+
+												           mainArray.push(subArray);
+												           subArray=[]
+														}	
+													}	
+													else{			
+														subArray.push(mechanic_id);
+											           subArray.push(mechanic_name);
+											           subArray.push(district);
+											           subArray.push(phone);
+											           subArray.push(state);
+											           subArray.push(distributor_id);
+
+											           subArray.push(unique_part_code);
+											           subArray.push(point);
+											           subArray.push(created_date);
+
+
+											           mainArray.push(subArray);
+											           subArray=[]
+			                                        }
+									           
+									        }   
 								          }
 
-								          console.log(mainArray)
+								          // console.log(mainArray)
 
 								          var csvContent = "data:text/csv;charset=utf-8,";
 								          mainArray.forEach(function(arrCSV_data, index){
