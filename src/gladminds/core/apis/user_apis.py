@@ -498,7 +498,7 @@ class CircleHeadResource(CustomBaseModelResource):
             
             
             try:
-                user = models.CircleHead.objects.get(user__user__username=email)
+                user = get_model('CircleHead',settings.BRAND).objects.get(user__user__username=email)
                 data = {'status': 0 , 'message' : 'Circle head with this username already exists'}
             except Exception as ex:
                 logger.info("[register_circle_head]:New circle_head registration")
@@ -507,8 +507,8 @@ class CircleHeadResource(CustomBaseModelResource):
                                                         first_name=name,
                                                         email = email,
                                                         APP=settings.BRAND)
-                circle_head_data = models.CircleHead(user=user_data)
-                circle_head_data.save()
+                circle_head_data = get_model('CircleHead',settings.BRAND)(user=user_data)
+                circle_head_data.save(using=settings.BRAND)
                 data = {"status": 1 , "message" : "Circle Head registered successfully"}
             return HttpResponse(json.dumps(data), content_type="application/json")
         
@@ -532,7 +532,7 @@ class CircleHeadResource(CustomBaseModelResource):
                                 status=401)
             user_id=kwargs['user_id']
             try:
-                ch_obj = models.CircleHead.objects.get(user__user_id=user_id)
+                ch_obj = get_model('CircleHead',settings.BRAND).objects.get(user__user_id=user_id)
                 load = json.loads(request.body)
             
                 ch_profile = ch_obj.user
