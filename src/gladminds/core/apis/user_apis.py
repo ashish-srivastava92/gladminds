@@ -455,7 +455,7 @@ class CircleHeadResource(CustomBaseModelResource):
         '''
         user = fields.ForeignKey(UserProfileResource, 'user', full=True)
         class Meta:
-            queryset = models.CircleHead.objects.all()
+            queryset = get_model('CircleHead',settings.BRAND).objects.all()
             resource_name = "circle-heads"
             authentication = AccessTokenAuthentication()
             authorization = MultiAuthorization(DjangoAuthorization())
@@ -616,7 +616,7 @@ class RegionalManagerResource(CustomBaseModelResource):
                                                     email = email,
                                                     APP=settings.BRAND)
             try:
-                circle_head_data = models.CircleHead.objects.get(user__user_id=circle_head_user_id)
+                circle_head_data = get_model('CircleHead',settings.BRAND).objects.get(user__user_id=circle_head_user_id)
                 rm_data = models.RegionalManager(region=region, user=user_data, circle_head=circle_head_data)
                 rm_data.save()
                 data = {"status": 1 , "message" : "Regional sales manager registered successfully"}
@@ -659,7 +659,7 @@ class RegionalManagerResource(CustomBaseModelResource):
             rm_obj.region = load.get('regional-office')
             ch_user_id = load.get('ch_user_id')
             try:
-                ch_data = models.CircleHead.objects.get(user__user_id=ch_user_id)
+                ch_data = get_model('CircleHead',settings.BRAND).objects.get(user__user_id=ch_user_id)
                 rm_obj.circle_head=ch_data
             except Exception as ex:
                 logger.info("[update_regional_sales_manager]: Invalid CH User ID provided :: {0}".format(ex))
