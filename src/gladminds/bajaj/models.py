@@ -507,12 +507,14 @@ class Retailer(base_models.Retailer):
     class Meta(base_models.Retailer.Meta):
         app_label = _APP_NAME
 
-class DSRWrokAllocation(base_models.DSRWrokAllocation):
+class DSRWorkAllocation(base_models.DSRWorkAllocation):
     '''details of DSR work allocation'''
     distributor = models.ForeignKey(Distributor)
+    dsr = models.ForeignKey(DistributorSalesRep)
     retailer = models.ForeignKey(Retailer)
+    date = models.DateField()
     
-    class Meta(base_models.DSRWrokAllocation.Meta):
+    class Meta(base_models.DSRWorkAllocation.Meta):
         app_label = _APP_NAME
 
 class Member(base_models.Member):
@@ -533,8 +535,9 @@ class SparePartMasterData(base_models.SparePartMasterData):
 
 class OrderPart(base_models.BaseModel):
     part = models.ForeignKey(SparePartMasterData)
-    quantity = models.CharField(max_length=10)
-    total_price = models.CharField(max_length=15)
+    quantity = models.IntegerField()
+    price = models.DecimalField(max_digits = 5, decimal_places=2)
+    total_price = models.DecimalField(max_digits = 8, decimal_places=2)
     dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
     retailer = models.ForeignKey(Retailer)
     fullfill = models.BooleanField()

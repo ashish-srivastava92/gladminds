@@ -429,12 +429,12 @@ class Retailer(base_models.Retailer):
     class Meta(base_models.Retailer.Meta):
         app_label = _APP_NAME
 
-class DSRWrokAllocation(base_models.DSRWrokAllocation):
+class DSRWorkAllocation(base_models.DSRWorkAllocation):
     '''details of DSR work allocation'''
     distributor = models.ForeignKey(Distributor, null=True, blank=True)
     retailer = models.ForeignKey(Retailer, null=True, blank=True)
     
-    class Meta(base_models.DSRWrokAllocation.Meta):
+    class Meta(base_models.DSRWorkAllocation.Meta):
         app_label = _APP_NAME
 
 class Member(base_models.Member):

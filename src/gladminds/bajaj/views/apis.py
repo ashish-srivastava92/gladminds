@@ -16,6 +16,7 @@ from rest_framework_jwt.settings import api_settings
 
 from gladminds.bajaj.models import DistributorSalesRep, Retailer, SparePartMasterData, \
                             SparePartPoint
+from gladminds.core import constants
 
 @api_view(['POST'])
 def authentication(request):
@@ -57,12 +58,14 @@ def get_retailers(request, dsr_id):
     '''
     This method returns all the retailers given the dsr id 
     '''
-    # distributor = DistributorSalesRep.objects.get(id = dsr_id)
-    # retailers = Retailer.objects.filter(distributor = distributor.distributor)
-    retailers = Retailer.objects.all()
+    distributor = DistributorSalesRep.objects.get(id = dsr_id)
+    retailers = Retailer.objects.filter(distributor = distributor.distributor, \
+                                approved = constants.STATUS['APPROVED'] )
+    #retailers = Retailer.objects.all()
     retailer_list = []
     for retailer in retailers:
         retailer_dict = {}
+        retailer_dict.update({"retailer_Id":retailer.id})
         retailer_dict.update({"retailer_name":retailer.retailer_name})
         retailer_dict.update({"retailer_mobile":retailer.mobile})
         retailer_dict.update({"retailer_email":retailer.email})
@@ -73,21 +76,19 @@ def get_retailers(request, dsr_id):
     return Response(retailer_list)
 
 @api_view(['GET'])
-@authentication_classes((JSONWebTokenAuthentication,))
-@permission_classes((IsAuthenticated,))
+# @authentication_classes((JSONWebTokenAuthentication,))
+# @permission_classes((IsAuthenticated,))
 def get_parts(request):
     parts = SparePartMasterData.objects.all()
     parts_list =[]
     for part in parts:
         today = datetime.date.today()
-        price = SparePartPoint.objects.filter(part_number = part, valid_from__gt = today, \
-                                    valid_till__lt = today)
+        # price = SparePartPoint.objects.filter(part_number = part, valid_from__gt = today, \
+        #                             valid_till__lt = today)
         parts_dict = {}
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_model":part.part_model})
         parts_dict.update({"category":part.category})
-        parts_dict.update({"price":price[0].price})
-        parts_dict.update({"price":price[0].MRP})
         parts_list.append(parts_dict)
     return Response(parts_list)
 

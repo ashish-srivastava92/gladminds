@@ -53,14 +53,7 @@
         
 {% block coltype %}flex{% endblock %}
 {% block content %}
-{% ifequal cl.opts.verbose_name "retailer" %}
-  <form action="{% url 'bulk_upload_retailer' %}" method="POST" enctype="multipart/form-data">
-	<table>
-	  <tr> <td> Bulk upload of retailer:
-				<input type="file" name="bulk_upload_retailer"> </td> </tr>
-	  <tr> <td></td> <td> <input type="submit" value="upload"> </td></tr>
-	</table>
-{% endifequal %}
+
 <!--popup of rejection of retailer-->
 <div id="popup">
   

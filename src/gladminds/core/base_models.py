@@ -1160,18 +1160,14 @@ class Retailer(BaseModel):
     def __unicode__(self):
         return self.retailer_name
  
-class DSRWrokAllocation(BaseModel):
-    '''details of DSRWrokAllocation'''
+class DSRWorkAllocation(BaseModel):
+    '''details of DSRWorkAllocation'''
     status = models.CharField(max_length=12, choices=constants.WORKFLOW_STATUS, default='Open')
 
     class Meta:
         abstract = True
         db_table = "gm_dsrworkallocation"
         verbose_name_plural = "DSR Work Allocation"
-
-    def __unicode__(self):
-        return self.retailer_name   
-
 
 class Member(BaseModel):
     '''details of Member'''

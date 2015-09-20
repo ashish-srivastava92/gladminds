@@ -10,7 +10,8 @@ from django import forms
 from django.utils.html import mark_safe
 
 from gladminds.bajaj import models
-from gladminds.bajaj.models import Distributor, DistributorStaff, UserProfile
+from gladminds.bajaj.models import Distributor, DistributorStaff, DistributorSalesRep, \
+                        Retailer, DSRWorkAllocation, UserProfile
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
@@ -495,7 +496,7 @@ class DistributorAdmin(GmModelAdmin):
     exclude = ['sent_to_sap']
     
     def save_model(self, request, obj, form, Change):
-        super(DistributorAdmin, self).save_model(request, obj, form, change)
+        super(DistributorAdmin, self).save_model(request, obj, form, Change)
         try:
             send_email(sender = constants.FROM_EMAIL_ADMIN, receiver = obj.email, 
                    subject = constants.ADD_DISTRIBUTOR_SUBJECT, body = '',
@@ -645,7 +646,7 @@ class RetailerForm(forms.ModelForm):
 class RetailerAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = RetailerForm
-    search_fields = ('retailer_name', 'retailer_town', 'billing_code', 'user__territory')
+    search_fields = ('retailer_name', 'retailer_town', 'billing_code','territory')
     list_display = ('billing_code', 'retailer_name', 'territory', 'pincode', 'phone',
                     'mobile', 'email', 'distributor_code', 'distributor_name', 'status')
     exclude = []
@@ -727,7 +728,75 @@ class RetailerAdmin(GmModelAdmin):
                     rejected_reason = "<input type=\"button\" value=\"Rejected Reason\" onclick=\"popup_rejected_reason(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.rejected_reason+"\'); return false;\">"
                     return mark_safe(rejected_reason)
     status.allow_tags = True
-
+    
+class RetailerForm(forms.ModelForm):
+    class Meta:
+        model = get_model('Retailer')
+        exclude = ['approved', 'rejected_reason']
+        
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(RetailerForm, self).__init__(*args, **kwargs)
+        # if dsr is added by distributorstaff, then show the concerned distributor of distributorstaff
+        # else show the distributor
+        if DistributorStaff.objects.filter(user__user = self.request.user).exists():
+            distributorstaff = DistributorStaff.objects.get(user__user = self.request.user)
+            self.fields['distributor'].queryset = Distributor.objects.filter(id = distributorstaff.distributor.id)
+        else:
+            self.fields['distributor'].queryset = Distributor.objects.filter(user__user = self.request.user)
+        self.fields['profile'].widget = TextInput(attrs={
+            'placeholder': 'Retailer'})
+        
+class DSRWorkAllocationForm(forms.ModelForm):
+    class Meta:
+        model = get_model('DSRWorkAllocation')
+        
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(DSRWorkAllocationForm, self).__init__(*args, **kwargs)
+        #list only the distributor who is currently logged in
+        distributor_objects = Distributor.objects.filter(user__user = \
+                                                                   self.request.user)
+        if not distributor_objects:
+            distributor_objects = Distributor.objects.all()
+        self.fields['distributor'].queryset = distributor_objects
+        #list the dsr, based on the distributor who is logged in
+        dsr_objects = DistributorSalesRep.objects.filter(distributor__user = \
+                                                                    self.request.user)
+        if not dsr_objects:
+            dsr_objects = DistributorSalesRep.objects.all()
+        self.fields['dsr'].queryset = dsr_objects
+        #list the retailer, based on the distributor who is logged in
+        retailer_objects = Retailer.objects.filter(distributor__user = \
+                                                                    self.request.user)
+        if not retailer_objects:
+            retailer_objects = Retailer.objects.all()
+        self.fields['retailer'].queryset = retailer_objects
+            
+class DSRWorkAllocationAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    form = DSRWorkAllocationForm
+    search_fields = ('dsr', 'date')
+    list_display = ('dsr', 'date', 'retailer')
+    
+    def queryset(self, request):
+        qs = super(DSRWorkAllocationAdmin, self).queryset(request)
+        #get workallocation objects for the logged in distributor
+        if Distributor.objects.filter(user = request.user).exists():
+            DSRWorkAllocation_objects = DSRWorkAllocation.objects.filter(distributor__user = \
+                                                                         request.user)
+        else:
+            DSRWorkAllocation_objects = DSRWorkAllocation.objects.all()
+        return DSRWorkAllocation_objects
+    
+    def get_form(self, request, obj=None, **kwargs):
+        ModelForm = super(DSRWorkAllocationAdmin, self).get_form(request, obj, **kwargs)
+        class ModelFormMetaClass(ModelForm):
+            def __new__(cls, *args, **kwargs):
+                kwargs['request'] = request
+                return ModelForm(*args, **kwargs)
+        return ModelFormMetaClass
+    
 class SparePartMasterAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('part_number', 'category',
@@ -1179,6 +1248,7 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("DistributorStaff", brand), DistributorStaffAdmin)
     brand_admin.register(get_model("DistributorSalesRep", brand), DistributorSalesRepAdmin)
     brand_admin.register(get_model("Retailer", brand), RetailerAdmin)
+    brand_admin.register(get_model("DSRWorkAllocation", brand), DSRWorkAllocationAdmin)
     brand_admin.register(get_model("NationalSalesManager", brand), NationalSalesManagerAdmin)
     brand_admin.register(get_model("AreaSalesManager", brand), AreaSalesManagerAdmin)
     brand_admin.register(get_model("SparePartMasterData", brand), SparePartMasterAdmin)
