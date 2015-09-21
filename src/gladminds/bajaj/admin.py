@@ -549,7 +549,7 @@ class DistributorSalesRepForm(forms.ModelForm):
     
 class DistributorSalesRepAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('distributor_sales_id', 'user_id')
+    search_fields = ('distributor_sales_id', )
     list_display = ('sales_representative_code', 'sales_representative_name', 'is_active')
     form = DistributorSalesRepForm
     
@@ -661,7 +661,7 @@ class RetailerAdmin(GmModelAdmin):
     
     def get_actions(self, request):
         #in case of administrator only, grant him the approve retailer option
-        if self.param.groups.filter(name__in =['SuperAdmins', 'Admins']).exists():
+        if self.param.groups.filter(name__in =['SuperAdmins', 'Admins', 'AreaSalesManagers']).exists():
             self.actions.append('approve')
         actions = super(RetailerAdmin, self).get_actions(request)
         return actions
@@ -715,13 +715,14 @@ class RetailerAdmin(GmModelAdmin):
         if obj.approved == constants.STATUS['APPROVED']:
             return 'Approved'
         elif obj.approved == constants.STATUS['WAITING_FOR_APPROVAL'] :
-            if self.param.groups.filter(name__in =['SuperAdmins', 'Admins']).exists():
+            if self.param.groups.filter(name__in = \
+                                    ['SuperAdmins', 'Admins', 'AreaSalesManagers']).exists():
                 reject_button = "<input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.email+"\',\'"+obj.distributor.name+"\'); return false;\">"
                 return mark_safe(reject_button)
             else:
                 return 'Waiting for approval'
         elif obj.approved == constants.STATUS['REJECTED'] :
-            if self.param.groups.filter(name__in =['SuperAdmins', 'Admins']).exists():
+            if self.param.groups.filter(name__in =['SuperAdmins', 'Admins', 'AreaSalesManagers']).exists():
                 return 'Rejected'
             else:
                 if self.param.groups.filter(name__in =['Distributors', 'DistributorStaffs']).exists():
@@ -729,23 +730,23 @@ class RetailerAdmin(GmModelAdmin):
                     return mark_safe(rejected_reason)
     status.allow_tags = True
     
-class RetailerForm(forms.ModelForm):
-    class Meta:
-        model = get_model('Retailer')
-        exclude = ['approved', 'rejected_reason']
-        
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(RetailerForm, self).__init__(*args, **kwargs)
-        # if dsr is added by distributorstaff, then show the concerned distributor of distributorstaff
-        # else show the distributor
-        if DistributorStaff.objects.filter(user__user = self.request.user).exists():
-            distributorstaff = DistributorStaff.objects.get(user__user = self.request.user)
-            self.fields['distributor'].queryset = Distributor.objects.filter(id = distributorstaff.distributor.id)
-        else:
-            self.fields['distributor'].queryset = Distributor.objects.filter(user__user = self.request.user)
-        self.fields['profile'].widget = TextInput(attrs={
-            'placeholder': 'Retailer'})
+# class RetailerForm(forms.ModelForm):
+#     class Meta:
+#         model = get_model('Retailer')
+#         exclude = ['approved', 'rejected_reason']
+#         
+#     def __init__(self, *args, **kwargs):
+#         self.request = kwargs.pop('request', None)
+#         super(RetailerForm, self).__init__(*args, **kwargs)
+#         # if dsr is added by distributorstaff, then show the concerned distributor of distributorstaff
+#         # else show the distributor
+#         if DistributorStaff.objects.filter(user__user = self.request.user).exists():
+#             distributorstaff = DistributorStaff.objects.get(user__user = self.request.user)
+#             self.fields['distributor'].queryset = Distributor.objects.filter(id = distributorstaff.distributor.id)
+#         else:
+#             self.fields['distributor'].queryset = Distributor.objects.filter(user__user = self.request.user)
+#         self.fields['profile'].widget = TextInput(attrs={
+#             'placeholder': 'Retailer'})
         
 class DSRWorkAllocationForm(forms.ModelForm):
     class Meta:

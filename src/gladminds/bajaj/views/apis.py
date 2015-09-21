@@ -56,7 +56,7 @@ def authentication(request):
 # @permission_classes((IsAuthenticated,))
 def get_retailers(request, dsr_id):
     '''
-    This method returns all the retailers given the dsr id 
+    This method returns all the retailers of the distributor given the dsr id 
     '''
     distributor = DistributorSalesRep.objects.get(id = dsr_id)
     retailers = Retailer.objects.filter(distributor = distributor.distributor, \
@@ -79,6 +79,9 @@ def get_retailers(request, dsr_id):
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
 def get_parts(request):
+    '''
+    This method returns all the spare parts details
+    '''
     parts = SparePartMasterData.objects.all()
     parts_list =[]
     for part in parts:
@@ -91,6 +94,55 @@ def get_parts(request):
         parts_dict.update({"category":part.category})
         parts_list.append(parts_dict)
     return Response(parts_list)
+
+@api_view(['POST'])
+# @authentication_classes((JSONWebTokenAuthentication,))
+# @permission_classes((IsAuthenticated,))
+def dsr_order(request):
+    '''
+    This method gets the orders placed by the dsr on behalf of the retailer and puts
+    it in the database
+    '''
+    
+    return Response({'message': 'Order has been placed successfully'})
+
+@api_view(['POST'])
+# @authentication_classes((JSONWebTokenAuthentication,))
+# @permission_classes((IsAuthenticated,))
+def retailer_order(request):
+    '''
+    This method gets the orders placed by the retailer and puts it in the database
+    '''
+    
+    return Response({'message': 'Order has been placed successfully'})
+
+# @api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def get_schedule(request):
+    '''
+    This method gets the schedule(the retailers he has to visit) for today, given the dsr id
+    '''
+    
+    return Response({'retailer': 'retailer id'})
+
+# @api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def get_retailer_transaction(request):
+    '''
+    This method returns retailer transaction details like paid amount, outstanding, cheque number, etc
+    given the retailer Id
+    '''
+    
+    return Response({'retailer': 'retailer id'})
+    
+    
+    
+    
+
+
+    
 
     
 
