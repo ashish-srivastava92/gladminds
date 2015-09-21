@@ -326,7 +326,7 @@
 				                                                <td class="center ">'+distributor+'</td>\
 				                                                <td class="center ">'+upc+'</td>\
 				                                                <td class="center ">'+points+'</td>\
-				                                                <td class="center ">'+moment(regdt).format('LL')+'</td>\
+				                                                <td class="center ">'+moment(regdt).format('MMMM Do YYYY')+'</td>\
 				                                            </tr>';
 														}	
 													}	
@@ -340,7 +340,7 @@
 				                                                <td class="center ">'+distributor+'</td>\
 				                                                <td class="center ">'+upc+'</td>\
 				                                                <td class="center ">'+points+'</td>\
-				                                                <td class="center ">'+moment(regdt).format('LL')+'</td>\
+				                                                <td class="center ">'+moment(regdt).format('MMMM Do YYYY')+'</td>\
 				                                            </tr>';
 			                                        }
 												}
@@ -477,7 +477,7 @@
 								           }
 
 								           if((csvData.objects[index].created_date != null) || (csvData.objects[index].created_date != undefined)) {
-								            var created_date = moment(csvData.objects[index].created_date).format('LL');
+								            var created_date = moment(csvData.objects[index].created_date).format('MMMM Do YYYY');
 
 								           } else {
 								            var created_date = "";
@@ -488,17 +488,17 @@
 								            
 								            
 
-								            if((csvData.objects[index].upcs[j].part_number.point != null) || (csvData.objects[index].upcs[j].part_number.point != undefined)) {
-								             var point = csvData.objects[index].upcs[j].part_number.point;
-								            } else {
-								             var point = "";
-								            }
+									            if((csvData.objects[index].upcs[j].part_number.point != null) || (csvData.objects[index].upcs[j].part_number.point != undefined)) {
+									             var point = csvData.objects[index].upcs[j].part_number.point;
+									            } else {
+									             var point = "";
+									            }
 
-								            if((unique_part_code = csvData.objects[index].upcs[j].unique_part_code != null) || (unique_part_code = csvData.objects[index].upcs[j].unique_part_code != undefined)) {
-								             var unique_part_code = csvData.objects[index].upcs[j].unique_part_code;
-								            } else {
-								             var unique_part_code = "";
-								            }
+									            if((unique_part_code = csvData.objects[index].upcs[j].unique_part_code != null) || (unique_part_code = csvData.objects[index].upcs[j].unique_part_code != undefined)) {
+									             var unique_part_code = csvData.objects[index].upcs[j].unique_part_code;
+									            } else {
+									             var unique_part_code = "";
+									            }
 								            
 								            	if(col=='upcs__unique_part_code')
 													{ 
