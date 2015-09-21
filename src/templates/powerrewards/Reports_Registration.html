@@ -322,7 +322,7 @@
 		                                                <td class="center ">'+phone+'</td>\
 		                                                <td class="center ">'+state+'</td>\
 		                                                <td class="center ">'+distributor+'</td>\
-		                                                <td class="center ">'+moment(regdt).format('LL')+'</td>\
+		                                                <td class="center ">'+moment(regdt).format('MMMM Do YYYY')+'</td>\
 		                                                <td class="center ">'+address+'</td>\
 		                                            </tr>';
 
@@ -385,6 +385,12 @@
 		                               $("#reportTable th").click(function(){
 		                               		$(".pagination li").removeClass("disabled");
 		                               		$(".pagination li.active").remove();
+		                               		if(data.meta.limit>data.meta.total_count)
+			                               {
+			                               		$(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+data.meta.total_count+' of '+data.meta.total_count+' Records');
+			                               }else{
+			                               		$(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+(data.meta.offset+20)+' of '+data.meta.total_count+' Records');
+			                           		}
 		                               })
 
 		                               
@@ -478,7 +484,7 @@
 								           }
 
 								           if((csvData.objects[index].created_date != null) || (csvData.objects[index].created_date != undefined)) {
-								            var created_date = moment(csvData.objects[index].created_date).format('LL');
+								            var created_date = moment(csvData.objects[index].created_date).format('MMMM Do YYYY');
 
 								           } else {
 								            var created_date = "";

@@ -327,7 +327,7 @@
 			                                                <td class="center ">'+upc+'</td>\
 			                                                <td class="center ">'+partno+'</td>\
 			                                                <td class="center ">'+partdesc+'</td>\<td class="center ">'+points+'</td>\
-			                                                <td class="center ">'+moment(regdt).format('LL')+'</td>\
+			                                                <td class="center ">'+moment(regdt).format('MMMM Do YYYY')+'</td>\
 			                                            </tr>';
 													}
 
@@ -343,7 +343,7 @@
 			                                                <td class="center ">'+upc+'</td>\
 			                                                <td class="center ">'+partno+'</td>\
 			                                                <td class="center ">'+partdesc+'</td>\<td class="center ">'+points+'</td>\
-			                                                <td class="center ">'+moment(regdt).format('LL')+'</td>\
+			                                                <td class="center ">'+moment(regdt).format('MMMM Do YYYY')+'</td>\
 			                                            </tr>';
 													}	
 												}	
@@ -358,7 +358,7 @@
 			                                                <td class="center ">'+upc+'</td>\
 			                                                <td class="center ">'+partno+'</td>\
 			                                                <td class="center ">'+partdesc+'</td>\<td class="center ">'+points+'</td>\
-			                                                <td class="center ">'+moment(regdt).format('LL')+'</td>\
+			                                                <td class="center ">'+moment(regdt).format('MMMM Do YYYY')+'</td>\
 			                                            </tr>';
 		                                     		}
 		                                        }	
@@ -443,6 +443,7 @@
 							         arrInnerInfo = [];
 							         mainArray = [];
 
+							         subArray = [];
 
 							         arrHeader = [];
 
@@ -502,7 +503,7 @@
 								           }
 
 								           if((csvData.objects[index].created_date != null) || (csvData.objects[index].created_date != undefined)) {
-								            var created_date = moment(csvData.objects[index].created_date).format('LL');
+								            var created_date = moment(csvData.objects[index].created_date).format('MMMM Do YYYY');
 
 								           } else {
 								            var created_date = "";

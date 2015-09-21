@@ -286,6 +286,12 @@
 		                               $("#reportTable th").click(function(){
 		                               		$(".pagination li").removeClass("disabled");
 		                               		$(".pagination li.active").remove();
+		                               		if(data.meta.limit>data.meta.total_count)
+			                               {
+			                               		$(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+data.meta.total_count+' of '+data.meta.total_count+' Records');
+			                               }else{
+			                               		$(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+(data.meta.offset+20)+' of '+data.meta.total_count+' Records');
+			                           		}
 		                               })
 
 									}
