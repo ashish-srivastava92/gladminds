@@ -323,20 +323,13 @@ class ConstantAdmin(GmModelAdmin):
     list_display = ('constant_name',  'constant_value',)
     
     def save_model(self, request, obj, form, change):
-        error_flag = False
-        constant_data = models.Constant.objects.filter(constant_name=obj.constant_name)
-        country_name = obj.country_id
-        constant_name = obj.constant_name
-        for constant in constant_data:
-            country_id = constant.country_id
-            if country_id == country_name and constant_name == 'purchase_date_format':
-                error_flag = True 
-                self.message_user(request, "Record not added. The format is already defined for the country specified.",
+        constant_data = models.Constant.objects.filter(constant_name=obj.constant_name,country_id=obj.country_id)
+        if constant_data:
+            self.message_user(request, "Record not added. The constant is already defined for the country specified.",
                                 level=messages.ERROR)
-        if not error_flag:
+        else:
             super(ConstantAdmin, self).save_model(request, obj, form, change)
-    
-            
+                        
 class FleetRiderAdmin(GmModelAdmin):
     search_fields = ('product',  'phone_number')
     list_display = ('product',  'phone_number',)
