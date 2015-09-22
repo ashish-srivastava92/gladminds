@@ -402,7 +402,6 @@ AREA_SPARES_MANAGER = {
         "nsm":""
        }
 
-
 PARTNER = {
             "address": "F-89,Kamla nagar,kanpur",
             "name": "Anchit",
@@ -802,7 +801,7 @@ ECO_RELEASE = {
                "eco_release_date": "2015-05-12",
                "id": 1,
                "interchangebility": "1",
-               "models_applicable": "12",
+               "models_applicable": "112",
                "modified_date": "2015-05-12T12:19:21",
                "parent_part": "11",
                "reason_for_change": "p",
