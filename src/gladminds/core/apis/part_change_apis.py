@@ -460,7 +460,7 @@ class ECOImplementationResource(CustomBaseModelResource):
         
     def prepend_urls(self):
         return [
-                  url(r"^(?P<resource_name>%s)/sku_code/(?P<sku_code>\w+)%s" % (self._meta.resource_name,trailing_slash()),
+                  url(r"^(?P<resource_name>%s)/skucode/(?P<sku_code>\w+)%s" % (self._meta.resource_name,trailing_slash()),
                      self.wrap_view('get_eco_number_for_sku_code'), name="get_eco_number_for_sku_code"),
                ]
         

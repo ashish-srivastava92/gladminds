@@ -110,7 +110,7 @@ class PartChangeTest(BaseTestCase):
         uri = '/v1/eco-implementations/'
         resp = self.post(uri, data=ECO_IMPLEMENTATION, access_token=access_token)
         self.assertEquals(resp.status_code, 201)
-        uri = '/v1/eco-implementations/sku_code/112/?access_token='+access_token
+        uri = '/v1/eco-implementations/skucode/112/?access_token='+access_token
         resp = client.get(uri, content_type='application/json')
         self.assertEquals(resp.status_code, 200)
         eco_numbers = json.loads(resp.content)['data']
