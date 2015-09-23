@@ -11,7 +11,7 @@ from integration.bajaj.base import BaseTestCase
 from integration.bajaj.test_brand_logic import Brand
 from integration.bajaj.test_system_logic import System
 from test_constants import BRAND_PRODUCT_RANGE, BRAND_VERTICAL, BOM_HEADER, \
-    BOM_PLATE_PART, ECO_RELEASE, ECO_IMPLEMENTATION, BOM_VISUALIZATION, \
+    BOM_PLATE_PART, ECO_RELEASE, ECO_IMPLEMENTATION,ECO_IMPLEMENTATION_1, BOM_VISUALIZATION, \
     SBOM_REVIEW
 
 from gladminds.core.auth_helper import Roles
@@ -96,28 +96,30 @@ class PartChangeTest(BaseTestCase):
         
     def test_eco_release(self):
         access_token = self.user_login()
+        uri = '/v1/eco-releases/'
+        resp = self.post(uri, data=ECO_RELEASE, access_token=access_token)
+        self.assertEquals(resp.status_code, 201)
+               
+        
+    def test_eco_implementation(self):
+        access_token = self.user_login()
         resp = self.save_bom_header(access_token, BOM_HEADER)
         self.assertEquals(resp.status_code, 201)
         uri = '/v1/eco-releases/'
         resp = self.post(uri, data=ECO_RELEASE, access_token=access_token)
+        uri = '/v1/eco-implementations/'
+        resp = self.post(uri, data=ECO_IMPLEMENTATION, access_token=access_token)
         self.assertEquals(resp.status_code, 201)
-        uri = '/v1/eco-releases/112/?access_token='+access_token
+        uri = '/v1/eco-implementations/'
+        resp = self.post(uri, data=ECO_IMPLEMENTATION_1, access_token=access_token)
+        uri = '/v1/eco-implementations/112/?access_token='+access_token
         resp = client.get(uri, content_type='application/json')
         self.assertEquals(resp.status_code, 200)
         eco_numbers = json.loads(resp.content)['data']
         self.assertEquals(len(eco_numbers), 1)
         self.assertEquals(eco_numbers[0],ECO_RELEASE["eco_number"])
                
-        
-    def test_eco_implementation(self):
-        access_token = self.user_login()
-        uri = '/v1/eco-implementations/'
-        resp = self.post(uri, data=ECO_IMPLEMENTATION, access_token=access_token)
-        self.assertEquals(resp.status_code, 201)
-        uri = '/v1/eco-implementations/1/?access_token='+access_token
-        resp = client.get(uri, content_type='application/json')
-        self.assertEquals(resp.status_code, 200)
-    
+               
     def test_get_plates_image(self):
         access_token = self.user_login()
         uri = '/v1/bom-plate-parts/'
