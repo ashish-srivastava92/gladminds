@@ -106,7 +106,7 @@ class RegisterUser():
                     username=username, first_name=first_name, last_name=last_name, email=email)
                 if group =='customer':
                     password = settings.PASSWORD_POSTFIX
-                elif group in [Roles.ZSM, Roles.AREASERVICEMANAGER]:
+                elif len(username.split('@'))>1:
                     password = username.split('@')[0] + settings.ADMIN_PASSWORD_POSTFIX
                     new_user.is_staff = True
                 else:
