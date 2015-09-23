@@ -8,7 +8,6 @@ from django.conf import settings
 from django.conf.urls import url
 from django.forms.models import model_to_dict
 from django.core.exceptions import ObjectDoesNotExist
-from django.core import serializers
 from django.http.response import HttpResponse, HttpResponseBadRequest
 from tastypie import fields
 from tastypie.authorization import Authorization
