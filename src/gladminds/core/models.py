@@ -436,7 +436,19 @@ class DSRWorkAllocation(base_models.DSRWorkAllocation):
     
     class Meta(base_models.DSRWorkAllocation.Meta):
         app_label = _APP_NAME
-
+        
+class PartPricing(base_models.PartPricing):
+    ''' details of parts and its pricing'''
+    
+    class Meta(base_models.PartPricing.Meta):
+        app_label = _APP_NAME
+        
+class OrderPart(base_models.OrderPart):
+    ''' details of ordering spare parts by dsr or retailer'''
+    
+    class Meta(base_models.OrderPart.Meta):
+        app_label = _APP_NAME
+    
 class Member(base_models.Member):
     '''details of Member'''
     registered_by_distributor = models.ForeignKey(Distributor, null=True, blank=True)

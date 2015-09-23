@@ -11,7 +11,7 @@ from django.utils.html import mark_safe
 
 from gladminds.bajaj import models
 from gladminds.bajaj.models import Distributor, DistributorStaff, DistributorSalesRep, \
-                        Retailer, DSRWorkAllocation, UserProfile
+                        Retailer, DSRWorkAllocation, UserProfile, SparePartPoint
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
@@ -461,7 +461,7 @@ class NationalSalesManagerAdmin(GmModelAdmin):
     
 class AreaSalesManagerAdmin(GmModelAdmin):
     search_fields = ('name',
-                     'phone_number', 'state')
+                     )
     list_display = ('name', 'email',
                      'phone_number', 'get_state')
     
@@ -647,8 +647,8 @@ class RetailerAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = RetailerForm
     search_fields = ('retailer_name', 'retailer_town', 'billing_code','territory')
-    list_display = ('billing_code', 'retailer_name', 'territory', 'pincode', 'phone',
-                    'mobile', 'email', 'distributor_code', 'distributor_name', 'status')
+    list_display = ('billing_code', 'retailer_name', 'territory', 'city', 'pincode', 'phone',
+                    'mobile', 'email', 'status')
     exclude = []
     
     def get_form(self, request, obj=None, **kwargs):
@@ -690,20 +690,23 @@ class RetailerAdmin(GmModelAdmin):
     
     def pincode(self, obj):
         return obj.user.pincode
+    pincode.admin_order_field = 'user__pincode'
     
     def city(self, obj):
-        return obj.user.city
+        return obj.retailer_town
+    city.admin_order_field = 'retailer_town'
     
     def phone(self, obj):
         return obj.user.phone_number
+    phone.admin_order_field = 'user__phone_number'
     
-    def distributor_code(self, obj):
-        return obj.distributor.distributor_id
-    distributor_code.short_description = 'Distributor Code'
-    
-    def distributor_name(self, obj):
-        return obj.distributor.name
-    distributor_name.short_description = 'Distributor Name'
+    # def distributor_code(self, obj):
+    #     return obj.distributor.distributor_id
+    # distributor_code.short_description = 'Distributor Code'
+    # 
+    # def distributor_name(self, obj):
+    #     return obj.distributor.name
+    # distributor_name.short_description = 'Distributor Name'
     
     def save_model(self, request, obj, form, change):
         obj.approved = constants.STATUS['WAITING_FOR_APPROVAL']
@@ -777,7 +780,7 @@ class DSRWorkAllocationForm(forms.ModelForm):
 class DSRWorkAllocationAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = DSRWorkAllocationForm
-    search_fields = ('dsr', 'date')
+    #search_fields = ('dsr', 'date')
     list_display = ('dsr', 'date', 'retailer')
     
     def queryset(self, request):
@@ -800,12 +803,15 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
     
 class SparePartMasterAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('part_number', 'category',
-                     'segment_type', 'supplier',
+    search_fields = ('part_number', 'description',
                      'product_type__product_type')
     list_display = ('part_number', 'description',
-                    'product_type', 'category',
-                    'segment_type',  'part_model', 'supplier')
+                    'part_model', 'price')
+    
+    def price(self, obj):
+        price = SparePartPoint.objects.get(part_number = obj.id)
+        return price.price
+    
 
 class SparePartUPCAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -835,6 +841,11 @@ class SparePartPointAdmin(GmModelAdmin):
             self.exclude = ('price', 'MRP')
         form = super(SparePartPointAdmin, self).get_form(request, obj, **kwargs)
         return form
+    
+class OrderPartAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('retailer_name', 'retailer_town', 'billing_code','territory')
+    list_display = ('retailer', 'dsr', 'part', 'price', 'quantity', 'total_price',)
 
 class SparePartline(TabularInline):
     model = models.AccumulationRequest.upcs.through
@@ -1248,8 +1259,9 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("Distributor", brand), DistributorAdmin)
     brand_admin.register(get_model("DistributorStaff", brand), DistributorStaffAdmin)
     brand_admin.register(get_model("DistributorSalesRep", brand), DistributorSalesRepAdmin)
-    brand_admin.register(get_model("Retailer", brand), RetailerAdmin)
-    brand_admin.register(get_model("DSRWorkAllocation", brand), DSRWorkAllocationAdmin)
+    brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
+    #brand_admin.register(get_model("DSRWorkAllocation", brand), DSRWorkAllocationAdmin)
+    
     brand_admin.register(get_model("NationalSalesManager", brand), NationalSalesManagerAdmin)
     brand_admin.register(get_model("AreaSalesManager", brand), AreaSalesManagerAdmin)
     brand_admin.register(get_model("SparePartMasterData", brand), SparePartMasterAdmin)

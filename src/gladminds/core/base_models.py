@@ -1168,7 +1168,23 @@ class DSRWorkAllocation(BaseModel):
         abstract = True
         db_table = "gm_dsrworkallocation"
         verbose_name_plural = "DSR Work Allocation"
-
+        
+class PartPricing(BaseModel):
+    ''' details of spare parts and pricing'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_partpricing"
+        verbose_name_plural = "PartPricing"
+        
+class OrderPart(BaseModel):
+    ''' details of ordering spare parts by dsr or retailer'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_orderpart"
+        verbose_name_plural = "Order Part"
+        
 class Member(BaseModel):
     '''details of Member'''
     mechanic_id = models.CharField(max_length=50, unique=True, default=generate_mech_id)

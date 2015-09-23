@@ -15,7 +15,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework_jwt.settings import api_settings
 
 from gladminds.bajaj.models import DistributorSalesRep, Retailer, SparePartMasterData, \
-                            SparePartPoint
+                            SparePartPoint, OrderPart
 from gladminds.core import constants
 
 @api_view(['POST'])
@@ -98,23 +98,41 @@ def get_parts(request):
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
-def dsr_order(request):
+def dsr_order(request, dsr_id, retailer_id):
     '''
     This method gets the orders placed by the dsr on behalf of the retailer and puts
     it in the database
     '''
+    parts = json.loads(request.body)
+    for part in parts:
+        order = OrderPart()
+        order.part = SparePartMasterData.objects.get(id = part['part_number'])
+        order.price = part['price']
+        order.quantity = part['quantity']
+        order.total_price = part['total_price']
+        order.retailer = Retailer.objects.get(id = retailer_id)
+        order.dsr = DistributorSalesRep.objects.get(id = dsr_id)
+        order.save()
     
     return Response({'message': 'Order has been placed successfully'})
 
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
-def retailer_order(request):
+def retailer_order(request, retailer_id):
     '''
     This method gets the orders placed by the retailer and puts it in the database
     '''
-    
-    return Response({'message': 'Order has been placed successfully'})
+    parts = json.loads(request.body)
+    for part in parts:
+        order = OrderPart()
+        order.part = SparePartMasterData.objects.get(id = part['part_number'])
+        order.price = part['price']
+        order.quantity = part['quantity']
+        order.total_price = part['total_price']
+        order.retailer = Retailer.objects.get(id = retailer_id)
+        order.save()
+    return Response({'message': 'Order(s) has been placed successfully'})
 
 # @api_view(['GET'])
 # # @authentication_classes((JSONWebTokenAuthentication,))

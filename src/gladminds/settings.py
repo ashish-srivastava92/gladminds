@@ -171,13 +171,13 @@ SUIT_CONFIG = {
 MANAGERS = ADMINS
 
 DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
-DB_USER = os.environ.get('DB_USER', 'root')
-#DB_USER = os.environ.get('DB_USER', 'bajajsfa')
-DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
-#DB_HOST = os.environ.get('DB_HOST', 'bajajSFA.db.11965675.hostedresource.com')
+#DB_USER = os.environ.get('DB_USER', 'root')
+DB_USER = os.environ.get('DB_USER', 'bajajsfa')
+#DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+DB_HOST = os.environ.get('DB_HOST', 'bajajSFA.db.11965675.hostedresource.com')
 DB_PORT = os.environ.get('DB_PORT', '3306')
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
-#DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Sfa!1234')
+#DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Sfa!1234')
 class GmApps():
     AFTERBUY = 'afterbuy'
     BAJAJ = 'bajaj'
@@ -203,7 +203,6 @@ DATABASE_APPS_MAPPING = {
 db_common = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gm',
-        #'NAME': 'bajajsfa',
         'USER': DB_USER,
         'PASSWORD': DB_PASSWORD,
         'HOST': DB_HOST,
@@ -215,7 +214,6 @@ for brand in dir(GmApps):
     if not brand.startswith('__'):
         if getattr(GmApps,brand) in ['default']:
             db_common.update({'NAME': 'gm'})
-            #db_common.update({'NAME': 'bajajsfa'})
         else:
             db_common.update({'NAME': getattr(GmApps,brand)})
         DATABASES[getattr(GmApps,brand)] = deepcopy(db_common)
@@ -737,6 +735,8 @@ DISTRIBUTOR_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/distrib
 BRAND_META = {
                "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/", 
                          "base_url": "local.bajaj.gladminds.co"},
+               "bajajsfa": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/", 
+                         "base_url": "local.bajaj.gladminds.co"},     
                "demo": {"title": "Daimler", "logo": "daimler/img/Daimler-logo.png", "tagline": "2015 Daimler AG",
                         "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
               "daimler": {"title": "Daimler", "logo": "daimler/img/Daimler-logo.png", "tagline": "2015 Daimler AG",

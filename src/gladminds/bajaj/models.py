@@ -533,17 +533,32 @@ class SparePartMasterData(base_models.SparePartMasterData):
     class Meta(base_models.SparePartMasterData.Meta):
         app_label = _APP_NAME
 
-class OrderPart(base_models.BaseModel):
-    part = models.ForeignKey(SparePartMasterData)
+class PartPricing(base_models.PartPricing):
+    part_cd = models.CharField(max_length=255)
+    part_desc = models.CharField(max_length=255)
+    mrp = models.CharField(max_length=255)
+    set_qty = models.IntegerField()
+    margin_cd = models.CharField(max_length=255)
+    category = models.CharField(max_length=255)
+    active = models.BooleanField(default = True)
+    
+    class Meta(base_models.PartPricing.Meta):
+        app_label = _APP_NAME
+        
+class OrderPart(base_models.OrderPart):
+    part = models.ForeignKey(PartPricing)
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits = 5, decimal_places=2)
     total_price = models.DecimalField(max_digits = 8, decimal_places=2)
+    fullfill = models.NullBooleanField()
+    delivered = models.IntegerField(null=True, blank=True)
+    no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
     dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
     retailer = models.ForeignKey(Retailer)
-    fullfill = models.BooleanField()
-    delivered = models.IntegerField()
-    no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
-        
+    
+    class Meta(base_models.OrderPart.Meta):
+        app_label = _APP_NAME
+          
 class SparePartUPC(base_models.SparePartUPC):
     '''details of Spare Part UPC'''
     part_number = models.ForeignKey(SparePartMasterData)
