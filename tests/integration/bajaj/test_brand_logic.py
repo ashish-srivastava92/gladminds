@@ -209,7 +209,7 @@ class Brand(object):
         return response
     
     def register_RM(self,access_token, data):
-        uri = '/v1/circle-heads/register/?access_token='+access_token
+        uri = '/v1/regional-sales-managers/register/?access_token='+access_token
         response = client.post(uri, data=json.dumps(data), content_type='application/json')
         return response
     

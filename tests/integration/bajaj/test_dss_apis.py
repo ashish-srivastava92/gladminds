@@ -6,7 +6,7 @@ from django.utils import unittest
 from integration.bajaj.base import BaseTestCase
 from integration.bajaj.test_brand_logic import Brand
 from integration.bajaj.test_system_logic import System
-from test_constants import CIRCLE_HEAD
+from test_constants import CIRCLE_HEAD, RM_DATA
 
 logger = logging.getLogger('gladminds')
 
@@ -63,4 +63,31 @@ class CircleHeadResourceTest(BaseTestCase):
         system.verify_result(input=status, output=1)
         ch_data = brand.get_circle_head(admin_access_token)
         system.verify_result(input= json.loads(ch_data.content)['objects'][0]["user"]["user"]["email"], output=new_detail["email"])
+        
+
+class RegionalSalesManagerResourceTest(BaseTestCase):
+    multi_db=True
+    
+    def setUp(self):
+        TestCase.setUp(self)
+        self.brand = Brand(self)
+        self.system = System(self)
+        BaseTestCase.setUp(self)
+        self.create_user(username='bajaj', email='bajaj@gladminds.co', password='bajaj', is_superuser=True)
+        self.access_token = self.brand.admin_login()
+        
+    def test_registration_of_RM(self):
+        '''
+           Test the API to register a Regional Sales manager
+        '''
+        brand = self.brand
+        system = self.system
+        admin_access_token=self.access_token
+        ch_registration = brand.register_circle_head(admin_access_token, CIRCLE_HEAD)
+        resp = brand.register_RM(admin_access_token, RM_DATA)
+        self.assertEquals(resp.status_code,200)
+        response_data=json.loads(resp.content)['status']
+        system.verify_result(input=response_data, output=1)
+
+
         

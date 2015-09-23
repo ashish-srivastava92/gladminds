@@ -20,6 +20,15 @@ CIRCLE_HEAD = {
     "phone-number": "+919988776655"
 }
 
+RM_DATA = {
+    "name": "rmtesting",
+    "email": "rmtesting@abc.com",
+    "phone-number": "+917988776655",
+    "regional-office": "Delhi",
+    "circle_head_user_id": 2
+}
+
+
 USER = {
         "date_joined":"2015-02-04T17:10:24",
          "email":"test@gladminds.co",
