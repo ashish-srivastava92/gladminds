@@ -6,6 +6,7 @@ from django.utils import unittest
 from integration.bajaj.base import BaseTestCase
 from integration.bajaj.test_brand_logic import Brand
 from integration.bajaj.test_system_logic import System
+from gladminds.core.auth_helper import Roles
 from test_constants import CIRCLE_HEAD, RM_DATA
 
 logger = logging.getLogger('gladminds')
@@ -32,6 +33,9 @@ class CircleHeadResourceTest(BaseTestCase):
         self.assertEquals(resp.status_code,200)
         response_data=json.loads(resp.content)['status']
         system.verify_result(input=response_data, output=1)
+        resp = brand.get_circle_head(admin_access_token)
+        system.verify_result(input= json.loads(resp.content)['objects'][0]["user"]["user"]["email"], output=CIRCLE_HEAD["email"])
+        
         
     def test_get_circle_head_list(self):
         '''
@@ -76,7 +80,7 @@ class RegionalSalesManagerResourceTest(BaseTestCase):
         self.create_user(username='bajaj', email='bajaj@gladminds.co', password='bajaj', is_superuser=True)
         self.access_token = self.brand.admin_login()
         
-    def test_registration_of_RM(self):
+    def test_registration_of_regional_sales_manager(self):
         '''
            Test the API to register a Regional Sales manager
         '''
@@ -84,7 +88,7 @@ class RegionalSalesManagerResourceTest(BaseTestCase):
         system = self.system
         admin_access_token=self.access_token
         ch_registration = brand.register_circle_head(admin_access_token, CIRCLE_HEAD)
-        resp = brand.register_RM(admin_access_token, RM_DATA)
+        resp = brand.register_regional_sales_manager(admin_access_token, RM_DATA)
         self.assertEquals(resp.status_code,200)
         response_data=json.loads(resp.content)['status']
         system.verify_result(input=response_data, output=1)
