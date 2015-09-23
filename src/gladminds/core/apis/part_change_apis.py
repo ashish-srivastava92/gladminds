@@ -482,10 +482,9 @@ class ECOImplementationResource(CustomBaseModelResource):
             eco_releases = get_model('ECORelease').objects.filter(models_applicable=sku_code) 
             for eco_release in eco_releases:
                 eco_numbers_released.append(eco_release.eco_number)
-            for eco_number in eco_numbers_released:
-                eco_implemented = get_model('ECOImplementation').objects.filter(eco_number=eco_number)
-                if eco_implemented:
-                    eco_numbers_implemented.append(eco_number)
+            eco_implemented = get_model('ECOImplementation').objects.filter(eco_number__in=eco_numbers_released)
+            for eco_implements in eco_implemented:
+                eco_numbers_implemented.append(eco_implements.eco_number)
             return HttpResponse(json.dumps({"data":eco_numbers_implemented,"status":1}), content_type="application/json")
         except Exception as ex:
             if not is_sku_code_present:
