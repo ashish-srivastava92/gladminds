@@ -14,6 +14,12 @@ GM_USER = {
                     }
            }
 
+CIRCLE_HEAD = {
+    "name": "chtesting",
+    "email": "chtesting@abc.com",
+    "phone-number": "+919988776655"
+}
+
 USER = {
         "date_joined":"2015-02-04T17:10:24",
          "email":"test@gladminds.co",
