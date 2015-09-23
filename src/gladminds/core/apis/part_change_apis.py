@@ -445,36 +445,6 @@ class ECOReleaseResource(CustomBaseModelResource):
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post']
     
-    def prepend_urls(self):
-        return [
-                  url(r"^(?P<resource_name>%s)/(?P<sku_code>\w+)%s" % (self._meta.resource_name,trailing_slash()),
-                     self.wrap_view('get_eco_release_for_sku_code'), name="get_eco_release_for_sku_code"),
-               ]
-        
-    def get_eco_release_for_sku_code(self, request, **kwargs):
-        '''
-           Get ECO Release details for the sku_code given
-        '''
-        is_sku_code_present = None
-        self.is_authenticated(request)
-        if request.method != 'GET':
-            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
-                                status=400)
-            
-        sku_code = kwargs['sku_code']
-        try:
-            eco_numbers = []
-            is_sku_code_present = get_model('BOMHeader').objects.get(sku_code=sku_code)
-            eco_releases = get_model('ECORelease').objects.filter(models_applicable=sku_code) 
-            for eco_release in eco_releases:
-                eco_numbers.append(eco_release.eco_number)
-            return HttpResponse(json.dumps({"data":eco_numbers,"status":1}), content_type="application/json")
-        except Exception as ex:
-            if not is_sku_code_present:
-                LOG.info("[get_eco_release_for_sku_code]: Invalid sku_code provided :: {0}".format(ex))
-                return HttpResponse(json.dumps({"message" : "Invalid sku_code provided "}),content_type="application/json", status=404)
-            LOG.info("[get_eco_release_for_sku_code]: No ECO Release for sku_code provided :: {0}".format(ex))
-            return HttpResponse(json.dumps({"message" : "No ECO Release for sku_code provided"}),content_type="application/json", status=404)
 
 class ECOImplementationResource(CustomBaseModelResource):
     '''
@@ -487,6 +457,42 @@ class ECOImplementationResource(CustomBaseModelResource):
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post']
         always_return_data = True
+        
+    def prepend_urls(self):
+        return [
+                  url(r"^(?P<resource_name>%s)/(?P<sku_code>\w+)%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('get_eco_number_for_sku_code'), name="get_eco_number_for_sku_code"),
+               ]
+        
+    def get_eco_number_for_sku_code(self, request, **kwargs):
+        '''
+           Get ECO Release details for the sku_code given
+        '''
+        is_sku_code_present = None
+        self.is_authenticated(request)
+        if request.method != 'GET':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+            
+        sku_code = kwargs['sku_code']
+        try:
+            eco_numbers_released = []
+            eco_numbers_implemented = []
+            is_sku_code_present = get_model('BOMHeader').objects.get(sku_code=sku_code)
+            eco_releases = get_model('ECORelease').objects.filter(models_applicable=sku_code) 
+            for eco_release in eco_releases:
+                eco_numbers_released.append(eco_release.eco_number)
+            for eco_number in eco_numbers_released:
+                eco_implemented = get_model('ECOImplementation').objects.filter(eco_number=eco_number)
+                if eco_implemented:
+                    eco_numbers_implemented.append(eco_number)
+            return HttpResponse(json.dumps({"data":eco_numbers_implemented,"status":1}), content_type="application/json")
+        except Exception as ex:
+            if not is_sku_code_present:
+                LOG.info("[get_eco_release_for_sku_code]: Invalid sku_code provided :: {0}".format(ex))
+                return HttpResponse(json.dumps({"message" : "Invalid sku_code provided "}),content_type="application/json", status=404)
+            LOG.info("[get_eco_release_for_sku_code]: No ECO Implementation for sku_code provided :: {0}".format(ex))
+            return HttpResponse(json.dumps({"message" : "No ECO Implementation for sku_code provided"}),content_type="application/json", status=404)
 
 class ManufacturingDataResource(CustomBaseModelResource):
     '''
