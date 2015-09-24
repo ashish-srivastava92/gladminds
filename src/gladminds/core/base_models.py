@@ -1697,6 +1697,22 @@ class BOMPlatePart(BaseModel):
         db_table = "gm_bomplatepart"
         verbose_name_plural = "BOM plate Parts"
         
+class UploadHistory(BaseModel):
+    '''
+        Upload history which has been saved along with status of
+        approved or rejected
+    '''
+    sku_code = models.CharField(max_length=20)
+    bom_number = models.CharField(max_length=10)
+    plateId = models.CharField(max_length=50)
+    eco_number = models.CharField(max_length=20, null=True)
+    status = models.CharField(max_length=10, choices=constants.SAVE_PLATE_PART_STATUS, default='Pending')
+
+    class Meta:
+        abstract = True
+        db_table = "gm_uploadhistory"
+        verbose_name_plural = "Upload History"
+        
 class BOMVisualization(BaseModel):
     '''Details of BOM Plates coordinates'''
     x_coordinate  = models.IntegerField(default=0)
@@ -1708,7 +1724,6 @@ class BOMVisualization(BaseModel):
                               blank=True, null=True)
     published_date = models.DateTimeField(null=True, blank=True)
     remarks = models.CharField(max_length=500, null=True, blank=True)
-
     
     class Meta:
         abstract = True

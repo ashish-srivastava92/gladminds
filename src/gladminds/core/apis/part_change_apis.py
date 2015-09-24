@@ -222,7 +222,13 @@ class BOMPlatePartResource(CustomBaseModelResource):
             plate_map=request.FILES['plateMap']
             dashboard_image=request.FILES['dashboardImage']
             plate_name= post_data.get('plateName')
+            eco_number = post_data.get('ecoNumber')
             sbom_part_mapping=[]
+            if not eco_number:
+                upload_history_data = get_model('UploadHistory')(sku_code=sku_code, bom_number=bom_number, plateId=plate_id, eco_number=None)
+            else:
+                upload_history_data = get_model('UploadHistory')(sku_code=sku_code, bom_number=bom_number, plateId=plate_id, eco_number=eco_number)
+            upload_history_data.save()
             bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
                                                                 bom__bom_number=bom_number,
                                                                 plate__plate_id=plate_id).select_related(

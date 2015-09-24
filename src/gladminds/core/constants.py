@@ -135,6 +135,12 @@ RATINGS = (
            ('3','Not Glad')
         )
 
+SAVE_PLATE_PART_STATUS = (
+                          ('Pending','Pending'),
+                          ('Approved','Approved'),
+                          ('Rejected','Rejected')
+                          )
+
 ROOT_CAUSE = (('Data','Data'),
               ('Infrastructure','Infrastructure'),
               ('Bug','Bug'),

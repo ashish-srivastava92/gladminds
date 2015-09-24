@@ -640,10 +640,18 @@ class BOMPlatePart(base_models.BOMPlatePart):
 
     class Meta(base_models.BOMPlatePart.Meta):
         app_label = _APP_NAME
+        
+class UploadHistory(base_models.UploadHistory):
+    '''Upload history with status'''
+
+    class Meta(base_models.UploadHistory.Meta):
+        app_label = _APP_NAME
 
 class BOMVisualization(base_models.BOMVisualization):
     '''Details of BOM Plates cordinates'''
     bom = models.ForeignKey(BOMPlatePart)
+    is_publised = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False)
     
     class Meta(base_models.BOMVisualization.Meta):
         app_label = _APP_NAME
