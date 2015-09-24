@@ -1710,7 +1710,7 @@ class VisualisationUploadHistory(BaseModel):
 
     class Meta:
         abstract = True
-        db_table = "gm_uploadhistory"
+        db_table = "gm_visualisationuploadhistory"
         verbose_name_plural = "Visualisation Upload History"
         
 class BOMVisualization(BaseModel):
