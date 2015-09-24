@@ -215,19 +215,16 @@ class BOMPlatePartResource(CustomBaseModelResource):
         try:
             post_data=request.POST
             model = post_data.get('model')
-            sku_code = post_data.get('skuCode')
-            bom_number = post_data.get('bomNumber')
-            plate_id = post_data.get('plateId')
+            sku_code = post_data.get('skuCode') 
+            bom_number = post_data.get('bomNumber') 
+            plate_id = post_data.get('plateId') 
             plate_image=request.FILES['plateImage']
             plate_map=request.FILES['plateMap']
             dashboard_image=request.FILES['dashboardImage']
             plate_name= post_data.get('plateName')
             eco_number = post_data.get('ecoNumber')
             sbom_part_mapping=[]
-            if not eco_number:
-                upload_history_data = get_model('UploadHistory')(sku_code=sku_code, bom_number=bom_number, plateId=plate_id, eco_number=None)
-            else:
-                upload_history_data = get_model('UploadHistory')(sku_code=sku_code, bom_number=bom_number, plateId=plate_id, eco_number=eco_number)
+            upload_history_data = get_model('UploadHistory')(sku_code=sku_code, bom_number=bom_number, plateId=plate_id, eco_number=eco_number)
             upload_history_data.save()
             bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
                                                                 bom__bom_number=bom_number,
@@ -391,8 +388,10 @@ class BOMVisualizationResource(CustomBaseModelResource):
     def prepend_urls(self):
         return [
                  url(r"^(?P<resource_name>%s)/review-sbom%s" % (self._meta.resource_name,trailing_slash()),
-                     self.wrap_view('review_sbom_details'), name="review_sbom_details")
-                ]
+                     self.wrap_view('review_sbom_details'), name="review_sbom_details"),
+            ]
+                 
+        
         
     def review_sbom_details(self, request, **kwargs):
         '''
