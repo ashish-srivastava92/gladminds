@@ -1697,7 +1697,7 @@ class BOMPlatePart(BaseModel):
         db_table = "gm_bomplatepart"
         verbose_name_plural = "BOM plate Parts"
         
-class UploadHistory(BaseModel):
+class VisualisationUploadHistory(BaseModel):
     '''
         Upload history which has been saved along with status of
         approved or rejected
@@ -1711,7 +1711,7 @@ class UploadHistory(BaseModel):
     class Meta:
         abstract = True
         db_table = "gm_uploadhistory"
-        verbose_name_plural = "Upload History"
+        verbose_name_plural = "Visualisation Upload History"
         
 class BOMVisualization(BaseModel):
     '''Details of BOM Plates coordinates'''

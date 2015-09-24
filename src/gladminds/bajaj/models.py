@@ -641,10 +641,10 @@ class BOMPlatePart(base_models.BOMPlatePart):
     class Meta(base_models.BOMPlatePart.Meta):
         app_label = _APP_NAME
         
-class UploadHistory(base_models.UploadHistory):
+class VisualisationUploadHistory(base_models.VisualisationUploadHistory):
     '''Upload history with status'''
 
-    class Meta(base_models.UploadHistory.Meta):
+    class Meta(base_models.VisualisationUploadHistory.Meta):
         app_label = _APP_NAME
 
 class BOMVisualization(base_models.BOMVisualization):
