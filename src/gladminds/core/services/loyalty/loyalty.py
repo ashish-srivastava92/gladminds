@@ -403,13 +403,15 @@ class CoreLoyaltyService(Services):
         return {'status': True, 'message': message}
     
     def check_date_validity(self,valid_from,valid_till):
-        utc=pytz.UTC
-        date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        current_date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-        current_date_with_tz = utc.localize(current_date)
-        if valid_from<=current_date_with_tz<=valid_till:
-            return True
-        return False
+        if settings.ENV not in ['prod']:
+            utc=pytz.UTC
+            date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            current_date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+            current_date_with_tz = utc.localize(current_date)
+            if valid_from<=current_date_with_tz<=valid_till:
+                return True
+            return False
+        return True
 
     def accumulate_point(self, sms_dict, phone_number):
         '''accumulate points with given upc'''
