@@ -1724,6 +1724,8 @@ class BOMVisualization(BaseModel):
                               blank=True, null=True)
     published_date = models.DateTimeField(null=True, blank=True)
     remarks = models.CharField(max_length=500, null=True, blank=True)
+    is_publised = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False)
     
     class Meta:
         abstract = True

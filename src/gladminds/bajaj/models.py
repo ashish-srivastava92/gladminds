@@ -650,8 +650,6 @@ class VisualisationUploadHistory(base_models.VisualisationUploadHistory):
 class BOMVisualization(base_models.BOMVisualization):
     '''Details of BOM Plates cordinates'''
     bom = models.ForeignKey(BOMPlatePart)
-    is_publised = models.BooleanField(default=False)
-    is_approved = models.BooleanField(default=False)
     
     class Meta(base_models.BOMVisualization.Meta):
         app_label = _APP_NAME
