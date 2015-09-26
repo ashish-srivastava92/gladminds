@@ -224,7 +224,7 @@ class BOMPlatePartResource(CustomBaseModelResource):
             plate_name= post_data.get('plateName')
             eco_number = post_data.get('ecoNumber')
             sbom_part_mapping=[]
-            upload_history_data = get_model('UploadHistory')(sku_code=sku_code, bom_number=bom_number, plateId=plate_id, eco_number=eco_number)
+            upload_history_data = get_model('VisualisationUploadHistory')(sku_code=sku_code, bom_number=bom_number, plateId=plate_id, eco_number=eco_number)
             upload_history_data.save()
             bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
                                                                 bom__bom_number=bom_number,
@@ -389,10 +389,58 @@ class BOMVisualizationResource(CustomBaseModelResource):
         return [
                  url(r"^(?P<resource_name>%s)/review-sbom%s" % (self._meta.resource_name,trailing_slash()),
                      self.wrap_view('review_sbom_details'), name="review_sbom_details"),
+                 url(r"^(?P<resource_name>%s)/preview-sbom/(?P<history_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('preview_sbom_details'), name="preview_sbom_details"),
             ]
+        
+    def preview_sbom_details(self, request, **kwargs):
+        '''
+        preview the BOM data submitted
+           params:
+               bom_number: the bom number associated with a sku_code code
+               plate_id: the plate_id of the bom
+               eco_number: the eco-release number
+        '''
+        self.is_authenticated(request)
+        if request.method != 'GET':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        history_id=kwargs['history_id']
+        try:
+            visualisation_data = get_model('VisualisationUploadHistory').objects.filter(id=history_id).values_list('sku_code','bom_number','plateId','eco_number')
+            (sku_code,bom_number,plate_id,eco_number) = visualisation_data[0]
+            plate_data = get_model('BOMPlate').objects.get(plate_id=plate_id)
+            plate_image = plate_data.plate_image
+            check_if_eco_implemented = False
+            try:
+                check_if_eco_implemented = get_model('ECOImplementation').objects.get(eco_number=eco_number)
+                eco_implementation_date = check_if_eco_implemented.change_date
+                bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
+                                                                            bom__bom_number=bom_number,
+                                                                            plate__plate_id=plate_id,valid_from__gte=eco_implementation_date,
+                                                                            valid_to__lt=eco_implementation_date)
+            except Exception as ex:
+                if not check_if_eco_implemented:
+                    current_date = datetime.today()
+                    bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
+                                                                            bom__bom_number=bom_number,
+                                                                            plate__plate_id=plate_id,valid_to__gte=current_date,
+                                                                            valid_from__lte=current_date)
+            bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset).values_list('bom__part__part_number','bom__quantity','x_coordinate','y_coordinate','z_coordinate')
+            if not plate_image:
+                plate_image = "Image Not Available"
+            output_data = {"plate_image":plate_image,'plate_part_details':{}}
+            plate_part_details ={}
+            list_of_keys = ['quantity:','x-coordinate','y-coordinate','z-coordinate']
+            for part_details in bom_visualisation:
+                list_of_values = list(part_details[1:5])
+                plate_part_details[part_details[0]] = dict(zip(list_of_keys,list_of_values))
+            output_data["plate_part_details"]=plate_part_details
+            return HttpResponse(json.dumps(output_data), content_type="application/json")            
+        except Exception as ex:
+            LOG.info("[preview_sbom_details]:",ex)
+            return HttpResponse(json.dumps({"message" : "Exception -" + ex}),content_type="application/json", status=404)
                  
-        
-        
     def review_sbom_details(self, request, **kwargs):
         '''
            saves the review of a sbom
