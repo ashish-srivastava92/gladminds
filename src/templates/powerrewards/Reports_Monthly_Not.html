@@ -62,11 +62,12 @@
 					    <nav role="navigation" class="navbar navbar-default">
 					        <!-- Brand and toggle get grouped for better mobile display -->
 					        <div class="navbar-header">
-					            <a href="" title="jQuery Mobile Demos home">
+					            
 					            	<img src="/static/powerrewards/img/power_rewards_logo.png" alt="jQuery Mobile">
-					            </a>
+					            
 					        </div>
-					        
+					        <div class='username' style="float: right;margin-top: 5px;margin-right: 5px;">
+					        </div>
 					    </nav>
 					</div>
 				</div><!-- /header -->
@@ -77,9 +78,9 @@
 				    <div class="col-md-6">
 				    	<div class="row">
 				    		<div class="col-md-7">
-				    			<button id="download_data">Download</button>
+				    			<!-- <button id="download_data">Download</button> -->
 				    		</div>
-				    		<div class="col-md-1" style="margin-top:22px;float: left;"><a href="." target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
+				    		<div class="col-md-1" style="margin-top:10px;float: left;"><a href="." target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
 				    		<div class="col-md-4" style="margin-top:-15px;">
 				    			<fieldset class="ui-field-contain">
 				    				
@@ -100,14 +101,17 @@
 	                    <div class="portlet-title">
 	                        <h4>Monthly Inactive Count</h4>
 	                     </div>
-
+	                     <div class="ui-nodisc-icon ui-alt-icon" style="float: right;">
+	                        <a title="Download" id="download_data" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-notext ui-btn-inline ui-icon-arrow-d"></a>
+	                    </div>
 	                    <div class="clearfix"></div>
 	                </div>
 	                <div class="portlet-body">
 	                	
 	                    <div class="table-responsive">
 	                    <script type="text/javascript">
-	                    
+	                    	var email=localStorage.getItem("email")
+	                    		$(".username").html(email);
    									
 	                    	var access_token=localStorage.getItem("access_token")
 	                    	$(document).ready(function(){
@@ -150,7 +154,7 @@
 									download_apiURL = "";
 									function getDataFromAPI(apiURL) {
 										
-										download_apiURL = apiURL;
+										
 										if($('#day').val()=='')
 											{
 												var val=90;
@@ -176,7 +180,7 @@
 												console.log(e)
 											}
 										});
-
+										download_apiURL = apiURL+"&last_transaction_date__lte="+defaultdate;
 																					
 									}
 
@@ -282,6 +286,12 @@
 		                               $("#reportTable th").click(function(){
 		                               		$(".pagination li").removeClass("disabled");
 		                               		$(".pagination li.active").remove();
+		                               		if(data.meta.limit>data.meta.total_count)
+			                               {
+			                               		$(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+data.meta.total_count+' of '+data.meta.total_count+' Records');
+			                               }else{
+			                               		$(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+(data.meta.offset+20)+' of '+data.meta.total_count+' Records');
+			                           		}
 		                               })
 
 									}
@@ -291,7 +301,7 @@
 							          showLoading();
 
 							          $.ajax({
-							           url : '//qa.bajajcv.gladminds.co'+download_apiURL+'&limit=10000',
+							           url : download_apiURL,
 							           type : 'GET',
 							           dataType : 'json',
 							           success : function(data, success) {
@@ -307,10 +317,26 @@
 							         arrInnerInfo = [];
 							         mainArray = [];
 
+
+							         arrHeader = [];
+
+							         arrHeader.push("Mechanic Id");
+							         arrHeader.push("Mechanic Name");
+							         arrHeader.push("District");
+							         arrHeader.push("Mobile No");
+							         arrHeader.push("State");
+							         arrHeader.push("Distributor Code");
+							         arrHeader.push("ASM Name");
+							        
+							         mainArray.push(arrHeader)
+
+
 							         createCSV  = function(csvData) {
 							          for(index=0; index<csvData.objects.length;index++) {
 
-							           if((csvData.objects[index].mechanic_id != null) || (csvData.objects[index].mechanic_id != undefined)) {
+							           if((csvData.objects[index].permanent_id != null) || (csvData.objects[index].permanent_id != undefined)) {
+							            var mechanic_id = csvData.objects[index].permanent_id;
+							           } else if((csvData.objects[index].mechanic_id != null) || (csvData.objects[index].mechanic_id != undefined)) {
 							            var mechanic_id = csvData.objects[index].mechanic_id;
 							           } else {
 							            var mechanic_id = "";
@@ -323,20 +349,20 @@
 							            var mechanic_name = "";
 							           }
 
-							           // if((csvData.objects[index].member.preferred_retailer.retailer_town != null) || (csvData.objects[index].member.preferred_retailer.retailer_town != undefined)) {
-							           //  var district = csvData.objects[index].member.preferred_retailer.retailer_town;
-							           // } else {
-							           //  var district = "";
-							           // }
+							           if((csvData.objects[index].district != null) || (csvData.objects[index].district != undefined)) {
+							            var district = csvData.objects[index].district;
+							           } else {
+							            var district = "";
+							           }
 
 							           if((csvData.objects[index].phone_number != null) || (csvData.objects[index].phone_number != undefined)) {
-							            var phone = csvData.objects[index].phone_number;
+							            var phone = (csvData.objects[index].phone_number).substring(3);;
 							           } else {
 							            var phone = "";
 							           }
 
-							           if((csvData.objects[index].member.state.state_name != null) || (csvData.objects[index].member.state.state_name != undefined)) {
-							            var state = csvData.objects[index].member.state.state_name;
+							           if((csvData.objects[index].state.state_name != null) || (csvData.objects[index].state.state_name != undefined)) {
+							            var state = csvData.objects[index].state.state_name;
 							           } else {
 							            var state = "";
 							           }
@@ -353,14 +379,11 @@
 							            var name = "";
 							           }
 
-							           
-							          
-							           
-							           
 							           subArray=[];
 
 							           subArray.push(mechanic_id);
 							           subArray.push(mechanic_name);
+							           subArray.push(district);
 							           subArray.push(phone);
 							           subArray.push(state);
 							           subArray.push(distributor_id);
@@ -368,6 +391,8 @@
 							           subArray.push(name);
 
 							           mainArray.push(subArray);
+
+							           subArray = [];
 
 							          }
 
@@ -377,19 +402,22 @@
 							          mainArray.forEach(function(arrCSV_data, index){
 							             console.log(arrCSV_data)
 							             arrCSV_dataString = arrCSV_data.join(",");
-							             csvContent += index < arrCSV_data.length ? arrCSV_dataString+ "\n" : arrCSV_dataString;
+							             csvContent += arrCSV_dataString+ "\n";
 							             var encodedUri = encodeURI(csvContent);
 
 							           link = document.createElement("a");
 							           link.setAttribute("href", encodedUri);
 							           // link.setAttribute("download", "my_arrCSV_data.csv");
-							           link.download = "Reports_Accumulation.csv";
+							           link.download = "Monthly_Inactive.csv";
 							          
 							          }); 
 
 							          link.click();
+							          mainArray = [];
+							          mainArray.push(arrHeader)
 							          hideLoading();
 							         }
+
                             </script>
                         </div>
                     <!-- /.table-responsive -->
