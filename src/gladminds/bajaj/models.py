@@ -488,6 +488,10 @@ class DistributorSalesRep(base_models.DistributorSalesRep):
     
     class Meta(base_models.DistributorSalesRep.Meta):
         app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.distributor_sales_code + ' ' + self.user.user.first_name + \
+                                ' ' + self.user.user.last_name
 
 class Retailer(base_models.Retailer):
     '''details of retailer'''
@@ -499,14 +503,17 @@ class Retailer(base_models.Retailer):
     email = models.EmailField(max_length=50, null=True, blank=True)
     mobile = models.CharField(max_length=15)
     profile = models.CharField(max_length=15, null=True, blank=True)
-    latitude = models.DecimalField(max_digits = 10, decimal_places=6)
-    longitude = models.DecimalField(max_digits = 11, decimal_places=6)
+    latitude = models.DecimalField(max_digits = 10, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits = 11, decimal_places=6, null=True, blank=True)
     language = models.CharField(max_length=10, null=True, blank=True)
     rejected_reason = models.CharField(max_length=300, null=True, blank=True)
     
     class Meta(base_models.Retailer.Meta):
         app_label = _APP_NAME
 
+    def __unicode__(self):
+        return self.retailer_code + ' ' + self.retailer_name
+    
 class DSRWorkAllocation(base_models.DSRWorkAllocation):
     '''details of DSR work allocation'''
     distributor = models.ForeignKey(Distributor)
@@ -516,7 +523,67 @@ class DSRWorkAllocation(base_models.DSRWorkAllocation):
     
     class Meta(base_models.DSRWorkAllocation.Meta):
         app_label = _APP_NAME
-
+        
+class PartModels(base_models.PartModels):
+    '''details of part models'''
+    model_name = models.CharField(max_length=255)
+    image_url = models.CharField(max_length=255, null=True, blank=True)
+    active = models.BooleanField(default = True)
+    
+    class Meta(base_models.PartModels.Meta):
+        app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.model_name
+        
+class Categories(base_models.Categories):
+    ''' details of model categories '''
+    category_name = models.CharField(max_length=255)
+    short_name = models.CharField(max_length=255, null=True, blank=True)
+    image_url = models.CharField(max_length=255, null=True, blank=True)
+    style_class = models.CharField(max_length=255, null=True, blank=True)
+    part_model = models.ForeignKey(PartModels)
+    active = models.BooleanField(default = True)
+    group_by = models.CharField(max_length=20, null=True, blank=True)
+    
+    class Meta(base_models.Categories.Meta):
+        app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.category_name
+        
+class SubCategories(base_models.SubCategories):
+    ''' details of model categories '''
+    subcategory_name = models.CharField(max_length=255)
+    image_url = models.CharField(max_length=255, null=True, blank=True)
+    category = models.ForeignKey(Categories)
+    part_model = models.ForeignKey(PartModels)
+    active = models.BooleanField(default = True)
+    
+    class Meta(base_models.SubCategories.Meta):
+        app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.subcategory_name
+        
+class PartPricing(base_models.PartPricing):
+    ''' details of model categories '''
+    bajaj_id = models.IntegerField(null=True, blank=True)
+    part_number = models.CharField(max_length=255, null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    part_model = models.CharField(max_length=255, null=True, blank=True)
+    valid_from = models.DateField( null=True, blank=True)
+    subcategory = models.ForeignKey(SubCategories)
+    category = models.ForeignKey(Categories)
+    mrp = models.CharField(max_length=8, null=True, blank=True)
+    active = models.BooleanField(default = True)
+    
+    class Meta(base_models.PartPricing.Meta):
+        app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.description
+        
 class Member(base_models.Member):
     '''details of Member'''
     registered_by_distributor = models.ForeignKey(Distributor, null=True, blank=True)
@@ -533,19 +600,10 @@ class SparePartMasterData(base_models.SparePartMasterData):
     class Meta(base_models.SparePartMasterData.Meta):
         app_label = _APP_NAME
 
-class PartPricing(base_models.PartPricing):
-    part_cd = models.CharField(max_length=255)
-    part_desc = models.CharField(max_length=255)
-    mrp = models.CharField(max_length=255)
-    set_qty = models.IntegerField()
-    margin_cd = models.CharField(max_length=255)
-    category = models.CharField(max_length=255)
-    active = models.BooleanField(default = True)
-    
-    class Meta(base_models.PartPricing.Meta):
-        app_label = _APP_NAME
-        
 class OrderPart(base_models.OrderPart):
+    ''' details of orders placed by retailer '''
+    order_id = models.CharField(max_length = 40)
+    order_date = models.DateField()
     part = models.ForeignKey(PartPricing)
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits = 5, decimal_places=2)
@@ -554,6 +612,7 @@ class OrderPart(base_models.OrderPart):
     delivered = models.IntegerField(null=True, blank=True)
     no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
     dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
+    accept = models.BooleanField(default = False)
     retailer = models.ForeignKey(Retailer)
     
     class Meta(base_models.OrderPart.Meta):

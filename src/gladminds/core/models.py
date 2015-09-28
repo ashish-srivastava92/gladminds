@@ -437,8 +437,26 @@ class DSRWorkAllocation(base_models.DSRWorkAllocation):
     class Meta(base_models.DSRWorkAllocation.Meta):
         app_label = _APP_NAME
         
+class PartModels(base_models.PartModels):
+    ''' details of parts models'''
+    
+    class Meta(base_models.PartModels.Meta):
+        app_label = _APP_NAME
+        
+class Categories(base_models.Categories):
+    ''' details of model categories'''
+    
+    class Meta(base_models.Categories.Meta):
+        app_label = _APP_NAME
+        
+class SubCategories(base_models.SubCategories):
+    ''' details of model sub categories'''
+    
+    class Meta(base_models.SubCategories.Meta):
+        app_label = _APP_NAME
+        
 class PartPricing(base_models.PartPricing):
-    ''' details of parts and its pricing'''
+    ''' details of parts models'''
     
     class Meta(base_models.PartPricing.Meta):
         app_label = _APP_NAME

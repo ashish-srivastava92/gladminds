@@ -1120,7 +1120,7 @@ class Distributor(BaseModel):
 
 class DistributorStaff(BaseModel):
     '''details of DistributorStaff'''
-    distributor_staff_id = models.CharField(max_length=50)
+    distributor_staff_code = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
 
@@ -1134,7 +1134,7 @@ class DistributorStaff(BaseModel):
 
 class DistributorSalesRep(BaseModel):
     '''details of DistributorSalesRep'''
-    distributor_sales_id = models.CharField(max_length=50)
+    distributor_sales_code = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
 
@@ -1142,12 +1142,10 @@ class DistributorSalesRep(BaseModel):
         abstract = True
         db_table = "gm_distributorsalesrep"
         verbose_name_plural = "Distributor Sales Rep"
-
-    def __unicode__(self):
-        return self.distributor_sales_id
     
 class Retailer(BaseModel):
     '''details of Retailer'''
+    retailer_code = models.CharField(max_length=50)
     retailer_name = models.CharField(max_length=50)
     retailer_town = models.CharField(max_length=50, null=True, blank=True)
     is_active = models.BooleanField(default=True)
@@ -1157,9 +1155,6 @@ class Retailer(BaseModel):
         db_table = "gm_retailer"
         verbose_name_plural = "Retailers"
 
-    def __unicode__(self):
-        return self.retailer_name
- 
 class DSRWorkAllocation(BaseModel):
     '''details of DSRWorkAllocation'''
     status = models.CharField(max_length=12, choices=constants.WORKFLOW_STATUS, default='Open')
@@ -1168,6 +1163,30 @@ class DSRWorkAllocation(BaseModel):
         abstract = True
         db_table = "gm_dsrworkallocation"
         verbose_name_plural = "DSR Work Allocation"
+        
+class PartModels(BaseModel):
+    ''' details of parts model '''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_partmodels"
+        verbose_name_plural = "PartModels"
+        
+class Categories(BaseModel):
+    ''' details of categories '''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_categories"
+        verbose_name_plural = "categories"
+        
+class SubCategories(BaseModel):
+    ''' details of categories '''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_subcategories"
+        verbose_name_plural = "subcategories"
         
 class PartPricing(BaseModel):
     ''' details of spare parts and pricing'''

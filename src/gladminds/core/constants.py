@@ -326,3 +326,12 @@ REJECT_RETAILER_MESSAGE = "your retailer membership is rejected.. \
 APPROVE_RETAILER_SUBJECT = "retailer is approved"
 APPROVE_RETAILER_MESSAGE = "your retailer membership is approved.\
                            you can login with your registered username and password"
+
+DISTRIBUTOR_SEQUENCE = 400001
+DISTRIBUTOR_SEQUENCE_INCREMENT = 1
+
+DSR_SEQUENCE = 500001
+DSR_SEQUENCE_INCREMENT = 1
+
+RETAILER_SEQUENCE = 60001
+RETAILER_SEQUENCE_INCREMENT = 1
