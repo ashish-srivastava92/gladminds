@@ -128,7 +128,7 @@ def dsr_order(request, dsr_id, retailer_id):
         orderpart.part = PartPricing.objects.filter(description = item['name'])[0]
         orderpart.dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
         orderpart.retailer = Retailer.objects.get(retailer_code = retailer_id)
-        #orderpart.save()
+        orderpart.save()
     return Response({'message': 'Order(s) has been placed successfully', 'status':1})
     
 
