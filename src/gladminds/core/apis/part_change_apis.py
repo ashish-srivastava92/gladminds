@@ -106,6 +106,25 @@ class BOMPartResource(CustomBaseModelResource):
                      "part_number" : ALL
                      }
         
+
+class VisualisationUploadHistoryResource(CustomBaseModelResource):
+    '''
+       Resource for VisualisationUploadHistory
+    '''
+    class Meta:
+        queryset = get_model('VisualisationUploadHistory').objects.all()
+        resource_name = 'visualisation-upload-history'
+        authorization = Authorization()
+        authentication = AccessTokenAuthentication()
+        detail_allowed_methods = ['get']
+        always_return_data = True
+        include_resource_uri = False
+        
+        filtering = {
+                     "status": ALL,
+                     }
+        
+        
         
 class BOMPlatePartResource(CustomBaseModelResource):
     '''
@@ -182,7 +201,8 @@ class BOMPlatePartResource(CustomBaseModelResource):
         except Exception as ex:
             LOG.error('Exception while fetching plate images : {0}'.format(ex))
             return HttpResponseBadRequest()
-    
+        
+        
     def save_plate_part(self, request, **kwargs):
         '''
            Parses the uploaded CSV and adds the
@@ -426,15 +446,22 @@ class BOMVisualizationResource(CustomBaseModelResource):
                                                                             bom__bom_number=bom_number,
                                                                             plate__plate_id=plate_id,valid_to__gte=current_date,
                                                                             valid_from__lte=current_date)
-            bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset).values_list('bom__part__part_number','bom__quantity','x_coordinate','y_coordinate','z_coordinate')
+            bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset).values_list('bom__part__part_number','bom__quantity','x_coordinate','y_coordinate','z_coordinate',
+                                                                                                                                                      'part_href','serial_number','published_date',
+                                                                                                                                                      'remarks','is_published','is_approved')
             if not plate_image:
                 plate_image = "Image Not Available"
-            output_data = {"plate_image":plate_image,'plate_part_details':{}}
-            plate_part_details ={}
-            list_of_keys = ['quantity:','x-coordinate','y-coordinate','z-coordinate']
+                
+            output_data = {"plate_image":plate_image,'plate_part_details':[]}
+            plate_part_details =[]
+            list_of_keys = ['part_number','quantity','x-coordinate','y-coordinate','z-coordinate',
+                                                                   'part_href','serial_number','published_date',
+                                                                   'remarks','is_published',
+                                                                   'is_approved']
             for part_details in bom_visualisation:
-                list_of_values = list(part_details[1:5])
-                plate_part_details[part_details[0]] = dict(zip(list_of_keys,list_of_values))
+                list_of_values = list(part_details[0:11])
+                plate_part_details.append (dict(zip(list_of_keys,list_of_values)))
+            
             output_data["plate_part_details"]=plate_part_details
             return HttpResponse(json.dumps(output_data), content_type="application/json")            
         except Exception as ex:
