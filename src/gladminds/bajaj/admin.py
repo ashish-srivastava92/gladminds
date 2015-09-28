@@ -810,6 +810,21 @@ class SparePartMasterAdmin(GmModelAdmin):
         price = SparePartPoint.objects.get(part_number = obj.id)
         return price.price
     
+class PartModelsAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('model_name',)
+    list_display = ('model_name', 'active')
+    
+class CategoriesAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('category_name', 'short_name',)
+    list_display = ('category_name', 'short_name', 'part_model', 'active',)
+    
+class SubCategoriesAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('subcategory_name', 'category')
+    list_display = ('subcategory_name', 'category', 'active')
+    
 class PartPricingAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('part_number', 'description','part_model')
@@ -1276,6 +1291,9 @@ def get_admin_site_custom(brand):
     #brand_admin.register(get_model("DistributorStaff", brand), DistributorStaffAdmin)
     brand_admin.register(get_model("DistributorSalesRep", brand), DistributorSalesRepAdmin)
     brand_admin.register(get_model("Retailer", brand), RetailerAdmin)
+    brand_admin.register(get_model("PartModels", brand), PartModelsAdmin)
+    brand_admin.register(get_model("Categories", brand), CategoriesAdmin)
+    brand_admin.register(get_model("SubCategories", brand), SubCategoriesAdmin)
     brand_admin.register(get_model("PartPricing", brand), PartPricingAdmin)
     brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
     brand_admin.register(get_model("DSRWorkAllocation", brand), DSRWorkAllocationAdmin)

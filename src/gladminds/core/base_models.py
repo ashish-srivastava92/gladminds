@@ -1170,7 +1170,7 @@ class PartModels(BaseModel):
     class Meta:
         abstract = True
         db_table = "gm_partmodels"
-        verbose_name_plural = "PartModels"
+        verbose_name_plural = "Part Models"
         
 class Categories(BaseModel):
     ''' details of categories '''
@@ -1194,7 +1194,7 @@ class PartPricing(BaseModel):
     class Meta:
         abstract = True
         db_table = "gm_partpricing"
-        verbose_name_plural = "PartPricing"
+        verbose_name_plural = "Part Pricing"
         
 class OrderPart(BaseModel):
     ''' details of ordering spare parts by dsr or retailer'''

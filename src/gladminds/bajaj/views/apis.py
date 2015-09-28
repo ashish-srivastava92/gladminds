@@ -35,7 +35,7 @@ def authentication(request):
             authenticated_user = DistributorSalesRep.objects.filter(user = user)
             if authenticated_user:
                 login_type = "dsr"
-                role_id = authenticated_user[0].dsr_code
+                role_id = authenticated_user[0].distributor_sales_code
             else:
                 authenticated_user = Retailer.objects.filter(user = user, \
                                                 approved = constants.STATUS['APPROVED'])
@@ -64,14 +64,14 @@ def get_retailers(request, dsr_id):
     '''
     This method returns all the retailers of the distributor given the dsr id 
     '''
-    distributor = DistributorSalesRep.objects.get(id = dsr_id)
+    distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
     retailers = Retailer.objects.filter(distributor = distributor.distributor, \
                                 approved = constants.STATUS['APPROVED'] )
     #retailers = Retailer.objects.all()
     retailer_list = []
     for retailer in retailers:
         retailer_dict = {}
-        retailer_dict.update({"retailer_Id":retailer.id})
+        retailer_dict.update({"retailer_Id":retailer.retailer_code})
         retailer_dict.update({"retailer_name":retailer.retailer_name})
         retailer_dict.update({"retailer_mobile":retailer.mobile})
         retailer_dict.update({"retailer_email":retailer.email})
@@ -114,6 +114,7 @@ def dsr_order(request, dsr_id, retailer_id):
     it in the database
     '''
     parts = json.loads(request.body)
+    
     date = parts['date']
     items = parts['order_items']
     for item in items:
@@ -124,10 +125,10 @@ def dsr_order(request, dsr_id, retailer_id):
         orderpart.quantity = item['qty']
         orderpart.price = item['unit_price']
         orderpart.total_price = item['sub_total']
-        orderpart.part = PartPricing.objects.get(id = item['part_id'])
+        orderpart.part = PartPricing.objects.filter(description = item['name'])[0]
         orderpart.dsr = DistributorSalesRep.objects.get(id = dsr_id)
         orderpart.retailer = Retailer.objects.get(id = retailer_id)
-        orderpart.save()
+        #orderpart.save()
     return Response({'message': 'Order(s) has been placed successfully', 'status':1})
     
 
