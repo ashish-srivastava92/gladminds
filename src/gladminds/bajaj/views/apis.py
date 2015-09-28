@@ -126,8 +126,8 @@ def dsr_order(request, dsr_id, retailer_id):
         orderpart.price = item['unit_price']
         orderpart.total_price = item['sub_total']
         orderpart.part = PartPricing.objects.filter(description = item['name'])[0]
-        orderpart.dsr = DistributorSalesRep.objects.get(id = dsr_id)
-        orderpart.retailer = Retailer.objects.get(id = retailer_id)
+        orderpart.dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+        orderpart.retailer = Retailer.objects.get(retailer_code = retailer_id)
         #orderpart.save()
     return Response({'message': 'Order(s) has been placed successfully', 'status':1})
     
@@ -150,8 +150,8 @@ def retailer_order(request, retailer_id):
         orderpart.quantity = item['qty']
         orderpart.price = item['unit_price']
         orderpart.total_price = item['sub_total']
-        orderpart.part = PartPricing.objects.get(id = item['part_id'])
-        orderpart.retailer = Retailer.objects.get(id = retailer_id)
+        orderpart.part = PartPricing.objects.filter(description = item['name'])[0]
+        orderpart.retailer = Retailer.objects.get(retailer_code = retailer_id)
         orderpart.save()
     return Response({'message': 'Order(s) has been placed successfully', 'status':1})
 
