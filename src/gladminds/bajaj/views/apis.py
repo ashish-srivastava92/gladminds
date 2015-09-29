@@ -7,13 +7,13 @@ import json, datetime
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.views import obtain_jwt_token
-from rest_framework.response import Response
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework.permissions import IsAuthenticated
+# from rest_framework_jwt.views import obtain_jwt_token
+# from rest_framework.response import Response
 from django.http import HttpResponse
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework_jwt.settings import api_settings
+# from rest_framework.decorators import api_view, authentication_classes, permission_classes
+# from rest_framework_jwt.settings import api_settings
 
 from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
                             SubCategories, PartPricing, OrderPart
@@ -46,11 +46,13 @@ def authentication(request):
                     return Response({'message': 'you are not \
                                  a DSR or retailer. Please contact your distributor', 'status':0})
             # now, he is a valid user, generate token
-            jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
-            jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
-            payload = jwt_payload_handler(user)
+            # jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+            # jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+            # payload = jwt_payload_handler(user)
+            # data = {"Id": role_id,
+            #         "token": jwt_encode_handler(payload), "status":1, "login_type":login_type}
             data = {"Id": role_id,
-                    "token": jwt_encode_handler(payload), "status":1, "login_type":login_type}
+                    "status":1, "login_type":login_type}
             return Response(data, content_type="application/json")
         else:
          return Response({'message': 'you are not active. Please contact your distributor', 'status':0})   
@@ -162,8 +164,22 @@ def get_schedule(request):
     '''
     This method gets the schedule(the retailers he has to visit) for today, given the dsr id
     '''
-    
-    return Response({'retailer': 'retailer id'})
+    dsr = json.loads(request.body)
+    date = dsr['date']
+    schedules = DSRWorkAllocation.objects.filter(date = date, dsr = dsr_id)
+    schedules_list = []
+    for schedule in schedules:
+        schedule_dict = {}
+        schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
+        schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
+        schedule_dict.update({"retailer_mobile" : schedule.retailer.mobile})
+        schedule_dict.update({"retailer_phone" : schedule.retailer.user.phone_number})
+        schedule_dict.update({"retailer_email" : schedule.retailer.email})
+        schedule_dict.update({"retailer_address":schedule.retailer.user.address})
+        schedule_dict.update({"latitude":schedule.retailer.latitude})
+        schedule_dict.update({"longitude":schedule.retailer.longitude})
+        schedules_list.append(schedule_dict)
+    return Response(schedules_list)
 
 # @api_view(['GET'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
@@ -174,8 +190,9 @@ def get_retailer_transaction(request):
     given the retailer Id
     '''
     
-    return Response({'retailer': 'retailer id'})
-
+    #return Response({'retailer': 'retailer id'})
+    return Response({'message': 'Order(s) has been placed successfully', 'status':1})
+    
 def split_date(date):
     date_array = date.split('-')
     dd = date_array[2]
