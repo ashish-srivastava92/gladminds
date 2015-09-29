@@ -145,7 +145,7 @@ def create_new_qa_version(version):
 @task()
 def create_new_demosfa_version(version):
     upload_to_s3(BUCKET_NAME, version, FILE_NAME)
-    create_version(APPLICATION_NAME, version)
+    create_version('Demos', version)
 
     ENVIRONMENT_NAME = 'demos-env01'
     update_environment(ENVIRONMENT_NAME, version)
