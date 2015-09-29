@@ -12,7 +12,7 @@ from django.db.models.query_utils import Q
 from django.contrib.sites.models import RequestSite
 
 from tastypie.utils.urls import trailing_slash
-from tastypie import fields,http
+from tastypie import fields,http, bundle
 from tastypie.http import HttpBadRequest
 from tastypie.authorization import Authorization
 from tastypie.authorization import DjangoAuthorization
@@ -38,9 +38,68 @@ from gladminds.core.utils import check_password
 from gladminds.afterbuy import utils as core_utils
 from gladminds.core.model_fetcher import get_model
 
+from tastypie.serializers import Serializer
+
 logger = logging.getLogger('gladminds')
 
 register_user = RegisterUser()
+
+
+
+import csv
+import StringIO
+class CSVSerializer(Serializer):
+    formats = Serializer.formats + ['csv']
+    content_types = dict(
+        Serializer.content_types.items() +
+        [('csv', 'text/csv')])
+    
+    def to_csv(self, data, options=None):
+        file_name='_member_details_' + datetime.now().strftime('%d_%m_%y')
+#         response = HttpResponse(mimetype='text/csv')
+#         response['Content-Disposition'] = 'attachment; filename=powerrewards_data.csv'
+        options = options or {}
+        data = self.to_simple(data, options)
+        raw_data = StringIO.StringIO()
+        if data['objects']:
+            fields = data['objects'][0].keys()
+            av_fields = []
+            filtering_all = [
+                     "mechanic_id",
+                     "first_name",
+                     "district",
+                     "phone_number",
+                     "State",
+                     "Distributor Code",
+                     "registered_date",
+                     "Address of garage"
+                     ]
+            #if 'state' in filtering_all.keys():
+            writer = csv.DictWriter(raw_data, filtering_all,
+                                    dialect="excel",
+                                    extrasaction='ignore')
+            header = dict(zip(filtering_all, filtering_all))
+            writer.writerow(header) 
+            for item in data['objects']:
+                print "mechanical id is ", item['permanent_id'] 
+                if item["permanent_id"]:
+                    item["mechanic_id"] = item["permanent_id"]
+                    
+                item["Address of garage"] = item['shop_name']+item['shop_number']+item['shop_address']+item['district']+item['state']['state_name']+item['pincode'],
+                                            
+                item['State'] = item['state']['state_name']
+                item['Distributor Code'] = item['distributor']['distributor_id']
+                
+                writer.writerow(item)
+        response = HttpResponse(raw_data.getvalue(), content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+ 
+        #return raw_data.getvalue()
+        return response
+
+
+
+
 
 class UserResource(CustomBaseModelResource):
     '''
@@ -972,6 +1031,10 @@ class MemberResource(CustomBaseModelResource):
         authentication = AccessTokenAuthentication()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
+        max_limit= None
+        
+        serializer = CSVSerializer(formats=['json', 'csv'])
+        
         filtering = {
                      "state": ALL_WITH_RELATIONS,
                      "distributor" : ALL_WITH_RELATIONS,
@@ -995,7 +1058,7 @@ class MemberResource(CustomBaseModelResource):
         ordering = ["state", "locality", "district", "registered_date",
                     "created_date", "mechanic_id", "last_transaction_date", "total_accumulation_req"
                     "total_accumulation_points", "total_redemption_points", "total_redemption_req" ]
-    
+        
     def build_filters(self, filters=None):
         if filters is None:
             filters = {}
@@ -1029,9 +1092,66 @@ class MemberResource(CustomBaseModelResource):
             url(r"^(?P<resource_name>%s)/points%s" % (self._meta.resource_name,
                                                      trailing_slash()),
                 self.wrap_view('get_total_points'), name="get_total_points"),
+                
+            url(r"^(?P<resource_name>%s)/registeredmembers%s" % (self._meta.resource_name,
+                                                     trailing_slash()),
+                self.wrap_view('registered_members'), name="registered_members"),
+            
         ]
-   
-
+        
+    def registered_members(self, request , **kwargs):
+        '''
+           Get registered member details
+           returns in csv format
+        '''
+        get_data=request.GET
+        if request.GET.get('member_id'):
+            try:
+                mechanic_id = get_data.get('member_id')
+                mechanics = models.Member.objects.filter(mechanic_id = mechanic_id).select_related('state', 'registered_by_distributor')
+                return self.get_list(request, member_id=mechanic_id)
+            except Exception as ex:
+                logger.error('[search_sbom_for_vin]: {0}'.format(ex))
+                data = {'status':0 , 'message': 'mechanic id does not match'}
+                return HttpResponse(json.dumps(data), content_type="application/json")
+        elif request.GET.get('district'):
+            try:
+                district = get_data.get('district')
+                mechanics = models.Member.objects.filter(district = district).select_related('state', 'registered_by_distributor')
+                return self.get_list(request, district=district)
+            except Exception as ex:
+                logger.error('[search_sbom_for_vin]: {0}'.format(ex))
+                data = {'status':0 , 'message': 'mechanic id does not match'}
+                return HttpResponse(json.dumps(data), content_type="application/json")
+        elif request.GET.get('phone_number__endswith'):
+            try:
+                phone_number = get_data.get('phone_number__endswith')
+                mechanics = models.Member.objects.filter(phone_number = phone_number).select_related('state', 'registered_by_distributor')
+                return self.get_list(request, phone_number__endswith=phone_number)
+            except Exception as ex:
+                logger.error('[search_sbom_for_vin]: {0}'.format(ex))
+                data = {'status':0 , 'message': 'mechanic id does not match'}
+                return HttpResponse(json.dumps(data), content_type="application/json")
+        elif request.GET.get('state__state_name'):
+            try:
+                state = get_data.get('state__state_name')
+                mechanics = models.Member.objects.filter(state__state_name = state).select_related( 'registered_by_distributor')
+                return self.get_list(request, state__state_name=state)
+            except Exception as ex:
+                logger.error('[search_sbom_for_vin]: {0}'.format(ex))
+                data = {'status':0 , 'message': 'mechanic id does not match'}
+                return HttpResponse(json.dumps(data), content_type="application/json")
+        elif request.GET.get('distributor__distributor_id'):
+            try:
+                distributor = get_data.get('distributor__distributor_id')
+                mechanics = models.Member.objects.filter(registered_by_distributor__distributor_id = distributor).select_related('state', 'registered_by_distributor')
+                return self.get_list(request, distributor__distributor_id=distributor)
+            except Exception as ex:
+                logger.error('[search_sbom_for_vin]: {0}'.format(ex))
+                data = {'status':0 , 'message': 'mechanic id does not match'}
+                return HttpResponse(json.dumps(data), content_type="application/json")
+            
+        
     def get_active_member(self, request, **kwargs):
         '''
            Get active member counts and
@@ -1206,4 +1326,4 @@ class SupervisorResource(CustomBaseModelResource):
         filtering = {
                      'transporter': ALL_WITH_RELATIONS
                      }
-
+        

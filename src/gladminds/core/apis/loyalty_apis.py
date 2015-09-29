@@ -221,6 +221,85 @@ class AccumulationResource(CustomBaseModelResource):
                     upc.data['part_number'].data['point'] = upc_mapping[0]['points']
                     
         return data
+    
+#     
+#     
+#     def prepend_urls(self):
+#         return [
+#               url(r"^(?P<resource_name>%s)/productfitment%s" % (self._meta.resource_name,trailing_slash()),
+#                                                      self.wrap_view('product_fitment'), name="product_fitment")
+#                ]
+#     
+#     def product_fitment(self, request):
+#         print "================="
+#         get_data=request.GET
+#         print "=============="
+#         if request.GET.get('member_id'):
+#             try:
+#                 member_id = get_data.get('member_id')
+#                 print "member_id===="
+#                 mechanics = models.AccumulationRequest.objects.filter(member__member_id = member_id).select_related('member')
+#                 return self.get_list(request, member_id=member_id)
+#             except Exception as ex:
+#                 logger.error('[search_sbom_for_vin]: {0}'.format(ex))
+#                 data = {'status':0 , 'message': 'mechanic id does not match'}
+#                 return HttpResponse(json.dumps(data), content_type="application/json")  
+#         elif request.GET.get('member__district'):
+#             try:
+#                 member__district = get_data.get('member__district')
+#                 mechanics = models.Member.objects.filter(district = member__district).select_related('state', 'registered_by_distributor')
+#                 return self.get_list(request, member__district=member__district)
+#             except Exception as ex:
+#                 logger.error('[search_sbom_for_vin]: {0}'.format(ex))
+#                 data = {'status':0 , 'message': 'mechanic id does not match'}
+#                 return HttpResponse(json.dumps(data), content_type="application/json")
+#         elif request.GET.get('member__phone_number__endswith'):
+#             try:
+#                 member_phone = get_data.get('member__phone_number__endswith')
+#                 mechanics = models.Member.objects.filter(phone_number = member_phone).select_related('state', 'registered_by_distributor')
+#                 return self.get_list(request, member__phone_number__endswith=member_phone)
+#             except Exception as ex:
+#                 logger.error('[search_sbom_for_vin]: {0}'.format(ex))
+#                 data = {'status':0 , 'message': 'mechanic id does not match'}
+#                 return HttpResponse(json.dumps(data), content_type="application/json")
+#         elif request.GET.get('member__state__state_name'):
+#             try:
+#                 state_name = get_data.get('member__state__state_name')
+#                 mechanics = models.Member.objects.filter(state__state_name = state_name).select_related('state', 'registered_by_distributor')
+#                 return self.get_list(request,member__state__state_name=state_name)
+#             except Exception as ex:
+#                 logger.error('[search_sbom_for_vin]: {0}'.format(ex))
+#                 data = {'status':0 , 'message': 'mechanic id does not match'}
+#                 return HttpResponse(json.dumps(data), content_type="application/json")
+#         elif request.GET.get('member__distributor__distributor_id'):
+#             try:
+#                 distributor = get_data.get('member__distributor__distributor_id')
+#                 mechanics = models.Member.objects.filter(registered_by_distributor__distributor_id = distributor).select_related('state', 'registered_by_distributor')
+#                 return self.get_list(request, member__distributor__distributor_id=distributor)
+#             except Exception as ex:
+#                 logger.error('[search_sbom_for_vin]: {0}'.format(ex))
+#                 data = {'status':0 , 'message': 'mechanic id does not match'}
+#                 return HttpResponse(json.dumps(data), content_type="application/json")
+#         elif request.GET.get('upcs__unique_part_code'):
+#             try:
+#                 distributor = get_data.get('upcs__unique_part_code')
+#                 mechanics = models.Member.objects.filter(registered_by_distributor__distributor_id = distributor).select_related('state', 'registered_by_distributor')
+#                 return self.get_list(request, upcs__unique_part_code=distributor)
+#             except Exception as ex:
+#                 logger.error('[search_sbom_for_vin]: {0}'.format(ex))
+#                 data = {'status':0 , 'message': 'mechanic id does not match'}
+#                 return HttpResponse(json.dumps(data), content_type="application/json")
+#         elif request.GET.get('distributor__distributor_id'):
+#             try:
+#                 distributor = get_data.get('distributor__distributor_id')
+#                 mechanics = models.Member.objects.filter(registered_by_distributor__distributor_id = distributor).select_related('state', 'registered_by_distributor')
+#                 return self.get_list(request, distributor__distributor_id=distributor)
+#             except Exception as ex:
+#                 logger.error('[search_sbom_for_vin]: {0}'.format(ex))
+#                 data = {'status':0 , 'message': 'mechanic id does not match'}
+#                 return HttpResponse(json.dumps(data), content_type="application/json") 
+    
+    
 
 
 class WelcomeKitResource(CustomBaseModelResource):

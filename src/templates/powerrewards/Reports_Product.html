@@ -243,7 +243,7 @@
 									download_apiURL = "";
 									function getDataFromAPI(apiURL) {
 										
-										download_apiURL = apiURL;
+										//download_apiURL = apiURL;
 										$.ajax({
 											url : apiURL,
 											type : 'GET',
@@ -423,11 +423,20 @@
 							         }
 
 							        $("#download_data").click(function(){
-							          // alert(download_apiURL)
 							          showLoading();
+							          var col=$('#select-native-3').val();
+				                var val=$('#search-1').val();
+				                console.log(col)
+				                 console.log(val)
+											          
+											   if((col.length > 0) || (val.length > 0)) {
+											        	  var dowlloadUrl = "/v1/accumulations/productfitment/?access_token="+access_token+"&"+col+"="+val;  
+											    } else {
+											        	  var dowlloadUrl = "/v1/accumulations/productfitment/?access_token="+access_token;
+											     }
 
 							          $.ajax({
-							           url : download_apiURL+'&limit=1000',
+							           url : dowlloadUrl,
 							           type : 'GET',
 							           dataType : 'json',
 							           success : function(data, success) {
@@ -453,8 +462,11 @@
 							         arrHeader.push("Mobile No");
 							         arrHeader.push("State");
 							         arrHeader.push("Distributor Code");
-							         arrHeader.push("Date of Redemption");
+							         arrHeader.push("Unique Code Detail");
+							         arrHeader.push("Part Number");
+							         arrHeader.push("Description");
 							         arrHeader.push("Point Redeemed");
+							         arrHeader.push("Date of Redemption");
 							         arrHeader.push("Gift Redeemed");
 
 							         mainArray.push(arrHeader)

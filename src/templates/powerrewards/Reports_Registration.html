@@ -240,7 +240,7 @@
 									download_apiURL = "";
 									function getDataFromAPI(apiURL) {
 											
-										download_apiURL = apiURL;
+										//download_apiURL = apiURL;
 										$.ajax({
 											url : apiURL,
 											type : 'GET',
@@ -408,13 +408,24 @@
 							        $("#download_data").click(function(){
 								          // alert(download_apiURL)
 								          showLoading();
+								          var col=$('#select-native-3').val();
+	                        var val=$('#search-1').val();
+								          
+								          if((col.length > 0) || (val.length > 0)) {
+								        	  var dowlloadUrl = "/v1/members/registeredmembers/?access_token="+access_token+"&"+col+"="+val;  
+								          } else {
+								        	  var dowlloadUrl = "/v1/members/registeredmembers/?access_token="+access_token;
+								          }
+								          
 
 								          $.ajax({
-								           url : download_apiURL+'&limit=10000',
+								           url : dowlloadUrl,
 								           type : 'GET',
 								           dataType : 'json',
 								           success : function(data, success) {
-								            createCSV(data)
+								           createCSV(data)
+								           console.log(data)
+								           hideLoading()
 								           }, error : function(e) {
 								            console.log(e)
 								            hideLoading();
