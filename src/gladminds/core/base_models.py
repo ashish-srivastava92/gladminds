@@ -1704,7 +1704,7 @@ class VisualisationUploadHistory(BaseModel):
     '''
     sku_code = models.CharField(max_length=20)
     bom_number = models.CharField(max_length=10)
-    plateId = models.CharField(max_length=50)
+    plate_id = models.CharField(max_length=50)
     eco_number = models.CharField(max_length=20, null=True)
     status = models.CharField(max_length=10, choices=constants.SAVE_PLATE_PART_STATUS, default='Pending')
 
@@ -1720,8 +1720,6 @@ class BOMVisualization(BaseModel):
     z_coordinate  = models.IntegerField(default=0)
     serial_number = models.IntegerField(default=0)
     part_href = models.CharField(max_length=200)
-    status =  models.CharField(max_length=25, choices=SBOM_STATUS,
-                              blank=True, null=True)
     published_date = models.DateTimeField(null=True, blank=True)
     remarks = models.CharField(max_length=500, null=True, blank=True)
     is_published = models.BooleanField(default=False)

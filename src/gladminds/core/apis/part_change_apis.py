@@ -238,13 +238,13 @@ class BOMPlatePartResource(CustomBaseModelResource):
             sku_code = post_data.get('skuCode') 
             bom_number = post_data.get('bomNumber') 
             plate_id = post_data.get('plateId') 
-            plate_image=request.FILES['plateImage']
-            plate_map=request.FILES['plateMap']
-            dashboard_image=request.FILES['dashboardImage']
             plate_name= post_data.get('plateName')
             eco_number = post_data.get('ecoNumber')
+            plate_image=request.FILES['plateImage'] 
+            plate_map=request.FILES['plateMap'] 
+            dashboard_image=request.FILES['dashboardImage'] 
             sbom_part_mapping=[]
-            upload_history_data = get_model('VisualisationUploadHistory')(sku_code=sku_code, bom_number=bom_number, plateId=plate_id, eco_number=eco_number)
+            upload_history_data = get_model('VisualisationUploadHistory')(sku_code=sku_code, bom_number=bom_number, plate_id=plate_id, eco_number=eco_number)
             upload_history_data.save()
             bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
                                                                 bom__bom_number=bom_number,
@@ -427,46 +427,37 @@ class BOMVisualizationResource(CustomBaseModelResource):
                                 status=400)
         history_id=kwargs['history_id']
         try:
-            visualisation_data = get_model('VisualisationUploadHistory').objects.filter(id=history_id).values_list('sku_code','bom_number','plateId','eco_number')
+            visualisation_data = get_model('VisualisationUploadHistory').objects.filter(id=history_id).values_list('sku_code','bom_number','plate_id','eco_number')
             (sku_code,bom_number,plate_id,eco_number) = visualisation_data[0]
             plate_data = get_model('BOMPlate').objects.get(plate_id=plate_id)
             plate_image = plate_data.plate_image
-            check_if_eco_implemented = False
+            validation_date = datetime.today()
             try:
                 check_if_eco_implemented = get_model('ECOImplementation').objects.get(eco_number=eco_number)
-                eco_implementation_date = check_if_eco_implemented.change_date
-                bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
-                                                                            bom__bom_number=bom_number,
-                                                                            plate__plate_id=plate_id,valid_from__gte=eco_implementation_date,
-                                                                            valid_to__lt=eco_implementation_date)
+                validation_date = check_if_eco_implemented.change_date
             except Exception as ex:
-                if not check_if_eco_implemented:
-                    current_date = datetime.today()
-                    bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
-                                                                            bom__bom_number=bom_number,
-                                                                            plate__plate_id=plate_id,valid_to__gte=current_date,
-                                                                            valid_from__lte=current_date)
-            bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset).values_list('bom__part__part_number','bom__quantity','x_coordinate','y_coordinate','z_coordinate',
-                                                                                                                                                      'part_href','serial_number','published_date',
-                                                                                                                                                      'remarks','is_published','is_approved')
+                LOG.info('[preview_sbom_details]: {0}'.format(ex))
+            bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
+                                                                    bom__bom_number=bom_number,
+                                                                    plate__plate_id=plate_id,valid_from__lte=validation_date,
+                                                                    valid_to__gt=validation_date)
+            bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset) 
+            plate_part_details =[]
+            
+            for data in bom_visualisation:
+                part_details = model_to_dict(data ,exclude=['id','bom'])
+                part_details["quantity"] = model_to_dict(data.bom ,fields=['quantity']).values()[0]
+                part_details["part_number"] = model_to_dict(data.bom.part ,fields=['part_number']).values()[0]
+                plate_part_details.append(part_details)
+            
             if not plate_image:
                 plate_image = "Image Not Available"
                 
-            output_data = {"plate_image":plate_image,'plate_part_details':[]}
-            plate_part_details =[]
-            list_of_keys = ['part_number','quantity','x-coordinate','y-coordinate','z-coordinate',
-                                                                   'part_href','serial_number','published_date',
-                                                                   'remarks','is_published',
-                                                                   'is_approved']
-            for part_details in bom_visualisation:
-                list_of_values = list(part_details[0:11])
-                plate_part_details.append (dict(zip(list_of_keys,list_of_values)))
-            
-            output_data["plate_part_details"]=plate_part_details
+            output_data = {"plate_image":plate_image,'plate_part_details': plate_part_details}
             return HttpResponse(json.dumps(output_data), content_type="application/json")            
         except Exception as ex:
-            LOG.info("[preview_sbom_details]:",ex)
-            return HttpResponse(json.dumps({"message" : "Exception -" + ex}),content_type="application/json", status=404)
+            LOG.info('[preview_sbom_details]: {0}'.format(ex))
+            return HttpResponse(json.dumps({"message" : 'Exception while fetching plate images : {0}'.format(ex)}),content_type="application/json", status=400)
                  
     def review_sbom_details(self, request, **kwargs):
         '''
@@ -524,7 +515,84 @@ class ECOReleaseResource(CustomBaseModelResource):
         authorization = Authorization()
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post']
+        
+    def prepend_urls(self):
+        return [
+                  url(r"^(?P<resource_name>%s)/approve_release/(?P<history_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('approve_release'), name="approve_release"),
+                  url(r"^(?P<resource_name>%s)/reject_release/(?P<history_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('reject_release'), name="reject_release"),
+               ]
     
+    def approve_release(self, request, **kwargs):
+        '''
+           Approve a ECO Release
+           Change status to approved 
+        '''
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        history_id = kwargs['history_id']
+        try:
+            visualisation_data = get_model('VisualisationUploadHistory').objects.get(id=history_id)
+            visualisation_data.status = 'Approved'
+            visualisation_data.save(update_fields=['status'])
+            sbom_details = get_model('VisualisationUploadHistory').objects.filter(id=history_id).values_list('sku_code','bom_number','plate_id','eco_number')
+            (sku_code,bom_number,plate_id,eco_number) = sbom_details[0]
+            validation_date = datetime.today()
+            try:
+                check_if_eco_implemented = get_model('ECOImplementation').objects.get(eco_number=eco_number)
+                validation_date = check_if_eco_implemented.change_date
+            except Exception as ex:
+                LOG.info('[approve_release]: {0}'.format(ex))
+            bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
+                                                                    bom__bom_number=bom_number,
+                                                                    plate__plate_id=plate_id,valid_from__lte=validation_date,
+                                                                    valid_to__gt=validation_date)
+            
+            bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset).update(is_published=True,is_approved=True)  
+            return HttpResponse(json.dumps({"message" : "Status of SBOM changed to approved ","status":visualisation_data.status}),content_type="application/json")           
+        except Exception as ex:
+            error_message='Error [approve_release]:  {0}'.format(ex)
+            LOG.info(error_message)
+            return HttpResponse(json.dumps({"message" : error_message}),content_type="application/json", status=400)
+        
+    
+    def reject_release(self, request, **kwargs):
+        '''
+           Reject a ECO Release
+           Change status to Rejected 
+        '''
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        history_id = kwargs['history_id']
+        try:
+            visualisation_data = get_model('VisualisationUploadHistory').objects.get(id=history_id)
+            visualisation_data.status = 'Rejected'
+            visualisation_data.save(update_fields=['status'])
+            sbom_details = get_model('VisualisationUploadHistory').objects.filter(id=history_id).values_list('sku_code','bom_number','plate_id','eco_number')
+            (sku_code,bom_number,plate_id,eco_number) = sbom_details[0]
+            validation_date = datetime.today()
+            try:
+                check_if_eco_implemented = get_model('ECOImplementation').objects.get(eco_number=eco_number)
+                validation_date = check_if_eco_implemented.change_date
+            except Exception as ex:
+                LOG.info('[reject_release]: {0}'.format(ex))
+            bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
+                                                                    bom__bom_number=bom_number,
+                                                                    plate__plate_id=plate_id,valid_from__lte=validation_date,
+                                                                    valid_to__gt=validation_date)
+            
+            bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset).update(is_approved=False) 
+            return HttpResponse(json.dumps({"message" : "Status of SBOM changed to rejected ","status":visualisation_data.status}),content_type="application/json") 
+        
+        except Exception as ex:
+            error_message='Error [reject_release]:  {0}'.format(ex)
+            LOG.info(error_message)
+            return HttpResponse(json.dumps({"message" : error_message}),content_type="application/json", status=400)
 
 class ECOImplementationResource(CustomBaseModelResource):
     '''

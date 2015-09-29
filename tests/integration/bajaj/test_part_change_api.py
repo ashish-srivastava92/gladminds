@@ -116,7 +116,74 @@ class PartChangeTest(BaseTestCase):
         eco_numbers = json.loads(resp.content)['data']
         self.assertEquals(len(eco_numbers), 1)
         self.assertEquals(eco_numbers[0],ECO_RELEASE["eco_number"])
-               
+        
+    def test_preview_of_sbom(self):
+        access_token = self.user_login()
+        brand=self.brand
+        brand.populate_upload_history_table(id=1,sku_code=112, bom_number="211760", plateId='44', eco_number='451')
+        uri = '/v1/eco-implementations/'
+        resp = self.post(uri, data=ECO_IMPLEMENTATION, access_token=access_token)
+        uri = '/v1/bom-visualizations/'
+        resp = self.post(uri, data=BOM_VISUALIZATION, access_token=access_token)
+        uri = '/v1/bom-visualizations/preview-sbom/1/?access_token='+access_token
+        resp = client.get(uri, content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        plate_details = json.loads(resp.content)['plate_part_details']
+        self.assertEquals(len(plate_details),1)
+        self.assertEquals(plate_details[0]["part_number"],BOM_VISUALIZATION["bom"]["part"]["part_number"])
+        
+    def test_preview_latest_sbom(self):
+        access_token = self.user_login()
+        brand=self.brand
+        brand.populate_upload_history_table(id=2,sku_code=112, bom_number="211760", plateId='44', eco_number='45')
+        uri = '/v1/eco-implementations/'
+        resp = self.post(uri, data=ECO_IMPLEMENTATION, access_token=access_token)
+        uri = '/v1/bom-visualizations/'
+        resp = self.post(uri, data=BOM_VISUALIZATION, access_token=access_token)
+        uri = '/v1/bom-visualizations/preview-sbom/2/?access_token='+access_token       
+        resp = client.get(uri, content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        plate_details = json.loads(resp.content)['plate_part_details']
+        self.assertEquals(len(plate_details),1)
+        self.assertEquals(plate_details[0]["part_number"],BOM_VISUALIZATION["bom"]["part"]["part_number"])
+        
+    def test_approve_release(self):
+        access_token = self.user_login()
+        brand=self.brand
+        brand.populate_upload_history_table(id=1,sku_code=112, bom_number="211760", plateId='44', eco_number='451')
+        uri = '/v1/eco-implementations/'
+        resp = self.post(uri, data=ECO_IMPLEMENTATION, access_token=access_token)
+        uri = '/v1/bom-visualizations/'
+        resp = self.post(uri, data=BOM_VISUALIZATION, access_token=access_token)
+        uri = '/v1/eco-releases/approve_release/1/?access_token='+access_token
+        resp = client.post(uri, data={}, content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        release_status = json.loads(resp.content)['status']
+        self.assertEquals(release_status,'Approved')
+        
+    def test_reject_release(self):
+        access_token = self.user_login()
+        brand=self.brand
+        brand.populate_upload_history_table(id=1,sku_code=112, bom_number="211760", plateId='44', eco_number='451')
+        uri = '/v1/eco-implementations/'
+        resp = self.post(uri, data=ECO_IMPLEMENTATION, access_token=access_token)
+        uri = '/v1/bom-visualizations/'
+        resp = self.post(uri, data=BOM_VISUALIZATION, access_token=access_token)
+        uri = '/v1/eco-releases/reject_release/1/?access_token='+access_token
+        resp = client.post(uri, data={}, content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        release_status = json.loads(resp.content)['status']
+        self.assertEquals(release_status,'Rejected')
+    
+    def test_get_pending_sbom(self):
+        access_token = self.user_login()
+        brand=self.brand
+        brand.populate_upload_history_table(id=1,sku_code=112, bom_number="211760", plateId='44', eco_number='451')
+        uri = '/v1/visualisation-upload-history/?access_token='+access_token+'&status=Pending'
+        resp = client.get(uri, content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        pending_sbom = json.loads(resp.content)['objects'][0]
+        self.assertEquals(pending_sbom["status"],'Pending')   
                
     def test_get_plates_image(self):
         access_token = self.user_login()

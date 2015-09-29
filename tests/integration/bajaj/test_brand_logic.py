@@ -45,7 +45,11 @@ class Brand(object):
     def send_sa_upate_mobile_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/bajaj/test_data/sa_update_mobile_feed.xml')
         self.post_feed(file_path)
-
+        
+    def populate_upload_history_table(self, id ,sku_code, bom_number, plateId, eco_number):
+        history_obj = models.VisualisationUploadHistory(id=id, sku_code=sku_code, bom_number=bom_number, plate_id=plateId, eco_number=eco_number)
+        history_obj.save()
+        
     def send_dispatch_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/bajaj/test_data/product_dispatch_feed.xml')
         self.post_feed(file_path)

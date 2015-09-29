@@ -774,12 +774,14 @@ BOM_PLATE_PART = {
                           "id": 3,
                           "plant": None,
                           "sku_code": 112,
-                          "valid_from": None,
-                          "valid_to": None
+                          "valid_from": '2014-05-12',
+                          "valid_to": '2016-08-12'
                           },
                   "change_number": "SCH01011210",
                   "change_number_to": "",
                   "item": "1",
+                  "valid_from":"2014-08-12",
+                  "valid_to":"2016-05-11",
                   "item_id": "1",
                   "modified_date": "2015-05-11T18:16:06",
                   "part": {
@@ -855,14 +857,18 @@ BOM_VISUALIZATION = {
                                      "id": 5,
                                      "plant": None,
                                      "sku_code": "112",
-                                     "valid_from": None,
-                                     "valid_to": None
+                                     "valid_from": "2016-05-12T12:18:45",
+                                     "valid_to": "2016-05-12T12:18:45"
                                      },
                              "change_number": "SCH01011210",
                              "change_number_to": "",
+                             "valid_from":"2014-08-12",
+                             "valid_to":"2016-05-11",
                              "id": 4701,
                              "item": "1",
                              "item_id": "1",
+                             "is_published":False,
+                             "is_approved":False,
                              "part": {
                                       "description": None,
                                       "id": 2487,
