@@ -412,9 +412,10 @@
 	                        var val=$('#search-1').val();
 								          
 								          if((col.length > 0) || (val.length > 0)) {
-								        	  var dowlloadUrl = "/v1/members/registeredmembers/?access_token="+access_token+"&"+col+"="+val;  
+								        	  //var dowlloadUrl = "/v1/members/registeredmembers/?access_token="+access_token+"&"+col+"="+val;
+								        	  var dowlloadUrl = "/v1/members/registeredmembers/?access_token=b80e91f8f9ae13d829f3fea1e4193ccdb06d12aa&key=member_id&value=1234"
 								          } else {
-								        	  var dowlloadUrl = "/v1/members/registeredmembers/?access_token="+access_token;
+								        	  var dowlloadUrl = "/v1/members/?access_token="+access_token;
 								          }
 								          
 

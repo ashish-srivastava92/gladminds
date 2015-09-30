@@ -23,6 +23,11 @@ from gladminds.core.auth_helper import Roles
 from gladminds.core.apis.user_apis import MemberResource, AreaSparesManagerResource, PartnerResource,UserResource
 from gladminds.core.apis.product_apis import ProductCatalogResource,\
     SparePartUPCResource
+from datetime import datetime, timedelta, date
+import csv
+import StringIO
+
+
 logger = logging.getLogger("gladminds")
 
 class LoyaltySLAResource(CustomBaseModelResource):
@@ -183,7 +188,7 @@ class AccumulationResource(CustomBaseModelResource):
         if filters is None:
             filters = {}
         orm_filters = super(AccumulationResource, self).build_filters(filters)
-        
+          
         if 'member_id' in filters:
             query = filters['member_id']
             qset = (
@@ -212,94 +217,104 @@ class AccumulationResource(CustomBaseModelResource):
                     part_numbers.append(upc.data['part_number'].data['id'])
         
         points = models.SparePartPoint.objects.filter(part_number__in=part_numbers).values('part_number__id', 'points')
-
         for object in data['objects']:
             if object.data.has_key('upcs'):
                 for upc in object.data['upcs']:
                     part_number = upc.data['part_number'].data['id']
                     upc_mapping = filter(lambda point: point['part_number__id']==part_number, points)
                     upc.data['part_number'].data['point'] = upc_mapping[0]['points']
-                    
         return data
     
-#     
-#     
-#     def prepend_urls(self):
-#         return [
-#               url(r"^(?P<resource_name>%s)/productfitment%s" % (self._meta.resource_name,trailing_slash()),
-#                                                      self.wrap_view('product_fitment'), name="product_fitment")
-#                ]
-#     
-#     def product_fitment(self, request):
-#         print "================="
-#         get_data=request.GET
-#         print "=============="
-#         if request.GET.get('member_id'):
-#             try:
-#                 member_id = get_data.get('member_id')
-#                 print "member_id===="
-#                 mechanics = models.AccumulationRequest.objects.filter(member__member_id = member_id).select_related('member')
-#                 return self.get_list(request, member_id=member_id)
-#             except Exception as ex:
-#                 logger.error('[search_sbom_for_vin]: {0}'.format(ex))
-#                 data = {'status':0 , 'message': 'mechanic id does not match'}
-#                 return HttpResponse(json.dumps(data), content_type="application/json")  
-#         elif request.GET.get('member__district'):
-#             try:
-#                 member__district = get_data.get('member__district')
-#                 mechanics = models.Member.objects.filter(district = member__district).select_related('state', 'registered_by_distributor')
-#                 return self.get_list(request, member__district=member__district)
-#             except Exception as ex:
-#                 logger.error('[search_sbom_for_vin]: {0}'.format(ex))
-#                 data = {'status':0 , 'message': 'mechanic id does not match'}
-#                 return HttpResponse(json.dumps(data), content_type="application/json")
-#         elif request.GET.get('member__phone_number__endswith'):
-#             try:
-#                 member_phone = get_data.get('member__phone_number__endswith')
-#                 mechanics = models.Member.objects.filter(phone_number = member_phone).select_related('state', 'registered_by_distributor')
-#                 return self.get_list(request, member__phone_number__endswith=member_phone)
-#             except Exception as ex:
-#                 logger.error('[search_sbom_for_vin]: {0}'.format(ex))
-#                 data = {'status':0 , 'message': 'mechanic id does not match'}
-#                 return HttpResponse(json.dumps(data), content_type="application/json")
-#         elif request.GET.get('member__state__state_name'):
-#             try:
-#                 state_name = get_data.get('member__state__state_name')
-#                 mechanics = models.Member.objects.filter(state__state_name = state_name).select_related('state', 'registered_by_distributor')
-#                 return self.get_list(request,member__state__state_name=state_name)
-#             except Exception as ex:
-#                 logger.error('[search_sbom_for_vin]: {0}'.format(ex))
-#                 data = {'status':0 , 'message': 'mechanic id does not match'}
-#                 return HttpResponse(json.dumps(data), content_type="application/json")
-#         elif request.GET.get('member__distributor__distributor_id'):
-#             try:
-#                 distributor = get_data.get('member__distributor__distributor_id')
-#                 mechanics = models.Member.objects.filter(registered_by_distributor__distributor_id = distributor).select_related('state', 'registered_by_distributor')
-#                 return self.get_list(request, member__distributor__distributor_id=distributor)
-#             except Exception as ex:
-#                 logger.error('[search_sbom_for_vin]: {0}'.format(ex))
-#                 data = {'status':0 , 'message': 'mechanic id does not match'}
-#                 return HttpResponse(json.dumps(data), content_type="application/json")
-#         elif request.GET.get('upcs__unique_part_code'):
-#             try:
-#                 distributor = get_data.get('upcs__unique_part_code')
-#                 mechanics = models.Member.objects.filter(registered_by_distributor__distributor_id = distributor).select_related('state', 'registered_by_distributor')
-#                 return self.get_list(request, upcs__unique_part_code=distributor)
-#             except Exception as ex:
-#                 logger.error('[search_sbom_for_vin]: {0}'.format(ex))
-#                 data = {'status':0 , 'message': 'mechanic id does not match'}
-#                 return HttpResponse(json.dumps(data), content_type="application/json")
-#         elif request.GET.get('distributor__distributor_id'):
-#             try:
-#                 distributor = get_data.get('distributor__distributor_id')
-#                 mechanics = models.Member.objects.filter(registered_by_distributor__distributor_id = distributor).select_related('state', 'registered_by_distributor')
-#                 return self.get_list(request, distributor__distributor_id=distributor)
-#             except Exception as ex:
-#                 logger.error('[search_sbom_for_vin]: {0}'.format(ex))
-#                 data = {'status':0 , 'message': 'mechanic id does not match'}
-#                 return HttpResponse(json.dumps(data), content_type="application/json") 
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/productfitment%s" % (self._meta.resource_name,
+                                                     trailing_slash()),
+                self.wrap_view('product_fitment'), name="product_fitment"),
+        ]
+
+    def product_fitment(self, request, **kwargs):
+        '''
+#           Get registered member details
+#           returns in csv format
+#       '''
+        filter_param = request.GET.get('key')
+        filter_value = request.GET.get('value')
+        applied_filter = {filter_param: filter_value}
+        try:
+            filter_data_list = self.get_list(request, **applied_filter)
+            csv_data = self.csv_convert_accumulation(filter_data_list)
+            print "csv_data is in product============",csv_data
+            #return self.csv_convert(filter_data_list)
+        except Exception as ex:
+            print (ex)
+            logger.error(ex)
+            data = {'status':0 , 'message': 'key does not exist'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
+
+    def csv_convert_accumulation(self, data):
+        json_response = json.loads(data.content)
+        file_name='accumulation_download' + datetime.now().strftime('%d_%m_%y')
+        headers=[]
+        headers=headers+constants.ACCUMULATION_API_HEADER
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(headers)
+        for item in json_response['objects']:
+            data=[]
+            for field in headers:
+                if field=='State':
+                    data.append(item['member']['state']['state_name'])
+                elif field=='Distributor Code':
+                        data.append(item['member']['distributor']['distributor_id'])
+                elif field== 'Mechanic Id':
+                    if item['member']["permanent_id"] != None:
+                        data.append(item['member']["permanent_id"])
+                    else:
+                        data.append(item['member']['mechanic_id'])
+                elif field== 'Mechanic Name': 
+                    data.append(item['member']['first_name'])  
+                elif field== 'District': 
+                    data.append(item['member']['district']) 
+                elif field== 'Mobile Number': 
+                    data.append(item['member']['phone_number']) 
+                elif field=='Unique Code Detail':
+                    unique_part_code = self.get_unique_part(item['upcs'])
+                    data.append(unique_part_code)
+                elif field== 'Point SMSed':
+                    upcs_data = self.get_upcs(item['upcs'])
+                    data.append(upcs_data)
+                elif field=='Date of SMSed':
+                    data.append(item['created_date'])
+            print "data========"
+            csvwriter.writerow(data)
+        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        return response
     
-    
+    def get_unique_part(self, upcs):
+        part_numbers =[]
+        for upc in upcs:
+            part_numbers.append(upc['unique_part_code'])
+            
+        part_code_list = models.SparePartUPC.objects.filter(unique_part_code__in=part_numbers).values('unique_part_code')
+        for upc in upcs:
+            part_number = upc['unique_part_code']
+            part_number_mapping = filter(lambda part:part['unique_part_code']==part_number, part_code_list)
+            upc['unique_part_code'] = part_number_mapping[0][part_code_list]
+        return upcs
+            
+    def get_upcs(self, upcs):
+        part_numbers = []
+        for upc in upcs:            
+            part_numbers.append(upc['part_number']['id'])
+        
+        points = models.SparePartPoint.objects.filter(part_number__in=part_numbers).values('part_number__id', 'points')
+        for upc in upcs:
+            part_number = upc['part_number']['id']
+            upc_mapping = filter(lambda point: point['part_number__id']==part_number, points)
+            upc['part_number']['point'] = upc_mapping[0]['points']
+        return upcs
+        
 
 
 class WelcomeKitResource(CustomBaseModelResource):
