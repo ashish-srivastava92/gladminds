@@ -243,8 +243,7 @@ class AccumulationResource(CustomBaseModelResource):
         try:
             filter_data_list = self.get_list(request, **applied_filter)
             csv_data = self.csv_convert_accumulation(filter_data_list)
-            print "csv_data is in product============",csv_data
-            #return self.csv_convert(filter_data_list)
+            return self.csv_convert(filter_data_list)
         except Exception as ex:
             print (ex)
             logger.error(ex)
@@ -285,7 +284,6 @@ class AccumulationResource(CustomBaseModelResource):
                     data.append(upcs_data)
                 elif field=='Date of SMSed':
                     data.append(item['created_date'])
-            print "data========"
             csvwriter.writerow(data)
         response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
