@@ -1227,22 +1227,31 @@ body .ui-tooltip {
 		{
 		  visibility: hidden;
 		  position: absolute;
-		  left: 300px;
+		  left: 250px;
 		  top: 120px;
 		  width:500px;
-		  height:240px;
+		  height:280px;
 		  text-align:center;
-		  border: thin;
-		  background-color: lightgray;
+		  border: 1px solid #000000;
+		  border-radius: 10px;
+		  background-color: #FFFFFF;
 		}
 .tbl_popup {
-	
-	border-spacing:15px;
-	border-collapse: seperate;
+	border-spacing:3px;
+	border-collapse: collapse;
 	margin-left:10px;
-	width:80%;
-	height:150px;
+	width:90%;
+	
 }
 #txt_rejected_reason {
-	width:200px;
+	width:450px;
 	height:100px;
+	text-align: justify;
+}
+.btn_popup {
+	background-color: lightgray;
+}
+.borderbox {
+	border:1px solid #EEEEEE;
+	color: lightgray;
+}

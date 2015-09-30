@@ -51,7 +51,7 @@ class DynamicSitesMiddleware(object):
     #Note its a hack for bajaj
         if BRAND.value == '127' or BRAND.value == '192':
             BRAND.value = 'bajaj'
-        
+        BRAND.value = 'bajaj'
     # hack for bajaj ends here      
         if BRAND.value == 'admin':
             request.urlconf = 'gladminds.urls'
@@ -61,7 +61,7 @@ class DynamicSitesMiddleware(object):
             request.urlconf = 'gladminds.{0}.urls'.format(BRAND.value)
         except:
             request.urlconf = 'gladminds.core.urls'
-
+        
     def process_response(self, request, response):
         if getattr(request, "urlconf", None):
             patch_vary_headers(response, ('Host',))

@@ -5,6 +5,7 @@ import datetime
 import operator
 import re
 import requests
+import csv
 
 from gladminds.core.utils import check_password
 from tastypie.http import HttpBadRequest
@@ -43,10 +44,11 @@ from gladminds.core.services.message_template import get_template
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
 from gladminds.core.auth import otp_handler
-from gladminds.bajaj.models import Retailer
+from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template import loader
 from django.template.context import Context
+from gladminds.core.managers.mail import send_email
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -750,8 +752,58 @@ def rejected_reason(request):
                                                  rejected_reason=rejected_reason)
     try:
         send_email(sender = constants.FROM_EMAIL_ADMIN, receiver = retailer_email, 
-                   subject = constants.ADD_DISTRIBUTOR_SUBJECT, body = '',
-                   message= constants.ADD_DISTRIBUTOR_MESSAGE)
+                   subject = constants.REJECT_RETAILER_SUBJECT, body = '',
+                   message = constants.REJECT_RETAILER_MESSAGE)
     except Exception as e:
-        print 'The exception is ',e
+        logger.error('Mail is not sent. Exception occurred', e)
     return HttpResponseRedirect('/admin/bajaj/retailer/')
+
+def handle_uploaded_file(uploaded_file):
+    '''
+    This method gets the uploaded file and writes it in the upload dir under the same name
+    '''
+    path = settings.UPLOAD_DIR + uploaded_file.name
+    with open(path, 'wb+') as destination:
+        for chunk in uploaded_file.chunks():
+            destination.write(chunk)
+    return path
+
+@login_required
+def bulk_upload_retailer(request):
+    '''
+    This method uploads retailers in bulk to the retailer model
+    '''
+    #upload the file to the upload_bajaj folder
+    full_path = handle_uploaded_file(request.FILES['bulk_upload_retailer'])
+    with open(full_path) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            #get the userprofile data and save it in userprofile model
+            userprofile = UserProfile()
+            userprofile.user = \
+                    User.objects.create_user(username = row['username'], password = row['password'])
+            userprofile.country = row['country']
+            userprofile.pincode = row['pincode']
+            userprofile.state = row['state']
+            userprofile.address = row['address']
+            userprofile.save()
+            #get the retailer data and save it in retailer model
+            retailer = Retailer()
+            retailer.retailer_name = row['retailer name']
+            retailer.retailer_town = row['retailer town']
+            retailer.billing_code = row['billing code']
+            retailer.territory = row['territory']
+            retailer.email = row['email']
+            retailer.mobile = row['mobile']
+            retailer.language = row['language']
+            retailer.user = UserProfile.objects.get(user__username = row['username'])
+            if DistributorStaff.objects.filter(user__user = request.user).exists():
+                distributorstaff = DistributorStaff.objects.get(user__user = request.user)
+                retailer.distributor = \
+                        Distributor.objects.get(id = distributorstaff.distributor.id)
+            else:
+                retailer.distributor = \
+                        Distributor.objects.get(user__user = request.user)
+            retailer.save()
+    return HttpResponseRedirect('/admin/bajaj/retailer/')
+    
