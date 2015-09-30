@@ -12,7 +12,7 @@ from integration.bajaj.test_brand_logic import Brand
 from integration.bajaj.test_system_logic import System
 from test_constants import BRAND_PRODUCT_RANGE, BRAND_VERTICAL, BOM_HEADER, \
     BOM_PLATE_PART, ECO_RELEASE, ECO_IMPLEMENTATION, BOM_VISUALIZATION, \
-    SBOM_REVIEW
+    SBOM_REVIEW, COMMENTS_FOR_RELEASE_REJECT
 
 from gladminds.core.auth_helper import Roles
 
@@ -121,10 +121,8 @@ class PartChangeTest(BaseTestCase):
         access_token = self.user_login()
         brand=self.brand
         brand.populate_upload_history_table(id=1,sku_code=112, bom_number="211760", plateId='44', eco_number='451')
-        uri = '/v1/eco-implementations/'
-        resp = self.post(uri, data=ECO_IMPLEMENTATION, access_token=access_token)
-        uri = '/v1/bom-visualizations/'
-        resp = self.post(uri, data=BOM_VISUALIZATION, access_token=access_token)
+        brand.populate_dependent_table('/v1/eco-implementations/',ECO_IMPLEMENTATION,access_token)
+        brand.populate_dependent_table('/v1/bom-visualizations/',BOM_VISUALIZATION,access_token)
         uri = '/v1/bom-visualizations/preview-sbom/1/?access_token='+access_token
         resp = client.get(uri, content_type='application/json')
         self.assertEquals(resp.status_code, 200)
@@ -136,10 +134,8 @@ class PartChangeTest(BaseTestCase):
         access_token = self.user_login()
         brand=self.brand
         brand.populate_upload_history_table(id=2,sku_code=112, bom_number="211760", plateId='44', eco_number='45')
-        uri = '/v1/eco-implementations/'
-        resp = self.post(uri, data=ECO_IMPLEMENTATION, access_token=access_token)
-        uri = '/v1/bom-visualizations/'
-        resp = self.post(uri, data=BOM_VISUALIZATION, access_token=access_token)
+        brand.populate_dependent_table('/v1/eco-implementations/',ECO_IMPLEMENTATION,access_token)
+        brand.populate_dependent_table('/v1/bom-visualizations/',BOM_VISUALIZATION,access_token)
         uri = '/v1/bom-visualizations/preview-sbom/2/?access_token='+access_token       
         resp = client.get(uri, content_type='application/json')
         self.assertEquals(resp.status_code, 200)
@@ -151,11 +147,9 @@ class PartChangeTest(BaseTestCase):
         access_token = self.user_login()
         brand=self.brand
         brand.populate_upload_history_table(id=1,sku_code=112, bom_number="211760", plateId='44', eco_number='451')
-        uri = '/v1/eco-implementations/'
-        resp = self.post(uri, data=ECO_IMPLEMENTATION, access_token=access_token)
-        uri = '/v1/bom-visualizations/'
-        resp = self.post(uri, data=BOM_VISUALIZATION, access_token=access_token)
-        uri = '/v1/eco-releases/approve_release/1/?access_token='+access_token
+        brand.populate_dependent_table('/v1/eco-implementations/',ECO_IMPLEMENTATION,access_token)
+        brand.populate_dependent_table('/v1/bom-visualizations/',BOM_VISUALIZATION,access_token)
+        uri = '/v1/eco-releases/approve-release/1/?access_token='+access_token
         resp = client.post(uri, data={}, content_type='application/json')
         self.assertEquals(resp.status_code, 200)
         release_status = json.loads(resp.content)['status']
@@ -165,15 +159,18 @@ class PartChangeTest(BaseTestCase):
         access_token = self.user_login()
         brand=self.brand
         brand.populate_upload_history_table(id=1,sku_code=112, bom_number="211760", plateId='44', eco_number='451')
-        uri = '/v1/eco-implementations/'
-        resp = self.post(uri, data=ECO_IMPLEMENTATION, access_token=access_token)
-        uri = '/v1/bom-visualizations/'
-        resp = self.post(uri, data=BOM_VISUALIZATION, access_token=access_token)
-        uri = '/v1/eco-releases/reject_release/1/?access_token='+access_token
-        resp = client.post(uri, data={}, content_type='application/json')
+        brand.populate_dependent_table('/v1/eco-implementations/',ECO_IMPLEMENTATION,access_token)
+        brand.populate_dependent_table('/v1/bom-visualizations/',BOM_VISUALIZATION,access_token)
+        uri = '/v1/eco-releases/reject-release/1/'
+        resp = self.post(uri, data=COMMENTS_FOR_RELEASE_REJECT, access_token=access_token)
         self.assertEquals(resp.status_code, 200)
         release_status = json.loads(resp.content)['status']
         self.assertEquals(release_status,'Rejected')
+        uri = '/v1/bom-visualizations/preview-sbom/1/?access_token='+access_token       
+        resp = client.get(uri, content_type='application/json')
+        comment = json.loads(resp.content)['comments']
+        self.assertEquals(comment[0][0],COMMENTS_FOR_RELEASE_REJECT["comment"])
+        
     
     def test_get_pending_sbom(self):
         access_token = self.user_login()

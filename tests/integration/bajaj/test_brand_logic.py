@@ -212,6 +212,10 @@ class Brand(object):
         response = client.post(uri, data=json.dumps(new_data), content_type='application/json')
         return response
     
+    def populate_dependent_table(self,uri,data,access_token):
+        uri = uri+'?access_token='+access_token
+        response = client.post(uri, data=json.dumps(data), content_type='application/json')
+    
     def register_regional_sales_manager(self,access_token, data):
         uri = '/v1/regional-sales-managers/register/?access_token='+access_token
         response = client.post(uri, data=json.dumps(data), content_type='application/json')

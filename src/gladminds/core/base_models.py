@@ -813,6 +813,16 @@ class Comment(BaseModel):
         abstract = True
         db_table = "gm_comment"
         verbose_name_plural = "Comment info"
+        
+class CommentsForEPC(BaseModel):
+    '''details of comments'''
+    user = models.CharField(max_length=20, null=False, blank=False)
+    comment = models.TextField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_commentsforepc"
+        verbose_name_plural = "Comments information"
 
 class FeedbackEvent(BaseModel):
     '''details of events for a feedback'''

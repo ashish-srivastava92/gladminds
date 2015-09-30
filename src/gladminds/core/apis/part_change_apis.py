@@ -453,7 +453,10 @@ class BOMVisualizationResource(CustomBaseModelResource):
             if not plate_image:
                 plate_image = "Image Not Available"
                 
-            output_data = {"plate_image":plate_image,'plate_part_details': plate_part_details}
+            comments_data = get_model('VisualisationUploadHistory').objects.get(id=history_id)
+            comment_list=[]
+            comments ={ comment_list.append((comments.comment,str(comments.created_date))) for comments in comments_data.comments.all()}
+            output_data = {"plate_image":plate_image,'plate_part_details': plate_part_details,'comments':comment_list}
             return HttpResponse(json.dumps(output_data), content_type="application/json")            
         except Exception as ex:
             LOG.info('[preview_sbom_details]: {0}'.format(ex))
@@ -518,12 +521,12 @@ class ECOReleaseResource(CustomBaseModelResource):
         
     def prepend_urls(self):
         return [
-                  url(r"^(?P<resource_name>%s)/approve_release/(?P<history_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                  url(r"^(?P<resource_name>%s)/approve-release/(?P<history_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
                      self.wrap_view('approve_release'), name="approve_release"),
-                  url(r"^(?P<resource_name>%s)/reject_release/(?P<history_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                  url(r"^(?P<resource_name>%s)/reject-release/(?P<history_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
                      self.wrap_view('reject_release'), name="reject_release"),
                ]
-    
+        
     def approve_release(self, request, **kwargs):
         '''
            Approve a ECO Release
@@ -534,6 +537,11 @@ class ECOReleaseResource(CustomBaseModelResource):
             return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
                                 status=400)
         history_id = kwargs['history_id']
+        try:
+            load = json.loads(request.body)
+            comment = load.get('comment')
+        except:
+            comment = None
         try:
             visualisation_data = get_model('VisualisationUploadHistory').objects.get(id=history_id)
             visualisation_data.status = 'Approved'
@@ -552,6 +560,11 @@ class ECOReleaseResource(CustomBaseModelResource):
                                                                     valid_to__gt=validation_date)
             
             bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset).update(is_published=True,is_approved=True)  
+            if comment:
+                comments_data = get_model('CommentsForEPC')(user=request.user,comment=comment)
+                comments_data.save()
+                visualisation_data.comments.add(comments_data)
+                visualisation_data.save()
             return HttpResponse(json.dumps({"message" : "Status of SBOM changed to approved ","status":visualisation_data.status}),content_type="application/json")           
         except Exception as ex:
             error_message='Error [approve_release]:  {0}'.format(ex)
@@ -570,9 +583,13 @@ class ECOReleaseResource(CustomBaseModelResource):
                                 status=400)
         history_id = kwargs['history_id']
         try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        comment = load.get('comment')
+        try:
             visualisation_data = get_model('VisualisationUploadHistory').objects.get(id=history_id)
             visualisation_data.status = 'Rejected'
-            visualisation_data.save(update_fields=['status'])
             sbom_details = get_model('VisualisationUploadHistory').objects.filter(id=history_id).values_list('sku_code','bom_number','plate_id','eco_number')
             (sku_code,bom_number,plate_id,eco_number) = sbom_details[0]
             validation_date = datetime.today()
@@ -587,8 +604,11 @@ class ECOReleaseResource(CustomBaseModelResource):
                                                                     valid_to__gt=validation_date)
             
             bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset).update(is_approved=False) 
+            comments_data = get_model('CommentsForEPC')(user=request.user,comment=comment)
+            comments_data.save()
+            visualisation_data.comments.add(comments_data)
+            visualisation_data.save()
             return HttpResponse(json.dumps({"message" : "Status of SBOM changed to rejected ","status":visualisation_data.status}),content_type="application/json") 
-        
         except Exception as ex:
             error_message='Error [reject_release]:  {0}'.format(ex)
             LOG.info(error_message)

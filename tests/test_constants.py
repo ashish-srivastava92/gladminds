@@ -14,6 +14,8 @@ GM_USER = {
                     }
            }
 
+COMMENTS_FOR_RELEASE_REJECT = {"comment":"Testing Comments"}
+
 CIRCLE_HEAD = {
     "name": "chtesting",
     "email": "chtesting@abc.com",
