@@ -13,6 +13,7 @@ TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
 EMAIL_DIR = os.path.join(TEMPLATE_DIR, "email")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 LOG_BASE_PATH = '/var/log/gladminds'
+UPLOAD_DIR = os.path.join(PROJECT_DIR, "upload_bajaj/")
 
 TIMEZONE = 'Asia/Kolkata'
 
@@ -170,11 +171,13 @@ SUIT_CONFIG = {
 MANAGERS = ADMINS
 
 DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
-DB_USER = os.environ.get('DB_USER', 'root')
-DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+#DB_USER = os.environ.get('DB_USER', 'root')
+DB_USER = os.environ.get('DB_USER', 'bajaj')
+#DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+DB_HOST = os.environ.get('DB_HOST', 'bajaj.chnnvvffqwop.us-east-1.rds.amazonaws.com')
 DB_PORT = os.environ.get('DB_PORT', '3306')
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
-
+#DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Bajajsfa')
 class GmApps():
     AFTERBUY = 'afterbuy'
     BAJAJ = 'bajaj'
@@ -199,7 +202,8 @@ DATABASE_APPS_MAPPING = {
 
 db_common = {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gm',
+        #'NAME': 'gm',
+        'NAME':'bajaj',
         'USER': DB_USER,
         'PASSWORD': DB_PASSWORD,
         'HOST': DB_HOST,
@@ -210,7 +214,8 @@ DATABASES = {}
 for brand in dir(GmApps):
     if not brand.startswith('__'):
         if getattr(GmApps,brand) in ['default']:
-            db_common.update({'NAME': 'gm'})
+            #db_common.update({'NAME': 'gm'})
+            db_common.update({'NAME': 'bajaj'})
         else:
             db_common.update({'NAME': getattr(GmApps,brand)})
         DATABASES[getattr(GmApps,brand)] = deepcopy(db_common)
@@ -373,23 +378,21 @@ ALL_APPS = (
 
 INSTALLED_APPS = ("longerusername",) + ALL_APPS
 
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        #'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        #'rest_framework.authentication.SessionAuthentication',
-        #rest_framework.authentication.BasicAuthentication',
-        # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-    ),
-}
-
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
-
 
 LOGIN_REDIRECT_URL = '/register/redirect'
 
 TASTYPIE_SWAGGER_API_MODULE = 'gladminds.urls.api_v1'
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.IsAuthenticated',
+#         ],
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'rest_framework.authentication.BasicAuthentication',            
+#         'rest_framework.authentication.SessionAuthentication',
+#     ),
+# }
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -734,6 +737,8 @@ DISTRIBUTOR_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/distrib
 BRAND_META = {
                "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/", 
                          "base_url": "local.bajaj.gladminds.co"},
+               "bajajsfa": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/", 
+                         "base_url": "local.bajaj.gladminds.co"},     
                "demo": {"title": "Daimler", "logo": "daimler/img/Daimler-logo.png", "tagline": "2015 Daimler AG",
                         "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
               "daimler": {"title": "Daimler", "logo": "daimler/img/Daimler-logo.png", "tagline": "2015 Daimler AG",

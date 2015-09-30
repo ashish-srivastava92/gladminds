@@ -1070,6 +1070,21 @@ class NationalSparesManager(BaseModel):
 
     def __unicode__(self):
         return self.name
+    
+#NSM model for SFA    
+class NationalSalesManager(BaseModel):
+    '''details of National Sales Manager'''
+    name = models.CharField(max_length=50, null=True, blank=True)
+    email = models.EmailField(max_length=50, null=True, blank=True)
+    phone_number = PhoneField(skip_check=True, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_nationalsalesmanager"
+        verbose_name_plural = "National Sales Managers"
+
+    def __unicode__(self):
+        return self.name
 
 class AreaSparesManager(BaseModel):
     '''details of Area Spares Manager'''
@@ -1105,7 +1120,7 @@ class Distributor(BaseModel):
 
 class DistributorStaff(BaseModel):
     '''details of DistributorStaff'''
-    distributor_staff_id = models.CharField(max_length=50)
+    distributor_staff_code = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
 
@@ -1119,7 +1134,7 @@ class DistributorStaff(BaseModel):
 
 class DistributorSalesRep(BaseModel):
     '''details of DistributorSalesRep'''
-    distributor_sales_id = models.CharField(max_length=50)
+    distributor_sales_code = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
 
@@ -1127,12 +1142,10 @@ class DistributorSalesRep(BaseModel):
         abstract = True
         db_table = "gm_distributorsalesrep"
         verbose_name_plural = "Distributor Sales Rep"
-
-    def __unicode__(self):
-        return self.distributor_sales_id
     
 class Retailer(BaseModel):
     '''details of Retailer'''
+    retailer_code = models.CharField(max_length=50)
     retailer_name = models.CharField(max_length=50)
     retailer_town = models.CharField(max_length=50, null=True, blank=True)
     is_active = models.BooleanField(default=True)
@@ -1142,22 +1155,55 @@ class Retailer(BaseModel):
         db_table = "gm_retailer"
         verbose_name_plural = "Retailers"
 
-    def __unicode__(self):
-        return self.retailer_name
- 
-class DSRWrokAllocation(BaseModel):
-    '''details of DSRWrokAllocation'''
+class DSRWorkAllocation(BaseModel):
+    '''details of DSRWorkAllocation'''
     status = models.CharField(max_length=12, choices=constants.WORKFLOW_STATUS, default='Open')
 
     class Meta:
         abstract = True
         db_table = "gm_dsrworkallocation"
         verbose_name_plural = "DSR Work Allocation"
-
-    def __unicode__(self):
-        return self.retailer_name   
-
-
+        
+class PartModels(BaseModel):
+    ''' details of parts model '''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_partmodels"
+        verbose_name_plural = "Part Models"
+        
+class Categories(BaseModel):
+    ''' details of categories '''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_categories"
+        verbose_name_plural = "categories"
+        
+class SubCategories(BaseModel):
+    ''' details of categories '''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_subcategories"
+        verbose_name_plural = "subcategories"
+        
+class PartPricing(BaseModel):
+    ''' details of spare parts and pricing'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_partpricing"
+        verbose_name_plural = "Part Pricing"
+        
+class OrderPart(BaseModel):
+    ''' details of ordering spare parts by dsr or retailer'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_orderpart"
+        verbose_name_plural = "Order Part"
+        
 class Member(BaseModel):
     '''details of Member'''
     mechanic_id = models.CharField(max_length=50, unique=True, default=generate_mech_id)
