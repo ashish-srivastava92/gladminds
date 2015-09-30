@@ -525,7 +525,34 @@ class ECOReleaseResource(CustomBaseModelResource):
                      self.wrap_view('approve_release'), name="approve_release"),
                   url(r"^(?P<resource_name>%s)/reject-release/(?P<history_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
                      self.wrap_view('reject_release'), name="reject_release"),
+                  url(r"^(?P<resource_name>%s)/change-status/(?P<eco_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('change_status_of_eco_release'), name="change_status_of_eco_release"),
                ]
+        
+    def change_status_of_eco_release(self, request, **kwargs):
+        '''
+           Change status for ECO Release
+        '''
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        eco_id = kwargs['eco_id']
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        status = load.get("status")
+        try:
+            eco_release_data = get_model('ECORelease').objects.get(id=eco_id)
+            eco_release_data.status = status
+            eco_release_data.save(update_fields=['status'])
+            return HttpResponse(json.dumps({"message" : "Status changed successfully","status":1}),content_type="application/json")
+        except Exception as ex:
+            error_message='Error [change_status_of_eco_release]:  {0}'.format(ex)
+            LOG.info(error_message)
+            return HttpResponse(json.dumps({"message" : error_message}),content_type="application/json", status=400)
+        
         
     def approve_release(self, request, **kwargs):
         '''
@@ -551,6 +578,8 @@ class ECOReleaseResource(CustomBaseModelResource):
             validation_date = datetime.today()
             try:
                 check_if_eco_implemented = get_model('ECOImplementation').objects.get(eco_number=eco_number)
+                check_if_eco_implemented.status = 'Approved'
+                check_if_eco_implemented.save(update_fields=['status'])
                 validation_date = check_if_eco_implemented.change_date
             except Exception as ex:
                 LOG.info('[approve_release]: {0}'.format(ex))
@@ -595,6 +624,8 @@ class ECOReleaseResource(CustomBaseModelResource):
             validation_date = datetime.today()
             try:
                 check_if_eco_implemented = get_model('ECOImplementation').objects.get(eco_number=eco_number)
+                check_if_eco_implemented.status = 'Rejected'
+                check_if_eco_implemented.save(update_fields=['status'])
                 validation_date = check_if_eco_implemented.change_date
             except Exception as ex:
                 LOG.info('[reject_release]: {0}'.format(ex))
@@ -602,7 +633,6 @@ class ECOReleaseResource(CustomBaseModelResource):
                                                                     bom__bom_number=bom_number,
                                                                     plate__plate_id=plate_id,valid_from__lte=validation_date,
                                                                     valid_to__gt=validation_date)
-            
             bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset).update(is_approved=False) 
             comments_data = get_model('CommentsForEPC')(user=request.user,comment=comment)
             comments_data.save()
@@ -630,7 +660,33 @@ class ECOImplementationResource(CustomBaseModelResource):
         return [
                   url(r"^(?P<resource_name>%s)/skucode/(?P<sku_code>\w+)%s" % (self._meta.resource_name,trailing_slash()),
                      self.wrap_view('get_eco_number_for_sku_code'), name="get_eco_number_for_sku_code"),
+                  url(r"^(?P<resource_name>%s)/change-status/(?P<eco_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('change_status_of_eco_implementation'), name="change_status_of_eco_implementation"),
                ]
+    
+    def change_status_of_eco_implementation(self, request, **kwargs):
+        '''
+           Change status for ECO Implementation
+        '''
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        eco_id = kwargs['eco_id']
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        status = load.get("status")
+        try:
+            eco_release_data = get_model('ECOImplementation').objects.get(id=eco_id)
+            eco_release_data.status = status
+            eco_release_data.save(update_fields=['status'])
+            return HttpResponse(json.dumps({"message" : "Status changed successfully","status":1}),content_type="application/json")
+        except Exception as ex:
+            error_message='Error [change_status_of_eco_implementation]:  {0}'.format(ex)
+            LOG.info(error_message)
+            return HttpResponse(json.dumps({"message" : error_message}),content_type="application/json", status=400)
         
     def get_eco_number_for_sku_code(self, request, **kwargs):
         '''

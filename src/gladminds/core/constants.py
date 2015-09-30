@@ -78,6 +78,20 @@ FEEDBACK_STATUS_LEVEL_TWO = (
         ('Pending', 'Pending')
     )
 
+ECO_RELEASE_STATUS = (
+                      ('Open', 'Open'),
+                      ('Closed', 'Closed'),
+                      ('Under Review', 'Under Review'),
+    )
+
+ECO_IMPLEMENTATION_STATUS = (
+                      ('Open', 'Open'),
+                      ('Closed', 'Closed'),
+                      ('Rejected', 'Rejected'),
+                      ('Approved', 'Approved'),
+                      ('Under Review', 'Under Review'),
+    )
+
 
 PRIORITY = (
         ('Low', 'Low'),

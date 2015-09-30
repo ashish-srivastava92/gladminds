@@ -1560,6 +1560,7 @@ class ECORelease(BaseModel):
     serviceability = models.CharField(max_length=20, null=True, blank=True)
     interchangebility = models.CharField(max_length=20, null=True, blank=True)
     reason_for_change = models.CharField(max_length=90, null=True, blank=True)
+    status = models.CharField(max_length=10, choices=constants.ECO_RELEASE_STATUS, default='Open')
 
     class Meta:
         abstract = True
@@ -1585,6 +1586,7 @@ class ECOImplementation(BaseModel):
     eco_number = models.CharField(max_length=20, null=True, blank=True)
     reason_code = models.CharField(max_length=20, null=True, blank=True)
     remarks = models.CharField(max_length=20, null=True, blank=True)
+    status = models.CharField(max_length=10, choices=constants.ECO_IMPLEMENTATION_STATUS, default='Open')
     
     class Meta:
         abstract = True
