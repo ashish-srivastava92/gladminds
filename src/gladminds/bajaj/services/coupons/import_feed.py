@@ -548,9 +548,9 @@ class ASCAndServiceAdvisorFeed(BaseFeed):
         if list_active_mobile:
             return True
         return False
+
     
 class ContainerTrackerFeed(BaseFeed):
-
     def import_data(self):
         for tracker_obj in self.data_source:
             try:
@@ -562,9 +562,12 @@ class ContainerTrackerFeed(BaseFeed):
                     container_indent_obj=models.ContainerIndent.objects.get(indent_num=tracker_obj['zib_indent_num'])
                 except ObjectDoesNotExist as done:
                     container_indent_obj=models.ContainerIndent(indent_num=tracker_obj['zib_indent_num'],
-                                                                no_of_containers=int(tracker_obj['no_of_containers']))
+                                                                no_of_containers=int(tracker_obj['no_of_containers']),transporter_id =str(int(tracker_obj['transporter_id'])))
                     container_indent_obj.save(using=settings.BRAND)
-                
+                    
+  
+  
+    
                 if tracker_obj['lr_number']:
                     try:
                         container_lr_obj = models.ContainerLR.objects.get(zib_indent_num=container_indent_obj,
