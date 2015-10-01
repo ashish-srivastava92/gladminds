@@ -560,12 +560,12 @@ class ContainerTrackerFeed(BaseFeed):
                                                                         name=tracker_obj['tranporter_name'])
                 try:
                     container_indent_obj=models.ContainerIndent.objects.get(indent_num=tracker_obj['zib_indent_num'])
-                    if container_indent_obj.transporter_id != str(int(tracker_obj['transporter_id'])):
-                        container_indent_obj=models.ContainerIndent.objects.filter(indent_num=tracker_obj['zib_indent_num']).update(str(int(tracker_obj['transporter_id'])))
-
+                    if container_indent_obj.transporter_id != tracker_obj['transporter_id']:    
+                        container_indent_obj.transporter_id=tracker_obj['transporter_id'] 
+                        container_indent_obj.save()
                 except ObjectDoesNotExist as done:
                     container_indent_obj=models.ContainerIndent(indent_num=tracker_obj['zib_indent_num'],
-                                                                no_of_containers=int(tracker_obj['no_of_containers']),transporter_id =str(int(tracker_obj['transporter_id'])))
+                                                                no_of_containers=int(tracker_obj['no_of_containers']),transporter_id= transporter_data)
                     container_indent_obj.save(using=settings.BRAND)
                     
                 if tracker_obj['lr_number']:
