@@ -560,14 +560,14 @@ class ContainerTrackerFeed(BaseFeed):
                                                                         name=tracker_obj['tranporter_name'])
                 try:
                     container_indent_obj=models.ContainerIndent.objects.get(indent_num=tracker_obj['zib_indent_num'])
+                    if container_indent_obj.transporter_id != str(int(tracker_obj['transporter_id'])):
+                        container_indent_obj=models.ContainerIndent.objects.filter(indent_num=tracker_obj['zib_indent_num']).update(str(int(tracker_obj['transporter_id'])))
+
                 except ObjectDoesNotExist as done:
                     container_indent_obj=models.ContainerIndent(indent_num=tracker_obj['zib_indent_num'],
                                                                 no_of_containers=int(tracker_obj['no_of_containers']),transporter_id =str(int(tracker_obj['transporter_id'])))
                     container_indent_obj.save(using=settings.BRAND)
                     
-  
-  
-    
                 if tracker_obj['lr_number']:
                     try:
                         container_lr_obj = models.ContainerLR.objects.get(zib_indent_num=container_indent_obj,
@@ -622,6 +622,7 @@ class ContainerTrackerFeed(BaseFeed):
                 self.feed_remark.fail_remarks(ex)
         
         return self.feed_remark
+
 
 def format_date(date):
     if date == "0000-00-00" or not date:
