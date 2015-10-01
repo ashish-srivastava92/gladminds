@@ -13,8 +13,9 @@ GM_USER = {
                             }
                     }
            }
+CHANGE_STATUS_DATA = {"status":"Approved"}
 
-COMMENTS_FOR_RELEASE_REJECT = {"comment":"Testing Comments"}
+COMMENTS_FOR_RELEASE_REJECT = {"comment":"Testing Comments","status":"Rejected"}
 
 CIRCLE_HEAD = {
     "name": "chtesting",

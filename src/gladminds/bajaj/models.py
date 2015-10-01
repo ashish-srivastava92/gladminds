@@ -128,9 +128,9 @@ class BrandDepartment(base_models.BrandDepartment):
         app_label = _APP_NAME
         verbose_name_plural = "Brand Department"
         
-class CommentsForEPC(base_models.CommentsForEPC):
+class EpcCommentThread(base_models.EpcCommentThread):
     
-    class Meta(base_models.CommentsForEPC.Meta):
+    class Meta(base_models.EpcCommentThread.Meta):
         app_label = _APP_NAME
         verbose_name_plural = "Comments For EPC"
 
@@ -650,7 +650,7 @@ class BOMPlatePart(base_models.BOMPlatePart):
 class VisualisationUploadHistory(base_models.VisualisationUploadHistory):
     '''Upload history with status'''
 
-    comments = models.ManyToManyField(CommentsForEPC)
+    comments = models.ManyToManyField(EpcCommentThread)
     class Meta(base_models.VisualisationUploadHistory.Meta):
         app_label = _APP_NAME
 

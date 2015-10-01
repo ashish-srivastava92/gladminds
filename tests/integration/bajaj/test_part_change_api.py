@@ -12,7 +12,7 @@ from integration.bajaj.test_brand_logic import Brand
 from integration.bajaj.test_system_logic import System
 from test_constants import BRAND_PRODUCT_RANGE, BRAND_VERTICAL, BOM_HEADER, \
     BOM_PLATE_PART, ECO_RELEASE, ECO_IMPLEMENTATION, BOM_VISUALIZATION, \
-    SBOM_REVIEW, COMMENTS_FOR_RELEASE_REJECT
+    SBOM_REVIEW, COMMENTS_FOR_RELEASE_REJECT, CHANGE_STATUS_DATA 
 
 from gladminds.core.auth_helper import Roles
 
@@ -149,8 +149,8 @@ class PartChangeTest(BaseTestCase):
         brand.populate_upload_history_table(id=1,sku_code=112, bom_number="211760", plateId='44', eco_number='451')
         brand.populate_dependent_table('/v1/eco-implementations/',ECO_IMPLEMENTATION,access_token)
         brand.populate_dependent_table('/v1/bom-visualizations/',BOM_VISUALIZATION,access_token)
-        uri = '/v1/eco-releases/approve-release/1/?access_token='+access_token
-        resp = client.post(uri, data={}, content_type='application/json')
+        uri = '/v1/bom-visualizations/change-status/1/'
+        resp = self.post(uri, data=CHANGE_STATUS_DATA , access_token=access_token)
         self.assertEquals(resp.status_code, 200)
         release_status = json.loads(resp.content)['status']
         self.assertEquals(release_status,'Approved')
@@ -161,7 +161,7 @@ class PartChangeTest(BaseTestCase):
         brand.populate_upload_history_table(id=1,sku_code=112, bom_number="211760", plateId='44', eco_number='451')
         brand.populate_dependent_table('/v1/eco-implementations/',ECO_IMPLEMENTATION,access_token)
         brand.populate_dependent_table('/v1/bom-visualizations/',BOM_VISUALIZATION,access_token)
-        uri = '/v1/eco-releases/reject-release/1/'
+        uri = '/v1/bom-visualizations/change-status/1/'
         resp = self.post(uri, data=COMMENTS_FOR_RELEASE_REJECT, access_token=access_token)
         self.assertEquals(resp.status_code, 200)
         release_status = json.loads(resp.content)['status']
