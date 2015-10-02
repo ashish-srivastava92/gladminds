@@ -171,13 +171,17 @@ SUIT_CONFIG = {
 MANAGERS = ADMINS
 
 DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
-#DB_USER = os.environ.get('DB_USER', 'root')
-DB_USER = os.environ.get('DB_USER', 'bajaj')
-#DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
-DB_HOST = os.environ.get('DB_HOST', 'bajaj.chnnvvffqwop.us-east-1.rds.amazonaws.com')
+
+DB_USER = os.environ.get('DB_USER', 'root')
+DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
+
+# DB_USER = os.environ.get('DB_USER', 'bajaj')
+# DB_HOST = os.environ.get('DB_HOST', 'bajaj.chnnvvffqwop.us-east-1.rds.amazonaws.com')
+# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Bajajsfa')
+
 DB_PORT = os.environ.get('DB_PORT', '3306')
-#DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Bajajsfa')
+
 class GmApps():
     AFTERBUY = 'afterbuy'
     BAJAJ = 'bajaj'
@@ -202,8 +206,8 @@ DATABASE_APPS_MAPPING = {
 
 db_common = {
         'ENGINE': 'django.db.backends.mysql',
-        #'NAME': 'gm',
-        'NAME':'bajaj',
+        'NAME': 'gm',
+        #'NAME':'bajaj',
         'USER': DB_USER,
         'PASSWORD': DB_PASSWORD,
         'HOST': DB_HOST,
@@ -214,8 +218,8 @@ DATABASES = {}
 for brand in dir(GmApps):
     if not brand.startswith('__'):
         if getattr(GmApps,brand) in ['default']:
-            #db_common.update({'NAME': 'gm'})
-            db_common.update({'NAME': 'bajaj'})
+            db_common.update({'NAME': 'gm'})
+            #db_common.update({'NAME': 'bajaj'})
         else:
             db_common.update({'NAME': getattr(GmApps,brand)})
         DATABASES[getattr(GmApps,brand)] = deepcopy(db_common)
