@@ -565,9 +565,8 @@ class ContainerTrackerFeed(BaseFeed):
                         container_indent_obj.save()
                 except ObjectDoesNotExist as done:
                     container_indent_obj=models.ContainerIndent(indent_num=tracker_obj['zib_indent_num'],
-                                                                no_of_containers=int(tracker_obj['no_of_containers']),transporter_id= transporter_data)
+                                                                no_of_containers=int(tracker_obj['no_of_containers']),transporter= transporter_data)
                     container_indent_obj.save(using=settings.BRAND)
-                    
                 if tracker_obj['lr_number']:
                     try:
                         container_lr_obj = models.ContainerLR.objects.get(zib_indent_num=container_indent_obj,
