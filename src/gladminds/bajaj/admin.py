@@ -496,12 +496,12 @@ class DistributorAdmin(GmModelAdmin):
     exclude = ['sent_to_sap']
     
     def save_model(self, request, obj, form, Change):
-        try:
-            distributor = Distributor.objects.filter()[0]
-            obj.distributor_id = str(int(distributor.distributor_id) + \
-                                    constants.DISTRIBUTOR_SEQUENCE_INCREMENT)
-        except:
-            obj.distributor_id = str(constants.DISTRIBUTOR_SEQUENCE)
+        # try:
+        #     distributor = Distributor.objects.filter()[0]
+        #     obj.distributor_id = str(int(distributor.distributor_id) + \
+        #                             constants.DISTRIBUTOR_SEQUENCE_INCREMENT)
+        # except:
+        #     obj.distributor_id = str(constants.DISTRIBUTOR_SEQUENCE)
         super(DistributorAdmin, self).save_model(request, obj, form, Change)
         try:
             send_email(sender = constants.FROM_EMAIL_ADMIN, receiver = obj.email, 
@@ -704,12 +704,12 @@ class RetailerAdmin(GmModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.approved = constants.STATUS['WAITING_FOR_APPROVAL']
         #get latest retailer code, add increment and assign it, else assign the sequence first number
-        try:
-            retailer = Retailer.objects.filter()[0]
-            obj.retailer_code = str(int(retailer.retailer_code) + \
-                                    constants.RETAILER_SEQUENCE_INCREMENT)
-        except:
-            obj.retailer_code = str(constants.RETAILER_SEQUENCE)
+        # try:
+        #     retailer = Retailer.objects.filter()[0]
+        #     obj.retailer_code = str(int(retailer.retailer_code) + \
+        #                             constants.RETAILER_SEQUENCE_INCREMENT)
+        # except:
+        #     obj.retailer_code = str(constants.RETAILER_SEQUENCE)
         # if dsr is added by distributorstaff, then show the concerned distributor of distributorstaff
         # else show the distributor
         if DistributorStaff.objects.filter(user__user = request.user).exists():
@@ -717,7 +717,7 @@ class RetailerAdmin(GmModelAdmin):
             obj.distributor = Distributor.objects.get(id = distributorstaff.distributor.id)
         else:
             obj.distributor = Distributor.objects.get(user__user = request.user)
-        #super(RetailerAdmin, self).save_model(request, obj, form, change)
+        super(RetailerAdmin, self).save_model(request, obj, form, change)
     
     def status(self, obj):
         #Added retailer by distributor/distributorstaff must be approved by the ASM/admin
@@ -1296,7 +1296,7 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("SubCategories", brand), SubCategoriesAdmin)
     brand_admin.register(get_model("PartPricing", brand), PartPricingAdmin)
     brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
-    brand_admin.register(get_model("DSRWorkAllocation", brand), DSRWorkAllocationAdmin)
+    #brand_admin.register(get_model("DSRWorkAllocation", brand), DSRWorkAllocationAdmin)
     
     brand_admin.register(get_model("NationalSalesManager", brand), NationalSalesManagerAdmin)
     brand_admin.register(get_model("AreaSalesManager", brand), AreaSalesManagerAdmin)
