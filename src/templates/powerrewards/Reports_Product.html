@@ -453,9 +453,11 @@
 							         arrHeader.push("Mobile No");
 							         arrHeader.push("State");
 							         arrHeader.push("Distributor Code");
-							         arrHeader.push("Date of Redemption");
-							         arrHeader.push("Point Redeemed");
-							         arrHeader.push("Gift Redeemed");
+							         arrHeader.push("Unique Code Detail");
+							         arrHeader.push("Part No");
+							         arrHeader.push("Description");
+							         arrHeader.push("Point SMSed");
+							         arrHeader.push("Date of SMSed");
 
 							         mainArray.push(arrHeader)
 
@@ -520,7 +522,7 @@
 								             var point = "";
 								            }
 
-								            if((unique_part_code = csvData.objects[index].upcs[j].unique_part_code != null) || (unique_part_code = csvData.objects[index].upcs[j].unique_part_code != undefined)) {
+								            if((csvData.objects[index].upcs[j].unique_part_code != null) || (csvData.objects[index].upcs[j].unique_part_code != undefined)) {
 								             var unique_part_code = csvData.objects[index].upcs[j].unique_part_code;
 								            } else {
 								             var unique_part_code = "";
@@ -543,7 +545,7 @@
 												{ 
 
 
-													if(val==part[j]["unique_part_code"]){
+													if(val==unique_part_code){
 														
 														subArray.push(mechanic_id);
 											           subArray.push(mechanic_name);
@@ -564,7 +566,7 @@
 											           subArray=[]
 													}
 
-													if(val==part[j]["part_number"]["part_number"]){
+													if(val==part_number){
 														
 														subArray.push(mechanic_id);
 											           subArray.push(mechanic_name);
@@ -620,7 +622,7 @@
 							           link = document.createElement("a");
 							           link.setAttribute("href", encodedUri);
 							           // link.setAttribute("download", "my_arrCSV_data.csv");
-							           link.download = "Reports_Redemption.csv";
+							           link.download = "Reports_Product_Fitment.csv";
 							          
 							          }); 
 

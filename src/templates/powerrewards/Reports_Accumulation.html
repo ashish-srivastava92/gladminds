@@ -494,7 +494,7 @@
 									             var point = "";
 									            }
 
-									            if((unique_part_code = csvData.objects[index].upcs[j].unique_part_code != null) || (unique_part_code = csvData.objects[index].upcs[j].unique_part_code != undefined)) {
+									            if((csvData.objects[index].upcs[j].unique_part_code != null) || (csvData.objects[index].upcs[j].unique_part_code != undefined)) {
 									             var unique_part_code = csvData.objects[index].upcs[j].unique_part_code;
 									            } else {
 									             var unique_part_code = "";
@@ -504,7 +504,7 @@
 													{ 
 
 
-														if(val==part[j]["unique_part_code"]){
+														if(val==unique_part_code){
 															
 															subArray.push(mechanic_id);
 												           subArray.push(mechanic_name);
