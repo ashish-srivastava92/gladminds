@@ -7,20 +7,20 @@ import json, datetime
 from django.utils import simplejson
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-
-# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-# from rest_framework.permissions import IsAuthenticated
-# from rest_framework_jwt.views import obtain_jwt_token
-# from rest_framework.response import Response
 from django.http import HttpResponse
-# from rest_framework.decorators import api_view, authentication_classes, permission_classes
-# from rest_framework_jwt.settings import api_settings
+
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_jwt.views import obtain_jwt_token
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework_jwt.settings import api_settings
 
 from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
                             SubCategories, PartPricing, OrderPart
 from gladminds.core import constants
 
-#@api_view(['POST'])
+@api_view(['POST'])
 def authentication(request):
     '''
     This method is an api gets username and password, authenticates it and sends
@@ -44,31 +44,31 @@ def authentication(request):
                     login_type = "retailer"
                     role_id = authenticated_user[0].retailer_code
                 else:
-                    # return Response({'message': 'you are not \
-                    #              a DSR or retailer. Please contact your distributor', 'status':0})
-                    return HttpResponse(json.dumps({'message': 'you are not \
-                                 a DSR or retailer. Please contact your distributor', 'status':0}), \
-                                        content_type="application/json")
+                    return Response({'message': 'you are not \
+                                  a DSR or retailer. Please contact your distributor', 'status':0})
+                    # return HttpResponse(json.dumps({'message': 'you are not \
+                    #              a DSR or retailer. Please contact your distributor', 'status':0}), \
+                    #                     content_type="application/json")
             # now, he is a valid user, generate token
-            # jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
-            # jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
-            # payload = jwt_payload_handler(user)
-            # data = {"Id": role_id,
-            #          "token": jwt_encode_handler(payload), "status":1, "login_type":login_type}
+            jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+            jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+            payload = jwt_payload_handler(user)
             data = {"Id": role_id,
-                   "status":1, "login_type":login_type}
-            # return Response(data, content_type="application/json")
-            return HttpResponse(json.dumps(data), content_type="application/json")
+                      "token": jwt_encode_handler(payload), "status":1, "login_type":login_type}
+            #data = {"Id": role_id,
+             #      "status":1, "login_type":login_type}
+            return Response(data, content_type="application/json")
+            #return HttpResponse(json.dumps(data), content_type="application/json")
         else:
-         # return Response({'message': 'you are not active. Please contact your distributor', 'status':0})
-         return HttpResponse(json.dumps({'message': 'you are not active. \
-                        Please contact your distributor', 'status':0}), content_type="application/json")   
+            return Response({'message': 'you are not active. Please contact your distributor', 'status':0})
+         #return HttpResponse(json.dumps({'message': 'you are not active. \
+          #              Please contact your distributor', 'status':0}), content_type="application/json")   
     else:
-        # return Response({'message': 'you are not a registered user', 'status':0})
-        return HttpResponse(json.dumps({'message': 'you are not a registered user', 'status':0}), \
-                        content_type="application/json")
+        return Response({'message': 'you are not a registered user', 'status':0})
+        #return HttpResponse(json.dumps({'message': 'you are not a registered user', 'status':0}), \
+                        #content_type="application/json")
     
-#@api_view(['GET'])
+@api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
 def get_retailers(request, dsr_id):
@@ -90,9 +90,9 @@ def get_retailers(request, dsr_id):
         retailer_dict.update({"latitude":retailer.latitude})
         retailer_dict.update({"longitude":retailer.longitude})
         retailer_list.append(retailer_dict)
-    return HttpResponse(json.dumps(retailer_list), content_type="application/json")
+    return Response(retailer_list)
 
-#@api_view(['GET'])
+@api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
 def get_parts(request):
@@ -114,9 +114,9 @@ def get_parts(request):
         parts_dict.update({"subcategory":part.subcategory.subcategory_name})
         parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
-    return HttpResponse(json.dumps(parts_list), content_type="application/json") 
+    return Response(parts_list) 
     
-#@api_view(['POST'])
+@api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
 def dsr_order(request, dsr_id, retailer_id):
@@ -136,15 +136,14 @@ def dsr_order(request, dsr_id, retailer_id):
         orderpart.quantity = item['qty']
         orderpart.price = item['unit_price']
         orderpart.total_price = item['sub_total']
-        orderpart.part = PartPricing.objects.filter(description = item['name'])[0]
+        orderpart.part = PartPricing.objects.get(part_number = item['part_number'])
         orderpart.dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
         orderpart.retailer = Retailer.objects.get(retailer_code = retailer_id)
         orderpart.save()
-    return HttpResponse(json.dumps({'message': 'Order(s) has been placed successfully', 'status':1}), \
-                        content_type="application/json")
+    return Response({'message': 'Order(s) has been placed successfully', 'status':1})
     
 
-#@api_view(['POST'])
+@api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
 def retailer_order(request, retailer_id):
@@ -165,10 +164,9 @@ def retailer_order(request, retailer_id):
         orderpart.part = PartPricing.objects.filter(description = item['name'])[0]
         orderpart.retailer = Retailer.objects.get(retailer_code = retailer_id)
         orderpart.save()
-    return HttpResponse(json.dumps({'message': 'Order(s) has been placed successfully', 'status':1}), \
-                        content_type="application/json")
+    return Response({'message': 'Order(s) has been placed successfully', 'status':1})
 
-#@api_view(['GET'])
+@api_view(['GET'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
 def get_schedule(request):
@@ -190,9 +188,9 @@ def get_schedule(request):
         schedule_dict.update({"latitude":schedule.retailer.latitude})
         schedule_dict.update({"longitude":schedule.retailer.longitude})
         schedules_list.append(schedule_dict)
-    return HttpResponse(json.dumps(schedules_list), content_type="application/json")
+    return Response(schedules_list)
 
-#@api_view(['GET'])
+@api_view(['GET'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
 def get_retailer_transaction(request):
@@ -201,9 +199,9 @@ def get_retailer_transaction(request):
     given the retailer Id
     '''
     
-    #return Response({'retailer': 'retailer id'})
-    return HttpResponse(json.dumps({'message': 'Order(s) has been placed successfully', 'status':1}), \
-                        content_type="application/json")
+    return Response({'retailer': 'retailer id'})
+    #return HttpResponse(json.dumps({'message': 'Order(s) has been placed successfully', 'status':1}), \
+     #                   content_type="application/json")
     
 def split_date(date):
     date_array = date.split('-')
