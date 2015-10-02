@@ -29,6 +29,7 @@ def authentication(request):
     #load the json input of username and password as json
     load = json.loads(request.body)
     user = authenticate(username = load.get("username"), password = load.get("password"))
+    print load.get('username')
     #user = authenticate(username = request.POST["username"], password = request.POST["password"])
     if user:
         if user.is_active:
