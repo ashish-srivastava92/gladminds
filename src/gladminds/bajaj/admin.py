@@ -512,6 +512,7 @@ class DistributorAdmin(GmModelAdmin):
     
     def distributor_code(self, obj):
         return obj.distributor_id
+    distributor_code.admin_order_field = 'distributor_id'
     
     def distributor_name(self, obj):
         return obj.name
