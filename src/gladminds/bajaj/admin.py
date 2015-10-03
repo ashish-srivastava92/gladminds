@@ -496,12 +496,12 @@ class DistributorAdmin(GmModelAdmin):
     exclude = ['sent_to_sap']
     
     def save_model(self, request, obj, form, Change):
-        # try:
-        #     distributor = Distributor.objects.filter()[0]
-        #     obj.distributor_id = str(int(distributor.distributor_id) + \
-        #                             constants.DISTRIBUTOR_SEQUENCE_INCREMENT)
-        # except:
-        #     obj.distributor_id = str(constants.DISTRIBUTOR_SEQUENCE)
+        try:
+            distributor = Distributor.objects.filter()[0]
+            obj.distributor_id = str(int(distributor.distributor_id) + \
+                                    constants.DISTRIBUTOR_SEQUENCE_INCREMENT)
+        except:
+            obj.distributor_id = str(constants.DISTRIBUTOR_SEQUENCE)
         super(DistributorAdmin, self).save_model(request, obj, form, Change)
         try:
             send_email(sender = constants.FROM_EMAIL_ADMIN, receiver = obj.email, 
