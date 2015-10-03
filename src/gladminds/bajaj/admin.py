@@ -515,9 +515,11 @@ class DistributorAdmin(GmModelAdmin):
     
     def distributor_name(self, obj):
         return obj.name
+    distributor_name.admin_order_field = 'name'
     
     def pincode(self, obj):
         return obj.user.pincode
+    pincode.admin_order_field = 'pincode'
     
     def staff_status(self, obj):
         if obj.user.user.is_staff == True:
