@@ -704,12 +704,12 @@ class RetailerAdmin(GmModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.approved = constants.STATUS['WAITING_FOR_APPROVAL']
         #get latest retailer code, add increment and assign it, else assign the sequence first number
-        # try:
-        #     retailer = Retailer.objects.filter()[0]
-        #     obj.retailer_code = str(int(retailer.retailer_code) + \
-        #                             constants.RETAILER_SEQUENCE_INCREMENT)
-        # except:
-        #     obj.retailer_code = str(constants.RETAILER_SEQUENCE)
+        try:
+            retailer = Retailer.objects.filter()[0]
+            obj.retailer_code = str(int(retailer.retailer_code) + \
+                                    constants.RETAILER_SEQUENCE_INCREMENT)
+        except:
+            obj.retailer_code = str(constants.RETAILER_SEQUENCE)
         # if dsr is added by distributorstaff, then show the concerned distributor of distributorstaff
         # else show the distributor
         if DistributorStaff.objects.filter(user__user = request.user).exists():
