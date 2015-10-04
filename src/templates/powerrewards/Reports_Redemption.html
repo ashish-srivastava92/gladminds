@@ -237,7 +237,7 @@
 									download_apiURL = "";
 									function getDataFromAPI(apiURL) {
 										
-										download_apiURL = apiURL;
+									//	download_apiURL = apiURL;
 										$.ajax({
 											url : apiURL,
 											type : 'GET',
@@ -390,8 +390,22 @@
 							        $("#download_data").click(function(){
 							          // alert(download_apiURL)
 							          showLoading();
+							          
+							          var col=$('#select-native-3').val();
+				                        var val=$('#search-1').val();
+											          
+											          if((col.length > 0) || (val.length > 0)) {
+											        	  //var dowlloadUrl = "/v1/members/registeredmembers/?access_token="+access_token+"&"+col+"="+val;
+											        	  var downloadURL = "/v1/redemption-requests/redemptiondownload/?access_token="+access_token+"&key="+col+"&value="+val;
+											        		  //var dowlloadUrl = "/v1/accumulations/accumulationreport/?access_token=bf9a6f758505b87e69fcf192784c877fbcb53af2&key=member_id&value=ME00045"
+											          } else {
+											        	  var downloadURL = "/v1/redemption-requests/?access_token="+access_token;
+											          }
+											          
+											          location.href=downloadURL;
+											          hideLoading();
 
-							          $.ajax({
+							  /*        $.ajax({
 							           url : download_apiURL+'&limit=1000',
 							           type : 'GET',
 							           dataType : 'json',
@@ -400,7 +414,7 @@
 							           }, error : function(e) {
 							            console.log(e)
 							           }
-							          })
+							          })*/
 							         });
 
 							         var link = "";

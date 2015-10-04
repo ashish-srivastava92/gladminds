@@ -406,6 +406,7 @@
 							         }
 
 							        $("#download_data").click(function(){
+							        		var downloadURL='';
 								          // alert(download_apiURL)
 								          showLoading();
 								          var col=$('#select-native-3').val();
@@ -413,19 +414,24 @@
 								          
 								          if((col.length > 0) || (val.length > 0)) {
 								        	  //var dowlloadUrl = "/v1/members/registeredmembers/?access_token="+access_token+"&"+col+"="+val;
-								        	  var dowlloadUrl = "/v1/members/registeredmembers/?access_token=b80e91f8f9ae13d829f3fea1e4193ccdb06d12aa&key=member_id&value=1234"
+								        	  var downloadURL = "/v1/members/registeredmembers/?access_token="+access_token+"&key="+col+"&value="+val;
 								          } else {
-								        	  var dowlloadUrl = "/v1/members/?access_token="+access_token;
+								        	  var downloadURL = "/v1/members/?access_token="+access_token;
 								          }
 								          
-
+								          location.href=downloadURL;
+								          hideLoading();
+								          
+													/*
 								          $.ajax({
-								           url : dowlloadUrl,
+								           url : downloadUrl,
 								           type : 'GET',
-								           dataType : 'json',
+								           dataType : 'html',
 								           success : function(data, success) {
-								           createCSV(data)
-								           console.log(data)
+								        	   alert("han	")
+								          // createCSV(data)
+								           //console.log(data)
+								           
 								           hideLoading()
 								           }, error : function(e) {
 								            console.log(e)
@@ -433,6 +439,7 @@
 								            alert("Data can not be downloaded at the moment. Please try again")
 								           }
 								          })
+								          */
 								         });
 
 								         var link = "";

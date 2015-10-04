@@ -82,8 +82,8 @@
 				    		<div class="col-md-1" style="margin-top:10px;float: left;"><a href="." target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
 				    		<div class="col-md-4" style="margin-top:-15px;">
 				    			<fieldset class="ui-field-contain">
-							        <select name="day" id="day">
-							        	<option value="">Select Days</option>
+							     <select name="day" id="day">
+							      <option value="">Select Days</option>
 										<option value="15">15</option>
 										<option value="30">30</option>
 										<option value="60">60</option>
@@ -263,8 +263,23 @@
 									$("#download_data").click(function(){
 							          // alert(download_apiURL)
 							          showLoading();
+							          
+							         // var col=$('#select-native-3').val();
+				                 //       var val=$('#search-1').val();
+											          
+											         // if((col.length > 0) || (val.length > 0)) {
+											        	  //var dowlloadUrl = "/v1/members/registeredmembers/?access_token="+access_token+"&"+col+"="+val;
+											        	  //var downloadURL = "/v1/members/monthlyactivecount/?access_token="+access_token+"&key="+col+"&value="+val;
+											        	var dowlloadUrl = "/v1/members/monthlyactivecount/?access_token=7c40e8d6b0a3627b6980aa1f42c1168eeea3cec0&key=active_days&value=15"
+											        		  //var dowlloadUrl = "/v1/accumulations/accumulationreport/?access_token=bf9a6f758505b87e69fcf192784c877fbcb53af2&key=member_id&value=ME00045"
+											          //} else {
+											        	  //var downloadURL = "/v1/members/active/?access_token="+access_token;
+											          //}
+											          
+											          location.href=downloadURL;
+											          hideLoading();
 
-							          $.ajax({
+							      /*    $.ajax({
 							           url : download_apiURL+'&limit=10000',
 							           type : 'GET',
 							           dataType : 'json',
@@ -273,7 +288,7 @@
 							           }, error : function(e) {
 							            console.log(e)
 							           }
-							          })
+							          }) */
 							         });
 
 							         var link = "";

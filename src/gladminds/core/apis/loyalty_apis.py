@@ -102,6 +102,9 @@ class RedemptionResource(CustomBaseModelResource):
                                                         self.wrap_view('pending_redemption_request'), name="pending_redemption_request"),
                 url(r"^(?P<resource_name>%s)/count%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('count_redemption_request'), name="count_redemption_request"),
+                url(r"^(?P<resource_name>%s)/redemptiondownload%s" % (self._meta.resource_name,trailing_slash()),
+                                                        self.wrap_view('redemption_download'), name="redemption_download"),
+                
                 ]
 
     def get_filter_query(self, user, query):
@@ -162,6 +165,64 @@ class RedemptionResource(CustomBaseModelResource):
             return HttpResponse(json.dumps(requests), content_type="application/json")
         else: 
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+        
+    
+    def redemption_download(self, request, **kwargs):
+        '''
+#          Get Rdemption report details for given filter
+#          and returns in csv format
+#       '''
+        filter_param = request.GET.get('key')
+        filter_value = request.GET.get('value')
+        applied_filter = {filter_param: filter_value}
+        try:
+            filter_data_list = self.get_list(request, **applied_filter)
+            csv_data = self.csv_convert_redemption(filter_data_list)
+            return csv_data
+        except Exception as ex:
+            logger.error(ex)
+            data = {'status':0 , 'message': 'key does not exist'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
+        
+    def csv_convert_redemption(self, data):
+        json_response = json.loads(data.content)
+        file_name='redemption_download' + datetime.now().strftime('%d_%m_%y')
+        headers = []
+        headers = headers+constants.REDEMPTION_API_HEADER
+#         headers= ['mechanic_id', 'first_name','district','phone_number','state_name','distributor_id',
+#                   'created_date','points','product_id']
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(headers)
+        for item in json_response['objects']:
+            data=[]
+            for field in headers:
+                if field=='state_name':
+                    data.append(item['member']['state']['state_name'])
+                elif field=='distributor_id':
+                        data.append(item['member']['distributor']['distributor_id'])
+                elif field== 'mechanic_id':
+                    if item['member']["permanent_id"] != None:
+                        data.append(item['member']["permanent_id"])
+                    else:
+                        data.append(item['member']['mechanic_id'])
+                elif field== 'first_name': 
+                    data.append(item['member']['first_name'])  
+                elif field== 'district': 
+                    data.append(item['member']['district']) 
+                elif field== 'phone_number': 
+                    data.append(item['member']['phone_number'])
+                elif field== 'points': 
+                    data.append(item['product_catalog']['points'])  
+                elif field== 'product_id': 
+                    data.append(item['product_catalog']['product_id'])
+                else:
+                    date_format = datetime.strptime(item['created_date'], '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
+                    data.append(date_format)
+            csvwriter.writerow(data)
+        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        return response
 
        
 class AccumulationResource(CustomBaseModelResource):
@@ -227,15 +288,18 @@ class AccumulationResource(CustomBaseModelResource):
     
     def prepend_urls(self):
         return [
+            url(r"^(?P<resource_name>%s)/accumulationreport%s" % (self._meta.resource_name,
+                                                     trailing_slash()),
+                self.wrap_view('accumulation_report'), name="accumulation_report"),
             url(r"^(?P<resource_name>%s)/productfitment%s" % (self._meta.resource_name,
                                                      trailing_slash()),
                 self.wrap_view('product_fitment'), name="product_fitment"),
         ]
 
-    def product_fitment(self, request, **kwargs):
+    def accumulation_report(self, request, **kwargs):
         '''
-#           Get registered member details
-#           returns in csv format
+#          Get Accumulation report details for given filter
+#          and returns in csv format
 #       '''
         filter_param = request.GET.get('key')
         filter_value = request.GET.get('value')
@@ -243,77 +307,111 @@ class AccumulationResource(CustomBaseModelResource):
         try:
             filter_data_list = self.get_list(request, **applied_filter)
             csv_data = self.csv_convert_accumulation(filter_data_list)
-            return self.csv_convert(filter_data_list)
+            return csv_data
         except Exception as ex:
-            print (ex)
             logger.error(ex)
             data = {'status':0 , 'message': 'key does not exist'}
             return HttpResponse(json.dumps(data), content_type="application/json")
-
-    def csv_convert_accumulation(self, data):
-        json_response = json.loads(data.content)
+        
+    def csv_convert_accumulation(self, data, options =None): 
         file_name='accumulation_download' + datetime.now().strftime('%d_%m_%y')
-        headers=[]
-        headers=headers+constants.ACCUMULATION_API_HEADER
-        csvfile = StringIO.StringIO()
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(headers)
-        for item in json_response['objects']:
-            data=[]
-            for field in headers:
-                if field=='State':
-                    data.append(item['member']['state']['state_name'])
-                elif field=='Distributor Code':
-                        data.append(item['member']['distributor']['distributor_id'])
-                elif field== 'Mechanic Id':
-                    if item['member']["permanent_id"] != None:
-                        data.append(item['member']["permanent_id"])
-                    else:
-                        data.append(item['member']['mechanic_id'])
-                elif field== 'Mechanic Name': 
-                    data.append(item['member']['first_name'])  
-                elif field== 'District': 
-                    data.append(item['member']['district']) 
-                elif field== 'Mobile Number': 
-                    data.append(item['member']['phone_number']) 
-                elif field=='Unique Code Detail':
-                    unique_part_code = self.get_unique_part(item['upcs'])
-                    data.append(unique_part_code)
-                elif field== 'Point SMSed':
-                    upcs_data = self.get_upcs(item['upcs'])
-                    data.append(upcs_data)
-                elif field=='Date of SMSed':
-                    data.append(item['created_date'])
-            csvwriter.writerow(data)
-        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+        options = options or {}
+        data = json.loads(data.content)
+        headers = []
+        headers = headers+constants.ACCUMULATION_API_HEADER
+        raw_data = StringIO.StringIO()
+        first = True
+ 
+        objects = data.get("objects")
+        for value in objects:
+            rows = []
+            self.req_accumulKeysVal(value,rows)
+            if first:
+                writer = csv.DictWriter(raw_data, headers, quoting=csv.QUOTE_NONNUMERIC)
+                writer.writeheader()
+                writer.writerows(rows)
+                first=False
+            else:
+                writer.writerows(rows)
+        response = HttpResponse(raw_data.getvalue(), content_type='application/csv')
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
         return response
+ 
+    def req_accumulKeysVal(self, data, accarray = []):
+        accdict = {}
+        accdict['mechanic_id'] = data['member']['mechanic_id']
+        accdict['first_name'] = data['member']['first_name']
+        accdict['district'] = data['member']['district']
+        accdict['phone_number'] = data['member']['phone_number']
+        accdict['state_name'] = data['member']['state']['state_name']
+        accdict['distributor_id'] = data['member']['distributor']['distributor_id']
+        accdict['created_date'] = datetime.strptime(data['created_date'], '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
+        for value in data['upcs']:
+            final_acc_dict = {}
+            final_acc_dict = accdict.copy()
+            final_acc_dict['unique_part_code'] = value['unique_part_code']
+            final_acc_dict['point'] = value['part_number']['point']
+            accarray.append(final_acc_dict)
+        
+    def product_fitment(self, request, **kwargs):
+            '''
+    #           Get Report product fitment for given filter
+    #           and returns in csv format
+    #       '''
+            filter_param = request.GET.get('key')
+            filter_value = request.GET.get('value')
+            applied_filter = {filter_param: filter_value}
+            try:
+                filter_data_list = self.get_list(request, **applied_filter)
+                csv_data = self.csv_convert_fitment(filter_data_list)
+                return csv_data
+            except Exception as ex:
+                logger.error(ex)
+                data = {'status':0 , 'message': 'key does not exist'}
+                return HttpResponse(json.dumps(data), content_type="application/json")
+        
+    def csv_convert_fitment(self, data, options =None): 
+        file_name='fitment_download' + datetime.now().strftime('%d_%m_%y')
+        options = options or {}
+        data = json.loads(data.content)
+        headers=[]
+        headers=headers+constants.ACCUMULATION_FITMENT_API_HEADER
+        raw_data = StringIO.StringIO()
+        first = True
+     
+        objects = data.get("objects")
+        for value in objects:
+            rows = []
+            self.req_fitmentKeysVal(value,rows)
+            if first:
+                writer = csv.DictWriter(raw_data, headers, quoting=csv.QUOTE_NONNUMERIC)
+                writer.writeheader()
+                writer.writerows(rows)
+                first=False
+            else:
+                writer.writerows(rows)
+        response = HttpResponse(raw_data.getvalue(), content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        return response
+     
+    def req_fitmentKeysVal(self, data, accarray = []):
+        accdict = {}
+        accdict['mechanic_id'] = data['member']['mechanic_id']
+        accdict['first_name'] = data['member']['first_name']
+        accdict['district'] = data['member']['district']
+        accdict['phone_number'] = data['member']['phone_number']
+        accdict['state_name'] = data['member']['state']['state_name']
+        accdict['distributor_id'] = data['member']['distributor']['distributor_id']
+        accdict['created_date'] = datetime.strptime(data['created_date'], '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
+        for value in data['upcs']:
+            final_acc_dict = {}
+            final_acc_dict = accdict.copy()
+            final_acc_dict['unique_part_code'] = value['unique_part_code']
+            final_acc_dict['point'] = value['part_number']['point']
+            final_acc_dict['part_number'] = value['part_number']['part_number']
+            final_acc_dict['description'] = value['part_number']['description']
+            accarray.append(final_acc_dict);
     
-    def get_unique_part(self, upcs):
-        part_numbers =[]
-        for upc in upcs:
-            part_numbers.append(upc['unique_part_code'])
-            
-        part_code_list = models.SparePartUPC.objects.filter(unique_part_code__in=part_numbers).values('unique_part_code')
-        for upc in upcs:
-            part_number = upc['unique_part_code']
-            part_number_mapping = filter(lambda part:part['unique_part_code']==part_number, part_code_list)
-            upc['unique_part_code'] = part_number_mapping[0][part_code_list]
-        return upcs
-            
-    def get_upcs(self, upcs):
-        part_numbers = []
-        for upc in upcs:            
-            part_numbers.append(upc['part_number']['id'])
-        
-        points = models.SparePartPoint.objects.filter(part_number__in=part_numbers).values('part_number__id', 'points')
-        for upc in upcs:
-            part_number = upc['part_number']['id']
-            upc_mapping = filter(lambda point: point['part_number__id']==part_number, points)
-            upc['part_number']['point'] = upc_mapping[0]['points']
-        return upcs
-        
-
 
 class WelcomeKitResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
