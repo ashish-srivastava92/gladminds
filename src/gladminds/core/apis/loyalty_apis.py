@@ -102,7 +102,7 @@ class RedemptionResource(CustomBaseModelResource):
                                                         self.wrap_view('pending_redemption_request'), name="pending_redemption_request"),
                 url(r"^(?P<resource_name>%s)/count%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('count_redemption_request'), name="count_redemption_request"),
-                url(r"^(?P<resource_name>%s)/redemptiondownload%s" % (self._meta.resource_name,trailing_slash()),
+                url(r"^(?P<resource_name>%s)/redemption-download%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('redemption_download'), name="redemption_download"),
                 
                 ]
@@ -180,9 +180,9 @@ class RedemptionResource(CustomBaseModelResource):
             csv_data = self.csv_convert_redemption(filter_data_list)
             return csv_data
         except Exception as ex:
-            logger.error(ex)
-            data = {'status':0 , 'message': 'key does not exist'}
-            return HttpResponse(json.dumps(data), content_type="application/json")
+            filter_data_list = self.get_list(request)
+            csv_data = self.csv_convert_redemption(filter_data_list)
+            return csv_data
         
     def csv_convert_redemption(self, data):
         json_response = json.loads(data.content)
@@ -288,10 +288,10 @@ class AccumulationResource(CustomBaseModelResource):
     
     def prepend_urls(self):
         return [
-            url(r"^(?P<resource_name>%s)/accumulationreport%s" % (self._meta.resource_name,
+            url(r"^(?P<resource_name>%s)/accumulation-report%s" % (self._meta.resource_name,
                                                      trailing_slash()),
                 self.wrap_view('accumulation_report'), name="accumulation_report"),
-            url(r"^(?P<resource_name>%s)/productfitment%s" % (self._meta.resource_name,
+            url(r"^(?P<resource_name>%s)/product-fitment%s" % (self._meta.resource_name,
                                                      trailing_slash()),
                 self.wrap_view('product_fitment'), name="product_fitment"),
         ]
@@ -309,9 +309,9 @@ class AccumulationResource(CustomBaseModelResource):
             csv_data = self.csv_convert_accumulation(filter_data_list)
             return csv_data
         except Exception as ex:
-            logger.error(ex)
-            data = {'status':0 , 'message': 'key does not exist'}
-            return HttpResponse(json.dumps(data), content_type="application/json")
+            filter_data_list = self.get_list(request)
+            csv_data = self.csv_convert_accumulation(filter_data_list)
+            return csv_data
         
     def csv_convert_accumulation(self, data, options =None): 
         file_name='accumulation_download' + datetime.now().strftime('%d_%m_%y')
@@ -325,7 +325,7 @@ class AccumulationResource(CustomBaseModelResource):
         objects = data.get("objects")
         for value in objects:
             rows = []
-            self.req_accumulKeysVal(value,rows)
+            self.req_acc_key_val(value,rows)
             if first:
                 writer = csv.DictWriter(raw_data, headers, quoting=csv.QUOTE_NONNUMERIC)
                 writer.writeheader()
@@ -337,7 +337,7 @@ class AccumulationResource(CustomBaseModelResource):
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
         return response
  
-    def req_accumulKeysVal(self, data, accarray = []):
+    def req_acc_key_val(self, data, accarray = [], is_fitment = False):
         accdict = {}
         accdict['mechanic_id'] = data['member']['mechanic_id']
         accdict['first_name'] = data['member']['first_name']
@@ -351,6 +351,9 @@ class AccumulationResource(CustomBaseModelResource):
             final_acc_dict = accdict.copy()
             final_acc_dict['unique_part_code'] = value['unique_part_code']
             final_acc_dict['point'] = value['part_number']['point']
+            if is_fitment:
+                final_acc_dict['part_number'] = value['part_number']['part_number']
+                final_acc_dict['description'] = value['part_number']['description']
             accarray.append(final_acc_dict)
         
     def product_fitment(self, request, **kwargs):
@@ -366,9 +369,9 @@ class AccumulationResource(CustomBaseModelResource):
                 csv_data = self.csv_convert_fitment(filter_data_list)
                 return csv_data
             except Exception as ex:
-                logger.error(ex)
-                data = {'status':0 , 'message': 'key does not exist'}
-                return HttpResponse(json.dumps(data), content_type="application/json")
+                filter_data_list = self.get_list(request)
+                csv_data = self.csv_convert_fitment(filter_data_list)
+                return csv_data
         
     def csv_convert_fitment(self, data, options =None): 
         file_name='fitment_download' + datetime.now().strftime('%d_%m_%y')
@@ -382,7 +385,9 @@ class AccumulationResource(CustomBaseModelResource):
         objects = data.get("objects")
         for value in objects:
             rows = []
-            self.req_fitmentKeysVal(value,rows)
+           # self.req_fitment_key_val(value,rows)
+            self.req_acc_key_val(value, rows, is_fitment = True)
+            
             if first:
                 writer = csv.DictWriter(raw_data, headers, quoting=csv.QUOTE_NONNUMERIC)
                 writer.writeheader()
@@ -394,23 +399,23 @@ class AccumulationResource(CustomBaseModelResource):
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
         return response
      
-    def req_fitmentKeysVal(self, data, accarray = []):
-        accdict = {}
-        accdict['mechanic_id'] = data['member']['mechanic_id']
-        accdict['first_name'] = data['member']['first_name']
-        accdict['district'] = data['member']['district']
-        accdict['phone_number'] = data['member']['phone_number']
-        accdict['state_name'] = data['member']['state']['state_name']
-        accdict['distributor_id'] = data['member']['distributor']['distributor_id']
-        accdict['created_date'] = datetime.strptime(data['created_date'], '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
-        for value in data['upcs']:
-            final_acc_dict = {}
-            final_acc_dict = accdict.copy()
-            final_acc_dict['unique_part_code'] = value['unique_part_code']
-            final_acc_dict['point'] = value['part_number']['point']
-            final_acc_dict['part_number'] = value['part_number']['part_number']
-            final_acc_dict['description'] = value['part_number']['description']
-            accarray.append(final_acc_dict);
+#     def req_fitment_key_val(self, data, accarray = []):
+#         accdict = {}
+#         accdict['mechanic_id'] = data['member']['mechanic_id']
+#         accdict['first_name'] = data['member']['first_name']
+#         accdict['district'] = data['member']['district']
+#         accdict['phone_number'] = data['member']['phone_number']
+#         accdict['state_name'] = data['member']['state']['state_name']
+#         accdict['distributor_id'] = data['member']['distributor']['distributor_id']
+#         accdict['created_date'] = datetime.strptime(data['created_date'], '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
+#         for value in data['upcs']:
+#             final_acc_dict = {}
+#             final_acc_dict = accdict.copy()
+#             final_acc_dict['unique_part_code'] = value['unique_part_code']
+#             final_acc_dict['point'] = value['part_number']['point']
+#             final_acc_dict['part_number'] = value['part_number']['part_number']
+#             final_acc_dict['description'] = value['part_number']['description']
+#             accarray.append(final_acc_dict)
     
 
 class WelcomeKitResource(CustomBaseModelResource):

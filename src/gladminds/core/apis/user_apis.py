@@ -1385,15 +1385,15 @@ class MemberResource(CustomBaseModelResource):
                                                      trailing_slash()),
                 self.wrap_view('get_total_points'), name="get_total_points"),
                 
-            url(r"^(?P<resource_name>%s)/registeredmembers%s" % (self._meta.resource_name,
+            url(r"^(?P<resource_name>%s)/registered-members%s" % (self._meta.resource_name,
                                                      trailing_slash()),
                 self.wrap_view('registered_members'), name="registered_members"),
                 
-            url(r"^(?P<resource_name>%s)/monthlyactivecount%s" % (self._meta.resource_name,
+            url(r"^(?P<resource_name>%s)/monthly-active-count%s" % (self._meta.resource_name,
                                                      trailing_slash()),
                 self.wrap_view('monthly_active_code'), name="monthly_active_code"),
                 
-            url(r"^(?P<resource_name>%s)/monthlyinactivecount%s" % (self._meta.resource_name,
+            url(r"^(?P<resource_name>%s)/monthly-inactive-count%s" % (self._meta.resource_name,
                                                      trailing_slash()),
                 self.wrap_view('monthly_inactive_code'), name="monthly_inactive_code"),
             
@@ -1411,9 +1411,8 @@ class MemberResource(CustomBaseModelResource):
             filter_data_list = self.get_list(request, **applied_filter)
             return self.csv_convert_registered_member(filter_data_list)
         except Exception as ex:
-            logger.error(ex)
-            data = {'status':0 , 'message': 'key does not exist'}
-            return HttpResponse(json.dumps(data), content_type="application/json")
+            filter_data_list = self.get_list(request)
+            return self.csv_convert_registered_member(filter_data_list)
      
     def csv_convert_registered_member(self, data):
         json_response = json.loads(data.content)

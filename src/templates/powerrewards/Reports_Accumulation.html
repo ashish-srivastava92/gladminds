@@ -80,7 +80,7 @@
 									        <option value="member__phone_number__endswith">Mobile No</option>
 									        <option value="member__state__state_name">State</option>
 									        <option value="member__distributor__distributor_id">Distributor Code</option>
-									        <option value="upcs__unique_part_code">Unique Code Detail</option>
+									        <!--<option value="upcs__unique_part_code">Unique Code Detail</option>-->
 									       
 									    </select>
 									</div>
@@ -406,10 +406,10 @@
 												          
 												          if((col.length > 0) || (val.length > 0)) {
 												        	  //var dowlloadUrl = "/v1/members/registeredmembers/?access_token="+access_token+"&"+col+"="+val;
-												        	  var downloadURL = "/v1/accumulations/accumulationreport/?access_token="+access_token+"&key="+col+"&value="+val;
+												        	  var downloadURL = "/v1/accumulations/accumulation-report/?access_token="+access_token+"&key="+col+"&value="+val;
 												        		  //var dowlloadUrl = "/v1/accumulations/accumulationreport/?access_token=bf9a6f758505b87e69fcf192784c877fbcb53af2&key=member_id&value=ME00045"
 												          } else {
-												        	  var downloadURL = "/v1/accumulations/?access_token="+access_token;
+												        	  var downloadURL = "/v1/accumulations/accumulation-report/?access_token="+access_token;
 												          }
 												          
 								location.href=downloadURL;

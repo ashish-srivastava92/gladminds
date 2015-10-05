@@ -413,10 +413,12 @@
 	                        var val=$('#search-1').val();
 								          
 								          if((col.length > 0) || (val.length > 0)) {
+								        	  
 								        	  //var dowlloadUrl = "/v1/members/registeredmembers/?access_token="+access_token+"&"+col+"="+val;
-								        	  var downloadURL = "/v1/members/registeredmembers/?access_token="+access_token+"&key="+col+"&value="+val;
+								        	  var downloadURL = "/v1/members/registered-members/?access_token="+access_token+"&key="+col+"&value="+val;
 								          } else {
-								        	  var downloadURL = "/v1/members/?access_token="+access_token;
+								        	  
+								        	  var downloadURL = "/v1/members/registered-members/?access_token="+access_token;
 								          }
 								          
 								          location.href=downloadURL;
