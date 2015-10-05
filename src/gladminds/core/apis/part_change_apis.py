@@ -431,6 +431,7 @@ class BOMVisualizationResource(CustomBaseModelResource):
         comment = load.get('comment')
         status = load.get('status')
         user = request.user
+        approval_flag=False
         try:
             '''
                 Changing the status to approved/rejected in VisualisationUploadHistory
@@ -444,10 +445,10 @@ class BOMVisualizationResource(CustomBaseModelResource):
                     '''
                         changing the ECO-I status to approved/rejected
                     '''
-                    check_if_eco_implemented = get_model('ECOImplementation').objects.get(eco_number=eco_number)
-                    check_if_eco_implemented.status = status
-                    check_if_eco_implemented.save(using=settings.BRAND)
-                    validation_date = check_if_eco_implemented.change_date
+                    eco_i = get_model('ECOImplementation').objects.get(eco_number=eco_number)
+                    eco_i.status = status
+                    eco_i.save(using=settings.BRAND)
+                    validation_date = eco_i.change_date
                 except Exception as ex:
                     validation_date = datetime.today()
                     LOG.info('[reject_release]: {0}'.format(ex))
@@ -455,11 +456,17 @@ class BOMVisualizationResource(CustomBaseModelResource):
                                                                     bom__bom_number=bom_number,
                                                                     plate__plate_id=plate_id,valid_from__lte=validation_date,
                                                                     valid_to__gt=validation_date)
-                if status == 'Rejected':
-                    result = self.reject_release(visualisation_data, bom_queryset, comment, user)
-                elif status == 'Approved':
-                    result = self.approve_release(visualisation_data, bom_queryset, comment, user)
-                return result
+                bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset)
+                if status == 'Approved':
+                    bom_visualisation.update(is_published=True,is_approved=True)
+                else:
+                    bom_visualisation.update(is_approved=approval_flag)
+                if comment:
+                    comments_data = get_model('EpcCommentThread')(user=user,comment=comment)
+                    comments_data.save(using=settings.BRAND)
+                    visualisation_data.comments.add(comments_data)
+                    visualisation_data.save(using=settings.BRAND)
+                return HttpResponse(json.dumps({"message" : "Status of SBOM changed to {0} ".format(status),"status":visualisation_data.status}),content_type="application/json")
             else:
                 error_message='Its mandatory to provide comment when status is changed to rejected '
                 return HttpResponse(json.dumps({"message" : error_message}),content_type="application/json", status=400)
@@ -468,57 +475,6 @@ class BOMVisualizationResource(CustomBaseModelResource):
             LOG.info(error_message)
             return HttpResponse(json.dumps({"message" : error_message}),content_type="application/json", status=400)
     
-    def reject_release(self,visualisation_data, bom_queryset, comment, user):
-        '''
-           Reject a ECO 
-           Change status to Rejected 
-        '''
-        try:
-            '''
-                For each valid parts of the plate, set the 
-                is_approved flag to True. The value of is_published is retained
-            '''
-            bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset).update(is_approved=False) 
-            '''
-                its mandatory to add comments for rejection,
-                comments are saved into the db.
-            '''
-            comments_data = get_model('EpcCommentThread')(user=user,comment=comment)
-            comments_data.save(using=settings.BRAND)
-            visualisation_data.comments.add(comments_data)
-            visualisation_data.save(using=settings.BRAND)
-            return HttpResponse(json.dumps({"message" : "Status of SBOM changed to rejected ","status":visualisation_data.status}),content_type="application/json") 
-        except Exception as ex:
-            error_message='Error [reject_release]:  {0}'.format(ex)
-            LOG.info(error_message)
-            return HttpResponse(json.dumps({"message" : error_message}),content_type="application/json", status=400)
-        
-    def approve_release(self, visualisation_data, bom_queryset, comment, user):
-        '''
-           Approve a ECO
-           Change status to approved 
-        '''
-        try:
-            '''
-                For each valid parts of the plate, set the 
-                is_published, is_approved flag to True
-            '''
-            bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset).update(is_published=True,is_approved=True)  
-            
-            '''
-                Not mandatory to add comments for approval,
-                if comments added then save them in db.
-            '''
-            if comment:
-                comments_data = get_model('EpcCommentThread')(user=user,comment=comment)
-                comments_data.save(using=settings.BRAND)
-                visualisation_data.comments.add(comments_data)
-                visualisation_data.save(using=settings.BRAND)
-            return HttpResponse(json.dumps({"message" : "Status of SBOM changed to approved ","status":visualisation_data.status}),content_type="application/json")           
-        except Exception as ex:
-            error_message='Error [approve_release]:  {0}'.format(ex)
-            LOG.info(error_message)
-            return HttpResponse(json.dumps({"message" : error_message}),content_type="application/json", status=400)
         
     def preview_sbom_details(self, request, **kwargs):
         '''
@@ -540,8 +496,8 @@ class BOMVisualizationResource(CustomBaseModelResource):
             plate_data = get_model('BOMPlate').objects.get(plate_id=plate_id)
             plate_image = plate_data.plate_image
             try:
-                check_if_eco_implemented = get_model('ECOImplementation').objects.get(eco_number=eco_number)
-                validation_date = check_if_eco_implemented.change_date
+                eco_i = get_model('ECOImplementation').objects.get(eco_number=eco_number)
+                validation_date = eco_i.change_date
             except Exception as ex:
                 validation_date = datetime.today()
                 LOG.info('[preview_sbom_details]: {0}'.format(ex))
