@@ -45,7 +45,11 @@ class Brand(object):
     def send_sa_upate_mobile_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/bajaj/test_data/sa_update_mobile_feed.xml')
         self.post_feed(file_path)
-
+        
+    def populate_upload_history_table(self, id ,sku_code, bom_number, plateId, eco_number):
+        history_obj = models.VisualisationUploadHistory(id=id, sku_code=sku_code, bom_number=bom_number, plate_id=plateId, eco_number=eco_number)
+        history_obj.save()
+        
     def send_dispatch_feed(self):
         file_path = os.path.join(settings.BASE_DIR, 'tests/integration/bajaj/test_data/product_dispatch_feed.xml')
         self.post_feed(file_path)
@@ -207,6 +211,10 @@ class Brand(object):
         uri = '/v1/circle-heads/update/'+str(user_id)+'/?access_token='+access_token
         response = client.post(uri, data=json.dumps(new_data), content_type='application/json')
         return response
+    
+    def populate_dependent_table(self,uri,data,access_token):
+        uri = uri+'?access_token='+access_token
+        response = client.post(uri, data=json.dumps(data), content_type='application/json')
     
     def register_regional_sales_manager(self,access_token, data):
         uri = '/v1/regional-sales-managers/register/?access_token='+access_token

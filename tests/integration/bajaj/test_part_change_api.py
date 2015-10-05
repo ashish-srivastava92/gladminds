@@ -12,7 +12,7 @@ from integration.bajaj.test_brand_logic import Brand
 from integration.bajaj.test_system_logic import System
 from test_constants import BRAND_PRODUCT_RANGE, BRAND_VERTICAL, BOM_HEADER, \
     BOM_PLATE_PART, ECO_RELEASE, ECO_IMPLEMENTATION, BOM_VISUALIZATION, \
-    SBOM_REVIEW
+    SBOM_REVIEW, COMMENTS_FOR_RELEASE_REJECT, CHANGE_STATUS_DATA 
 
 from gladminds.core.auth_helper import Roles
 
@@ -116,7 +116,71 @@ class PartChangeTest(BaseTestCase):
         eco_numbers = json.loads(resp.content)['data']
         self.assertEquals(len(eco_numbers), 1)
         self.assertEquals(eco_numbers[0],ECO_RELEASE["eco_number"])
-               
+        
+    def test_preview_of_sbom(self):
+        access_token = self.user_login()
+        brand=self.brand
+        brand.populate_upload_history_table(id=1,sku_code=112, bom_number="211760", plateId='44', eco_number='451')
+        brand.populate_dependent_table('/v1/eco-implementations/',ECO_IMPLEMENTATION,access_token)
+        brand.populate_dependent_table('/v1/bom-visualizations/',BOM_VISUALIZATION,access_token)
+        uri = '/v1/bom-visualizations/preview-sbom/1/?access_token='+access_token
+        resp = client.get(uri, content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        plate_details = json.loads(resp.content)['plate_part_details']
+        self.assertEquals(len(plate_details),1)
+        self.assertEquals(plate_details[0]["part_number"],BOM_VISUALIZATION["bom"]["part"]["part_number"])
+        
+    def test_preview_latest_sbom(self):
+        access_token = self.user_login()
+        brand=self.brand
+        brand.populate_upload_history_table(id=2,sku_code=112, bom_number="211760", plateId='44', eco_number='45')
+        brand.populate_dependent_table('/v1/eco-implementations/',ECO_IMPLEMENTATION,access_token)
+        brand.populate_dependent_table('/v1/bom-visualizations/',BOM_VISUALIZATION,access_token)
+        uri = '/v1/bom-visualizations/preview-sbom/2/?access_token='+access_token       
+        resp = client.get(uri, content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        plate_details = json.loads(resp.content)['plate_part_details']
+        self.assertEquals(len(plate_details),1)
+        self.assertEquals(plate_details[0]["part_number"],BOM_VISUALIZATION["bom"]["part"]["part_number"])
+        
+    def test_approve_release(self):
+        access_token = self.user_login()
+        brand=self.brand
+        brand.populate_upload_history_table(id=1,sku_code=112, bom_number="211760", plateId='44', eco_number='451')
+        brand.populate_dependent_table('/v1/eco-implementations/',ECO_IMPLEMENTATION,access_token)
+        brand.populate_dependent_table('/v1/bom-visualizations/',BOM_VISUALIZATION,access_token)
+        uri = '/v1/bom-visualizations/change-status/1/'
+        resp = self.post(uri, data=CHANGE_STATUS_DATA , access_token=access_token)
+        self.assertEquals(resp.status_code, 200)
+        release_status = json.loads(resp.content)['status']
+        self.assertEquals(release_status,'Approved')
+        
+    def test_reject_release(self):
+        access_token = self.user_login()
+        brand=self.brand
+        brand.populate_upload_history_table(id=1,sku_code=112, bom_number="211760", plateId='44', eco_number='451')
+        brand.populate_dependent_table('/v1/eco-implementations/',ECO_IMPLEMENTATION,access_token)
+        brand.populate_dependent_table('/v1/bom-visualizations/',BOM_VISUALIZATION,access_token)
+        uri = '/v1/bom-visualizations/change-status/1/'
+        resp = self.post(uri, data=COMMENTS_FOR_RELEASE_REJECT, access_token=access_token)
+        self.assertEquals(resp.status_code, 200)
+        release_status = json.loads(resp.content)['status']
+        self.assertEquals(release_status,'Rejected')
+        uri = '/v1/bom-visualizations/preview-sbom/1/?access_token='+access_token       
+        resp = client.get(uri, content_type='application/json')
+        comment = json.loads(resp.content)['comments']
+        self.assertEquals(comment[0][0],COMMENTS_FOR_RELEASE_REJECT["comment"])
+        
+    
+    def test_get_pending_sbom(self):
+        access_token = self.user_login()
+        brand=self.brand
+        brand.populate_upload_history_table(id=1,sku_code=112, bom_number="211760", plateId='44', eco_number='451')
+        uri = '/v1/visualisation-upload-history/?access_token='+access_token+'&status=Pending'
+        resp = client.get(uri, content_type='application/json')
+        self.assertEquals(resp.status_code, 200)
+        pending_sbom = json.loads(resp.content)['objects'][0]
+        self.assertEquals(pending_sbom["status"],'Pending')   
                
     def test_get_plates_image(self):
         access_token = self.user_login()

@@ -127,6 +127,12 @@ class BrandDepartment(base_models.BrandDepartment):
     class Meta(base_models.BrandDepartment.Meta):
         app_label = _APP_NAME
         verbose_name_plural = "Brand Department"
+        
+class EpcCommentThread(base_models.EpcCommentThread):
+    
+    class Meta(base_models.EpcCommentThread.Meta):
+        app_label = _APP_NAME
+        verbose_name_plural = "Comments For EPC"
 
 class DepartmentSubCategories(base_models.DepartmentSubCategories):
     department = models.ForeignKey(BrandDepartment, null=True, blank=True)
@@ -640,6 +646,13 @@ class BOMPlatePart(base_models.BOMPlatePart):
     part = models.ForeignKey(BOMPart)
 
     class Meta(base_models.BOMPlatePart.Meta):
+        app_label = _APP_NAME
+        
+class VisualisationUploadHistory(base_models.VisualisationUploadHistory):
+    '''Upload history with status'''
+
+    comments = models.ManyToManyField(EpcCommentThread)
+    class Meta(base_models.VisualisationUploadHistory.Meta):
         app_label = _APP_NAME
 
 class BOMVisualization(base_models.BOMVisualization):
