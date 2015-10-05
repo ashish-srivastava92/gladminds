@@ -459,9 +459,9 @@ class BOMVisualizationResource(CustomBaseModelResource):
                                                                     valid_to__gt=validation_date)
                 bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset)
                 if status == 'Approved':
-                    bom_visualisation.update(is_published=True,is_approved=True)
-                else:
-                    bom_visualisation.update(is_approved=approval_flag)
+                    approval_flag = True
+                    bom_visualisation.update(is_published=True)
+                bom_visualisation.update(is_approved=approval_flag)
                 if comment:
                     comments_data = get_model('EpcCommentThread')(user=user,comment=comment)
                     comments_data.save(using=settings.BRAND)
