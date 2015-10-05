@@ -431,42 +431,49 @@ class BOMVisualizationResource(CustomBaseModelResource):
         comment = load.get('comment')
         status = load.get('status')
         user = request.user
-        if status == 'Rejected' and comment:
-            result = self.reject_release(history_id, comment, user)
-        elif status == 'Approved':
-            result = self.approve_release(history_id, comment, user)
-        else:
-             return HttpResponse(json.dumps({"message" : "Its mandatory to provide comment when status is changed to rejected  "}),content_type="application/json", status=400)
-        return result
+        try:
+            '''
+                Changing the status to approved/rejected in VisualisationUploadHistory
+            '''
+            if (status == 'Rejected' and comment) or status == 'Approved':
+                sbom_details = get_model('VisualisationUploadHistory').objects.filter(id=history_id)
+                (sku_code,bom_number,plate_id,eco_number) = sbom_details.values_list('sku_code','bom_number','plate_id','eco_number')[0]
+                visualisation_data = sbom_details[0]
+                visualisation_data.status = status
+                try:
+                    '''
+                        changing the ECO-I status to approved/rejected
+                    '''
+                    check_if_eco_implemented = get_model('ECOImplementation').objects.get(eco_number=eco_number)
+                    check_if_eco_implemented.status = status
+                    check_if_eco_implemented.save(using=settings.BRAND)
+                    validation_date = check_if_eco_implemented.change_date
+                except Exception as ex:
+                    validation_date = datetime.today()
+                    LOG.info('[reject_release]: {0}'.format(ex))
+                bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
+                                                                    bom__bom_number=bom_number,
+                                                                    plate__plate_id=plate_id,valid_from__lte=validation_date,
+                                                                    valid_to__gt=validation_date)
+                if status == 'Rejected':
+                    result = self.reject_release(visualisation_data, bom_queryset, comment, user)
+                elif status == 'Approved':
+                    result = self.approve_release(visualisation_data, bom_queryset, comment, user)
+                return result
+            else:
+                error_message='Its mandatory to provide comment when status is changed to rejected '
+                return HttpResponse(json.dumps({"message" : error_message}),content_type="application/json", status=400)
+        except Exception as ex:
+            error_message='Error [reject_release]:  {0}'.format(ex)
+            LOG.info(error_message)
+            return HttpResponse(json.dumps({"message" : error_message}),content_type="application/json", status=400)
     
-    def reject_release(self, history_id, comment, user):
+    def reject_release(self,visualisation_data, bom_queryset, comment, user):
         '''
            Reject a ECO 
            Change status to Rejected 
         '''
         try:
-            '''
-                Changing the status to rejected in VisualisationUploadHistory
-            '''
-            sbom_details = get_model('VisualisationUploadHistory').objects.filter(id=history_id)
-            (sku_code,bom_number,plate_id,eco_number) = sbom_details.values_list('sku_code','bom_number','plate_id','eco_number')[0]
-            visualisation_data = sbom_details[0]
-            visualisation_data.status = 'Rejected'
-            try:
-                '''
-                    changing the ECO-I status to rejected
-                '''
-                check_if_eco_implemented = get_model('ECOImplementation').objects.get(eco_number=eco_number)
-                check_if_eco_implemented.status = 'Rejected'
-                check_if_eco_implemented.save(using=settings.BRAND)
-                validation_date = check_if_eco_implemented.change_date
-            except Exception as ex:
-                validation_date = datetime.today()
-                LOG.info('[reject_release]: {0}'.format(ex))
-            bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
-                                                                    bom__bom_number=bom_number,
-                                                                    plate__plate_id=plate_id,valid_from__lte=validation_date,
-                                                                    valid_to__gt=validation_date)
             '''
                 For each valid parts of the plate, set the 
                 is_approved flag to True. The value of is_published is retained
@@ -486,35 +493,12 @@ class BOMVisualizationResource(CustomBaseModelResource):
             LOG.info(error_message)
             return HttpResponse(json.dumps({"message" : error_message}),content_type="application/json", status=400)
         
-    def approve_release(self, history_id, comment, user):
+    def approve_release(self, visualisation_data, bom_queryset, comment, user):
         '''
            Approve a ECO
            Change status to approved 
         '''
         try:
-            '''
-                Changing the status to approved in VisualisationUploadHistory
-            '''
-            sbom_details = get_model('VisualisationUploadHistory').objects.filter(id=history_id)
-            (sku_code,bom_number,plate_id,eco_number) = sbom_details.values_list('sku_code','bom_number','plate_id','eco_number')[0]
-            visualisation_data = sbom_details[0]
-            visualisation_data.status = 'Approved'
-            visualisation_data.save(using=settings.BRAND)
-            try:
-                '''
-                    changing the ECO-I status to approved
-                '''
-                check_if_eco_implemented = get_model('ECOImplementation').objects.get(eco_number=eco_number)
-                check_if_eco_implemented.status = 'Approved'
-                check_if_eco_implemented.save(using=settings.BRAND)
-                validation_date = check_if_eco_implemented.change_date
-            except Exception as ex:
-                validation_date = datetime.today()
-                LOG.info('[approve_release]: {0}'.format(ex))
-            bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
-                                                                    bom__bom_number=bom_number,
-                                                                    plate__plate_id=plate_id,valid_from__lte=validation_date,
-                                                                    valid_to__gt=validation_date)
             '''
                 For each valid parts of the plate, set the 
                 is_published, is_approved flag to True
