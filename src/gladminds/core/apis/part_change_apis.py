@@ -432,11 +432,12 @@ class BOMVisualizationResource(CustomBaseModelResource):
         status = load.get('status')
         user = request.user
         approval_flag=False
+        status_values = ['Approved','Rejected']
         try:
             '''
                 Changing the status to approved/rejected in VisualisationUploadHistory
             '''
-            if (status == 'Rejected' and comment) or status == 'Approved':
+            if status in status_values:
                 sbom_details = get_model('VisualisationUploadHistory').objects.filter(id=history_id)
                 (sku_code,bom_number,plate_id,eco_number) = sbom_details.values_list('sku_code','bom_number','plate_id','eco_number')[0]
                 visualisation_data = sbom_details[0]
