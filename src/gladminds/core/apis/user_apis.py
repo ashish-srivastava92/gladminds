@@ -12,7 +12,7 @@ from django.db.models.query_utils import Q
 from django.contrib.sites.models import RequestSite
 
 from tastypie.utils.urls import trailing_slash
-from tastypie import fields,http
+from tastypie import fields,http, bundle
 from tastypie.http import HttpBadRequest
 from tastypie.authorization import Authorization
 from tastypie.authorization import DjangoAuthorization
@@ -38,6 +38,10 @@ from gladminds.core.model_helpers import format_phone_number
 from gladminds.core.utils import check_password
 from gladminds.afterbuy import utils as core_utils
 from gladminds.core.model_fetcher import get_model
+import csv
+import StringIO
+from celery.worker.consumer import Heart
+from boto.gs.cors import HEADERS
 
 logger = logging.getLogger('gladminds')
 
@@ -1321,6 +1325,8 @@ class MemberResource(CustomBaseModelResource):
         authentication = AccessTokenAuthentication()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
+        max_limit= None
+        
         filtering = {
                      "state": ALL_WITH_RELATIONS,
                      "distributor" : ALL_WITH_RELATIONS,
@@ -1344,12 +1350,12 @@ class MemberResource(CustomBaseModelResource):
         ordering = ["state", "locality", "district", "registered_date",
                     "created_date", "mechanic_id", "last_transaction_date", "total_accumulation_req"
                     "total_accumulation_points", "total_redemption_points", "total_redemption_req" ]
-    
+        
     def build_filters(self, filters=None):
         if filters is None:
             filters = {}
         orm_filters = super(MemberResource, self).build_filters(filters)
-        
+         
         if 'member_id' in filters:
             query = filters['member_id']
             qset = (
@@ -1378,14 +1384,146 @@ class MemberResource(CustomBaseModelResource):
             url(r"^(?P<resource_name>%s)/points%s" % (self._meta.resource_name,
                                                      trailing_slash()),
                 self.wrap_view('get_total_points'), name="get_total_points"),
+                
+            url(r"^(?P<resource_name>%s)/registered-members%s" % (self._meta.resource_name,
+                                                     trailing_slash()),
+                self.wrap_view('registered_members'), name="registered_members"),
+                
+            url(r"^(?P<resource_name>%s)/monthly-active-count%s" % (self._meta.resource_name,
+                                                     trailing_slash()),
+                self.wrap_view('monthly_active_code'), name="monthly_active_code"),
+                
+            url(r"^(?P<resource_name>%s)/monthly-inactive-count%s" % (self._meta.resource_name,
+                                                     trailing_slash()),
+                self.wrap_view('monthly_inactive_code'), name="monthly_inactive_code"),
+            
         ]
-   
+        
+    def registered_members(self, request , **kwargs):
+        '''
+#           Get registered member details for given filter
+#           and returns in csv format
+#       '''
+        filter_param = request.GET.get('key')
+        filter_value = request.GET.get('value')
+        applied_filter = {filter_param: filter_value}
+        try:
+            filter_data_list = self.get_list(request, **applied_filter)
+            return self.csv_convert_registered_member(filter_data_list)
+        except Exception as ex:
+            filter_data_list = self.get_list(request)
+            return self.csv_convert_registered_member(filter_data_list)
+     
+    def csv_convert_registered_member(self, data):
+        json_response = json.loads(data.content)
+        file_name='registered_member_download' + datetime.now().strftime('%d_%m_%y')
+        headers=[]
+        headers=headers+constants.MEMBER_API_HEADER
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(headers)
+        for item in json_response['objects']:
+            data=[]
+            for field in headers:
+                if field=='State':
+                    data.append(item['state']['state_name'])
+                elif field=='Distributor Code':
+                        data.append(item['distributor']['distributor_id'])
+                elif field=='Address of garage':
+                        data.append(item['shop_name']+" ,"+item['shop_number']+" ,"+item['shop_address'] +" ,"+item['district']+" ,"+item['state']['state_name']+" ,"+item['pincode'])
+                elif field== 'Mechanic Id':
+                    if item["permanent_id"] != None:
+                        data.append(item["permanent_id"])
+                    else:
+                        data.append(item['mechanic_id'])
+                elif field== 'Mechanic Name': 
+                    data.append(item['first_name'])  
+                elif field== 'District': 
+                    data.append(item['district']) 
+                elif field== 'Mobile Number': 
+                    data.append(item['phone_number']) 
+                else:
+                    date_format = datetime.strptime(item['registered_date'], '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
+                    data.append(date_format)
+            csvwriter.writerow(data)
+        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        return response
+            
 
+    def monthly_active_code(self, request , **kwargs):
+        '''
+#           Get registered member details
+#           returns in csv format
+#       '''
+#         filter_param = request.GET.get('key')
+#         filter_value = request.GET.get('value')
+#         applied_filter = {filter_param: filter_value}
+        try:
+            #filter_data_list = self.get_list(request, **applied_filter)
+            active_member_data = self.get_active_member(request, **kwargs)
+            csv =  self.csv_convert_monthly_active(active_member_data)
+            return csv
+        except Exception as ex:
+            logger.error(ex)
+            data = {'status':0 , 'message': 'key does not exist'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
+        
+    def csv_convert_monthly_active(self, data):
+        data_received = json.loads(data.content)
+        file_name='monthly_active_download' + datetime.now().strftime('%d_%m_%y')
+        headers = []
+        headers = headers+constants.MONTHLY_ACTIVE_API_HEADER
+        #headers= ['State', 'No of Mechanic Registered (till date)','No of Mechanic messaged','%active','ASM Name']
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(headers)
+        for k, v in data_received.items():
+            data=[]
+            for field in headers:
+                if field=='State':
+                    data.append(k)
+                elif field=='No of Mechanic Registered (till date)':
+                    data.append(v['registered_count'])
+                elif field== 'No of Mechanic messaged': 
+                    data.append(v['active_count'])  
+                elif field== '%active': 
+                    data.append(v['active_percent'])
+                else:
+                    data.append(v['asm'])
+            csvwriter.writerow(data)
+        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        return response
+    
+    def monthly_inactive_code(self, request , **kwargs):
+        '''
+#           Get registered member details
+#           returns in csv format
+#       '''
+        filter_param = request.GET.get('key')
+        filter_value = request.GET.get('value')
+        applied_filter = {filter_param: filter_value}
+        try:
+            filter_data_list = self.get_list(request, **applied_filter)
+            csv =  self.csv_convert_monthly_inactive(filter_data_list)
+            return csv
+        except Exception as ex:
+            logger.error(ex)
+            data = {'status':0 , 'message': 'key does not exist'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
+    
+    def csv_convert_monthly_inactive(self, data):
+        pass
+
+          
+        
     def get_active_member(self, request, **kwargs):
         '''
            Get active member counts and
            registered member count based on region
         '''
+        
         self.is_authenticated(request)
         args={}
         try:
@@ -1555,4 +1693,4 @@ class SupervisorResource(CustomBaseModelResource):
         filtering = {
                      'transporter': ALL_WITH_RELATIONS
                      }
-
+        

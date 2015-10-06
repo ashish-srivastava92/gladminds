@@ -237,7 +237,7 @@
 									download_apiURL = "";
 									function getDataFromAPI(apiURL) {
 										
-										download_apiURL = apiURL;
+									//	download_apiURL = apiURL;
 										$.ajax({
 											url : apiURL,
 											type : 'GET',
@@ -390,8 +390,20 @@
 							        $("#download_data").click(function(){
 							          // alert(download_apiURL)
 							          showLoading();
+							          
+							          var col=$('#select-native-3').val();
+				                        var val=$('#search-1').val();
+											          
+											          if((col.length > 0) || (val.length > 0)) {
+											        	  var downloadURL = "/v1/redemption-requests/redemption-download/?access_token="+access_token+"&key="+col+"&value="+val;
+											          } else {
+											        	  var downloadURL = "/v1/redemption-requests/redemption-download/?access_token="+access_token;
+											          }
+											          
+											          location.href=downloadURL;
+											          hideLoading();
 
-							          $.ajax({
+							  /*        $.ajax({
 							           url : download_apiURL+'&limit=1000',
 							           type : 'GET',
 							           dataType : 'json',
@@ -400,7 +412,7 @@
 							           }, error : function(e) {
 							            console.log(e)
 							           }
-							          })
+							          })*/
 							         });
 
 							         var link = "";

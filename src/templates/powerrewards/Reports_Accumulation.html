@@ -80,7 +80,7 @@
 									        <option value="member__phone_number__endswith">Mobile No</option>
 									        <option value="member__state__state_name">State</option>
 									        <option value="member__distributor__distributor_id">Distributor Code</option>
-									        <option value="upcs__unique_part_code">Unique Code Detail</option>
+									        <!--<option value="upcs__unique_part_code">Unique Code Detail</option>-->
 									       
 									    </select>
 									</div>
@@ -239,7 +239,7 @@
 
 									function getDataFromAPI(apiURL) {
 											
-										download_apiURL = apiURL;
+										//download_apiURL = apiURL;
 										$.ajax({
 											url : apiURL,
 											type : 'GET',
@@ -398,19 +398,30 @@
 									}
 
 									$("#download_data").click(function(){
-								          // alert(download_apiURL)
 								          showLoading();
-
-								          $.ajax({
-								           url : download_apiURL+'&limit=10000',
+								          
+								          var col=$('#select-native-3').val();
+					                        var val=$('#search-1').val();
+												          
+												          if((col.length > 0) || (val.length > 0)) {
+												        	  var downloadURL = "/v1/accumulations/accumulation-report/?access_token="+access_token+"&key="+col+"&value="+val;
+												          } else {
+												        	  var downloadURL = "/v1/accumulations/accumulation-report/?access_token="+access_token;
+												          }
+												          
+								location.href=downloadURL;
+								hideLoading();
+	
+								     /*     $.ajax({
+								           url : dowlloadUrl,
 								           type : 'GET',
 								           dataType : 'json',
 								           success : function(data, success) {
-								            createCSV(data)
+								          // createCSV(data)
 								           }, error : function(e) {
 								            console.log(e)
 								           }
-								          })
+								          })  */
 								         });
 
 								         var link = "";
