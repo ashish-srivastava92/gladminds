@@ -611,6 +611,7 @@ class BOMPlatePart(base_models.BOMPlatePart):
     bom = models.ForeignKey(BOMHeader)
     plate = models.ForeignKey(BOMPlate)
     part = models.ForeignKey(BOMPart)
+    
     class Meta(base_models.BOMPlatePart.Meta):
             app_label = _APP_NAME
             
