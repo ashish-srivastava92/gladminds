@@ -106,6 +106,25 @@ class BOMPartResource(CustomBaseModelResource):
                      "part_number" : ALL
                      }
         
+
+class VisualisationUploadHistoryResource(CustomBaseModelResource):
+    '''
+       Resource for VisualisationUploadHistory
+    '''
+    class Meta:
+        queryset = get_model('VisualisationUploadHistory').objects.all()
+        resource_name = 'visualisation-upload-history'
+        authorization = Authorization()
+        authentication = AccessTokenAuthentication()
+        detail_allowed_methods = ['get']
+        always_return_data = True
+        include_resource_uri = False
+        
+        filtering = {
+                     "status": ALL,
+                     }
+        
+        
         
 class BOMPlatePartResource(CustomBaseModelResource):
     '''
@@ -182,7 +201,8 @@ class BOMPlatePartResource(CustomBaseModelResource):
         except Exception as ex:
             LOG.error('Exception while fetching plate images : {0}'.format(ex))
             return HttpResponseBadRequest()
-    
+        
+        
     def save_plate_part(self, request, **kwargs):
         '''
            Parses the uploaded CSV and adds the
@@ -215,14 +235,17 @@ class BOMPlatePartResource(CustomBaseModelResource):
         try:
             post_data=request.POST
             model = post_data.get('model')
-            sku_code = post_data.get('skuCode')
-            bom_number = post_data.get('bomNumber')
-            plate_id = post_data.get('plateId')
-            plate_image=request.FILES['plateImage']
-            plate_map=request.FILES['plateMap']
-            dashboard_image=request.FILES['dashboardImage']
+            sku_code = post_data.get('skuCode') 
+            bom_number = post_data.get('bomNumber') 
+            plate_id = post_data.get('plateId') 
             plate_name= post_data.get('plateName')
+            eco_number = post_data.get('ecoNumber')
+            plate_image=request.FILES['plateImage'] 
+            plate_map=request.FILES['plateMap'] 
+            dashboard_image=request.FILES['dashboardImage'] 
             sbom_part_mapping=[]
+            upload_history_data = get_model('VisualisationUploadHistory')(sku_code=sku_code, bom_number=bom_number, plate_id=plate_id, eco_number=eco_number)
+            upload_history_data.save()
             bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
                                                                 bom__bom_number=bom_number,
                                                                 plate__plate_id=plate_id).select_related(
@@ -385,9 +408,124 @@ class BOMVisualizationResource(CustomBaseModelResource):
     def prepend_urls(self):
         return [
                  url(r"^(?P<resource_name>%s)/review-sbom%s" % (self._meta.resource_name,trailing_slash()),
-                     self.wrap_view('review_sbom_details'), name="review_sbom_details")
-                ]
+                     self.wrap_view('review_sbom_details'), name="review_sbom_details"),
+                 url(r"^(?P<resource_name>%s)/preview-sbom/(?P<history_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('preview_sbom_details'), name="preview_sbom_details"),
+                 url(r"^(?P<resource_name>%s)/change-status/(?P<history_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('change_status'), name="change_status"),
+            ]
         
+    def change_status(self, request, **kwargs):
+        '''
+            Change status to Either approved or rejected
+        '''
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        history_id = kwargs['history_id']
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        comment = load.get('comment')
+        status = load.get('status')
+        user = request.user
+        approval_flag=False
+        status_values = ['Approved','Rejected']
+        try:
+            '''
+                Changing the status to approved/rejected in VisualisationUploadHistory
+            '''
+            if status in status_values:
+                sbom_details = get_model('VisualisationUploadHistory').objects.filter(id=history_id)
+                (sku_code,bom_number,plate_id,eco_number) = sbom_details.values_list('sku_code','bom_number','plate_id','eco_number')[0]
+                visualisation_data = sbom_details[0]
+                visualisation_data.status = status
+                try:
+                    '''
+                        changing the ECO-I status to approved/rejected
+                    '''
+                    eco_i = get_model('ECOImplementation').objects.get(eco_number=eco_number)
+                    eco_i.status = status
+                    eco_i.save(using=settings.BRAND)
+                    validation_date = eco_i.change_date
+                except Exception as ex:
+                    validation_date = datetime.today()
+                    LOG.info('[reject_release]: {0}'.format(ex))
+                bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
+                                                                    bom__bom_number=bom_number,
+                                                                    plate__plate_id=plate_id,valid_from__lte=validation_date,
+                                                                    valid_to__gt=validation_date)
+                bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset)
+                if status == 'Approved':
+                    approval_flag = True
+                    bom_visualisation.update(is_published=True)
+                bom_visualisation.update(is_approved=approval_flag)
+                if comment:
+                    comments_data = get_model('EpcCommentThread')(user=user,comment=comment)
+                    comments_data.save(using=settings.BRAND)
+                    visualisation_data.comments.add(comments_data)
+                    visualisation_data.save(using=settings.BRAND)
+                return HttpResponse(json.dumps({"message" : "Status of SBOM changed to {0} ".format(status),"status":visualisation_data.status}),content_type="application/json")
+            else:
+                error_message='Its mandatory to provide comment when status is changed to rejected '
+                return HttpResponse(json.dumps({"message" : error_message}),content_type="application/json", status=400)
+        except Exception as ex:
+            error_message='Error [reject_release]:  {0}'.format(ex)
+            LOG.info(error_message)
+            return HttpResponse(json.dumps({"message" : error_message}),content_type="application/json", status=400)
+    
+        
+    def preview_sbom_details(self, request, **kwargs):
+        '''
+        preview the BOM data submitted
+           params:
+               bom_number: the bom number associated with a sku_code code
+               plate_id: the plate_id of the bom
+               eco_number: the eco-release number
+        '''
+        self.is_authenticated(request)
+        if request.method != 'GET':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        history_id=kwargs['history_id']
+        try:
+            visualisation_data = get_model('VisualisationUploadHistory').objects.filter(id=history_id)
+            comments_data_from_visualisation_table = visualisation_data[0]
+            (sku_code,bom_number,plate_id,eco_number) = visualisation_data.values_list('sku_code','bom_number','plate_id','eco_number')[0]
+            plate_data = get_model('BOMPlate').objects.get(plate_id=plate_id)
+            plate_image = plate_data.plate_image
+            try:
+                eco_i = get_model('ECOImplementation').objects.get(eco_number=eco_number)
+                validation_date = eco_i.change_date
+            except Exception as ex:
+                validation_date = datetime.today()
+                LOG.info('[preview_sbom_details]: {0}'.format(ex))
+            bom_queryset = get_model('BOMPlatePart').objects.filter(bom__sku_code=sku_code,
+                                                                    bom__bom_number=bom_number,
+                                                                    plate__plate_id=plate_id,valid_from__lte=validation_date,
+                                                                    valid_to__gt=validation_date)
+            bom_visualisation =get_model('BOMVisualization').objects.filter(bom__in=bom_queryset) 
+            plate_part_details =[]
+            
+            for data in bom_visualisation:
+                part_details = model_to_dict(data ,exclude=['id','bom'])
+                part_details["quantity"] = model_to_dict(data.bom ,fields=['quantity']).values()[0]
+                part_details["part_number"] = model_to_dict(data.bom.part ,fields=['part_number']).values()[0]
+                plate_part_details.append(part_details)
+            
+            if not plate_image:
+                plate_image = "Image Not Available"
+                
+            comment_list=[]
+            comments ={ comment_list.append((comments.comment,str(comments.created_date))) for comments in comments_data_from_visualisation_table.comments.all()}
+            output_data = {"plate_image":plate_image,'plate_part_details': plate_part_details,'comments':comment_list}
+            return HttpResponse(json.dumps(output_data), content_type="application/json")            
+        except Exception as ex:
+            LOG.info('[preview_sbom_details]: {0}'.format(ex))
+            return HttpResponse(json.dumps({"message" : 'Exception while fetching plate images : {0}'.format(ex)}),content_type="application/json", status=400)
+                 
     def review_sbom_details(self, request, **kwargs):
         '''
            saves the review of a sbom
@@ -444,6 +582,38 @@ class ECOReleaseResource(CustomBaseModelResource):
         authorization = Authorization()
         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post']
+        
+    def prepend_urls(self):
+        return [
+                  url(r"^(?P<resource_name>%s)/change-status/(?P<eco_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('change_status_of_eco_release'), name="change_status_of_eco_release"),
+               ]
+        
+    def change_status_of_eco_release(self, request, **kwargs):
+        '''
+           Change status for ECO Release
+        '''
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        eco_id = kwargs['eco_id']
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        status = load.get("status")
+        try:
+            eco_release_data = get_model('ECORelease').objects.get(id=eco_id)
+            eco_release_data.status = status
+            eco_release_data.save(using=settings.BRAND)
+            return HttpResponse(json.dumps({"message" : "Status changed successfully","status":1}),content_type="application/json")
+        except Exception as ex:
+            error_message='Error [change_status_of_eco_release]:  {0}'.format(ex)
+            LOG.info(error_message)
+            return HttpResponse(json.dumps({"message" : error_message}),content_type="application/json", status=400)
+            
+    
     
 
 class ECOImplementationResource(CustomBaseModelResource):
@@ -462,7 +632,33 @@ class ECOImplementationResource(CustomBaseModelResource):
         return [
                   url(r"^(?P<resource_name>%s)/skucode/(?P<sku_code>\w+)%s" % (self._meta.resource_name,trailing_slash()),
                      self.wrap_view('get_eco_number_for_sku_code'), name="get_eco_number_for_sku_code"),
+                  url(r"^(?P<resource_name>%s)/change-status/(?P<eco_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
+                     self.wrap_view('change_status_of_eco_implementation'), name="change_status_of_eco_implementation"),
                ]
+    
+    def change_status_of_eco_implementation(self, request, **kwargs):
+        '''
+           Change status for ECO Implementation
+        '''
+        self.is_authenticated(request)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                                status=400)
+        eco_id = kwargs['eco_id']
+        try:
+            load = json.loads(request.body)
+        except:
+            return HttpResponse(content_type="application/json", status=404)
+        status = load.get("status")
+        try:
+            eco_release_data = get_model('ECOImplementation').objects.get(id=eco_id)
+            eco_release_data.status = status
+            eco_release_data.save(using=settings.BRAND)
+            return HttpResponse(json.dumps({"message" : "Status changed successfully","status":1}),content_type="application/json")
+        except Exception as ex:
+            error_message='Error [change_status_of_eco_implementation]:  {0}'.format(ex)
+            LOG.info(error_message)
+            return HttpResponse(json.dumps({"message" : error_message}),content_type="application/json", status=400)
         
     def get_eco_number_for_sku_code(self, request, **kwargs):
         '''

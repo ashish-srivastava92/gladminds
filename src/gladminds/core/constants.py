@@ -78,6 +78,20 @@ FEEDBACK_STATUS_LEVEL_TWO = (
         ('Pending', 'Pending')
     )
 
+ECO_RELEASE_STATUS = (
+                      ('Open', 'Open'),
+                      ('Closed', 'Closed'),
+                      ('Under Review', 'Under Review'),
+    )
+
+ECO_IMPLEMENTATION_STATUS = (
+                      ('Open', 'Open'),
+                      ('Closed', 'Closed'),
+                      ('Rejected', 'Rejected'),
+                      ('Approved', 'Approved'),
+                      ('Under Review', 'Under Review'),
+    )
+
 
 PRIORITY = (
         ('Low', 'Low'),
@@ -134,6 +148,12 @@ RATINGS = (
            ('2','Very Glad'),
            ('3','Not Glad')
         )
+
+SAVE_PLATE_PART_STATUS = (
+                          ('Pending','Pending'),
+                          ('Approved','Approved'),
+                          ('Rejected','Rejected')
+                          )
 
 ROOT_CAUSE = (('Data','Data'),
               ('Infrastructure','Infrastructure'),

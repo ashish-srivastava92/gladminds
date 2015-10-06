@@ -99,6 +99,8 @@ rename table gm_constant to afterbuy_constant;
 
 DROP INDEX constant_name ON gm_constant;
 
+alter table gm_bomvisualization drop column status;
+
 
 
 
