@@ -611,9 +611,21 @@ class BOMPlatePart(base_models.BOMPlatePart):
     bom = models.ForeignKey(BOMHeader)
     plate = models.ForeignKey(BOMPlate)
     part = models.ForeignKey(BOMPart)
-
-class Meta(base_models.BOMPlatePart.Meta):
+    class Meta(base_models.BOMPlatePart.Meta):
             app_label = _APP_NAME
+            
+class EpcCommentThread(base_models.EpcCommentThread):
+    
+    class Meta(base_models.EpcCommentThread.Meta):
+        app_label = _APP_NAME
+       
+            
+class VisualisationUploadHistory(base_models.VisualisationUploadHistory):
+    '''Upload history with status'''
+
+    comments = models.ManyToManyField(EpcCommentThread)
+    class Meta(base_models.VisualisationUploadHistory.Meta):
+        app_label = _APP_NAME
 
 class BOMVisualization(base_models.BOMVisualization):
     '''Details of BOM Plates cordinates'''
