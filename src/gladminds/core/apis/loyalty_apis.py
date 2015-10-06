@@ -189,8 +189,6 @@ class RedemptionResource(CustomBaseModelResource):
         file_name='redemption_download' + datetime.now().strftime('%d_%m_%y')
         headers = []
         headers = headers+constants.REDEMPTION_API_HEADER
-#         headers= ['mechanic_id', 'first_name','district','phone_number','state_name','distributor_id',
-#                   'created_date','points','product_id']
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(headers)
@@ -220,6 +218,7 @@ class RedemptionResource(CustomBaseModelResource):
                     date_format = datetime.strptime(item['created_date'], '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
                     data.append(date_format)
             csvwriter.writerow(data)
+            
         response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
         return response
@@ -320,19 +319,14 @@ class AccumulationResource(CustomBaseModelResource):
         headers = []
         headers = headers+constants.ACCUMULATION_API_HEADER
         raw_data = StringIO.StringIO()
-        first = True
- 
         objects = data.get("objects")
+        writer = csv.DictWriter(raw_data, headers, quoting=csv.QUOTE_NONNUMERIC)
+        writer.writeheader()
         for value in objects:
             rows = []
             self.req_acc_key_val(value,rows)
-            if first:
-                writer = csv.DictWriter(raw_data, headers, quoting=csv.QUOTE_NONNUMERIC)
-                writer.writeheader()
-                writer.writerows(rows)
-                first=False
-            else:
-                writer.writerows(rows)
+            writer.writerows(rows)
+            
         response = HttpResponse(raw_data.getvalue(), content_type='application/csv')
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
         return response
@@ -380,44 +374,18 @@ class AccumulationResource(CustomBaseModelResource):
         headers=[]
         headers=headers+constants.ACCUMULATION_FITMENT_API_HEADER
         raw_data = StringIO.StringIO()
-        first = True
-     
         objects = data.get("objects")
+        writer = csv.DictWriter(raw_data, headers, quoting=csv.QUOTE_NONNUMERIC)
+        writer.writeheader()
         for value in objects:
             rows = []
-           # self.req_fitment_key_val(value,rows)
             self.req_acc_key_val(value, rows, is_fitment = True)
+            writer.writerows(rows)
             
-            if first:
-                writer = csv.DictWriter(raw_data, headers, quoting=csv.QUOTE_NONNUMERIC)
-                writer.writeheader()
-                writer.writerows(rows)
-                first=False
-            else:
-                writer.writerows(rows)
         response = HttpResponse(raw_data.getvalue(), content_type='application/csv')
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
         return response
      
-#     def req_fitment_key_val(self, data, accarray = []):
-#         accdict = {}
-#         accdict['mechanic_id'] = data['member']['mechanic_id']
-#         accdict['first_name'] = data['member']['first_name']
-#         accdict['district'] = data['member']['district']
-#         accdict['phone_number'] = data['member']['phone_number']
-#         accdict['state_name'] = data['member']['state']['state_name']
-#         accdict['distributor_id'] = data['member']['distributor']['distributor_id']
-#         accdict['created_date'] = datetime.strptime(data['created_date'], '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
-#         for value in data['upcs']:
-#             final_acc_dict = {}
-#             final_acc_dict = accdict.copy()
-#             final_acc_dict['unique_part_code'] = value['unique_part_code']
-#             final_acc_dict['point'] = value['part_number']['point']
-#             final_acc_dict['part_number'] = value['part_number']['part_number']
-#             final_acc_dict['description'] = value['part_number']['description']
-#             accarray.append(final_acc_dict)
-    
-
 class WelcomeKitResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
     partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)
