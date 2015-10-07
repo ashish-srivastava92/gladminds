@@ -101,6 +101,7 @@ DROP INDEX constant_name ON gm_constant;
 
 alter table gm_bomvisualization drop column status;
 
-
+ALTER TABLE gm_bomvisualization ADD is_published tinyint(1)  NOT NULL DEFAULT 0;
+ALTER TABLE gm_bomvisualization ADD is_approved tinyint(1)  NOT NULL DEFAULT 0;
 
 
