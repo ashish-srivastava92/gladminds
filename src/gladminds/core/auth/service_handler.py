@@ -20,6 +20,7 @@ class Services():
     SERVICE_DESK = 'service_desk'
     LOYALTY = 'loyalty'
     AFTERBUY = 'afterbuy'
+    SFA = 'sfa'
 
 
 class ServiceHandler(object):

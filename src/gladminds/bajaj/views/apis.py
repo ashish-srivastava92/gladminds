@@ -16,8 +16,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework_jwt.settings import api_settings
 
-from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
-                            SubCategories, PartPricing, OrderPart
+#from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
+ #                           SubCategories, PartPricing, OrderPart, DSRWorkAllocation
+from gladminds.core.models import DistributorSalesRep, Retailer,PartModels, CvCategories, \
+                             PartMasterCv, OrderPart, DSRWorkAllocation, AlternateParts
 from gladminds.core import constants
 
 @api_view(['POST'])
@@ -29,7 +31,7 @@ def authentication(request):
     #load the json input of username and password as json
     load = json.loads(request.body)
     user = authenticate(username = load.get("username"), password = load.get("password"))
-    print load.get('username')
+    
     #user = authenticate(username = request.POST["username"], password = request.POST["password"])
     if user:
         if user.is_active:
@@ -96,27 +98,60 @@ def get_retailers(request, dsr_id):
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
+def get_retailer_profile(request, retailer_id):
+    retailer = Retailer.objects.filter(retailer_code = retailer_id, \
+                                is_active = True)
+    if not retailer:
+        return Response('The given retailer id is invalid or your login may be inactive. Please \
+                                    contact your distributor')
+    else:
+        retailer_dict = {}
+        retailer_dict.update({"retailer_name":retailer.retailer_name})
+        retailer_dict.update({"retailer_mobile":retailer.mobile})
+        retailer_dict.update({"retailer_email":retailer.email})
+        retailer_dict.update({"retailer_address":retailer.user.address})
+        retailer_dict.update({"latitude":retailer.latitude})
+        retailer_dict.update({"longitude":retailer.longitude})
+        return Response(retailer_dict)
+
+
+@api_view(['GET'])
+# @authentication_classes((JSONWebTokenAuthentication,))
+# @permission_classes((IsAuthenticated,))
 def get_parts(request):
     '''
     This method returns all the spare parts details
     '''
-    parts = PartPricing.objects.filter(active = True)
+    parts = PartMasterCv.objects.filter(active = True)
     parts_list =[]
     for part in parts:
-        # today = datetime.date.today()
-        # # price = SparePartPoint.objects.filter(part_number = part, valid_from__gt = today, \
-        # #                             valid_till__lt = today)
         parts_dict = {}
-        parts_dict.update({"part_id":part.id})
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
         parts_dict.update({"part_model":part.part_model})
-        parts_dict.update({"category":part.category.category_name})
-        parts_dict.update({"subcategory":part.subcategory.subcategory_name})
         parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
-    return Response(parts_list) 
-    
+    return Response(parts_list)
+
+@api_view(['GET'])
+# @authentication_classes((JSONWebTokenAuthentication,))
+# @permission_classes((IsAuthenticated,))
+def get_alternateparts(request):
+    '''
+    This method returns all the spare parts details
+    '''
+    parts = AlternateParts.objects.filter(active = True)
+    parts_list =[]
+    for part in parts:
+        parts_dict = {}
+        parts_dict.update({"part_name":part.name})
+        parts_dict.update({"part_number":part.part_number})
+        parts_dict.update({"part_model":part.model_name})
+        #parts_dict.update({"mrp":part.mrp})
+        parts_list.append(parts_dict)
+    return Response(parts_list)
+
+
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
@@ -170,22 +205,19 @@ def retailer_order(request, retailer_id):
 @api_view(['GET'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
-def get_schedule(request):
+def get_schedule(request, dsr_id, date):
     '''
     This method gets the schedule(the retailers he has to visit) for today, given the dsr id
     '''
-    dsr = json.loads(request.body)
-    date = dsr['date']
-    schedules = DSRWorkAllocation.objects.filter(date = date, dsr = dsr_id)
+    schedule_date = date
+    dsr = DistributorSalesRep.objects.filter(distributor_sales_code = dsr_id)
+    schedules = DSRWorkAllocation.objects.filter(date = schedule_date, dsr = dsr)
     schedules_list = []
     for schedule in schedules:
         schedule_dict = {}
         schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
         schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
-        # schedule_dict.update({"retailer_mobile" : schedule.retailer.mobile})
-        # schedule_dict.update({"retailer_phone" : schedule.retailer.user.phone_number})
-        # schedule_dict.update({"retailer_email" : schedule.retailer.email})
-        # schedule_dict.update({"retailer_address":schedule.retailer.user.address})
+        schedule_dict.update({"retailer_address":schedule.retailer.user.address})
         schedule_dict.update({"latitude":schedule.retailer.latitude})
         schedule_dict.update({"longitude":schedule.retailer.longitude})
         schedules_list.append(schedule_dict)

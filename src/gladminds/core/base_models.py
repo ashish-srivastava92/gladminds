@@ -1194,7 +1194,39 @@ class PartPricing(BaseModel):
     class Meta:
         abstract = True
         db_table = "gm_partpricing"
-        verbose_name_plural = "Part Pricing"
+        verbose_name_plural = "Part Master"
+        
+class CvCategories(BaseModel):
+    ''' details of cv categories'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_cvcategories"
+        verbose_name_plural = "CV Categories"
+        
+class PartMasterCv(BaseModel):
+    ''' details of spare parts and pricing'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_partmastercv"
+        verbose_name_plural = "Part Master"
+        
+class AlternateParts(BaseModel):
+    ''' details of alternate spare parts and pricing'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_alternateparts"
+        verbose_name_plural = "Alternate Parts"
+        
+class Kit(BaseModel):
+    ''' details of kit packages and parts'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_kit"
+        verbose_name_plural = "Kit"
         
 class OrderPart(BaseModel):
     ''' details of ordering spare parts by dsr or retailer'''

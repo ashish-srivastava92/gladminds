@@ -514,16 +514,6 @@ class Retailer(base_models.Retailer):
     def __unicode__(self):
         return self.retailer_code + ' ' + self.retailer_name
     
-class DSRWorkAllocation(base_models.DSRWorkAllocation):
-    '''details of DSR work allocation'''
-    distributor = models.ForeignKey(Distributor)
-    dsr = models.ForeignKey(DistributorSalesRep)
-    retailer = models.ForeignKey(Retailer)
-    date = models.DateField()
-    
-    class Meta(base_models.DSRWorkAllocation.Meta):
-        app_label = _APP_NAME
-        
 class PartModels(base_models.PartModels):
     '''details of part models'''
     model_name = models.CharField(max_length=255)

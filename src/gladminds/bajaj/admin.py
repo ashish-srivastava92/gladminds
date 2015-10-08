@@ -11,7 +11,7 @@ from django.utils.html import mark_safe
 
 from gladminds.bajaj import models
 from gladminds.bajaj.models import Distributor, DistributorStaff, DistributorSalesRep, \
-                        Retailer, DSRWorkAllocation, UserProfile, SparePartPoint
+                        Retailer, UserProfile, SparePartPoint
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
@@ -688,7 +688,7 @@ class RetailerAdmin(GmModelAdmin):
                 send_email(sender = constants.FROM_EMAIL_ADMIN, receiver = retailer.email, 
                        subject = constants.APPROVE_RETAILER_SUBJECT, body = '',
                        message = constants.APPROVE_RETAILER_MESSAGE)
-            except:
+            except Exception as e:
                 logger.error('Mail is not sent. Exception occurred ',e)
     approve.short_description = 'Approve Selected Retailers'
     
@@ -743,65 +743,6 @@ class RetailerAdmin(GmModelAdmin):
                     return mark_safe(rejected_reason)
     status.allow_tags = True
     
-class DSRWorkAllocationForm(forms.ModelForm):
-    class Meta:
-        model = get_model('DSRWorkAllocation')
-        exclude = ['distributor', 'status']
-        
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        super(DSRWorkAllocationForm, self).__init__(*args, **kwargs)
-        dsr_objects = DistributorSalesRep.objects.filter(distributor__user = \
-                                                                    self.request.user)
-        if not dsr_objects:
-            dsr_objects = DistributorSalesRep.objects.all()
-        self.fields['dsr'].queryset = dsr_objects
-        #list the retailer, based on the distributor who is logged in
-        retailer_objects = Retailer.objects.filter(distributor__user = \
-                                                                    self.request.user)
-        if not retailer_objects:
-            retailer_objects = Retailer.objects.all()
-        self.fields['retailer'].queryset = retailer_objects
-            
-class DSRWorkAllocationAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    form = DSRWorkAllocationForm
-    #search_fields = ('dsr', 'date')
-    list_display = ('dsr', 'allocated_date', 'retailer')
-    
-    def allocated_date(self, obj):
-        return obj.date.date()
-    allocated_date.short_description = 'Date'
-    allocated_date.admin_order_field = 'date'
-    
-    def queryset(self, request):
-        qs = super(DSRWorkAllocationAdmin, self).queryset(request)
-        #get workallocation objects for the logged in distributor
-        if Distributor.objects.filter(user = request.user).exists():
-            DSRWorkAllocation_objects = DSRWorkAllocation.objects.filter(distributor__user = \
-                                                                         request.user)
-        else:
-            DSRWorkAllocation_objects = DSRWorkAllocation.objects.all()
-        return DSRWorkAllocation_objects
-    
-    def get_form(self, request, obj=None, **kwargs):
-        ModelForm = super(DSRWorkAllocationAdmin, self).get_form(request, obj, **kwargs)
-        class ModelFormMetaClass(ModelForm):
-            def __new__(cls, *args, **kwargs):
-                kwargs['request'] = request
-                return ModelForm(*args, **kwargs)
-        return ModelFormMetaClass
-    
-    def save_model(self, request, obj, form, change):
-        # if dsr is added by distributorstaff, then show the concerned distributor of distributorstaff
-        # else show the distributor
-        if DistributorStaff.objects.filter(user__user = request.user).exists():
-            distributorstaff = DistributorStaff.objects.get(user__user = request.user)
-            obj.distributor = Distributor.objects.get(id = distributorstaff.distributor.id)
-        else:
-            obj.distributor = Distributor.objects.get(user__user = request.user)
-        super(DSRWorkAllocationAdmin, self).save_model(request, obj, form, change)
-        
 class SparePartMasterAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('part_number', 'description',
@@ -1299,7 +1240,6 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("SubCategories", brand), SubCategoriesAdmin)
     brand_admin.register(get_model("PartPricing", brand), PartPricingAdmin)
     brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
-    #brand_admin.register(get_model("DSRWorkAllocation", brand), DSRWorkAllocationAdmin)
     
     brand_admin.register(get_model("NationalSalesManager", brand), NationalSalesManagerAdmin)
     brand_admin.register(get_model("AreaSalesManager", brand), AreaSalesManagerAdmin)
