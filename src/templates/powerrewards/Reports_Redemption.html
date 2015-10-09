@@ -388,16 +388,37 @@
 							         }
 		                        	
 							        $("#download_data").click(function(){
-							          // alert(download_apiURL)
 							          showLoading();
 							          
 							          var col=$('#select-native-3').val();
 				                        var val=$('#search-1').val();
+				                        
+				                        var from=$('#from').val();
+				                        var to=$('#to').val();				                        
+				                        
+				                        if ((from == '' && to == '') || (from == '' && to != '') || (from != '' && to == '')){
+				                        	alert("Please Select a Date Range")
+				                        	return false;
+				                        } else {
+				                        	split_from = from.split("-");
+				                        	split_to = to.split("-");
+				                        	
+				                        	var a = moment(split_from);
+				                        	var b = moment(split_to);
+				                        	 var diff = b.diff(a, 'days');
+				                        	 if(diff  > 180) {
+				                        		 alert("Maximum 6 months data can be downloaded. Please select the date range accordingly")
+				                        		 return false;
+				                        	 } else {
+				                        		 //alert(diff)	 
+				                        	 }
+				                        	
+				                        }
 											          
 											          if((col.length > 0) || (val.length > 0)) {
-											        	  var downloadURL = "/v1/redemption-requests/redemption-download/?access_token="+access_token+"&key="+col+"&value="+val;
+											        	  var downloadURL = "/v1/redemption-requests/redemption-download/?access_token="+access_token+"&key="+col+"&value="+val+"&created_date__gte="+from+"&created_date__lte="+to+"&limit=0";
 											          } else {
-											        	  var downloadURL = "/v1/redemption-requests/redemption-download/?access_token="+access_token;
+											        	  var downloadURL = "/v1/redemption-requests/redemption-download/?access_token="+access_token+"&created_date__gte="+from+"&created_date__lte="+to+"&limit=0";
 											          }
 											          
 											          location.href=downloadURL;
