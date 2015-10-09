@@ -244,6 +244,7 @@ class AccumulationResource(CustomBaseModelResource):
                      "created_date" : ALL
                      }
     
+    
     def build_filters(self, filters=None):
         if filters is None:
             filters = {}
@@ -258,6 +259,7 @@ class AccumulationResource(CustomBaseModelResource):
             orm_filters.update({'custom':  qset})
         return orm_filters  
                      
+
             
     def apply_filters(self, request, applicable_filters):
         if 'custom' in applicable_filters:
