@@ -211,6 +211,7 @@ class CoreLoyaltyService(Services):
     
     def get_accumulation_detail(self, request, choice, model_name):
         kwargs={}
+        
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm_state_list=get_model('AreaSparesManager').objects.get(user__user=request.user).state.all()
             kwargs['member__state__in'] = asm_state_list
