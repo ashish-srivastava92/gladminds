@@ -18,13 +18,13 @@ from tastypie.authorization import Authorization
 from tastypie.authorization import DjangoAuthorization
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
 from tastypie.exceptions import ImmediateHttpResponse
-
+from provider.oauth2.models import Client, AccessToken
 from gladminds.core import constants
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import MultiAuthorization,\
     LoyaltyCustomAuthorization,\
      ZSMCustomAuthorization, DealerCustomAuthorization,\
-     RMCustomAuthorization
+     RMCustomAuthorization,CHCustomAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.auth.access_token_handler import create_access_token, \
     delete_access_token
@@ -38,7 +38,8 @@ from gladminds.core.model_helpers import format_phone_number
 from gladminds.core.utils import check_password
 from gladminds.afterbuy import utils as core_utils
 from gladminds.core.model_fetcher import get_model
-
+from django.core.serializers.json import DjangoJSONEncoder
+from django.contrib.auth.models import User
 logger = logging.getLogger('gladminds')
 
 register_user = RegisterUser()
@@ -86,6 +87,7 @@ class UserProfileResource(CustomBaseModelResource):
                      }
         always_return_data = True 
         ordering = ['user', 'phone_number']
+        
         
     def prepend_urls(self):
         return [
@@ -562,12 +564,12 @@ class RegionalManagerResource(CustomBaseModelResource):
         queryset = models.RegionalManager.objects.all()
         resource_name = "regional-sales-managers"
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization(),CHCustomAuthorization())
         allowed_methods = ['get']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "region": ALL,
-                     "circle_head": ALL_WITH_RELATIONS,
+                     "circle_head": ALL_WITH_RELATIONS                  
                      }
         always_return_data = True
         
@@ -576,9 +578,13 @@ class RegionalManagerResource(CustomBaseModelResource):
                  url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),
                      self.wrap_view('register_regional_sales_manager'), name="register_regional_sales_manager"),
                  url(r"^(?P<resource_name>%s)/update/(?P<user_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
-                     self.wrap_view('update_regional_sales_manager'), name="update_regional_sales_manager"),
+                     self.wrap_view('update_regional_sales_manager'), name="update_regional_sales_manager")
+        
                ]
         
+   
+   
+               
     def register_regional_sales_manager(self, request, **kwargs):
         '''
            Register a new RM
@@ -651,11 +657,9 @@ class RegionalManagerResource(CustomBaseModelResource):
             
             rm_profile = rm_obj.user
             rm_profile.phone_number = load.get('phone_number')
-            
             rm_user= rm_obj.user.user
             rm_user.first_name=load.get('name')
-            rm_user.email=load.get('email')
-            
+            rm_user.email=load.get('email')           
             rm_obj.region = load.get('regional-office')
             ch_user_id = load.get('ch_user_id')
             try:
@@ -683,7 +687,7 @@ class AreaSalesManagerResource(CustomBaseModelResource):
             queryset = models.AreaSalesManager.objects.all()
             resource_name = "area-sales-managers"
             authentication = AccessTokenAuthentication()
-            authorization = MultiAuthorization(DjangoAuthorization(), RMCustomAuthorization())
+            authorization = MultiAuthorization(DjangoAuthorization(),RMCustomAuthorization())
             allowed_methods = ['get']
             filtering = {
                      "user": ALL_WITH_RELATIONS, 
@@ -698,9 +702,11 @@ class AreaSalesManagerResource(CustomBaseModelResource):
                     url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),
                      self.wrap_view('register_area_sales_manager'), name="register_area_sales_manager"),
                     url(r"^(?P<resource_name>%s)/update/(?P<user_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
-                     self.wrap_view('update_area_sales_manager'), name="update_area_sales_manager"),
-                    ]
-            
+                     self.wrap_view('update_area_sales_manager'), name="update_area_sales_manager")
+                
+                ]
+    
+     
         def register_area_sales_manager(self, request, **kwargs):
             '''
                Register a new sm
@@ -1051,7 +1057,8 @@ class DealerResource(CustomBaseModelResource):
                 url(r"^(?P<resource_name>%s)/active%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('get_active_dealer'), name="get_active_dealer"),
                 url(r"^(?P<resource_name>%s)/update/(?P<dealer_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
-                     self.wrap_view('update_dealer'), name="update_dealer"),
+                     self.wrap_view('update_dealer'), name="update_dealer")
+               
                 ]
     
     

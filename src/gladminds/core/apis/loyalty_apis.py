@@ -53,11 +53,11 @@ class RedemptionResource(CustomBaseModelResource):
     class Meta:
         queryset = get_model('RedemptionRequest').objects.all()
         resource_name = "redemption-requests"
-        authentication = AccessTokenAuthentication()
+#         authentication = AccessTokenAuthentication()
         detail_allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         args = constants.LOYALTY_ACCESS
-        authorization = MultiAuthorization(Authorization(), LoyaltyCustomAuthorization(query_field=args['query_field']))
+#         authorization = MultiAuthorization(Authorization(), LoyaltyCustomAuthorization(query_field=args['query_field']))
         filtering = {
                      "member": ALL_WITH_RELATIONS,
                      "resolution_flag":ALL,
@@ -220,8 +220,7 @@ class AccumulationResource(CustomBaseModelResource):
                 for upc in object.data['upcs']:
                     part_number = upc.data['part_number'].data['id']
                     upc_mapping = filter(lambda point: point['part_number__id']==part_number, points)
-                    upc.data['part_number'].data['point'] = upc_mapping[0]['points']
-                    
+                    upc.data['part_number'].data['point'] = upc_mapping[0]['points']                    
         return data
 
 
