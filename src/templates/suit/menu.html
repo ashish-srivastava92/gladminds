@@ -20,32 +20,33 @@
 		   Models available in the {{ name }} application.{% endblocktrans %}">
     {% for app in app_list %}
 	  {% for model in app.models %}
-		{% if model.name == "Users" %}
+	  
+		{% if "Users" in model.name %}
 		<tr>
 		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Users' %}</a></td>
 		</tr>
 		{% endif %}
-		{% if model.name == "Distributors" %}
+		{% if "Distributors" in model.name %}
 		<tr>
 		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Distributors' %}</a></td>
 		</tr>
 		{% endif %}
-		{% if model.name == "Retailers" %}
+		{% if "Retailers" in model.name %}
 		<tr>
 		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Retailers' %}</a></td>
 		</tr>
 		{% endif %}
-		{% if model.name == "Order Part" %}
+		{% if "Order Part" in model.name %}
 		<tr>
 		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Orders' %}</a></td>
 		</tr>
 		{% endif %}
-		{% if model.name == "RetailerCollection" %}
+		{% if "RetailerCollection" in model.name %}
 		<tr>
 		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Collection' %}</a></td>
 		</tr>
 		{% endif %}
-		{% if model.name == "DSR Scorecard Report" %}
+		{% if "DSR Scorecard Report" in model.name %}
 		<tr>
 		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Reports' %}</a></td>
 		</tr>

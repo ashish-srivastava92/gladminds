@@ -2,7 +2,7 @@
 author: araskumar.a
 date: 31-08-2015
 '''
-import json, datetime
+import json, datetime, time
 
 from django.utils import simplejson
 from django.contrib.auth.models import User
@@ -163,7 +163,6 @@ def dsr_order(request, dsr_id, retailer_id):
     it in the database
     '''
     parts = json.loads(request.body)
-    
     date = parts['date']
     items = parts['order_items']
     for item in items:
@@ -202,7 +201,9 @@ def retailer_order(request, retailer_id):
         orderpart.price = item['unit_price']
         orderpart.total_price = item['sub_total']
         orderpart.part = PartMasterCv.objects.get(part_number = item['part_number'])
-        orderpart.retailer = Retailer.objects.get(retailer_code = retailer_id)
+        retailer = Retailer.objects.get(retailer_code = retailer_id)
+        orderpart.retailer = retailer
+        orderpart.distributor = retailer.distributor
         orderpart.save()
     return Response({'message': 'Order(s) has been placed successfully', 'status':1})
 
@@ -217,14 +218,16 @@ def get_schedule(request, dsr_id, date):
     dsr = DistributorSalesRep.objects.filter(distributor_sales_code = dsr_id)
     #schedules = DSRWorkAllocation.objects.filter(date__year = schedule_date[2],\
     #                         date__month = schedule_date[1], date__day = schedule_date[0])
-    schedules = DSRWorkAllocation.objects.filter(date__startswith = datetime.date(schedule_date[0],schedule_date[1],schedule_date[0]))
+    schedules = DSRWorkAllocation.objects.filter(date__startswith = \
+                    datetime.date(int(schedule_date[2]),int(schedule_date[1]),int(schedule_date[0])))
                        
     schedules_list = []
     for schedule in schedules:
         schedule_dict = {}
         schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
         schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
-        schedule_dict.update({"Time" : schedule.date})
+        tm = time.strptime(str(schedule.date.time()), "%H:%M:%S")
+        schedule_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
         schedule_dict.update({"retailer_address":schedule.retailer.user.address})
         schedule_dict.update({"latitude":schedule.retailer.latitude})
         schedule_dict.update({"longitude":schedule.retailer.longitude})

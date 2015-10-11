@@ -549,7 +549,7 @@ class DistributorSalesRepAdmin(GmModelAdmin):
         # else:
         obj.distributor = Distributor.objects.get(user__user = request.user)
         try:
-            dsr = DistributorSalesRep.objects.filter()[0]
+            dsr = DistributorSalesRep.objects.filter().order_by("-id")[0]
             obj.distributor_sales_code = str(int(dsr.distributor_sales_code) + \
                                             constants.DSR_SEQUENCE_INCREMENT)
         except:
@@ -666,7 +666,7 @@ class RetailerAdmin(GmModelAdmin):
         obj.approved = constants.STATUS['WAITING_FOR_APPROVAL']
         #get latest retailer code, add increment and assign it, else assign the sequence first number
         try:
-            retailer = Retailer.objects.filter()[0]
+            retailer = Retailer.objects.filter().order_by("-id")[0]
             obj.retailer_code = str(int(retailer.retailer_code) + \
                                     constants.RETAILER_SEQUENCE_INCREMENT)
         except:
