@@ -129,6 +129,8 @@ def get_parts(request):
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
         parts_dict.update({"part_model":part.part_model})
+        parts_dict.update({"part_category":part.category.name})
+        parts_dict.update({"part_subcategory":part.part_models})
         parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
     return Response(parts_list)
@@ -168,13 +170,15 @@ def dsr_order(request, dsr_id, retailer_id):
         orderpart = OrderPart()
         dd, mm, yyyy = split_date(parts['date'])
         orderpart.order_date = parts['date']
-        orderpart.order_id = retailer_id + dd + mm + yyyy
+        orderpart.order_id = parts['order_id']
         orderpart.quantity = item['qty']
         orderpart.price = item['unit_price']
-        orderpart.total_price = item['sub_total']
-        orderpart.part = PartPricing.objects.get(part_number = item['part_number'])
+        orderpart.total_price = item['sub_total'] #total_price
+        orderpart.part = PartMasterCv.objects.get(part_number = item['part_number'])
         orderpart.dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-        orderpart.retailer = Retailer.objects.get(retailer_code = retailer_id)
+        retailer = Retailer.objects.get(retailer_code = retailer_id)
+        orderpart.retailer = retailer
+        orderpart.distributor = retailer.distributor
         orderpart.save()
     return Response({'message': 'Order(s) has been placed successfully', 'status':1})
     
@@ -193,11 +197,11 @@ def retailer_order(request, retailer_id):
         orderpart = OrderPart()
         dd, mm, yyyy = split_date(parts['date'])
         orderpart.order_date = parts['date']
-        orderpart.order_id = retailer_id + dd + mm + yyyy
+        orderpart.order_id = parts['order_id']
         orderpart.quantity = item['qty']
         orderpart.price = item['unit_price']
         orderpart.total_price = item['sub_total']
-        orderpart.part = PartPricing.objects.filter(description = item['name'])[0]
+        orderpart.part = PartMasterCv.objects.get(part_number = item['part_number'])
         orderpart.retailer = Retailer.objects.get(retailer_code = retailer_id)
         orderpart.save()
     return Response({'message': 'Order(s) has been placed successfully', 'status':1})
@@ -209,14 +213,18 @@ def get_schedule(request, dsr_id, date):
     '''
     This method gets the schedule(the retailers he has to visit) for today, given the dsr id
     '''
-    schedule_date = date
+    schedule_date = split_date(date)
     dsr = DistributorSalesRep.objects.filter(distributor_sales_code = dsr_id)
-    schedules = DSRWorkAllocation.objects.filter(date = schedule_date, dsr = dsr)
+    #schedules = DSRWorkAllocation.objects.filter(date__year = schedule_date[2],\
+    #                         date__month = schedule_date[1], date__day = schedule_date[0])
+    schedules = DSRWorkAllocation.objects.filter(date__startswith = datetime.date(schedule_date[0],schedule_date[1],schedule_date[0]))
+                       
     schedules_list = []
     for schedule in schedules:
         schedule_dict = {}
         schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
         schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
+        schedule_dict.update({"Time" : schedule.date})
         schedule_dict.update({"retailer_address":schedule.retailer.user.address})
         schedule_dict.update({"latitude":schedule.retailer.latitude})
         schedule_dict.update({"longitude":schedule.retailer.longitude})

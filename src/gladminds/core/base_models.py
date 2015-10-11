@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -22,6 +23,8 @@ from gladminds.core.managers.mail import sent_password_reset_link,\
 from gladminds.core.constants import SBOM_STATUS
 from gladminds.core.managers.email_token_manager import EmailTokenManager
 
+image_upload_directory = os.path.join(settings.PROJECT_DIR, "static")
+
 try:
     from django.utils.timezone import now as datetime_now
 except ImportError:
@@ -30,6 +33,7 @@ STATUS_CHOICES=constants.STATUS_CHOICES
 
 def set_user_pic_path(instance, filename):
     return '{0}/{1}/user'.format(settings.ENV,settings.BRAND)
+    #return '{0}/{1}/image'.format(settings.PROJECT_DIR, 'static')
 
 class BaseModel(models.Model):
     '''Base model containing created date and modified date'''
@@ -56,14 +60,16 @@ class UserProfile(BaseModel):
   
     department = models.CharField(max_length=100, null=True, blank=True)
     
-    image_url = models.FileField(upload_to=set_user_pic_path,
-                                  max_length=200, null=True, blank=True,
-                                  validators=[validate_image])
+    # image_url = models.FileField(upload_to=set_user_pic_path,
+    #                               max_length=200, null=True, blank=True,
+    #                               validators=[validate_image])
+    image_url = models.FileField(upload_to="image",
+                                   max_length=200, null=True, blank=True)
     reset_password = models.BooleanField(default=False)
     reset_date = models.DateTimeField(null=True, blank=True)
-        
+    
     def image_tag(self):
-        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+        return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
     image_tag.short_description = 'User Image'
     image_tag.allow_tags = True
 
@@ -1163,6 +1169,22 @@ class DSRWorkAllocation(BaseModel):
         abstract = True
         db_table = "gm_dsrworkallocation"
         verbose_name_plural = "DSR Work Allocation"
+        
+class RetailerCollection(BaseModel):
+    '''details of retailer collection'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_retailercollection"
+        verbose_name_plural = "Collection"
+        
+class DSRScorecardReport(BaseModel):
+    '''details of DSRScorecard'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_dsrscorecardreport"
+        verbose_name_plural = "DSR Scorecard Report"
         
 class PartModels(BaseModel):
     ''' details of parts model '''

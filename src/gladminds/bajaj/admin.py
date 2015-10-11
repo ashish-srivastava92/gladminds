@@ -813,8 +813,8 @@ class OrderPartAdmin(GmModelAdmin):
     
     def get_actions(self, request):
         #in case of administrator only, grant him the approve retailer option
-        #if self.param.groups.filter(name__in =['SuperAdmins', 'Admins', 'distributors']).exists():
-        self.actions.append('accept')
+        if self.param.groups.filter(name__in =['distributors']).exists():
+            self.actions.append('accept')
         actions = super(OrderPartAdmin, self).get_actions(request)
         return actions
     

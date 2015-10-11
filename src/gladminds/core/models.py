@@ -498,15 +498,39 @@ class Retailer(base_models.Retailer):
 
     def __unicode__(self):
         return self.retailer_code + ' ' + self.retailer_name
+    
+class RetailerCollection(base_models.RetailerCollection):
+    '''details of retailer collection'''
+    retailer = models.ForeignKey(Retailer)
+    dsr = models.ForeignKey(DistributorSalesRep)
+    order_amount = models.CharField(max_length = 20)
+    collected_amount = models.CharField(max_length = 20)
+    outstanding_amount = models.CharField(max_length = 20)
+    
+    class Meta(base_models.RetailerCollection.Meta):
+        app_label = _APP_NAME
 
 class DSRWorkAllocation(base_models.DSRWorkAllocation):
     '''details of DSR work allocation'''
     distributor = models.ForeignKey(Distributor)
     dsr = models.ForeignKey(DistributorSalesRep)
     retailer = models.ForeignKey(Retailer)
-    date = models.DateField()
+    date = models.DateTimeField(null = True, blank=True)
     
     class Meta(base_models.DSRWorkAllocation.Meta):
+        app_label = _APP_NAME
+        
+class DSRScorecardReport(base_models.DSRScorecardReport):
+    '''details of DSRScorecardReport'''
+    serial_number = models.CharField(max_length = 5)
+    goals = models.CharField(max_length = 255, null = True, blank = True)
+    target = models.CharField(max_length = 255, null = True, blank = True)
+    actual = models.CharField(max_length = 255,  null = True, blank = True)
+    measures = models.CharField(max_length = 255, null = True, blank = True)
+    weight = models.CharField(max_length = 255, null = True, blank = True)
+    total_score = models.CharField(max_length = 255, null = True, blank = True)
+    
+    class Meta(base_models.DSRScorecardReport.Meta):
         app_label = _APP_NAME
         
 class PartModels(base_models.PartModels):
@@ -570,9 +594,10 @@ class OrderPart(base_models.OrderPart):
     fullfill = models.NullBooleanField()
     delivered = models.IntegerField(null=True, blank=True)
     no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
-    dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
+    dsr = models.ForeignKey(DistributorSalesRep, null = True, blank=True)
     accept = models.BooleanField(default = False)
     retailer = models.ForeignKey(Retailer)
+    distributor = models.ForeignKey(Distributor)
     
     class Meta(base_models.OrderPart.Meta):
         app_label = _APP_NAME

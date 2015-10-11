@@ -1,5 +1,5 @@
 import copy
-import datetime, logging
+import datetime, logging, os
 
 from django import forms
 from django.contrib.admin import AdminSite, TabularInline
@@ -33,7 +33,7 @@ class UserProfileAdmin(GmModelAdmin):
     list_display = ('user', 'phone_number', 'status', 'address',
                     'state', 'country', 'pincode', 'date_of_birth', 'gender')
     readonly_fields = ('image_tag',)
-    
+        
 class DealerAdmin(GmModelAdmin):
     search_fields = ('dealer_id',)
     list_display = ('dealer_id', 'get_user', 'get_profile_number', 'get_profile_address')
@@ -455,19 +455,18 @@ class DistributorForm(forms.ModelForm):
 class DistributorAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = DistributorForm
-    search_fields = ('asm__asm_id',
-                     'phone_number', 'city')
-    list_display = ('distributor_code', 'distributor_name', 'pincode', 'phone_number',
-                    'email', 'staff_status')
+    search_fields = ('distributor_name', 'city')
+    list_display = ('distributor_code', 'distributor_name', 'distributor_head', \
+                    'locality', 'phone', 'email', 'staff_status')
     exclude = ['sent_to_sap']
     
     def save_model(self, request, obj, form, Change):
-        try:
-            distributor = Distributor.objects.filter()[0]
-            obj.distributor_id = str(int(distributor.distributor_id) + \
-                                    constants.DISTRIBUTOR_SEQUENCE_INCREMENT)
-        except:
-            obj.distributor_id = str(constants.DISTRIBUTOR_SEQUENCE)
+        # try:
+        #     distributor = Distributor.objects.filter()[0]
+        #     obj.distributor_id = str(int(distributor.distributor_id) + \
+        #                             constants.DISTRIBUTOR_SEQUENCE_INCREMENT)
+        # except:
+        #     obj.distributor_id = str(constants.DISTRIBUTOR_SEQUENCE)
         super(DistributorAdmin, self).save_model(request, obj, form, Change)
         try:
             send_email(sender = constants.FROM_EMAIL_ADMIN, receiver = obj.email, 
@@ -482,11 +481,21 @@ class DistributorAdmin(GmModelAdmin):
     
     def distributor_name(self, obj):
         return obj.name
+    distributor_name.short_description = 'Name of Distributorship'
     distributor_name.admin_order_field = 'name'
     
-    def pincode(self, obj):
-        return obj.user.pincode
-    pincode.admin_order_field = 'pincode'
+    def distributor_head(self, obj):
+        return obj.user.user.first_name + ' ' + obj.user.user.last_name
+    distributor_head.short_description = 'Distributor Head'
+    distributor_head.admin_order_field = 'user__user'
+    
+    def locality(self, obj):
+        return obj.city
+    locality.admin_order_field = 'city'
+    
+    def phone(self, obj):
+        return obj.phone_number +' ' + obj.mobile
+    phone.short_description = 'phone/ mobile'
     
     def staff_status(self, obj):
         if obj.user.user.is_staff == True:
@@ -579,8 +588,9 @@ class RetailerAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = RetailerForm
     search_fields = ('retailer_name', 'retailer_town', 'billing_code','territory')
-    list_display = ('retailer_code', 'billing_code', 'retailer_name', 'territory', 'city', 'pincode', 'phone',
-                    'mobile', 'email', 'status')
+    list_display = ('retailer_code', 'retailer_billing_code', 'retailer_name', 'territory', 'town',
+                    'pincode', 'phone','mobile', 'email', 'distributor_code', 'distributor_name',
+                    'status')
     exclude = []
     
     def get_form(self, request, obj=None, **kwargs):
@@ -620,6 +630,16 @@ class RetailerAdmin(GmModelAdmin):
                 logger.error('Mail is not sent. Exception occurred ',e)
     approve.short_description = 'Approve Selected Retailers'
     
+    def retailer_billing_code(self, obj):
+        return obj.billing_code
+    retailer_billing_code.short_description = 'Retailer billing code'
+    retailer_billing_code.admin_order_field = 'billing_code'
+    
+    def town(self,obj):
+        return obj.retailer_town
+    town.short_description = 'Town/ City'
+    town.admin_order_field = 'retailer_town'
+    
     def pincode(self, obj):
         return obj.user.pincode
     pincode.admin_order_field = 'user__pincode'
@@ -631,6 +651,16 @@ class RetailerAdmin(GmModelAdmin):
     def phone(self, obj):
         return obj.user.phone_number
     phone.admin_order_field = 'user__phone_number'
+    
+    def distributor_code(self, obj):
+        return obj.distributor.distributor_id
+    distributor_code.short_description = 'Distributor Code'
+    distributor_code.admin_order_field = 'distributor__distributor_id'
+    
+    def distributor_name(self, obj):
+        return obj.distributor.name
+    distributor_name.short_description = 'Distributor Name'
+    distributor_name.admin_order_field = 'distributor__name'
     
     def save_model(self, request, obj, form, change):
         obj.approved = constants.STATUS['WAITING_FOR_APPROVAL']
@@ -670,6 +700,8 @@ class RetailerAdmin(GmModelAdmin):
                     rejected_reason = "<input type=\"button\" value=\"Rejected Reason\" onclick=\"popup_rejected_reason(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.rejected_reason+"\'); return false;\">"
                     return mark_safe(rejected_reason)
     status.allow_tags = True
+    
+
     
 class DSRWorkAllocationForm(forms.ModelForm):
     class Meta:
@@ -729,6 +761,45 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
         # else:
         obj.distributor = Distributor.objects.get(user__user = request.user)
         super(DSRWorkAllocationAdmin, self).save_model(request, obj, form, change)
+
+class OrderPartAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('retailer_name',)
+    list_display = ('order_id', 'retailer', 'dsr_id', 'part_id', 'part_name', 'price', 'quantity', 'total_price',
+                    'accept', 'order_date')
+    list_filter = ['order_date']
+    
+    def get_actions(self, request):
+        #in case of administrator only, grant him the approve retailer option
+        #if self.param.groups.filter(name__in =['SuperAdmins', 'Admins', 'distributors']).exists():
+        self.actions.append('accept')
+        actions = super(OrderPartAdmin, self).get_actions(request)
+        return actions
+    
+    def accept(self, request, queryset):
+        queryset.update(accept = True)
+    accept.short_description = 'Accept selected orders'
+    
+    def part_id(self, obj):
+        return obj.part.part_number
+    part_id.admin_order_field = 'part'
+    
+    def part_name(self, obj):
+        return obj.part.description
+    part_name.admin_order_field = 'part__description'
+    
+    def dsr_id(self, obj):
+        if obj.dsr is None:
+            return 'NA'
+        else:
+            return obj.dsr
+    dsr_id.short_description = "DSR"
+    dsr_id.admin_order_field = "dsr"
+    
+class DSRScorecardReportAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('goals', )
+    list_display = ( 'goals', 'target', 'actual', 'measures', 'weight', 'total_score')
     
 class SparePartMasterAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -1157,6 +1228,10 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("AlternateParts", brand), AlternatePartsAdmin)
     brand_admin.register(get_model("Kit", brand), KitAdmin)
     brand_admin.register(get_model("PartMasterCv", brand), PartMasterCvAdmin)
+    
+    brand_admin.register(get_model("DSRScorecardReport", brand), DSRScorecardReportAdmin)
+    
+    brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
     brand_admin.register(get_model("SparePartMasterData", brand), SparePartMasterAdmin)
     brand_admin.register(get_model("SparePartUPC", brand), SparePartUPCAdmin)
     brand_admin.register(get_model("SparePartPoint", brand), SparePartPointAdmin)

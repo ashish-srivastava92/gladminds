@@ -63,6 +63,7 @@ from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (
     'gladminds.core.context_processors.gm_constants',
     'django.core.context_processors.request',
+    #'django.core.context_processors.applist',
 )
 
 SUIT_CONFIG = {
@@ -255,8 +256,8 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
-
+#MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
+MEDIA_ROOT = os.path.join(PROJECT_DIR, "static")
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://example.com/media/", "http://media.example.com/"
@@ -591,15 +592,16 @@ AFTERBUY_PRODUCT_WARRENTY_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "warrenty")
 AFTERBUY_PRODUCT_INSURANCE_LOC = os.path.join(
     AFTERBUY_PRODUCT_LOC, "insurance")
 AFTERBUY_PRODUCT_INVOICE_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "invoice")
-MEDIA_ROOT = AFTERBUY_LOC
+#MEDIA_ROOT = AFTERBUY_LOC
 MEDIA_URL = '/media/'
 
 # S3 Configuration
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-
+#DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 AWS_STORAGE_BUCKET_MAP = {'afterbuy': 'afterbuy'}
 AWS_STORAGE_BUCKET_NAME = 'gladminds-brands'
-S3_BASE_URL = 'https://%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+#S3_BASE_URL = 'https://%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+S3_BASE_URL = '/static/'
 ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif']
 ALLOWED_FILE_TYPES = { 'pdf' :'pdf',
                        'ppt' : 'vnd.ms-powerpoint',
