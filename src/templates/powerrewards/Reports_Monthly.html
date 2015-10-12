@@ -290,7 +290,7 @@
 							          var col='active_days';
 				                 var val=$('#day').val();
 											          
-											       var downloadURL = "/v1/members/monthly-active-count/?access_token="+access_token+"&key="+col+"&value="+val;
+											       var downloadURL = "/v1/members/monthly-active-count/?access_token="+access_token+"&key="+col+"&value="+val+"$limit=0";
 											          location.href=downloadURL;
 											          hideLoading();
 

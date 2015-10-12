@@ -172,17 +172,22 @@ class RedemptionResource(CustomBaseModelResource):
 #          Get Rdemption report details for given filter
 #          and returns in csv format
 #       '''
-        filter_param = request.GET.get('key')
-        filter_value = request.GET.get('value')
-        applied_filter = {filter_param: filter_value}
-        try:
-            filter_data_list = self.get_list(request, **applied_filter)
-            csv_data = self.csv_convert_redemption(filter_data_list)
-            return csv_data
-        except Exception as ex:
-            filter_data_list = self.get_list(request)
-            csv_data = self.csv_convert_redemption(filter_data_list)
-            return csv_data
+        filter_param = request.GET.get('key','')
+        filter_value = request.GET.get('value','')
+        created_date__gte = request.GET.get('created_date__gte')
+        created_date__lte = request.GET.get('created_date__lte')
+        applied_filter = {filter_param: filter_value, 'created_date__gte':created_date__gte, 'created_date__lte':created_date__lte}
+        if created_date__gte and created_date__lte :
+            try:
+                filter_data_list = self.get_list(request, **applied_filter)
+                return self.csv_convert_redemption(filter_data_list)
+            except Exception as ex:
+                data = {'status':0 , 'message': 'key does not exist'}
+                return HttpResponse(json.dumps(data), content_type="application/json")
+        else:
+            data = {'status':0 , 'message': 'Select a Date range'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
+
         
     def csv_convert_redemption(self, data):
         json_response = json.loads(data.content)
@@ -302,17 +307,21 @@ class AccumulationResource(CustomBaseModelResource):
 #          Get Accumulation report details for given filter
 #          and returns in csv format
 #       '''
-        filter_param = request.GET.get('key')
-        filter_value = request.GET.get('value')
-        applied_filter = {filter_param: filter_value}
-        try:
-            filter_data_list = self.get_list(request, **applied_filter)
-            csv_data = self.csv_convert_accumulation(filter_data_list)
-            return csv_data
-        except Exception as ex:
-            filter_data_list = self.get_list(request)
-            csv_data = self.csv_convert_accumulation(filter_data_list)
-            return csv_data
+        filter_param = request.GET.get('key','')
+        filter_value = request.GET.get('value','')
+        created_date__gte = request.GET.get('created_date__gte')
+        created_date__lte = request.GET.get('created_date__lte')
+        applied_filter = {filter_param: filter_value, 'created_date__gte':created_date__gte, 'created_date__lte':created_date__lte}
+        if created_date__gte and created_date__lte :
+            try:
+                filter_data_list = self.get_list(request, **applied_filter)
+                return self.csv_convert_accumulation(filter_data_list)
+            except Exception as ex:
+                data = {'status':0 , 'message': 'key does not exist'}
+                return HttpResponse(json.dumps(data), content_type="application/json")
+        else:
+            data = {'status':0 , 'message': 'Select a Date range'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
         
     def csv_convert_accumulation(self, data, options =None): 
         file_name='accumulation_download' + datetime.now().strftime('%d_%m_%y')
@@ -353,21 +362,26 @@ class AccumulationResource(CustomBaseModelResource):
             accarray.append(final_acc_dict)
         
     def product_fitment(self, request, **kwargs):
-            '''
+        '''
     #           Get Report product fitment for given filter
     #           and returns in csv format
-    #       '''
-            filter_param = request.GET.get('key')
-            filter_value = request.GET.get('value')
-            applied_filter = {filter_param: filter_value}
+    #   '''
+        filter_param = request.GET.get('key','')
+        filter_value = request.GET.get('value','')
+        created_date__gte = request.GET.get('created_date__gte')
+        created_date__lte = request.GET.get('created_date__lte')
+        applied_filter = {filter_param: filter_value, 'created_date__gte':created_date__gte, 'created_date__lte':created_date__lte}
+        if created_date__gte and created_date__lte :
             try:
                 filter_data_list = self.get_list(request, **applied_filter)
-                csv_data = self.csv_convert_fitment(filter_data_list)
-                return csv_data
+                return self.csv_convert_fitment(filter_data_list)
             except Exception as ex:
-                filter_data_list = self.get_list(request)
-                csv_data = self.csv_convert_fitment(filter_data_list)
-                return csv_data
+                data = {'status':0 , 'message': 'key does not exist'}
+                return HttpResponse(json.dumps(data), content_type="application/json")
+        else:
+            data = {'status':0 , 'message': 'Select a Date range'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
+
         
     def csv_convert_fitment(self, data, options =None): 
         file_name='fitment_download' + datetime.now().strftime('%d_%m_%y')

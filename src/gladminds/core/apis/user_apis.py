@@ -1404,15 +1404,22 @@ class MemberResource(CustomBaseModelResource):
 #           Get registered member details for given filter
 #           and returns in csv format
 #       '''
-        filter_param = request.GET.get('key')
-        filter_value = request.GET.get('value')
-        applied_filter = {filter_param: filter_value}
-        try:
-            filter_data_list = self.get_list(request, **applied_filter)
-            return self.csv_convert_registered_member(filter_data_list)
-        except Exception as ex:
-            filter_data_list = self.get_list(request)
-            return self.csv_convert_registered_member(filter_data_list)
+        
+        filter_param = request.GET.get('key','')
+        filter_value = request.GET.get('value','')
+        registered_date__gte = request.GET.get('registered_date__gte')
+        registered_date__lte = request.GET.get('registered_date__lte')
+        applied_filter = {filter_param: filter_value, 'registered_date__gte':registered_date__gte, 'registered_date__lte':registered_date__lte}
+        if registered_date__gte and registered_date__lte :
+            try:
+                filter_data_list = self.get_list(request, **applied_filter)
+                return self.csv_convert_registered_member(filter_data_list)
+            except Exception as ex:
+                data = {'status':0 , 'message': 'key does not exist'}
+                return HttpResponse(json.dumps(data), content_type="application/json")
+        else:
+            data = {'status':0 , 'message': 'Select a Date range'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
      
     def csv_convert_registered_member(self, data):
         json_response = json.loads(data.content)
@@ -1428,7 +1435,10 @@ class MemberResource(CustomBaseModelResource):
                 if field=='State':
                     data.append(item['state']['state_name'])
                 elif field=='Distributor Code':
+                    if item['distributor']['distributor_id']:
                         data.append(item['distributor']['distributor_id'])
+                    else:
+                        data.append("NA")
                 elif field=='Address of garage':
                         data.append(item['shop_name']+" ,"+item['shop_number']+" ,"+item['shop_address'] +" ,"+item['district']+" ,"+item['state']['state_name']+" ,"+item['pincode'])
                 elif field== 'Mechanic Id':
@@ -1443,13 +1453,16 @@ class MemberResource(CustomBaseModelResource):
                 elif field== 'Mobile Number': 
                     data.append(item['phone_number']) 
                 else:
-                    date_format = datetime.strptime(item['registered_date'], '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
-                    data.append(date_format)
+                    if item['registered_date']:
+                        date_format =  datetime.strptime(item['registered_date'], '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
+                        data.append(date_format)
+                    else:
+                        data.append("NA")
             csvwriter.writerow(data)
         response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
         return response
-            
+    
 
     def monthly_active_code(self, request , **kwargs):
         '''
