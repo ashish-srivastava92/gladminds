@@ -96,8 +96,12 @@ rename table gm_constant to afterbuy_constant;
 --alter table gm_dealer add foreign key(sm_id) references gm_areasalesmanager(id);
 --alter table auth_user modify username varchar(250);
 --alter table gm_comment modify column comment varchar(512);
-
+--------------------------------------------------------------------------------------------
 DROP INDEX constant_name ON gm_constant;
+
+alter table gm_bomvisualization drop column status;
+alter table gm_bomvisualization add column is_published boolean default False;
+alter table gm_bomvisualization add column is_approved boolean default False;
 
 
 

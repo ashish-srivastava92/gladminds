@@ -80,7 +80,7 @@
 									        <option value="member__phone_number__endswith">Mobile No</option>
 									        <option value="member__state__state_name">State</option>
 									        <option value="member__distributor__distributor_id">Distributor Code</option>
-									        <option value="upcs__unique_part_code">Unique Code Detail</option>
+									        <!--<option value="upcs__unique_part_code">Unique Code Detail</option>-->
 									       
 									    </select>
 									</div>
@@ -239,7 +239,7 @@
 
 									function getDataFromAPI(apiURL) {
 											
-										download_apiURL = apiURL;
+										//download_apiURL = apiURL;
 										$.ajax({
 											url : apiURL,
 											type : 'GET',
@@ -348,11 +348,21 @@
 		                                table += ' </tbody></table>';	
 		                               $(".table-responsive").html('').append(table);
  
-		                               $("#reportTable").dataTable({"bFilter": false,"iDisplayLength": 500,"bLengthChange": false,"paging": false,"spagingType": "simple"});
+		                               $("#reportTable").dataTable({"bFilter": false,"iDisplayLength":500,"bLengthChange": false,"paging": false,"spagingType": "simple"});
 		                               $(".pagination li").removeClass("disabled");
 		                               $(".pagination li.active").remove();
 		                               $(".dataTables_info").remove();
 
+		                               
+		                            	//console.log(data.meta.limit)
+		                               /*if(data.meta.limit>data.meta.total_count)
+		                               {
+		                            	  
+		                               		$(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+data.meta.total_count+' of '+data.meta.total_count+' Records');
+		                               }else{
+		                            	 
+		                               		$(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+(data.meta.offset+20)+' of '+data.meta.total_count+' Records');
+		                           		}*/
 		                               
 
 		                               hideLoading();
@@ -389,28 +399,85 @@
 			                               		getPrivPageData($(this).attr('rel'))
 			                               		$(".table-responsive").html('')}
 		                               })
+		                               
+		                               
 
-		                               $("#reportTable th").click(function(){
+		                        /*   $("#reportTable th").click(function(){
 		                               		$(".pagination li").removeClass("disabled");
 		                               		$(".pagination li.active").remove();
 		                               })
+		                               
+		                               $("#reportTable th").click(function(){
+		                               		$(".pagination li").removeClass("disabled");
+		                               		console.log(data.meta.limit)
+		                               		console.log(data.meta.total_count)
+		                               		$(".pagination li.active").remove();
+		                               		if(data.meta.limit>data.meta.total_count)
+			                               {
+		                               			alert("reportTable")
+			                               		$(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+data.meta.total_count+' of '+data.meta.total_count+' Records');
+			                               }else{
+			                            	   alert('Showing '+(data.meta.offset+1)+'-'+(data.meta.offset+20)+' of '+data.meta.total_count+' Records')
+			                            	   
+			                               		$(".dataTables_info").html('Showing '+(data.meta.offset+1)+'-'+(data.meta.offset+20)+' of '+data.meta.total_count+' Records');
+			                           		}
+		                               })   */
+		                               
+		                               
+		                               
+		                               
 
 									}
 
 									$("#download_data").click(function(){
-								          // alert(download_apiURL)
 								          showLoading();
-
-								          $.ajax({
-								           url : download_apiURL+'&limit=10000',
+								          
+								          var col=$('#select-native-3').val();
+					                var val=$('#search-1').val();
+					                        
+					               
+					                        var from=$('#from').val();
+					                        var to=$('#to').val();
+					                        
+					                        if ((from == '' && to == '') || (from == '' && to != '') || (from != '' && to == '')){
+					                        	alert("Please Select a Date Range")
+					                        	return false;
+					                        } else {
+					                        	split_from = from.split("-");
+					                        	split_to = to.split("-");
+					                        	
+					                        	var a = moment(split_from);
+					                        	var b = moment(split_to);
+					                        	 var diff = b.diff(a, 'days');
+					                        	 if(diff  > 180) {
+					                        		 alert("Maximum 6 months data can be downloaded. Please select the date range accordingly")
+					                        		 return false;
+					                        	 } else {
+					                        		 //alert(diff)	 
+					                        	 }
+					                        	
+					                        }
+					                        
+												          
+												          if((col.length > 0) || (val.length > 0)) {
+												        	  var downloadURL = "/v1/accumulations/accumulation-report/?access_token="+access_token+"&key="+col+"&value="+val+"&created_date__gte="+from+"&created_date__lte="+to+"&limit=0";
+												          } else {
+												        	  var downloadURL = "/v1/accumulations/accumulation-report/?access_token="+access_token+"&created_date__gte="+from+"&created_date__lte="+to+"&limit=0";
+												          }
+												          
+													location.href=downloadURL;
+													hideLoading();
+	
+								     /*     $.ajax({
+								           url : dowlloadUrl,
 								           type : 'GET',
 								           dataType : 'json',
 								           success : function(data, success) {
-								            createCSV(data)
+								          // createCSV(data)
 								           }, error : function(e) {
 								            console.log(e)
 								           }
-								          })
+								          })  */
 								         });
 
 								         var link = "";

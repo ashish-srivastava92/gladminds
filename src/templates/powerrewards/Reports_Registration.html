@@ -71,6 +71,7 @@
 				    <div class="col-md-11 pull-right">
 				    	
 					    	<form id="datefilter" style="float: right;" class="pull-right">
+					    	<!--<input type= "hidden" id= "count_data_api" name= "count-data_api"> -->
 						    	<div class="row" style="padding-right: 10px;">
 						    		<div class="col-md-1" style="margin-top:6px;float: left;width: inherit;"><a href="." target="_self" class="ui-btn ui-icon-refresh ui-btn-icon-notext ui-corner-all"></a></div>
 						    		<div class="col-md-3" style="width: 250px;" class="" ><select name="select-native-3" id="select-native-3" data-iconpos="left" data-mini="true" required>
@@ -240,7 +241,7 @@
 									download_apiURL = "";
 									function getDataFromAPI(apiURL) {
 											
-										download_apiURL = apiURL;
+										//download_apiURL = apiURL;
 										$.ajax({
 											url : apiURL,
 											type : 'GET',
@@ -406,21 +407,62 @@
 							         }
 
 							        $("#download_data").click(function(){
-								          // alert(download_apiURL)
+							        		var downloadURL='';
 								          showLoading();
-
+								          var col=$('#select-native-3').val();
+	                        var val=$('#search-1').val();
+	                        
+	                        var from=$('#from').val();
+	                        var to=$('#to').val();
+	                        
+	                        
+	                        if ((from == '' && to == '') || (from == '' && to != '') || (from != '' && to == '')){
+	                        	alert("Please Select a Date Range")
+	                        	return false;
+	                        } else {
+	                        	split_from = from.split("-");
+	                        	split_to = to.split("-");
+	                        	
+	                        	var a = moment(split_from);
+	                        	var b = moment(split_to);
+	                        	 var diff = b.diff(a, 'days');
+	                        	 if(diff  > 180) {
+	                        		 alert("Maximum 6 months data can be downloaded. Please select the date range accordingly")
+	                        		 return false;
+	                        	 } else {
+	                        		 //alert(diff)	 
+	                        	 }
+	                        	
+	                        }
+	                        
+	                        
+								          if((col.length > 0) || (val.length > 0)) {
+								        	  
+								        	  var downloadURL = "/v1/members/registered-members/?access_token="+access_token+"&key="+col+"&value="+val+"&registered_date__gte="+from+"&registered_date__lte="+to+"&limit=0";
+								          } else {
+								        	  var downloadURL = "/v1/members/registered-members/?access_token="+access_token+"&registered_date__gte="+from+"&registered_date__lte="+to+"&limit=0";
+								          }
+								          
+								          location.href=downloadURL;
+								          hideLoading();
+								          
+													/*
 								          $.ajax({
-								           url : download_apiURL+'&limit=10000',
+								           url : downloadUrl,
 								           type : 'GET',
-								           dataType : 'json',
+								           dataType : 'html',
 								           success : function(data, success) {
-								            createCSV(data)
+								          // createCSV(data)
+								           //console.log(data)
+								           
+								           hideLoading()
 								           }, error : function(e) {
 								            console.log(e)
 								            hideLoading();
 								            alert("Data can not be downloaded at the moment. Please try again")
 								           }
 								          })
+								          */
 								         });
 
 								         var link = "";
