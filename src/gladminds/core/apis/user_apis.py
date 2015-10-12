@@ -580,8 +580,7 @@ class RegionalManagerResource(CustomBaseModelResource):
                  url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),
                      self.wrap_view('register_regional_sales_manager'), name="register_regional_sales_manager"),
                  url(r"^(?P<resource_name>%s)/update/(?P<user_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
-                     self.wrap_view('update_regional_sales_manager'), name="update_regional_sales_manager")
-        
+                     self.wrap_view('update_regional_sales_manager'), name="update_regional_sales_manager"),
                ]
         
    
