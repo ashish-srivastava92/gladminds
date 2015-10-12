@@ -222,7 +222,7 @@ def get_schedule(request, dsr_id, date):
     #schedules = DSRWorkAllocation.objects.filter(date__year = schedule_date[2],\
     #                         date__month = schedule_date[1], date__day = schedule_date[0])
     schedules = DSRWorkAllocation.objects.filter(date__startswith = \
-                    datetime.date(int(schedule_date[2]),int(schedule_date[1]),int(schedule_date[0])))
+                    datetime.date(int(schedule_date[2]),int(schedule_date[1]),int(schedule_date[0])), dsr=dsr)
                        
     schedules_list = []
     for schedule in schedules:
