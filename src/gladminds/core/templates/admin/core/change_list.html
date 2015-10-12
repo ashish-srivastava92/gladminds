@@ -54,7 +54,9 @@
         
 {% block coltype %}flex{% endblock %}
 {% block content %}
-
+<div id="order_link">
+  
+</div>
 <!--popup of rejection of retailer-->
 <div id="popup">
   
@@ -123,6 +125,30 @@
           	function popup_close() {
           		document.getElementById("popup").style.visibility = "hidden";
           	}
+			//to show the popup of order link
+			//to close the rejection popup
+          	function order_link_close() {
+          		document.getElementById("order_link").style.visibility = "hidden";
+          	}
+			//to show the popup of order link
+			function order_link() {
+			  var orders = '<br><center>'+
+							'<div class=borderbox>'+
+							'<table class = tbl_header> <tr>'+
+							'<td> part id </td> <td> part name </td> <td> price </td>'+
+							'<td> quantity'+ '<td> total_price </td>'+
+							'</tr> </table>'+
+							'<br><br><br><br><br><br><br><br><br><br><br>'+
+							'<div class="btn_popup">' +
+									'<input type="button" value="cancel" id="button_cancel" \
+									onclick="order_link_close()">'+
+							'</div>'+
+							'</center>'
+			  var Msg = document.getElementById("order_link");
+			  Msg.innerHTML = orders;
+		  	  document.getElementById("order_link").style.visibility = "visible";
+			  
+			}
 			//to show the popup to state the reason for rejection of retailer
 		  	function popup_reject(retailer_id, retailer_name, retailer_email, distributor_name) {
 		  		var popup_content = '<br><center><form action="/admin/retailer/rejected_reason" method="POST">' +

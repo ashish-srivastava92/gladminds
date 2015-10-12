@@ -41,6 +41,8 @@ from django.core.context_processors import csrf
 from gladminds.core.model_fetcher import models
 from gladminds.core.model_helpers import format_phone_number
 from gladminds.core.auth.access_token_handler import create_access_token
+from gladminds.core.models import Retailer
+from gladminds.core.constants import STATUS
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -672,3 +674,23 @@ def get_loyalty_reports(request, report_choice):
         access_token = create_access_token(request.user, http_host)
     template = report_templates[report_choice]
     return render(request, template, {'token':access_token})
+
+@login_required
+def rejected_reason(request):
+    '''
+    This method updates the retailer with the reason for rejection by the ASM/admin
+    '''
+    retailer_id = request.POST['retailer_id']
+    rejected_reason = request.POST['rejected_reason']
+    retailer_email = request.POST['retailer_email']
+    print retailer_id
+    print rejected_reason
+    Retailer.objects.filter(id=retailer_id).update(approved=STATUS['REJECTED'],\
+                                                 rejected_reason=rejected_reason)
+    try:
+        send_email(sender = constants.FROM_EMAIL_ADMIN, receiver = retailer_email, 
+                   subject = constants.REJECT_RETAILER_SUBJECT, body = '',
+                   message = constants.REJECT_RETAILER_MESSAGE)
+    except Exception as e:
+        logger.error('Mail is not sent. Exception occurred', e)
+    return HttpResponseRedirect('/admin/core/retailer/')

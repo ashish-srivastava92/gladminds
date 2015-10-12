@@ -163,6 +163,7 @@ def dsr_order(request, dsr_id, retailer_id):
     it in the database
     '''
     parts = json.loads(request.body)
+    total = parts['total_price']
     date = parts['date']
     items = parts['order_items']
     for item in items:
@@ -172,7 +173,8 @@ def dsr_order(request, dsr_id, retailer_id):
         orderpart.order_id = parts['order_id']
         orderpart.quantity = item['qty']
         orderpart.price = item['unit_price']
-        orderpart.total_price = item['sub_total'] #total_price
+        orderpart.line_total = item['sub_total']
+        orderpart.total_price = float(total) #total_price
         orderpart.part = PartMasterCv.objects.get(part_number = item['part_number'])
         orderpart.dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
         retailer = Retailer.objects.get(retailer_code = retailer_id)
@@ -199,7 +201,8 @@ def retailer_order(request, retailer_id):
         orderpart.order_id = parts['order_id']
         orderpart.quantity = item['qty']
         orderpart.price = item['unit_price']
-        orderpart.total_price = item['sub_total']
+        orderpart.line_total = item['sub_total']
+        orderpart.total_price = parts['total_price']
         orderpart.part = PartMasterCv.objects.get(part_number = item['part_number'])
         retailer = Retailer.objects.get(retailer_code = retailer_id)
         orderpart.retailer = retailer

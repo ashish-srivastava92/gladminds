@@ -9,6 +9,7 @@ from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib.admin import DateFieldListFilter
 from django.forms.widgets import TextInput
 from django.utils.html import mark_safe
+from django.db.models import Count
 
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
@@ -20,7 +21,7 @@ from django.conf import settings
 from gladminds.core.auth_helper import Roles
 from gladminds.core import constants
 from gladminds.core.models import Distributor, DistributorSalesRep, \
-                        Retailer, UserProfile, DSRWorkAllocation
+                        Retailer, UserProfile, DSRWorkAllocation, OrderPart
 
 logger = logging.getLogger('gladminds')
 
@@ -689,6 +690,7 @@ class RetailerAdmin(GmModelAdmin):
             if self.param.groups.filter(name__in = \
                                     ['SuperAdmins', 'Admins', 'AreaSalesManagers']).exists():
                 reject_button = "<input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.email+"\',\'"+obj.distributor.name+"\'); return false;\">"
+                #reject_button = "<input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(); return false;\">"
                 return mark_safe(reject_button)
             else:
                 return 'Waiting for approval'
@@ -700,8 +702,6 @@ class RetailerAdmin(GmModelAdmin):
                     rejected_reason = "<input type=\"button\" value=\"Rejected Reason\" onclick=\"popup_rejected_reason(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.rejected_reason+"\'); return false;\">"
                     return mark_safe(rejected_reason)
     status.allow_tags = True
-    
-
     
 class DSRWorkAllocationForm(forms.ModelForm):
     class Meta:
@@ -765,9 +765,18 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
 class OrderPartAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('retailer_name',)
-    list_display = ('order_id', 'retailer', 'dsr_id', 'part_id', 'part_name', 'price', 'quantity', 'total_price',
-                    'accept', 'order_date')
-    list_filter = ['order_date']
+    list_display = ('order_id', 'retailer', 'dsr_id', 'part_id', 'part_name', 'price', 'quantity',
+                    'line_total', 'accept', 'order_date')
+    #list_display = ('order_link', 'retailer', 'dsr_id',
+     #               'total_amount', 'accept', 'order_date')
+    list_filter = ['order_date', 'distributor', 'dsr']
+    
+    def order_link(self, obj):
+        #reject_button = "<input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.email+"\',\'"+obj.distributor.name+"\'); return false;\">"
+        order_link = "<a href='#' onclick =order_link();>"+str(obj.order_id)+"</a>"
+        return mark_safe(order_link)
+    order_link.short_description = 'order id'
+    order_link.admin_order_field = 'order_id'
     
     def get_actions(self, request):
         #in case of administrator only, grant him the approve retailer option
@@ -793,8 +802,23 @@ class OrderPartAdmin(GmModelAdmin):
             return 'NA'
         else:
             return obj.dsr
-    dsr_id.short_description = "DSR"
+    dsr_id.short_description = "Dsr"
     dsr_id.admin_order_field = "dsr"
+    
+    def queryset(self, request):
+        qs = super(OrderPartAdmin, self).queryset(request)
+        from django.db import connection
+        # cursor = connection.cursor()
+        # sql = 'select order_id from bajajcv.gm_orderpart group by order_id'
+        # rows = cursor.execute(sql)
+        orderpart_objects = OrderPart.objects.filter()
+        #orderpart_objects = OrderPart.objects.raw('select order_id from bajajcv.gm_orderpart group by order_id')
+        return orderpart_objects
+
+class RetailerCollectionAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('retailer',)
+    list_display = ('retailer', 'order_amount', 'collected_amount', 'outstanding_amount')
     
 class DSRScorecardReportAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -1230,6 +1254,7 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("PartMasterCv", brand), PartMasterCvAdmin)
     
     brand_admin.register(get_model("DSRScorecardReport", brand), DSRScorecardReportAdmin)
+    brand_admin.register(get_model("RetailerCollection", brand), RetailerCollectionAdmin)
     
     brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
     brand_admin.register(get_model("SparePartMasterData", brand), SparePartMasterAdmin)
