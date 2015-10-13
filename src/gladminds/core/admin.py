@@ -728,7 +728,7 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
     form = DSRWorkAllocationForm
     #search_fields = ('dsr', 'date')
     list_display = ('dsr', 'allocated_date', 'retailer')
-    list_filter = ('dsr',)
+    list_filter = ['date', 'retailer', 'dsr',]
     
     def allocated_date(self, obj):
         return obj.date

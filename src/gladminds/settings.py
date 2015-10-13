@@ -174,13 +174,13 @@ MANAGERS = ADMINS
 
 DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
 
-# DB_USER = os.environ.get('DB_USER', 'root')
-# DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
-# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
+DB_USER = os.environ.get('DB_USER', 'root')
+DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
 
-DB_USER = os.environ.get('DB_USER', 'bajajcv')
-DB_HOST = os.environ.get('DB_HOST', 'bajajcv.chnnvvffqwop.us-east-1.rds.amazonaws.com')
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'bajajcv123')
+# DB_USER = os.environ.get('DB_USER', 'bajajcv')
+# DB_HOST = os.environ.get('DB_HOST', ' bajajcv1.chnnvvffqwop.us-east-1.rds.amazonaws.com')
+# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'bajajcv123')
 
 DB_PORT = os.environ.get('DB_PORT', '3306')
 
