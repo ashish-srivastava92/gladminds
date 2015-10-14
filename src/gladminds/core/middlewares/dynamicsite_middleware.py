@@ -51,7 +51,7 @@ class DynamicSitesMiddleware(object):
     #Note its a hack for bajaj
         if BRAND.value == '127' or BRAND.value == '192':
             BRAND.value = 'bajaj'
-        BRAND.value = 'bajajcv'
+        BRAND.value = 'bajaj'
     # hack for bajaj ends here      
         if BRAND.value == 'admin':
             request.urlconf = 'gladminds.urls'

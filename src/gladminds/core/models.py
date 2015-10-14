@@ -585,7 +585,7 @@ class PartMasterCv(base_models.PartMasterCv):
         
 class OrderPart(base_models.OrderPart):
     ''' details of ordering spare parts by dsr or retailer'''
-    order_id = models.CharField(max_length = 40)
+    order_id = models.IntegerField()
     order_date = models.DateField()
     part = models.ForeignKey(PartMasterCv)
     quantity = models.IntegerField()

@@ -491,8 +491,8 @@ class DistributorAdmin(GmModelAdmin):
     form = DistributorForm
     search_fields = ('asm__asm_id',
                      'phone_number', 'city')
-    list_display = ('distributor_code', 'distributor_name', 'territory', 'pincode', 'phone_number',
-                    'mobile', 'email', 'staff_status')
+    list_display = ('distributor_code', 'distributor_name', 'head', 'locality', 'phone',
+                    'mail')
     exclude = ['sent_to_sap']
     
     def save_model(self, request, obj, form, Change):
@@ -516,11 +516,23 @@ class DistributorAdmin(GmModelAdmin):
     
     def distributor_name(self, obj):
         return obj.name
-    distributor_name.admin_order_field = 'name'
+    distributor_name.short_description = 'Name of Distributorship'
     
-    def pincode(self, obj):
-        return obj.user.pincode
-    pincode.admin_order_field = 'pincode'
+    def head(self,obj):
+        return obj.user.user.first_name
+    head.short_description = 'Distributor Head'
+    
+    def locality(self,obj):
+        return obj.city
+    locality.short_description = 'locality'
+    
+    def phone(self,obj):
+        return obj.mobile + '/ ' + obj.phone_number
+    phone.short_description = 'Phone/ Mobile'
+    
+    def mail(self, obj):
+        return obj.email
+    mail.short_description = 'Email'
     
     def staff_status(self, obj):
         if obj.user.user.is_staff == True:
@@ -547,6 +559,11 @@ class DistributorSalesRepForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(DistributorSalesRepForm, self).__init__(*args, **kwargs)
+        
+class DSRScorecardReportAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ()
+    list_display = ()
         
 class DistributorSalesRepAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -651,9 +668,37 @@ class RetailerAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = RetailerForm
     search_fields = ('retailer_name', 'retailer_town', 'billing_code','territory')
-    list_display = ('retailer_code', 'billing_code', 'retailer_name', 'territory', 'city', 'pincode', 'phone',
-                    'mobile', 'email', 'status')
+    list_display = ('retailer_code', 'billcode', 'name', 'contact', 'city','phone',
+                    'mail')
     exclude = []
+    
+    def pincode(self, obj):
+        return obj.user.pincode
+    pincode.admin_order_field = 'user__pincode'
+    
+    def billcode(self,obj):
+        return obj.billing_code
+    billcode.short_description = 'Retailer billing code'
+    
+    def name(self,obj):
+        return obj.retailer_name
+    name.short_description = 'Name of the shop'
+    
+    def contact(self,obj):
+        return obj.user.user.first_name + ' ' + obj.user.user.last_name
+    contact.short_description = 'Contact Person'
+    
+    def city(self, obj):
+        return obj.retailer_town
+    city.short_description = 'locality'
+    
+    def phone(self, obj):
+        return obj.user.phone_number + ' ' + obj.mobile
+    phone.short_description = 'Phone / Mobile'
+    
+    def mail(self, obj):
+        return obj.email
+    mail.short_description = 'Email'
     
     def get_form(self, request, obj=None, **kwargs):
         ModelForm = super(RetailerAdmin, self).get_form(request, obj, **kwargs)
@@ -691,18 +736,6 @@ class RetailerAdmin(GmModelAdmin):
             except Exception as e:
                 logger.error('Mail is not sent. Exception occurred ',e)
     approve.short_description = 'Approve Selected Retailers'
-    
-    def pincode(self, obj):
-        return obj.user.pincode
-    pincode.admin_order_field = 'user__pincode'
-    
-    def city(self, obj):
-        return obj.retailer_town
-    city.admin_order_field = 'retailer_town'
-    
-    def phone(self, obj):
-        return obj.user.phone_number
-    phone.admin_order_field = 'user__phone_number'
     
     def save_model(self, request, obj, form, change):
         obj.approved = constants.STATUS['WAITING_FOR_APPROVAL']
@@ -813,8 +846,8 @@ class OrderPartAdmin(GmModelAdmin):
     
     def get_actions(self, request):
         #in case of administrator only, grant him the approve retailer option
-        if self.param.groups.filter(name__in =['distributors']).exists():
-            self.actions.append('accept')
+        # if self.param.groups.filter(name__in =['distributors']).exists():
+        self.actions.append('accept')
         actions = super(OrderPartAdmin, self).get_actions(request)
         return actions
     
@@ -1243,6 +1276,7 @@ def get_admin_site_custom(brand):
     
     brand_admin.register(get_model("NationalSalesManager", brand), NationalSalesManagerAdmin)
     brand_admin.register(get_model("AreaSalesManager", brand), AreaSalesManagerAdmin)
+    brand_admin.register(get_model("DSRScorecardReport", brand), DSRScorecardReportAdmin)
     #brand_admin.register(get_model("SparePartMasterData", brand), SparePartMasterAdmin)
     brand_admin.register(get_model("Dealer", brand), DealerAdmin)
     brand_admin.register(get_model("AuthorizedServiceCenter", brand), AuthorizedServiceCenterAdmin)

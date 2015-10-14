@@ -812,9 +812,12 @@ class OrderPartAdmin(GmModelAdmin):
         # cursor = connection.cursor()
         # sql = 'select order_id from bajajcv.gm_orderpart group by order_id'
         # rows = cursor.execute(sql)
-        orderpart_objects = OrderPart.objects.filter()
+        objects = OrderPart.objects.filter()
+        # objects = OrderPart.objects.values('id', 'order_id').distinct()
+        # for object in objects:
+        #     print object['order_id']
         #orderpart_objects = OrderPart.objects.raw('select order_id from bajajcv.gm_orderpart group by order_id')
-        return orderpart_objects
+        return objects
 
 class RetailerCollectionAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]

@@ -472,6 +472,19 @@ class Distributor(base_models.Distributor):
     
     class Meta(base_models.Distributor.Meta):
         app_label = _APP_NAME
+        
+class DSRScorecardReport(base_models.DSRScorecardReport):
+    ''' details of report '''
+    serial_number = models.CharField(max_length = 5)
+    goals = models.CharField(max_length = 255, null = True, blank = True)
+    target = models.CharField(max_length = 255, null = True, blank = True)
+    actual = models.CharField(max_length = 255,  null = True, blank = True)
+    measures = models.CharField(max_length = 255, null = True, blank = True)
+    weight = models.CharField(max_length = 255, null = True, blank = True)
+    total_score = models.CharField(max_length = 255, null = True, blank = True)
+    
+    class Meta(base_models.DSRScorecardReport.Meta):
+        app_label = _APP_NAME
 
 class DistributorStaff(base_models.DistributorStaff):
     '''details of Distributor'''
