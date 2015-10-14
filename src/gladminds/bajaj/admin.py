@@ -669,7 +669,7 @@ class RetailerAdmin(GmModelAdmin):
     form = RetailerForm
     search_fields = ('retailer_name', 'retailer_town', 'billing_code','territory')
     list_display = ('retailer_code', 'billcode', 'name', 'contact', 'city','phone',
-                    'mail')
+                    'mail','status')
     exclude = []
     
     def pincode(self, obj):
