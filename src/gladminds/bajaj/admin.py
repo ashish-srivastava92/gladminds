@@ -794,19 +794,18 @@ class PartModelsAdmin(GmModelAdmin):
     
 class CategoriesAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('category_name', 'short_name',)
-    list_display = ('category_name', 'short_name', 'part_model', 'active',)
+    search_fields = ('category_name',)
+    list_display = ('category_name','active',)
     
-class SubCategoriesAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('subcategory_name', 'category')
-    list_display = ('subcategory_name', 'category', 'active')
+# class SubCategoriesAdmin(GmModelAdmin):
+#     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+#     search_fields = ('subcategory_name', 'category')
+#     list_display = ('subcategory_name', 'category', 'active')
     
 class PartPricingAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('part_number', 'description','part_model')
-    list_display = ('part_number', 'part_model', 'description', 'valid_from', 'category',
-                    'subcategory', 'mrp', 'active')
+    search_fields = ('part_number', 'description')
+    list_display = ('part_number', 'description','mrp', 'active')
     
 class SparePartUPCAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -1270,7 +1269,7 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("Retailer", brand), RetailerAdmin)
     brand_admin.register(get_model("PartModels", brand), PartModelsAdmin)
     brand_admin.register(get_model("Categories", brand), CategoriesAdmin)
-    brand_admin.register(get_model("SubCategories", brand), SubCategoriesAdmin)
+    #brand_admin.register(get_model("SubCategories", brand), SubCategoriesAdmin)
     brand_admin.register(get_model("PartPricing", brand), PartPricingAdmin)
     brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
     

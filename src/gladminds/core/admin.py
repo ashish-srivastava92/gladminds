@@ -809,14 +809,15 @@ class OrderPartAdmin(GmModelAdmin):
     def queryset(self, request):
         qs = super(OrderPartAdmin, self).queryset(request)
         from django.db import connection
-        # cursor = connection.cursor()
-        # sql = 'select order_id from bajajcv.gm_orderpart group by order_id'
-        # rows = cursor.execute(sql)
-        objects = OrderPart.objects.filter()
-        # objects = OrderPart.objects.values('id', 'order_id').distinct()
-        # for object in objects:
-        #     print object['order_id']
-        #orderpart_objects = OrderPart.objects.raw('select order_id from bajajcv.gm_orderpart group by order_id')
+        #objects = OrderPart.objects.filter()
+        objects = OrderPart.objects.values('order_id').distinct()
+        objects_id = []
+        for object in objects:
+            id = OrderPart.objects.values('id').filter(order_id = object['order_id'])
+            objects_id.append(id)
+        print objects_id
+        # ids = OrderPart.objects.filter(order_id__in = order_id_list).values_list('id')
+        # print ids
         return objects
 
 class RetailerCollectionAdmin(GmModelAdmin):

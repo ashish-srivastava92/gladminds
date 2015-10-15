@@ -542,12 +542,11 @@ class PartModels(base_models.PartModels):
 class Categories(base_models.Categories):
     ''' details of model categories '''
     category_name = models.CharField(max_length=255)
-    short_name = models.CharField(max_length=255, null=True, blank=True)
+    
     image_url = models.CharField(max_length=255, null=True, blank=True)
-    style_class = models.CharField(max_length=255, null=True, blank=True)
-    part_model = models.ForeignKey(PartModels)
+    
     active = models.BooleanField(default = True)
-    group_by = models.CharField(max_length=20, null=True, blank=True)
+    
     
     class Meta(base_models.Categories.Meta):
         app_label = _APP_NAME
@@ -555,30 +554,29 @@ class Categories(base_models.Categories):
     def __unicode__(self):
         return self.category_name
         
-class SubCategories(base_models.SubCategories):
-    ''' details of model categories '''
-    subcategory_name = models.CharField(max_length=255)
-    image_url = models.CharField(max_length=255, null=True, blank=True)
-    category = models.ForeignKey(Categories)
-    part_model = models.ForeignKey(PartModels)
-    active = models.BooleanField(default = True)
-    
-    class Meta(base_models.SubCategories.Meta):
-        app_label = _APP_NAME
-        
-    def __unicode__(self):
-        return self.subcategory_name
-        
+# class SubCategories(base_models.SubCategories):
+#     ''' details of model categories '''
+#     subcategory_name = models.CharField(max_length=255)
+#     image_url = models.CharField(max_length=255, null=True, blank=True)
+#     category = models.ForeignKey(Categories)
+#     part_model = models.ForeignKey(PartModels)
+#     active = models.BooleanField(default = True)
+#     
+#     class Meta(base_models.SubCategories.Meta):
+#         app_label = _APP_NAME
+#         
+#     def __unicode__(self):
+#         return self.subcategory_name
+#         
 class PartPricing(base_models.PartPricing):
     ''' details of model categories '''
-    bajaj_id = models.IntegerField(null=True, blank=True)
     part_number = models.CharField(max_length=255, null=True, blank=True)
-    description = models.CharField(max_length=255, null=True, blank=True)
-    part_model = models.CharField(max_length=255, null=True, blank=True)
-    valid_from = models.DateField( null=True, blank=True)
-    subcategory = models.ForeignKey(SubCategories)
-    category = models.ForeignKey(Categories)
+    products = models.CharField(max_length=255, null=True, blank=True)
+    remarks = models.CharField(max_length=255, null=True, blank=True)
     mrp = models.CharField(max_length=8, null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    subcategory = models.IntegerField()
+    price_list = models.IntegerField()
     active = models.BooleanField(default = True)
     
     class Meta(base_models.PartPricing.Meta):
