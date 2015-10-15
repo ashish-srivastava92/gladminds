@@ -16,10 +16,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework_jwt.settings import api_settings
 
-#from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
- #                           SubCategories, PartPricing, OrderPart, DSRWorkAllocation
+from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
+                            PartPricing, OrderPart
 from gladminds.core.models import DistributorSalesRep, Retailer,PartModels, CvCategories, \
-                             PartMasterCv, OrderPart, DSRWorkAllocation, AlternateParts
+                             OrderPart, DSRWorkAllocation, AlternateParts
 from gladminds.core import constants
 
 @api_view(['POST'])
@@ -122,15 +122,15 @@ def get_parts(request):
     '''
     This method returns all the spare parts details
     '''
-    parts = PartMasterCv.objects.filter(active = True)
+    parts = PartPricing.objects.filter(active = True)
     parts_list =[]
     for part in parts:
         parts_dict = {}
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
-        parts_dict.update({"part_model":part.part_model})
-        parts_dict.update({"part_category":part.category.name})
-        parts_dict.update({"part_subcategory":part.part_models})
+        # parts_dict.update({"part_model":part.part_model})
+        # parts_dict.update({"part_category":part.category.name})
+        # parts_dict.update({"part_subcategory":part.part_models})
         parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
     return Response(parts_list)
@@ -175,7 +175,7 @@ def dsr_order(request, dsr_id, retailer_id):
         orderpart.price = item['unit_price']
         orderpart.line_total = item['sub_total']
         orderpart.total_price = float(total) #total_price
-        orderpart.part = PartMasterCv.objects.get(part_number = item['part_number'])
+        orderpart.part = PartPricing.objects.get(part_number = item['part_number'])
         orderpart.dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
         retailer = Retailer.objects.get(retailer_code = retailer_id)
         orderpart.retailer = retailer
@@ -203,7 +203,7 @@ def retailer_order(request, retailer_id):
         orderpart.price = item['unit_price']
         orderpart.line_total = item['sub_total']
         orderpart.total_price = parts['total_price']
-        orderpart.part = PartMasterCv.objects.get(part_number = item['part_number'])
+        orderpart.part = PartPricing.objects.get(part_number = item['part_number'])
         retailer = Retailer.objects.get(retailer_code = retailer_id)
         orderpart.retailer = retailer
         orderpart.distributor = retailer.distributor
