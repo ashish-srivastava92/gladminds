@@ -84,10 +84,14 @@ class GmModelAdmin(ModelAdmin):
     def get_mechanic_district(self, obj):
         return obj.member.district
     
+    
     def get_asm(self, obj):
-        asm_obj = models.AreaSparesManager.objects.filter(state=obj.member.state)
+        asm_id =  obj.member.registered_by_distributor.asm_id
+        asm_obj = models.AreaSparesManager.objects.filter(id=asm_id)
         if asm_obj:
             return ' | '.join([str(upc.name) for upc in asm_obj])
+
+
 
     def get_mechanic_state(self, obj):
         return obj.member.state.state_name

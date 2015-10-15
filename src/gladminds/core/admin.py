@@ -520,7 +520,6 @@ class AccumulationRequestAdmin(GmModelAdmin):
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm_state_list=get_model("AreaSparesManager").objects.get(user__user=request.user).state.all()
             query_set=query_set.filter(member__state=asm_state_list)
-
         return query_set
 
     def changelist_view(self, request, extra_context=None):
