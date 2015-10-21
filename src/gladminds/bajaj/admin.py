@@ -46,7 +46,7 @@ class AreaServiceManagerAdmin(GmModelAdmin):
     
 class AreaSalesManagerAdmin(GmModelAdmin):
     search_fields = ('state__state_name','rm__region')
-    list_display = ('get_user', 'get_profile_number','get_state', 'rm')
+    list_display = ('get_user', 'get_profile_number','get_state')
     
 class DealerAdmin(GmModelAdmin):
     search_fields = ('dealer_id','asm__asm_id')
@@ -477,6 +477,11 @@ class AreaSalesManagerAdmin(GmModelAdmin):
         obj.phone_number = utils.mobile_format(obj.phone_number)
         super(AreaSalesManagerAdmin, self).save_model(request, obj, form, change)
         
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ("nsm",)
+        form = super(AreaSalesManagerAdmin, self).get_form(request, obj, **kwargs)
+        return form
+        
 class DistributorForm(forms.ModelForm):
     class Meta:
         model = get_model('Distributor')
@@ -496,12 +501,12 @@ class DistributorAdmin(GmModelAdmin):
     exclude = ['sent_to_sap']
     
     def save_model(self, request, obj, form, Change):
-        try:
-            distributor = Distributor.objects.filter()[0]
-            obj.distributor_id = str(int(distributor.distributor_id) + \
-                                    constants.DISTRIBUTOR_SEQUENCE_INCREMENT)
-        except:
-            obj.distributor_id = str(constants.DISTRIBUTOR_SEQUENCE)
+        # try:
+        #     distributor = Distributor.objects.filter()[0]
+        #     obj.distributor_id = str(int(distributor.distributor_id) + \
+        #                             constants.DISTRIBUTOR_SEQUENCE_INCREMENT)
+        # except:
+        #     obj.distributor_id = str(constants.DISTRIBUTOR_SEQUENCE)
         super(DistributorAdmin, self).save_model(request, obj, form, Change)
         try:
             send_email(sender = constants.FROM_EMAIL_ADMIN, receiver = obj.email, 
@@ -787,10 +792,10 @@ class SparePartMasterAdmin(GmModelAdmin):
         price = SparePartPoint.objects.get(part_number = obj.id)
         return price.price
     
-class PartModelsAdmin(GmModelAdmin):
+class PartModelAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('model_name',)
-    list_display = ('model_name', 'active')
+    search_fields = ('name',)
+    list_display = ('name', 'active')
     
 class CategoriesAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -805,7 +810,47 @@ class CategoriesAdmin(GmModelAdmin):
 class PartPricingAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('part_number', 'description')
-    list_display = ('part_number', 'description','mrp', 'active')
+    list_display = ('part_no', 'Part_Description','Category', 'Applicable_Model',
+                    'Price', 'Available', 'Pending',
+                    'Current', 'active')
+    
+    def part_no(self, obj):
+        return obj.part_number
+    part_no.short_description='Parts #'
+    part_no.admin_order_field='part_number'
+    
+    def Part_Description(self, obj):
+        return obj.description
+    Part_Description.short_description='Part Description'
+    
+    def Category(self, obj):
+        return obj.subcategory
+    Category.short_description='Category'
+    
+    def Applicable_Model(self, obj):
+        return obj.subcategory.part_model
+    Applicable_Model.short_description='Applicable_Model'
+    
+    def Price(self, obj):
+        return obj.mrp
+    Price.short_description='Price'
+    
+    def Available(self, obj):
+        return obj.available_quantity
+    Available.short_description='Available Qut.'
+    
+    def Pending(self, obj):
+        return '0'
+    Pending.short_description='Pending Order Qut.'
+    
+    def Current(self, obj):
+        return obj.current_month_should
+    Current.short_description='Current Month should'
+    
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ("price_list",)
+        form = super(PartPricingAdmin, self).get_form(request, obj, **kwargs)
+        return form
     
 class SparePartUPCAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -1267,7 +1312,7 @@ def get_admin_site_custom(brand):
     #brand_admin.register(get_model("DistributorStaff", brand), DistributorStaffAdmin)
     brand_admin.register(get_model("DistributorSalesRep", brand), DistributorSalesRepAdmin)
     brand_admin.register(get_model("Retailer", brand), RetailerAdmin)
-    brand_admin.register(get_model("PartModels", brand), PartModelsAdmin)
+    brand_admin.register(get_model("PartModel", brand), PartModelAdmin)
     brand_admin.register(get_model("Categories", brand), CategoriesAdmin)
     #brand_admin.register(get_model("SubCategories", brand), SubCategoriesAdmin)
     brand_admin.register(get_model("PartPricing", brand), PartPricingAdmin)

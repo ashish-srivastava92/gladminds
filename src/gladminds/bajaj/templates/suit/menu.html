@@ -21,17 +21,17 @@
     {% for app in app_list %}
 	  {% for model in app.models %}
 	  
-		{% if "Users" in model.name %}
+		{% if "Users" == model.name %}
 		<tr>
 		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Users' %}</a></td>
 		</tr>
 		{% endif %}
-		{% if "Distributors" in model.name %}
+		{% if "Distributors" == model.name %}
 		<tr>
 		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Distributors' %}</a></td>
 		</tr>
 		{% endif %}
-		{% if "Retailers" in model.name %}
+		{% if "Retailers" == model.name %}
 		<tr>
 		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Retailers' %}</a></td>
 		</tr>
@@ -41,12 +41,12 @@
 		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Orders' %}</a></td>
 		</tr>
 		{% endif %}
-		{% if "Collection" in model.name %}
+		{% if "Collection" == model.name %}
 		<tr>
 		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Collection' %}</a></td>
 		</tr>
 		{% endif %}
-		{% if "DSR Scorecard Report" in model.name %}
+		{% if "DSR Scorecard Report" == model.name %}
 		<tr>
 		  <td><a href="#" style="text-decoration: none" >{% trans 'Reports' %}</a></td>
 		</tr>

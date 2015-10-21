@@ -1210,6 +1210,14 @@ class SubCategories(BaseModel):
         db_table = "gm_subcategories"
         verbose_name_plural = "subcategories"
         
+class PartModel(BaseModel):
+    ''' details of mc model '''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_partmodel"
+        verbose_name_plural = "Part Model"
+        
 class PartPricing(BaseModel):
     ''' details of spare parts and pricing'''
     
