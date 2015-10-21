@@ -494,8 +494,7 @@ class DistributorForm(forms.ModelForm):
 class DistributorAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = DistributorForm
-    search_fields = ('asm__asm_id',
-                     'phone_number', 'city')
+    search_fields = ('name', 'email',)
     list_display = ('distributor_code', 'distributor_name', 'head', 'locality', 'phone',
                     'mail')
     exclude = ['sent_to_sap']
