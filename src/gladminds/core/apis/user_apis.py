@@ -1417,7 +1417,7 @@ class MemberResource(CustomBaseModelResource):
         if registered_date__gte and registered_date__lte :
             try:
                 filter_data_list = self.get_list(request, **applied_filter)
-                return self.csv_convert_registered_member(filter_data_list, )
+                return self.csv_convert_registered_member(filter_data_list)
             except Exception as ex:
                 data = {'status':0 , 'message': 'key does not exist'}
                 return HttpResponse(json.dumps(data), content_type="application/json")
