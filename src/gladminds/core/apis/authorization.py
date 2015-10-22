@@ -319,3 +319,17 @@ class DealerCustomAuthorization(Authorization):
         elif bundle.request.user.groups.filter(name=Roles.CIRCLEHEADS):
             object_list = object_list.filter(sm__rm__circle_head__user__user_id=int(bundle.request.user.id))
         return object_list
+    
+############# EPC ###############
+
+class HistoryCustomAuthorization(Authorization):
+    print "EPC"
+    def read_list(self, object_list, bundle):
+        print bundle.request.user,"visualtion"
+        if bundle.request.user.groups.filter(name=Roles.VISUALIZATIONADMIN).exists():
+                print "pending only"
+                object_list = object_list.filter(status='Pending')
+        print object_list,"objectssssssssssssss"
+        return object_list
+        
+    
