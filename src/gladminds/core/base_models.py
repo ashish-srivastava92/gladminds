@@ -1242,6 +1242,14 @@ class PartMasterCv(BaseModel):
         db_table = "gm_partmastercv"
         verbose_name_plural = "Part Master"
         
+class Collection(BaseModel):
+    ''' details of payment collected from the retailer'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_collection"
+        verbose_name_plural = "Collection"
+        
 class AlternateParts(BaseModel):
     ''' details of alternate spare parts and pricing'''
     

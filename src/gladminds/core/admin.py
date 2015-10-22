@@ -10,6 +10,8 @@ from django.contrib.admin import DateFieldListFilter
 from django.forms.widgets import TextInput
 from django.utils.html import mark_safe
 from django.db.models import Count
+from django.db import models
+from django.contrib import admin
 
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
@@ -443,23 +445,24 @@ class PartMasterCvAdmin(GmModelAdmin):
     search_fields = ('part_number', 'description', )
     list_display = ('part_number', 'description', 'mrp')
 
-
 class DistributorForm(forms.ModelForm):
+    username = forms.CharField()
+    
+    
     class Meta:
-        model = get_model('Distributor')
-        
-    def __init__(self, *args, **kwargs):
-        super(DistributorForm, self).__init__(*args, **kwargs)
-        self.fields['profile'].widget = TextInput(attrs={
-            'placeholder': 'Distributor'})
-
-class DistributorAdmin(GmModelAdmin):
+        model = Distributor
+        exclude = ['sent_to_sap', 'distributor_id', 'territory']
+    
+class DistributorAdmin(admin.ModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = DistributorForm
     search_fields = ('distributor_name', 'city')
     list_display = ('distributor_code', 'distributor_name', 'distributor_head', \
                     'locality', 'phone', 'email', 'staff_status')
-    exclude = ['sent_to_sap']
+    
+    
+    def get_changelist_form(self, request, **kwargs):
+        return DistributorForm
     
     def save_model(self, request, obj, form, Change):
         # try:

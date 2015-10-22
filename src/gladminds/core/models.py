@@ -583,10 +583,27 @@ class PartMasterCv(base_models.PartMasterCv):
     class Meta(base_models.PartMasterCv.Meta):
         app_label = _APP_NAME
         
+    def __unicode__(self):
+        return self.description
+    
+class Collection(base_models.Collection):
+    ''' details of spare parts and pricing '''
+    retailer = models.ForeignKey(Retailer)
+    payment_date = models.DateTimeField()
+    payment_mode = models.CharField(max_length=10)
+    payment_amount = models.CharField(max_length=10)
+    invoice_date = models.DateTimeField()
+    invoice_amount = models.CharField(max_length=10)
+    invoice_number = models.CharField(max_length=15)
+    
+    class Meta(base_models.Collection.Meta):
+        app_label = _APP_NAME      
+
+        
 class OrderPart(base_models.OrderPart):
     ''' details of ordering spare parts by dsr or retailer'''
     order_id = models.IntegerField()
-    order_date = models.DateField()
+    order_date = models.DateTimeField()
     part = models.ForeignKey(PartMasterCv)
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits = 5, decimal_places=2)
