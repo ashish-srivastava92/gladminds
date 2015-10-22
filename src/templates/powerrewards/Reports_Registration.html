@@ -408,7 +408,7 @@
 
 							        $("#download_data").click(function(){
 							        		var downloadURL='';
-								          showLoading();
+								         // showLoading();
 								          var col=$('#select-native-3').val();
 	                        var val=$('#search-1').val();
 	                        
@@ -435,15 +435,17 @@
 	                        	
 	                        }
 	                        
-	                        
 								          if((col.length > 0) || (val.length > 0)) {
 								        	  
 								        	  var downloadURL = "/v1/members/registered-members/?access_token="+access_token+"&key="+col+"&value="+val+"&registered_date__gte="+from+"&registered_date__lte="+to+"&limit=0";
 								          } else {
 								        	  var downloadURL = "/v1/members/registered-members/?access_token="+access_token+"&registered_date__gte="+from+"&registered_date__lte="+to+"&limit=0";
 								          }
+								          //$("#downloadinfo").html("Download is in progress...");
 								          
-								          location.href=downloadURL;
+								         // location.href=downloadURL;
+								          window.open(downloadURL)
+								          alert("Your Download is in Progress...")
 								          hideLoading();
 								          
 													/*

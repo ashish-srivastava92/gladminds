@@ -388,7 +388,7 @@
 							         }
 		                        	
 							        $("#download_data").click(function(){
-							          showLoading();
+							          //showLoading();
 							          
 							          var col=$('#select-native-3').val();
 				                        var val=$('#search-1').val();
@@ -421,7 +421,9 @@
 											        	  var downloadURL = "/v1/redemption-requests/redemption-download/?access_token="+access_token+"&created_date__gte="+from+"&created_date__lte="+to+"&limit=0";
 											          }
 											          
-											          location.href=downloadURL;
+											          //location.href=downloadURL;
+											          window.open(downloadURL)
+											          alert("Your Download is in Progress...")
 											          hideLoading();
 
 							  /*        $.ajax({
