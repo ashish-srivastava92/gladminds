@@ -120,6 +120,11 @@ class GmModelAdmin(ModelAdmin):
         return obj.part_number.description
 
     get_part_description.short_description = 'Description'
+    
+    def is_used(self, obj):
+        return obj
+
+    is_used.short_description = 'Status'
 
     def get_state(self, obj):
         states = obj.state.all()
