@@ -261,7 +261,7 @@
 									function createTable(data) {
 										dat = data.objects;
 
-										var table='<table id="reportTable" class="table table-striped table-bordered table-hover table-green dataTable" aria-describedby="example-table_info">\
+										var table='<table id="reportTable" class="table table-striped table-bordered table-hover table-green dataTable read_only" aria-describedby="example-table_info">\
 				                        	<thead>\
 				                           			<tr role="row">\
 				                           			<th class="sorting_asc" role="columnheader" tabindex="0" aria-controls="example-table" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Mechanic ID" style="width: 150px;">Mechanic ID</th>\
@@ -408,7 +408,7 @@
 
 							        $("#download_data").click(function(){
 							        		var downloadURL='';
-								          showLoading();
+								         // showLoading();
 								          var col=$('#select-native-3').val();
 	                        var val=$('#search-1').val();
 	                        
@@ -426,8 +426,8 @@
 	                        	var a = moment(split_from);
 	                        	var b = moment(split_to);
 	                        	 var diff = b.diff(a, 'days');
-	                        	 if(diff  > 180) {
-	                        		 alert("Maximum 6 months data can be downloaded. Please select the date range accordingly")
+	                        	 if(diff  > 90 ) {
+	                        		 alert("Maximum 3 months data can be downloaded. Please select the date range accordingly")
 	                        		 return false;
 	                        	 } else {
 	                        		 //alert(diff)	 
@@ -435,15 +435,17 @@
 	                        	
 	                        }
 	                        
-	                        
 								          if((col.length > 0) || (val.length > 0)) {
 								        	  
 								        	  var downloadURL = "/v1/members/registered-members/?access_token="+access_token+"&key="+col+"&value="+val+"&registered_date__gte="+from+"&registered_date__lte="+to+"&limit=0";
 								          } else {
 								        	  var downloadURL = "/v1/members/registered-members/?access_token="+access_token+"&registered_date__gte="+from+"&registered_date__lte="+to+"&limit=0";
 								          }
+								          //$("#downloadinfo").html("Download is in progress...");
 								          
-								          location.href=downloadURL;
+								         // location.href=downloadURL;
+								          window.open(downloadURL)
+								          alert("Your Download is in Progress...")
 								          hideLoading();
 								          
 													/*
