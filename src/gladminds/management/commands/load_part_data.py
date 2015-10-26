@@ -154,26 +154,26 @@ class Command(BaseCommand):
                 users_points_old = 0
                 get_member = member.objects.filter(phone_number=spare['phone']).using(APP)
                 
-                if len(get_member) > 0:
+                if get_member:    ##if len(get_member) > 0: changed to get_member
                     user_total_points  = get_member[0].total_points
                     users_points_old = ( int(user_total_points))
                         
                 for data in spare['data']:
                     spare_master_object = spare_part_upc.objects.filter(unique_part_code = data, is_used=False).using(APP)
-                    if len(spare_master_object) > 0:
+                    if spare_master_object:    #if len(spare_master_object) > 0:
                         spare_points_data = spare_part_points.objects.filter(part_number=spare_master_object[0]).using(APP)
                         if len(spare_points_data) > 0:
                             points_list.append( int (spare_points_data[0].points) )
                         else:
                             points_list.append(0)
                     
-                        if len(get_member) > 0 and len(spare_points_data) > 0:
+                        if get_member and spare_points_data:     #if len(get_member) > 0 and len(spare_points_data) > 0:
                             update_status = spare_part_upc.objects.filter(unique_part_code = data, is_used=False).using(APP)
                             for update in update_status:
                                 update.is_used=True
                                 update.save(using=APP)
                             
-                        if len(get_member) > 0:
+                        if get_member:                 #if len(get_member) > 0: changed to get_member
                             if len(spare_points_data) > 0:
                                 updated_point = user_total_points+spare_points_data[0].points 
                                 users_points_new.append(updated_point)
@@ -195,7 +195,7 @@ class Command(BaseCommand):
                 user_final_point = 0
                 user_old_final_point = 0
                 
-                if len(users_points_new) > 0:
+                if users_points_new :    #if len(users_points_new) > 0:
                     user_final_point = users_points_new[len(users_points_new) -1]
                     mechanic_id = member.objects.using(APP).get(id=get_member[0].id)
                     mechanic_id.total_points = user_final_point

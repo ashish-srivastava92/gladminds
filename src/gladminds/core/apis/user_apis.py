@@ -23,7 +23,7 @@ from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import MultiAuthorization,\
     LoyaltyCustomAuthorization,\
      ZSMCustomAuthorization, DealerCustomAuthorization,\
-     RMCustomAuthorization,CHCustomAuthorization, DistributorUnderASMCustomAuthorization
+     RMCustomAuthorization,CHCustomAuthorization, DistributorCustomAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.auth.access_token_handler import create_access_token, \
     delete_access_token
@@ -1292,8 +1292,8 @@ class DistributorResource(CustomBaseModelResource):
     class Meta:
         queryset = models.Distributor.objects.all()
         resource_name = "distributors"
-        #authorization = Authorization()
-        authorization = MultiAuthorization(DjangoAuthorization(), DistributorUnderASMCustomAuthorization())
+        authorization = Authorization()
+        #authorization = MultiAuthorization(DjangoAuthorization(), DistributorCustomAuthorization())
         authentication = AccessTokenAuthentication()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
