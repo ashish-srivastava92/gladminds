@@ -406,8 +406,8 @@
 				                        	var a = moment(split_from);
 				                        	var b = moment(split_to);
 				                        	 var diff = b.diff(a, 'days');
-				                        	 if(diff  > 90 ) {
-				                        		 alert("Maximum 3 months data can be downloaded. Please select the date range accordingly")
+				                        	 if(diff  > 31 ) {
+				                        		 alert("Maximum 1 months data can be downloaded. Please select the date range accordingly")
 				                        		 return false;
 				                        	 } else {
 				                        		 //alert(diff)	 
