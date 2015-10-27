@@ -103,6 +103,7 @@ alter table gm_bomvisualization drop column status;
 alter table gm_bomvisualization add column is_published boolean default False;
 alter table gm_bomvisualization add column is_approved boolean default False;
 
-
+ALTER TABLE gm_bomvisualization ADD is_published tinyint(1)  NOT NULL DEFAULT 0;
+ALTER TABLE gm_bomvisualization ADD is_approved tinyint(1)  NOT NULL DEFAULT 0;
 
 
