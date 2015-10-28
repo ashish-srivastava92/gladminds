@@ -433,7 +433,7 @@
 									$("#download_data").click(function(){
 								          //showLoading();
 								          
-								          var col=$('#select-native-3').val();
+								          /* var col=$('#select-native-3').val();
 					                var val=$('#search-1').val();
 					                        
 					               
@@ -458,14 +458,15 @@
 					                        		 //alert(diff)	 
 					                        	 }
 					                        	
-					                        }
+					                        } */
 					                        
 												          
-												          if((col.length > 0) || (val.length > 0)) {
-												        	  var downloadURL = "/v1/accumulations/accumulation-report/?access_token="+access_token+"&key="+col+"&value="+val+"&created_date__gte="+from+"&created_date__lte="+to+"&limit=0";
-												          } else {
-												        	  var downloadURL = "/v1/accumulations/accumulation-report/?access_token="+access_token+"&created_date__gte="+from+"&created_date__lte="+to+"&limit=0";
-												          }
+												         // if((col.length > 0) || (val.length > 0)) {
+												        	  //var downloadURL = "/v1/accumulations/accumulation-report/?access_token="+access_token+"&key="+col+"&value="+val+"&created_date__gte="+from+"&created_date__lte="+to+"&limit=0";
+												        	  var downloadURL = "/v1/accumulations/accumulation-report/?access_token="+access_token;
+												          //} else {
+												        	//  var downloadURL = "/v1/accumulations/accumulation-report/?access_token="+access_token+"&created_date__gte="+from+"&created_date__lte="+to+"&limit=0";
+												          //}
 												  //$("#downloadinfo").html("Download is in progress...");        
 													//location.href=downloadURL;
 													window.open(downloadURL)

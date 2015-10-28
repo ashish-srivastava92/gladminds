@@ -307,17 +307,11 @@ class AccumulationResource(CustomBaseModelResource):
            Get Accumulation report details for given filter
            and returns in csv format
         '''
-        created_date__gte = request.GET.get('created_date__gte')
-        created_date__lte = request.GET.get('created_date__lte')
-        if created_date__gte and created_date__lte :
-            try:
-                received_csv_data = self.download_accumulation_details(request)
-                return received_csv_data
-            except Exception as ex:
-                data = {'status':0 , 'message': 'key does not exist'}
-                return HttpResponse(json.dumps(data), content_type="application/json")
-        else:
-            data = {'status':0 , 'message': 'Select a Date range'}
+        try:
+            received_csv_data = self.download_accumulation_details(request)
+            return received_csv_data
+        except Exception as ex:
+            data = {'status':0 , 'message': 'key does not exist'}
             return HttpResponse(json.dumps(data), content_type="application/json")
         
     def download_accumulation_details(self,request, is_fitment = False, fitmentheaders = None, file_name_fitment=None):
@@ -396,17 +390,11 @@ class AccumulationResource(CustomBaseModelResource):
             Get Report product fitment for given filter
             and returns in csv format
         '''
-        created_date__gte = request.GET.get('created_date__gte')
-        created_date__lte = request.GET.get('created_date__lte')
-        if created_date__gte and created_date__lte :
-            try:
-                received_csv_data = self.csv_convert_fitment(request)
-                return received_csv_data
-            except Exception as ex:
-                data = {'status':0 , 'message': 'key does not exist'}
-                return HttpResponse(json.dumps(data), content_type="application/json")
-        else:
-            data = {'status':0 , 'message': 'Select a Date range'}
+        try:
+            received_csv_data = self.csv_convert_fitment(request)
+            return received_csv_data
+        except Exception as ex:
+            data = {'status':0 , 'message': 'key does not exist'}
             return HttpResponse(json.dumps(data), content_type="application/json")
 
     def csv_convert_fitment(self, request):
@@ -420,7 +408,6 @@ class AccumulationResource(CustomBaseModelResource):
         csvwriter.writerow(headers)
         received_csv_data = self.download_accumulation_details(request, is_fitment = True, fitmentheaders=headers, file_name_fitment=file_name)
         return received_csv_data
-       
        
      
 class WelcomeKitResource(CustomBaseModelResource):
