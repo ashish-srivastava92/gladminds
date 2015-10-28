@@ -26,7 +26,7 @@ from gladminds.core.apis.product_apis import ProductCatalogResource,\
 from datetime import datetime, timedelta, date
 import csv
 import StringIO
-
+from django.conf import settings
 
 logger = logging.getLogger("gladminds")
 
@@ -304,18 +304,15 @@ class AccumulationResource(CustomBaseModelResource):
 
     def accumulation_report(self, request, **kwargs):
         '''
-#          Get Accumulation report details for given filter
-#          and returns in csv format
-#       '''
-        filter_param = request.GET.get('key','')
-        filter_value = request.GET.get('value','')
+           Get Accumulation report details for given filter
+           and returns in csv format
+        '''
         created_date__gte = request.GET.get('created_date__gte')
         created_date__lte = request.GET.get('created_date__lte')
-        applied_filter = {filter_param: filter_value, 'created_date__gte':created_date__gte, 'created_date__lte':created_date__lte}
         if created_date__gte and created_date__lte :
             try:
-                filter_data_list = self.get_list(request, **applied_filter)
-                return self.csv_convert_accumulation(filter_data_list)
+                received_csv_data = self.download_accumulation_details(request)
+                return received_csv_data
             except Exception as ex:
                 data = {'status':0 , 'message': 'key does not exist'}
                 return HttpResponse(json.dumps(data), content_type="application/json")
@@ -323,58 +320,88 @@ class AccumulationResource(CustomBaseModelResource):
             data = {'status':0 , 'message': 'Select a Date range'}
             return HttpResponse(json.dumps(data), content_type="application/json")
         
-    def csv_convert_accumulation(self, data, options =None): 
+    def download_accumulation_details(self,request, is_fitment = False, fitmentheaders = None, file_name_fitment=None):
+        '''Download Accumulation Details'''
+        
         file_name='accumulation_download' + datetime.now().strftime('%d_%m_%y')
-        options = options or {}
-        data = json.loads(data.content)
-        headers = []
-        headers = headers+constants.ACCUMULATION_API_HEADER
-        raw_data = StringIO.StringIO()
-        objects = data.get("objects")
-        writer = csv.DictWriter(raw_data, headers, quoting=csv.QUOTE_NONNUMERIC)
-        writer.writeheader()
-        for value in objects:
-            rows = []
-            self.req_acc_key_val(value,rows)
-            writer.writerows(rows)
-            
-        response = HttpResponse(raw_data.getvalue(), content_type='application/csv')
+        headers=[]
+        if is_fitment:
+            headers = fitmentheaders
+            file_name = file_name_fitment
+        else:
+            headers = headers+constants.ACCUMULATION_API_HEADER
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(headers)
+        accumulations = self.get_accumulation_details(request,'AccumulationRequest')
+        finaldata=[]
+        count = 0
+        for accumulation in accumulations:
+            data=[]
+            upcs_data = []
+            for field in headers:
+                if field == 'unique_part_code' :
+                    upcs_data = accumulation.upcs.all()
+                elif field == 'part_number' or field =='description' or field =='points':   
+                    pass  
+                        
+                elif field == 'distributor_id':
+                    if accumulation.member.registered_by_distributor:
+                        if accumulation.member.registered_by_distributor.distributor_id:
+                            data.append(accumulation.member.registered_by_distributor.distributor_id)
+                        else:
+                            data.append("NA")
+                    else:
+                        data.append(accumulation.member.registered_by_distributor)
+                elif field == 'state_name':
+                    data.append(accumulation.member.state.state_name)
+                elif field in constants.ACCUMULATION_API_HEADER_MEMBER_FIELDS:
+                    data.append(getattr(accumulation.member, field))
+                else:
+                    data.append(getattr(accumulation, field))
+            for upcs in upcs_data:
+                if upcs:
+                    count = count+1
+                    get_part_point = get_model('SparePartPoint').objects.using(settings.BRAND).filter(part_number = upcs.part_number)#.select_related('part_number')
+                    finalupcs = list(data)
+                    finalupcs.insert(6, upcs.unique_part_code)
+                    if get_part_point:
+                        finalupcs.insert(7, get_part_point[0].points)
+                    else:
+                        finalupcs.insert(7, "NA")
+                    if is_fitment:
+                        finalupcs.insert(8, upcs.part_number)
+                        finalupcs.insert(9, upcs.part_number.description)
+                        
+                finaldata.append(finalupcs)
+                
+        csvwriter.writerows(finaldata)
+        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        logger.error('[download_accumulation_detail]: Download of accumulation data by user {0}'.format(request.user))
         return response
- 
-    def req_acc_key_val(self, data, accarray = [], is_fitment = False):
-        accdict = {}
-        accdict['mechanic_id'] = data['member']['mechanic_id']
-        accdict['first_name'] = data['member']['first_name']
-        accdict['district'] = data['member']['district']
-        accdict['phone_number'] = data['member']['phone_number']
-        accdict['state_name'] = data['member']['state']['state_name']
-        accdict['distributor_id'] = data['member']['distributor']['distributor_id']
-        accdict['created_date'] = datetime.strptime(data['created_date'], '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
-        for value in data['upcs']:
-            final_acc_dict = {}
-            final_acc_dict = accdict.copy()
-            final_acc_dict['unique_part_code'] = value['unique_part_code']
-            final_acc_dict['point'] = value['part_number']['point']
-            if is_fitment:
-                final_acc_dict['part_number'] = value['part_number']['part_number']
-                final_acc_dict['description'] = value['part_number']['description']
-            accarray.append(final_acc_dict)
+    
+    def get_accumulation_details(self, request,model_name):
+        kwargs={}
+        
+        if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=get_model('AreaSparesManager').objects.get(user__user=request.user).state.all()
+            kwargs['member__state__in'] = asm_state_list
+        accumulation = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs).select_related('member__state','member__registered_by_distributor','upcs', 'upcs__part_number')
+        return accumulation
+
         
     def product_fitment(self, request, **kwargs):
         '''
-    #           Get Report product fitment for given filter
-    #           and returns in csv format
-    #   '''
-        filter_param = request.GET.get('key','')
-        filter_value = request.GET.get('value','')
+            Get Report product fitment for given filter
+            and returns in csv format
+        '''
         created_date__gte = request.GET.get('created_date__gte')
         created_date__lte = request.GET.get('created_date__lte')
-        applied_filter = {filter_param: filter_value, 'created_date__gte':created_date__gte, 'created_date__lte':created_date__lte}
         if created_date__gte and created_date__lte :
             try:
-                filter_data_list = self.get_list(request, **applied_filter)
-                return self.csv_convert_fitment(filter_data_list)
+                received_csv_data = self.csv_convert_fitment(request)
+                return received_csv_data
             except Exception as ex:
                 data = {'status':0 , 'message': 'key does not exist'}
                 return HttpResponse(json.dumps(data), content_type="application/json")
@@ -382,25 +409,19 @@ class AccumulationResource(CustomBaseModelResource):
             data = {'status':0 , 'message': 'Select a Date range'}
             return HttpResponse(json.dumps(data), content_type="application/json")
 
+    def csv_convert_fitment(self, request):
+        '''Download Pfroduct Fitment Details'''
         
-    def csv_convert_fitment(self, data, options =None): 
         file_name='fitment_download' + datetime.now().strftime('%d_%m_%y')
-        options = options or {}
-        data = json.loads(data.content)
         headers=[]
         headers=headers+constants.ACCUMULATION_FITMENT_API_HEADER
-        raw_data = StringIO.StringIO()
-        objects = data.get("objects")
-        writer = csv.DictWriter(raw_data, headers, quoting=csv.QUOTE_NONNUMERIC)
-        writer.writeheader()
-        for value in objects:
-            rows = []
-            self.req_acc_key_val(value, rows, is_fitment = True)
-            writer.writerows(rows)
-            
-        response = HttpResponse(raw_data.getvalue(), content_type='application/csv')
-        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
-        return response
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(headers)
+        received_csv_data = self.download_accumulation_details(request, is_fitment = True, fitmentheaders=headers, file_name_fitment=file_name)
+        return received_csv_data
+       
+       
      
 class WelcomeKitResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
