@@ -1412,17 +1412,11 @@ class MemberResource(CustomBaseModelResource):
             Get registered member details for given filter
             and returns in csv format
         '''
-        registered_date__gte = request.GET.get('registered_date__gte')
-        registered_date__lte = request.GET.get('registered_date__lte')
-        if registered_date__gte and registered_date__lte :
-            try:
-                received_csv_data = self.download_member_detail(request)
-                return received_csv_data
-            except Exception as ex:
-                data = {'status':0 , 'message': 'key does not exist'}
-                return HttpResponse(json.dumps(data), content_type="application/json")
-        else:
-            data = {'status':0 , 'message': 'Select a Date range'}
+        try:
+            received_csv_data = self.download_member_detail(request)
+            return received_csv_data
+        except Exception as ex:
+            data = {'status':0 , 'message': 'key does not exist'}
             return HttpResponse(json.dumps(data), content_type="application/json")
         
     def download_member_detail(self,request):
@@ -1453,8 +1447,13 @@ class MemberResource(CustomBaseModelResource):
                         data.append(mechanic.registered_by_distributor)
                 
                 elif field=='Address of garage':
-                        #data.append("NA")
-                        data.append(mechanic.shop_name+" ,"+mechanic.shop_number+" ,"+mechanic.shop_address +" ,"+mechanic.district+" ,"+mechanic.state.state_name+" ,"+mechanic.pincode)
+                    shop_name =self.address_get(mechanic.shop_name)
+                    shop_number=self.address_get(mechanic.shop_number)
+                    shop_address =self.address_get(mechanic.shop_address)
+                    district = self.address_get(mechanic.district)
+                    state_name= self.address_get(mechanic.state.state_name)
+                    pincode = self.address_get(mechanic.pincode)
+                    data.append(shop_name+" ,"+shop_number+" ,"+shop_address+" ,"+district+" ,"+state_name+" ,"+pincode)
                 elif field== 'Mechanic Id':
                     if mechanic.permanent_id != None:
                         data.append(mechanic.permanent_id)
@@ -1493,7 +1492,13 @@ class MemberResource(CustomBaseModelResource):
         
         return mechanics
 
-    
+    def address_get(self, addr_data):
+        if addr_data:
+            return addr_data
+        else:
+            return "NA"
+        
+        
 
     def monthly_active_code(self, request , **kwargs):
         '''
