@@ -103,6 +103,9 @@ alter table gm_bomvisualization drop column status;
 alter table gm_bomvisualization add column is_published boolean default False;
 alter table gm_bomvisualization add column is_approved boolean default False;
 
-
+--------------------------bajajcv-----------------------------
+alter table gm_dealer add column asm_id integer
+alter table gm_dealer add foreign key(asm_id) references gm_areaservicemanager(id);
+-------------------------------------------------------
 
 
