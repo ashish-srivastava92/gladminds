@@ -11,7 +11,7 @@ from django.utils.html import mark_safe
 
 from gladminds.bajaj import models
 from gladminds.bajaj.models import Distributor, DistributorStaff, DistributorSalesRep, \
-                        Retailer, UserProfile, SparePartPoint
+                        Retailer, UserProfile, SparePartPoint, State
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
@@ -25,6 +25,10 @@ from django.forms.widgets import TextInput
 from gladminds.core.managers.mail import send_email
 
 logger = logging.getLogger('gladminds')
+
+PROFILE_CHOICES = (
+        ('distributor', 'Wholesale Distributors'),
+    )
 
 class BajajAdminSite(AdminSite):
     pass
@@ -483,21 +487,58 @@ class AreaSalesManagerAdmin(GmModelAdmin):
         return form
         
 class DistributorForm(forms.ModelForm):
+    name_distributorship = forms.CharField(label = 'Name of Distributorship', max_length=300)
+    last_name = forms.CharField(max_length=30)
+    first_name = forms.CharField(max_length=30)
+    mobile1 = forms.CharField(max_length=15)
+    mobile2 = forms.CharField(max_length=15)
+    email = forms.CharField(max_length=50)
+    email_Bajaj = forms.CharField(max_length=50)
+    date_birth = forms.DateTimeField(label = 'Date of birth')
+    profile = forms.ChoiceField(choices = PROFILE_CHOICES, required=True)
+    image_url = forms.FileField(max_length=200, required=False)
+    plot_no = forms.CharField(max_length=20)
+    street_name = forms.CharField(max_length=30)
+    locality = forms.CharField(max_length=30)
+    city = forms.CharField(max_length=20)
+    pincode = forms.CharField(max_length=15)
+    phone = forms.CharField(max_length=15, label = 'Phone (Land line)')
+    
+    states = State.objects.all()
+    # state = forms.ChoiceField(choices = ((st.state_code, st.state_name) \
+    #                                         for st in states ))
+    # multiple_states = forms.ChoiceField(choices = ((st.state_code, st.state_name) \
+    #                                         for st in states ), label = 'states')
+    districts = forms.CharField(max_length = 20)
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
+    image_tag.short_description = 'User Image'
+    image_tag.allow_tags = True
+    
     class Meta:
-        model = get_model('Distributor')
+        model = Distributor
+        exclude = ['sent_to_sap', 'distributor_id', 'name', 'email', 'phone_number','city',
+                   'user', 'mobile', 'profile', 'language', 'territory']
         
-    def __init__(self, *args, **kwargs):
-        super(DistributorForm, self).__init__(*args, **kwargs)
-        self.fields['profile'].widget = TextInput(attrs={
-            'placeholder': 'Distributor'})
-
 class DistributorAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = DistributorForm
     search_fields = ('name', 'email',)
     list_display = ('distributor_code', 'distributor_name', 'head', 'locality', 'phone',
                     'mail')
-    exclude = ['sent_to_sap']
+    fieldsets = (
+            ('User Information', {
+              'fields': ('name_distributorship', 'first_name', 'last_name', 'mobile1',
+                'mobile2', 'email', 'email_Bajaj', 'date_birth', 'profile', 'image_url',)
+            }),
+            ('Location', {
+              'fields': ('plot_no', 'street_name', 'locality', 'city',
+                'pincode', 'phone',)
+            }),
+            ('Territory', {
+              'fields': ( 'districts',)
+            }),
+          )
     
     def save_model(self, request, obj, form, Change):
         # try:
@@ -882,10 +923,10 @@ class SparePartPointAdmin(GmModelAdmin):
     
 class OrderPartAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('retailer_name',)
-    list_display = ('retailer', 'dsr', 'part', 'price', 'quantity', 'total_price',
-                    'accept', 'order_date')
-    list_filter = ['order_date']
+    # search_fields = ('retailer_name',)
+    # list_display = ('retailer', 'dsr', 'part', 'price', 'quantity', 'total_price',
+    #                 'accept', 'order_date')
+    # list_filter = ['order_date']
     
     def get_actions(self, request):
         #in case of administrator only, grant him the approve retailer option

@@ -603,7 +603,7 @@ class Collection(base_models.Collection):
 class OrderPart(base_models.OrderPart):
     ''' details of ordering spare parts by dsr or retailer'''
     order_id = models.IntegerField()
-    order_date = models.DateTimeField()
+    order_date = models.DateTimeField(auto_now_add=True)
     part = models.ForeignKey(PartMasterCv)
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits = 5, decimal_places=2)

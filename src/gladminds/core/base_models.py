@@ -1264,7 +1264,7 @@ class Kit(BaseModel):
     class Meta:
         abstract = True
         db_table = "gm_kit"
-        verbose_name_plural = "Kit"
+        verbose_name_plural = "Fast Moving Kit"
         
 class OrderPart(BaseModel):
     ''' details of ordering spare parts by dsr or retailer'''

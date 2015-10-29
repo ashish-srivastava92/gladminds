@@ -16,8 +16,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework_jwt.settings import api_settings
 
-from gladminds.bajaj.models import DistributorSalesRep, Retailer, Categories, \
-                            PartPricing, OrderPart
+# from gladminds.bajaj.models import DistributorSalesRep, Retailer, Categories, \
+#                             PartPricing, OrderPart
 from gladminds.core.models import DistributorSalesRep, Retailer, CvCategories, \
                              OrderPart, DSRWorkAllocation, AlternateParts, Collection, \
                              PartMasterCv
@@ -58,7 +58,8 @@ def authentication(request):
                       "token": jwt_encode_handler(payload), "status":1, "login_type":login_type}
             return Response(data, content_type="application/json")
         else:
-            return Response({'message': 'you are not active. Please contact your distributor', 'status':0})
+            return Response({'message': 'you are not active. Please contact your distributor',
+                             'status':0})
     else:
         return Response({'message': 'you are not a registered user', 'status':0})
     
@@ -119,9 +120,9 @@ def get_parts(request):
         parts_dict = {}
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
-        # parts_dict.update({"part_model":part.part_model})
-        # parts_dict.update({"part_category":part.category.name})
-        # parts_dict.update({"part_subcategory":part.part_models})
+        parts_dict.update({"part_model":part.part_model})
+        parts_dict.update({"part_category":part.category.name})
+        parts_dict.update({"part_subcategory":part.part_models})
         parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
     return Response(parts_list)
@@ -148,7 +149,7 @@ def get_alternateparts(request):
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
-def dsr_order(request, dsr_id, retailer_id):
+def dsr_order(request, dsr_id):
     '''
     This method gets the orders placed by the dsr on behalf of the retailer and puts
     it in the database
@@ -156,19 +157,20 @@ def dsr_order(request, dsr_id, retailer_id):
     parts = json.loads(request.body)
     total = parts['total_price']
     date = parts['date']
+    retailerid = parts['retailer_id']
     items = parts['order_items']
     for item in items:
         orderpart = OrderPart()
         dd, mm, yyyy = split_date(parts['date'])
-        orderpart.order_date = parts['date']
+        orderpart.order_date = parts['date'] + " 00:00:00"
         orderpart.order_id = parts['order_id']
         orderpart.quantity = item['qty']
         orderpart.price = item['unit_price']
         orderpart.line_total = item['sub_total']
-        orderpart.total_price = float(total) #total_price
-        orderpart.part = PartPricing.objects.get(part_number = item['part_number'])
+        orderpart.total_amount = float(total) #total_price
+        orderpart.part = PartMasterCv.objects.get(part_number = item['part_number'])
         orderpart.dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-        retailer = Retailer.objects.get(retailer_code = retailer_id)
+        retailer = Retailer.objects.get(retailer_code = retailerid)
         orderpart.retailer = retailer
         orderpart.distributor = retailer.distributor
         orderpart.save()
