@@ -716,7 +716,7 @@ class RetailerAdmin(GmModelAdmin):
         elif obj.approved == constants.STATUS['WAITING_FOR_APPROVAL'] :
             if self.param.groups.filter(name__in = \
                                     ['SuperAdmins', 'Admins', 'AreaSalesManagers']).exists():
-                reject_button = "<input type=\"button\" id=\"button_reject\" value=\"Approve\" onclick=\"admin/retailer/approve_retailer\"); return false;\"><input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.email+"\',\'"+obj.distributor.name+"\'); return false;\">"
+                reject_button = "<input type=\"button\" id=\"button_reject\" value=\"Approve\" onclick=\"admin/retailer/approve_retailer/retailer_id/\'"+str(obj.id)+"\'); return false;\"><input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.email+"\',\'"+obj.distributor.name+"\'); return false;\">"
                 #reject_button = "<input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(); return false;\">"
                 return mark_safe(reject_button)
             else:

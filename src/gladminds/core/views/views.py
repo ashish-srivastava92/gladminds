@@ -683,8 +683,7 @@ def rejected_reason(request):
     retailer_id = request.POST['retailer_id']
     rejected_reason = request.POST['rejected_reason']
     retailer_email = request.POST['retailer_email']
-    print retailer_id
-    print rejected_reason
+    
     Retailer.objects.filter(id=retailer_id).update(approved=STATUS['REJECTED'],\
                                                  rejected_reason=rejected_reason)
     try:
@@ -693,4 +692,14 @@ def rejected_reason(request):
                    message = constants.REJECT_RETAILER_MESSAGE)
     except Exception as e:
         logger.error('Mail is not sent. Exception occurred', e)
+    return HttpResponseRedirect('/admin/core/retailer/')
+
+@login_required
+def approve_retailer(request, retailer_id):
+    '''
+    This method approves the retailer by the ASM/admin
+    '''
+    
+    print retailer_id
+    raise 
     return HttpResponseRedirect('/admin/core/retailer/')
