@@ -75,17 +75,21 @@ def get_retailers(request, dsr_id):
                                 approved = constants.STATUS['APPROVED'] )
     #retailers = Retailer.objects.all()
     retailer_list = []
-    for retailer in retailers:
-        retailer_dict = {}
-        retailer_dict.update({"retailer_Id":retailer.retailer_code})
-        retailer_dict.update({"retailer_name":retailer.retailer_name})
-        retailer_dict.update({"retailer_mobile":retailer.mobile})
-        retailer_dict.update({"retailer_email":retailer.email})
-        retailer_dict.update({"retailer_address":retailer.user.address})
-        retailer_dict.update({"latitude":retailer.latitude})
-        retailer_dict.update({"longitude":retailer.longitude})
-        retailer_list.append(retailer_dict)
-    return Response(retailer_list)
+    if retailers:
+        for retailer in retailers:
+            retailer_dict = {}
+            retailer_dict.update({"retailer_Id":retailer.retailer_code})
+            retailer_dict.update({"retailer_name":retailer.retailer_name})
+            retailer_dict.update({"retailer_mobile":retailer.mobile})
+            retailer_dict.update({"retailer_email":retailer.email})
+            retailer_dict.update({"retailer_address":retailer.user.address})
+            retailer_dict.update({"latitude":retailer.latitude})
+            retailer_dict.update({"longitude":retailer.longitude})
+            retailer_list.append(retailer_dict)
+        return Response(retailer_list)
+    else:
+        return Response({'message': 'There are no approved retailers'})
+        
 
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
