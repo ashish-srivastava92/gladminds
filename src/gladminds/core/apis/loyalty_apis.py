@@ -26,9 +26,13 @@ from gladminds.core.apis.product_apis import ProductCatalogResource,\
 from datetime import datetime, timedelta, date
 import csv
 import StringIO
-
+from django.conf import settings
+from gunicorn.http.wsgi import FileWrapper
+import mimetypes
+import os
 
 logger = logging.getLogger("gladminds")
+LOG = logging.getLogger('gladminds')
 
 class LoyaltySLAResource(CustomBaseModelResource):
     class Meta:
@@ -304,104 +308,44 @@ class AccumulationResource(CustomBaseModelResource):
 
     def accumulation_report(self, request, **kwargs):
         '''
-#          Get Accumulation report details for given filter
-#          and returns in csv format
-#       '''
-        filter_param = request.GET.get('key','')
-        filter_value = request.GET.get('value','')
-        created_date__gte = request.GET.get('created_date__gte')
-        created_date__lte = request.GET.get('created_date__lte')
-        applied_filter = {filter_param: filter_value, 'created_date__gte':created_date__gte, 'created_date__lte':created_date__lte}
-        if created_date__gte and created_date__lte :
-            try:
-                filter_data_list = self.get_list(request, **applied_filter)
-                return self.csv_convert_accumulation(filter_data_list)
-            except Exception as ex:
-                data = {'status':0 , 'message': 'key does not exist'}
-                return HttpResponse(json.dumps(data), content_type="application/json")
-        else:
-            data = {'status':0 , 'message': 'Select a Date range'}
-            return HttpResponse(json.dumps(data), content_type="application/json")
-        
-    def csv_convert_accumulation(self, data, options =None): 
-        file_name='accumulation_download' + datetime.now().strftime('%d_%m_%y')
-        options = options or {}
-        data = json.loads(data.content)
-        headers = []
-        headers = headers+constants.ACCUMULATION_API_HEADER
-        raw_data = StringIO.StringIO()
-        objects = data.get("objects")
-        writer = csv.DictWriter(raw_data, headers, quoting=csv.QUOTE_NONNUMERIC)
-        writer.writeheader()
-        for value in objects:
-            rows = []
-            self.req_acc_key_val(value,rows)
-            writer.writerows(rows)
-            
-        response = HttpResponse(raw_data.getvalue(), content_type='application/csv')
-        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+           Get Accumulation report details for given filter
+           and returns in csv format
+#         '''
+        from boto.s3.connection import S3Connection
+        from boto.s3.key import  Key
+        S3_ID = 'AKIAIL7IDCSTNCG2R6JA'
+        S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
+        connection = S3Connection(S3_ID, S3_KEY)
+        AWS_STORAGE_BUCKET_NAME = 'gladminds'
+        fname = 'acc_data.csv'
+        bucket_name = AWS_STORAGE_BUCKET_NAME
+        key = connection.get_bucket(bucket_name).get_key(fname)
+        value = key.get_contents_as_string()
+        response = HttpResponse(value, content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename=%s' %(fname)
+        LOG.error('[download_member_detail]: Download of fitment data by user {0}'.format(request.user))
         return response
- 
-    def req_acc_key_val(self, data, accarray = [], is_fitment = False):
-        accdict = {}
-        accdict['mechanic_id'] = data['member']['mechanic_id']
-        accdict['first_name'] = data['member']['first_name']
-        accdict['district'] = data['member']['district']
-        accdict['phone_number'] = data['member']['phone_number']
-        accdict['state_name'] = data['member']['state']['state_name']
-        accdict['distributor_id'] = data['member']['distributor']['distributor_id']
-        accdict['created_date'] = datetime.strptime(data['created_date'], '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
-        for value in data['upcs']:
-            final_acc_dict = {}
-            final_acc_dict = accdict.copy()
-            final_acc_dict['unique_part_code'] = value['unique_part_code']
-            final_acc_dict['point'] = value['part_number']['point']
-            if is_fitment:
-                final_acc_dict['part_number'] = value['part_number']['part_number']
-                final_acc_dict['description'] = value['part_number']['description']
-            accarray.append(final_acc_dict)
-        
+    
     def product_fitment(self, request, **kwargs):
         '''
-    #           Get Report product fitment for given filter
-    #           and returns in csv format
-    #   '''
-        filter_param = request.GET.get('key','')
-        filter_value = request.GET.get('value','')
-        created_date__gte = request.GET.get('created_date__gte')
-        created_date__lte = request.GET.get('created_date__lte')
-        applied_filter = {filter_param: filter_value, 'created_date__gte':created_date__gte, 'created_date__lte':created_date__lte}
-        if created_date__gte and created_date__lte :
-            try:
-                filter_data_list = self.get_list(request, **applied_filter)
-                return self.csv_convert_fitment(filter_data_list)
-            except Exception as ex:
-                data = {'status':0 , 'message': 'key does not exist'}
-                return HttpResponse(json.dumps(data), content_type="application/json")
-        else:
-            data = {'status':0 , 'message': 'Select a Date range'}
-            return HttpResponse(json.dumps(data), content_type="application/json")
-
-        
-    def csv_convert_fitment(self, data, options =None): 
-        file_name='fitment_download' + datetime.now().strftime('%d_%m_%y')
-        options = options or {}
-        data = json.loads(data.content)
-        headers=[]
-        headers=headers+constants.ACCUMULATION_FITMENT_API_HEADER
-        raw_data = StringIO.StringIO()
-        objects = data.get("objects")
-        writer = csv.DictWriter(raw_data, headers, quoting=csv.QUOTE_NONNUMERIC)
-        writer.writeheader()
-        for value in objects:
-            rows = []
-            self.req_acc_key_val(value, rows, is_fitment = True)
-            writer.writerows(rows)
-            
-        response = HttpResponse(raw_data.getvalue(), content_type='application/csv')
-        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+            Get Report product fitment for given filter
+            and returns in csv format
+        '''
+        from boto.s3.connection import S3Connection
+        from boto.s3.key import  Key
+        S3_ID = 'AKIAIL7IDCSTNCG2R6JA'
+        S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
+        connection = S3Connection(S3_ID, S3_KEY)
+        AWS_STORAGE_BUCKET_NAME = 'gladminds'
+        fname = 'fitment_data.csv'
+        bucket_name = AWS_STORAGE_BUCKET_NAME
+        key = connection.get_bucket(bucket_name).get_key(fname)
+        value = key.get_contents_as_string()
+        response = HttpResponse(value, content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename=%s' %(fname)
+        LOG.error('[download_member_detail]: Download of fitment data by user {0}'.format(request.user))
         return response
-     
+        
 class WelcomeKitResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
     partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)
