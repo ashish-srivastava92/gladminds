@@ -107,6 +107,9 @@ alter table gm_bomvisualization add column is_approved boolean default False;
 --------------------------bajajcv-----------------------------
 alter table gm_dealer add column asm_id integer
 alter table gm_dealer add foreign key(asm_id) references gm_areaservicemanager(id);
+alter table gm_dealer add column area varchar(250);
+alter table gm_dealer add column last_transaction_date datetime null;
+alter table gm_dealer add column regional_office varchar(250);
 -------------------------------------------------------
 
 ALTER TABLE gm_bomvisualization ADD is_published tinyint(1)  NOT NULL DEFAULT 0;
