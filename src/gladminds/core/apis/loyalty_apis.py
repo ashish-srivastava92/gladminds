@@ -27,8 +27,12 @@ from datetime import datetime, timedelta, date
 import csv
 import StringIO
 from django.conf import settings
+from gunicorn.http.wsgi import FileWrapper
+import mimetypes
+import os
 
 logger = logging.getLogger("gladminds")
+LOG = logging.getLogger('gladminds')
 
 class LoyaltySLAResource(CustomBaseModelResource):
     class Meta:
@@ -306,110 +310,42 @@ class AccumulationResource(CustomBaseModelResource):
         '''
            Get Accumulation report details for given filter
            and returns in csv format
-        '''
-        try:
-            received_csv_data = self.download_accumulation_details(request)
-            return received_csv_data
-        except Exception as ex:
-            data = {'status':0 , 'message': 'key does not exist'}
-            return HttpResponse(json.dumps(data), content_type="application/json")
-        
-    def download_accumulation_details(self,request, is_fitment = False, fitmentheaders = None, file_name_fitment=None):
-        '''Download Accumulation Details'''
-        
-        file_name='accumulation_download' + datetime.now().strftime('%d_%m_%y')
-        headers=[]
-        if is_fitment:
-            headers = fitmentheaders
-            file_name = file_name_fitment
-        else:
-            headers = headers+constants.ACCUMULATION_API_HEADER
-        csvfile = StringIO.StringIO()
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(headers)
-        accumulations = self.get_accumulation_details(request,'AccumulationRequest')
-        finaldata=[]
-        count = 0
-        for accumulation in accumulations:
-            data=[]
-            upcs_data = []
-            for field in headers:
-                if field == 'unique_part_code' :
-                    upcs_data = accumulation.upcs.all()
-                elif field == 'part_number' or field =='description' or field =='points':   
-                    pass  
-                        
-                elif field == 'distributor_id':
-                    if accumulation.member.registered_by_distributor:
-                        if accumulation.member.registered_by_distributor.distributor_id:
-                            data.append(accumulation.member.registered_by_distributor.distributor_id)
-                        else:
-                            data.append("NA")
-                    else:
-                        data.append(accumulation.member.registered_by_distributor)
-                elif field == 'state_name':
-                    data.append(accumulation.member.state.state_name)
-                elif field in constants.ACCUMULATION_API_HEADER_MEMBER_FIELDS:
-                    data.append(getattr(accumulation.member, field))
-                else:
-                    data.append(getattr(accumulation, field))
-            for upcs in upcs_data:
-                if upcs:
-                    count = count+1
-                    get_part_point = get_model('SparePartPoint').objects.using(settings.BRAND).filter(part_number = upcs.part_number)#.select_related('part_number')
-                    finalupcs = list(data)
-                    finalupcs.insert(6, upcs.unique_part_code)
-                    if get_part_point:
-                        finalupcs.insert(7, get_part_point[0].points)
-                    else:
-                        finalupcs.insert(7, "NA")
-                    if is_fitment:
-                        finalupcs.insert(8, upcs.part_number)
-                        finalupcs.insert(9, upcs.part_number.description)
-                        
-                finaldata.append(finalupcs)
-                
-        csvwriter.writerows(finaldata)
-        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
-        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
-        logger.error('[download_accumulation_detail]: Download of accumulation data by user {0}'.format(request.user))
+#         '''
+        from boto.s3.connection import S3Connection
+        from boto.s3.key import  Key
+        S3_ID = 'AKIAIL7IDCSTNCG2R6JA'
+        S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
+        connection = S3Connection(S3_ID, S3_KEY)
+        AWS_STORAGE_BUCKET_NAME = 'gladminds'
+        fname = 'acc_data.csv'
+        bucket_name = AWS_STORAGE_BUCKET_NAME
+        key = connection.get_bucket(bucket_name).get_key(fname)
+        value = key.get_contents_as_string()
+        response = HttpResponse(value, content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename=%s' %(fname)
+        LOG.error('[download_member_detail]: Download of fitment data by user {0}'.format(request.user))
         return response
     
-    def get_accumulation_details(self, request,model_name):
-        kwargs={}
-        
-        if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm_state_list=get_model('AreaSparesManager').objects.get(user__user=request.user).state.all()
-            kwargs['member__state__in'] = asm_state_list
-        accumulation = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs).select_related('member__state','member__registered_by_distributor','upcs', 'upcs__part_number')
-        return accumulation
-
-        
     def product_fitment(self, request, **kwargs):
         '''
             Get Report product fitment for given filter
             and returns in csv format
         '''
-        try:
-            received_csv_data = self.csv_convert_fitment(request)
-            return received_csv_data
-        except Exception as ex:
-            data = {'status':0 , 'message': 'key does not exist'}
-            return HttpResponse(json.dumps(data), content_type="application/json")
-
-    def csv_convert_fitment(self, request):
-        '''Download Pfroduct Fitment Details'''
+        from boto.s3.connection import S3Connection
+        from boto.s3.key import  Key
+        S3_ID = 'AKIAIL7IDCSTNCG2R6JA'
+        S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
+        connection = S3Connection(S3_ID, S3_KEY)
+        AWS_STORAGE_BUCKET_NAME = 'gladminds'
+        fname = 'fitment_data.csv'
+        bucket_name = AWS_STORAGE_BUCKET_NAME
+        key = connection.get_bucket(bucket_name).get_key(fname)
+        value = key.get_contents_as_string()
+        response = HttpResponse(value, content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename=%s' %(fname)
+        LOG.error('[download_member_detail]: Download of fitment data by user {0}'.format(request.user))
+        return response
         
-        file_name='fitment_download' + datetime.now().strftime('%d_%m_%y')
-        headers=[]
-        headers=headers+constants.ACCUMULATION_FITMENT_API_HEADER
-        csvfile = StringIO.StringIO()
-        csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(headers)
-        received_csv_data = self.download_accumulation_details(request, is_fitment = True, fitmentheaders=headers, file_name_fitment=file_name)
-        return received_csv_data
-       
-     
 class WelcomeKitResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
     partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)
