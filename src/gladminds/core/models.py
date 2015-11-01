@@ -522,7 +522,7 @@ class DSRWorkAllocation(base_models.DSRWorkAllocation):
         
 class DSRScorecardReport(base_models.DSRScorecardReport):
     '''details of DSRScorecardReport'''
-    serial_number = models.CharField(max_length = 5)
+    serial_number = models.DecimalField(max_digits = 6, decimal_places=3)
     goals = models.CharField(max_length = 255, null = True, blank = True)
     target = models.CharField(max_length = 255, null = True, blank = True)
     actual = models.CharField(max_length = 255,  null = True, blank = True)
@@ -579,6 +579,8 @@ class PartMasterCv(base_models.PartMasterCv):
     category = models.ForeignKey(CvCategories)
     mrp = models.CharField(max_length = 255)
     active = models.BooleanField(default = True)
+    available = models.CharField(max_length=25)
+    pending = models.CharField(max_length=25)
     
     class Meta(base_models.PartMasterCv.Meta):
         app_label = _APP_NAME

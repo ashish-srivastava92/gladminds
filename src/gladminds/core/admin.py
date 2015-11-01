@@ -23,7 +23,8 @@ from django.conf import settings
 from gladminds.core.auth_helper import Roles
 from gladminds.core import constants
 from gladminds.core.models import Distributor, DistributorSalesRep, \
-                        Retailer, UserProfile, DSRWorkAllocation, OrderPart, State
+                        Retailer, UserProfile, DSRWorkAllocation, OrderPart, State, \
+                        DSRScorecardReport
 
 logger = logging.getLogger('gladminds')
 
@@ -447,8 +448,44 @@ class KitAdmin(GmModelAdmin):
 class PartMasterCvAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('part_number', 'description', )
-    list_display = ('part_number', 'description', 'mrp')
-
+    list_display = ('part_no', 'thisdescription', 'thiscategory', 'thismodel','price',
+                    'quantityavailable', 'orderpending')
+    
+    def part_no(self, obj):
+        return obj.part_number
+    part_no.short_description = 'Parts #'
+    part_no.admin_order_field = 'part_number'
+    
+    def thisdescription(self,obj):
+        return obj.description
+    thisdescription.short_description = 'Part Description'
+    
+    def thismodel(self,obj):
+        return obj.part_model
+    thismodel.short_description = 'Applicable Model'
+    
+    def thiscategory(self,obj):
+        return obj.category.name
+    thiscategory.short_description = 'Category'
+    
+    def price(self,obj):
+        return obj.mrp
+    price.short_description = 'Price'
+    
+    def quantityavailable(self,obj):
+        if obj.available is None:
+            return ''
+        else:
+            return obj.available
+    quantityavailable.short_description = 'Available Qut.'
+    
+    def orderpending(self, obj):
+        if obj.pending is None:
+            return ''
+        else:
+            return obj.pending
+    orderpending.short_description = 'Pending order Qut.'
+    
 class DistributorForm(forms.ModelForm):
     
     
@@ -716,7 +753,7 @@ class RetailerAdmin(GmModelAdmin):
         elif obj.approved == constants.STATUS['WAITING_FOR_APPROVAL'] :
             if self.param.groups.filter(name__in = \
                                     ['SuperAdmins', 'Admins', 'AreaSalesManagers']).exists():
-                reject_button = "<a href=\"/admin/retailer/approve_retailer/retailer_id/"+str(obj.id)+"/\"><input type=button value=Approve></a><input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.email+"\',\'"+obj.distributor.name+"\'); return false;\">"
+                reject_button = "<a href=\"/admin/retailer/approve_retailer/retailer_id/"+str(obj.id)+"/\"><input type=button value=Approve></a>&nbsp;<input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.email+"\',\'"+obj.distributor.name+"\'); return false;\">"
                 #reject_button = "<input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(); return false;\">"
                 return mark_safe(reject_button)
             else:
@@ -856,7 +893,21 @@ class RetailerCollectionAdmin(GmModelAdmin):
 class DSRScorecardReportAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('goals', )
-    list_display = ( 'goals', 'target', 'actual', 'measures', 'weight', 'total_score')
+    list_display = ( 'srno', 'goals', 'target', 'actual', 'measures', 'weight', 'total_score')
+    
+    def srno(self, obj):
+        return obj.serial_number
+    srno.short_description = 'Sr.No.'
+    
+    def queryset(self, request):
+        qs = super(DSRScorecardReportAdmin, self).queryset(request)
+        report_headers = DSRScorecardReport.objects.filter().order_by('serial_number')
+        return report_headers
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('weight', 'total_score')
+        form = super(DSRScorecardReportAdmin, self).get_form(request, obj, **kwargs)
+        return form
     
 class SparePartMasterAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]

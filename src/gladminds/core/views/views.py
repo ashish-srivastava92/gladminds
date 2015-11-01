@@ -700,6 +700,5 @@ def approve_retailer(request, retailer_id):
     This method approves the retailer by the ASM/admin
     '''
     
-    print retailer_id
-    raise 
+    retailer = Retailer.objects.filter(id=retailer_id).update(approved=STATUS['APPROVED'])
     return HttpResponseRedirect('/admin/core/retailer/')

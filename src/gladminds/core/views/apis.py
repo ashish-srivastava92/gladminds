@@ -37,12 +37,12 @@ def authentication(request):
     if user:
         if user.is_active:
             #the user is active.He should be a dsr or retailer 
-            authenticated_user = DistributorSalesRep.objects.filter(user = user)
+            authenticated_user = DistributorSalesRep.objects.filter(user = user, is_active=True)
             if authenticated_user:
                 login_type = "dsr"
                 role_id = authenticated_user[0].distributor_sales_code
             else:
-                authenticated_user = Retailer.objects.filter(user = user, \
+                authenticated_user = Retailer.objects.filter(user = user, is_active=True, \
                                                 approved = constants.STATUS['APPROVED'])
                 if authenticated_user:
                     login_type = "retailer"
@@ -149,7 +149,6 @@ def get_alternateparts(request):
         parts_list.append(parts_dict)
     return Response(parts_list)
 
-
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
@@ -166,7 +165,7 @@ def dsr_order(request, dsr_id):
     for item in items:
         orderpart = OrderPart()
         dd, mm, yyyy = split_date(parts['date'])
-        orderpart.order_date = parts['date'] + " 00:00:00"
+        #orderpart.order_date = parts['date'] + " 00:00:00"
         orderpart.order_id = parts['order_id']
         orderpart.quantity = item['qty']
         orderpart.price = item['unit_price']
@@ -178,6 +177,34 @@ def dsr_order(request, dsr_id):
         orderpart.retailer = retailer
         orderpart.distributor = retailer.distributor
         orderpart.save()
+    return Response({'message': 'Order(s) has been placed successfully', 'status':1})
+
+@api_view(['POST'])
+# @authentication_classes((JSONWebTokenAuthentication,))
+# @permission_classes((IsAuthenticated,))
+def day_close_order(request, dsr_id):
+    '''
+    This method gets the orders placed by the dsr on behalf of the retailer and puts
+    it in the database
+    '''
+    parts = json.loads(request.body)
+    print '---------------------'
+    print parts['dayclose_order_list']
+    print '---------------------'
+    for order_list in parts['dayclose_order_list']:
+        for order_items in order_list['order_items']:
+            orderpart = OrderPart()
+            orderpart.order_id = order_list['order_number']
+            orderpart.quantity = order_items['item_qty']
+            orderpart.price = order_items['unit_price']
+            orderpart.line_total = order_items['item_sub_total']
+            orderpart.total_amount = float(order_list['total_price']) #total_price
+            orderpart.part = PartMasterCv.objects.get(part_number = order_items['item_number'])
+            orderpart.dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+            retailer = Retailer.objects.get(retailer_code = order_list['retailer_id'])
+            orderpart.retailer = retailer
+            orderpart.distributor = retailer.distributor
+            orderpart.save()
     return Response({'message': 'Order(s) has been placed successfully', 'status':1})
     
 
@@ -241,7 +268,7 @@ def get_outstanding(request, retailer_id):
     given the retailer Id
     '''
     retailer = Retailer.objects.get(retailer_code = retailer_id)
-    retailer_transaction = Collection.objects.latest('invoice_date')
+    retailer_transaction = Collection.objects.filter('invoice_date')
     
     payment_list = []
     for transaction in retailer_transaction:
