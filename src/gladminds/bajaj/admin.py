@@ -875,6 +875,7 @@ class ContainerIndentAdmin(GmModelAdmin):
             return {'class': css_class}
 
 
+
 class ContainerLRAdmin(GmModelAdmin):
     search_fields = ('zib_indent_num__indent_num',)
     list_display = ('lr_number', 'zib_indent_num',

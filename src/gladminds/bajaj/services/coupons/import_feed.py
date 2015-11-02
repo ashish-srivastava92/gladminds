@@ -1,18 +1,3 @@
-Skip to content
-This repository  
-Pull requests
-Issues
-Gist
- @GladmindsTeena
- Unwatch 11
-  Star 0
- Fork 9 GM-Technologies/gladminds PRIVATE
-forked from hashedin/gladminds
- Branch: master  gladminds/src/gladminds/bajaj/services/coupons/import_feed.py
-56cee82  on Oct 2
-@GladmindsTeena GladmindsTeena lr table updating transp id
-4 contributors @pavankumar77 @naureen-34 @GladmindsTeena @Karishmac6
-RawBlameHistory    638 lines (566 sloc)  33.3 KB
 import csv
 import logging
 import os
@@ -653,5 +638,3 @@ def format_date(date):
     else:
         date=datetime.strptime(date, "%Y-%m-%d")
     return date
-Status API Training Shop Blog About Pricing
-© 2015 GitHub, Inc. Terms Privacy Security Contact Help
