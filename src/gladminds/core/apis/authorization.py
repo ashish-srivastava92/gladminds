@@ -328,3 +328,9 @@ class DealerCustomAuthorization(Authorization):
         return object_list
     
 
+
+class DistributorCustomAuthorization(Authorization):
+    def read_list(self, object_list, bundle):
+        if bundle.request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            object_list = object_list.filter(asm__user=int(bundle.request.user.id))
+        return object_list
