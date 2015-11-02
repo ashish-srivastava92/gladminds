@@ -326,8 +326,3 @@ class DealerCustomAuthorization(Authorization):
         elif bundle.request.user.groups.filter(name=Roles.CIRCLEHEADS):
             object_list = object_list.filter(sm__rm__circle_head__user__user_id=int(bundle.request.user.id))
         return object_list
-<<<<<<< HEAD
-    
-
-=======
->>>>>>> parent of f9600d3... changed for epc
