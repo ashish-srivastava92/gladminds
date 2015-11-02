@@ -130,16 +130,16 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                 dealer_data = self.check_or_create_dealer(dealer_id=dealer['id'],
                                 address=dealer['address'], cdms_flag=dealer['cdms_flag'])
                 mobile_number_active = self.check_mobile_active(dealer, dealer_data)
-                if mobile_number_active and dealer['status']=='Y':
+                if mobile_number_active and dealer['status'] == 'Y':
                     raise ValueError(dealer['phone_number'] + ' is active under another dealer')
                 try:
                     service_advisor = models.ServiceAdvisor.objects.select_related('user__user').get(
                                         service_advisor_id=dealer['service_advisor_id'])
                     if service_advisor.user.phone_number != dealer['phone_number']:
-                        new_user=service_advisor.user
-                        new_user.phone_number=dealer['phone_number']
+                        new_user = service_advisor.user
+                        new_user.phone_number = dealer['phone_number']
                         new_user.save()
-                        service_advisor.user=new_user
+                        service_advisor.user = new_user
                         logger.info(
                         "[Info: DealerAndServiceAdvisorFeed_sa]: Updated phone number for {0}"
                         .format(dealer['service_advisor_id']))
@@ -151,7 +151,7 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
                                                  first_name=dealer['name'],
                                                  phone_number=dealer['phone_number'])
                     service_advisor = models.ServiceAdvisor(
-                                            service_advisor_id=dealer['service_advisor_id'], 
+                                            service_advisor_id=dealer['service_advisor_id'],
                                             dealer=dealer_data, user=sa_user)
                 service_advisor.status = unicode(dealer['status'])
                 service_advisor.save()
@@ -173,9 +173,9 @@ class DealerAndServiceAdvisorFeed(BaseFeed):
         return False
 
 def compare_purchase_date(date_of_purchase):
-    valid_msg_days = models.Constant.objects.get(constant_name = "welcome_msg_active_days").constant_value
+    valid_msg_days = models.Constant.objects.get(constant_name="welcome_msg_active_days").constant_value
     valid_msg_days_delta = timedelta(days=int(valid_msg_days))
-    purchased_days = datetime.now().date()-date_of_purchase
+    purchased_days = datetime.now().date() - date_of_purchase
     if purchased_days <= valid_msg_days_delta:
         return True
     else:
@@ -194,7 +194,7 @@ class ProductDispatchFeed(BaseFeed):
                 try:
                     dealer_data = self.check_or_create_dealer(dealer_id=product['dealer_id'])
                     product_data = models.ProductData(
-                        product_id=product['vin'], invoice_date=product['invoice_date'], 
+                        product_id=product['vin'], invoice_date=product['invoice_date'],
                         dealer_id=dealer_data, sku_code=product['product_type'])
                     product_data.save()
                     logger.info('[Successful: ProductDispatchFeed_product_data_save]:VIN-{0} UCN-{1}'.format(product['vin'], product['unique_service_coupon']))
@@ -259,7 +259,7 @@ class ProductPurchaseFeed(BaseFeed):
                 if not product_data.customer_id  or product_data.customer_id.find('T') == 0:
                     product_data.customer_id = product['sap_customer_id']
                     product_data.engine = product["engine"]
-                    product_data.veh_reg_no =  product['veh_reg_no']
+                    product_data.veh_reg_no = product['veh_reg_no']
                 
                 product_purchase_date = product['product_purchase_date']
                 product_data.purchase_date = product_purchase_date
@@ -274,15 +274,15 @@ class ProductPurchaseFeed(BaseFeed):
                     update_coupon_data, sender=models.ProductData)
 
             except ObjectDoesNotExist as done:
-                ex='[Info: ProductPurchaseFeed_product_data]: VIN- {0} :: {1}'''.format(product['vin'], done)
+                ex = '[Info: ProductPurchaseFeed_product_data]: VIN- {0} :: {1}'''.format(product['vin'], done)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
-                vin_sync_feed = models.VinSyncFeedLog.objects.filter(product_id = product['vin'],ucn_count=-1)
+                vin_sync_feed = models.VinSyncFeedLog.objects.filter(product_id=product['vin'], ucn_count=-1)
                 if vin_sync_feed:
-                    vin_sync_feed=vin_sync_feed[0]
-                    vin_sync_feed.sent_to_sap=False
+                    vin_sync_feed = vin_sync_feed[0]
+                    vin_sync_feed.sent_to_sap = False
                 else:
-                    vin_sync_feed=models.VinSyncFeedLog(product_id = product['vin'],ucn_count=-1) 
+                    vin_sync_feed = models.VinSyncFeedLog(product_id=product['vin'], ucn_count=-1) 
                 vin_sync_feed.save()
             except Exception as ex:
                 ex = '''[Exception: ProductPurchaseFeed_product_data]: VIN- {0} :: {1}'''.format(product['vin'], ex)
@@ -326,9 +326,9 @@ def update_coupon_data(sender, **kwargs):
             coupon_object.save()
         
         try:
-            customer_name=instance.customer_name
+            customer_name = instance.customer_name
             customer_phone_number = utils.get_phone_number_format(instance.customer_phone_number)
-            customer_id=instance.customer_id
+            customer_id = instance.customer_id
             temp_customer_data = models.CustomerTempRegistration.objects.filter(product_data__product_id=vin)
             customer_id_replaced = False
             if temp_customer_data and not temp_customer_data[0].temp_customer_id == customer_id:
@@ -351,12 +351,12 @@ def update_coupon_data(sender, **kwargs):
 
             if not customer_id_replaced:
                 if str(instance.sku_code).upper()[3] == 'J': 
-                    if str(instance.sku_code).upper()[4] in ['U','G']:
+                    if str(instance.sku_code).upper()[4] in ['U', 'G']:
                         message = templates.get_template('SEND_CUSTOMER_REGISTER_KTM_DUKE'
                                                      ).format(customer_name=instance.customer_name,
                                                               duke_android_url="http://tinyurl.com/com-ktm-ab",
                                                               duke_web_url="http://ktmdukeweb.gladminds.co")
-                    elif str(vin).upper()[4]=='Y':
+                    elif str(vin).upper()[4] == 'Y':
                         message = templates.get_template('SEND_CUSTOMER_REGISTER_KTM_RC'
                                                      ).format(customer_name=instance.customer_name,
                                                               rc_android_url="http://tinyurl.com/COM-KTM-RC",
@@ -390,13 +390,13 @@ class OldFscFeed(BaseFeed):
         for fsc in self.data_source:
             product_data = models.ProductData.objects.filter(product_id=fsc['vin'])
             dealer_id = str(int(fsc['dealer']))
-            if len(product_data)==0:
+            if len(product_data) == 0:
                 self.save_to_old_fsc_table(dealer_id, fsc['service'], 'product_id', fsc['vin'])
             else:
                 coupon_data = models.CouponData.objects.filter(product__product_id=fsc['vin'],
                                         service_type=int(fsc['service']))
                 if len(coupon_data) == 0:
-                    self.save_to_old_fsc_table(dealer_id, fsc['service'], 'service_type', fsc['service'], vin = product_data[0] )
+                    self.save_to_old_fsc_table(dealer_id, fsc['service'], 'service_type', fsc['service'], vin=product_data[0])
                 else:
                     coupon_details = coupon_data[0]
                     coupon_details.status = 6
@@ -406,13 +406,13 @@ class OldFscFeed(BaseFeed):
                     coupon_details.save()
         return self.feed_remark
 
-    def save_to_old_fsc_table(self, dealer_detail,st, missing_field,missing_value, vin=None):
+    def save_to_old_fsc_table(self, dealer_detail, st, missing_field, missing_value, vin=None):
         try:
             old_fsc_obj = models.OldFscData.objects.get(product=vin, service_type=int(st), missing_field=missing_field)
         except Exception as ex:
-            old_coupon_data = models.OldFscData(product=vin, service_type = int(st),
-                                             status=6, closed_date=datetime.now(), sent_to_sap = True,
-                                             servicing_dealer = dealer_detail, missing_field=missing_field, 
+            old_coupon_data = models.OldFscData(product=vin, service_type=int(st),
+                                             status=6, closed_date=datetime.now(), sent_to_sap=True,
+                                             servicing_dealer=dealer_detail, missing_field=missing_field,
                                              missing_value=missing_value)
             old_coupon_data.save()
 
@@ -421,20 +421,20 @@ class CreditNoteFeed(BaseFeed):
     def import_data(self):
         for credit_note in self.data_source:
             try:
-                message=coupon_data=None
+                message = coupon_data = None
                 product_data = models.ProductData.objects.filter(product_id=credit_note['vin'])
                 if not product_data:
-                    message='VIN: {0} does not exits'.format(credit_note['vin'])
+                    message = 'VIN: {0} does not exits'.format(credit_note['vin'])
                     raise ValueError(message)
                 else:
                     coupon_data = models.CouponData.objects.filter(product__product_id=credit_note['vin'],
                                     unique_service_coupon=credit_note['unique_service_coupon'])
                     if not coupon_data:
-                        message='VIN: {0} coupon:{1}:: coupon does not exists'.format(credit_note['vin'],
+                        message = 'VIN: {0} coupon:{1}:: coupon does not exists'.format(credit_note['vin'],
                                                             credit_note['unique_service_coupon'])
                         raise ValueError(message)
-                    elif coupon_data[0].service_type!=int(credit_note['service_type']):
-                        message='VIN: {0} coupon:{1}:: service type does not match'.format(credit_note['vin'],
+                    elif coupon_data[0].service_type != int(credit_note['service_type']):
+                        message = 'VIN: {0} coupon:{1}:: service type does not match'.format(credit_note['vin'],
                                                             credit_note['unique_service_coupon'])
                         raise ValueError(message)
                     else:
@@ -445,7 +445,7 @@ class CreditNoteFeed(BaseFeed):
                         valid_coupon.servicing_dealer = credit_note['dealer']
                         valid_coupon.sent_to_sap = True
 #                         valid_coupon.closed_date = credit_note['closed_date']
-                        if not valid_coupon.status==6:
+                        if not valid_coupon.status == 6:
                             valid_coupon.status = 2
                         if not valid_coupon.closed_date:
                             valid_coupon.closed_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -464,11 +464,11 @@ class CreditNoteFeed(BaseFeed):
         return self.feed_remark
 
     def save_cdms_data(self, credit_note, coupon_data, message):
-        valid_coupon=None
+        valid_coupon = None
         if coupon_data:
-            valid_coupon=coupon_data[0]
+            valid_coupon = coupon_data[0]
 
-        cdms_data=models.CDMSData(unique_service_coupon=valid_coupon,
+        cdms_data = models.CDMSData(unique_service_coupon=valid_coupon,
                         received_date=credit_note['received_date'],
                         cdms_date=credit_note['cdms_date'],
                         cdms_doc_number=credit_note['cdms_doc_number'],
@@ -486,7 +486,7 @@ class ASCFeed(BaseFeed):
                 try:
                     asc_obj = self.register_user(Roles.ASCS, username=asc['asc_id'],
                                                 address=asc['address'])
-                    asc_data = models.AuthorizedServiceCenter(user=asc_obj,asc_id=asc['asc_id'],
+                    asc_data = models.AuthorizedServiceCenter(user=asc_obj, asc_id=asc['asc_id'],
                                     dealer=dealer_data)
                     asc_data.save()
                 except Exception as ex:
@@ -507,10 +507,10 @@ class ASCAndServiceAdvisorFeed(BaseFeed):
                 asc_data = models.AuthorizedServiceCenter.objects.get(asc_id=asc['id'])
             except ObjectDoesNotExist as ex:
                 asc_obj = self.register_user(Roles.ASCS, username=asc['id'])
-                asc_data = models.AuthorizedServiceCenter(user=asc_obj,asc_id=asc['id'])
+                asc_data = models.AuthorizedServiceCenter(user=asc_obj, asc_id=asc['id'])
             try:
                 mobile_number_active = self.check_mobile_active(asc, asc_data)
-                if mobile_number_active and asc['status']=='Y':
+                if mobile_number_active and asc['status'] == 'Y':
                     raise ValueError(asc['phone_number'] + ' is active under another dealer')
                 try:
                     service_advisor = models.ServiceAdvisor.objects.select_related('user__user').get(
@@ -528,7 +528,7 @@ class ASCAndServiceAdvisorFeed(BaseFeed):
                                                  first_name=asc['name'],
                                                  phone_number=asc['phone_number'])
                     service_advisor = models.ServiceAdvisor(
-                                            service_advisor_id=asc['service_advisor_id'], 
+                                            service_advisor_id=asc['service_advisor_id'],
                                             asc=asc_data, user=sa_user)
                 service_advisor.status = unicode(asc['status'])
                 service_advisor.save()
@@ -559,60 +559,60 @@ class ContainerTrackerFeed(BaseFeed):
                 transporter_data = self.check_or_create_transporter(transporter_id=str(int(tracker_obj['transporter_id'])),
                                                                         name=tracker_obj['tranporter_name'])
                 try:
-                    container_indent_obj=models.ContainerIndent.objects.get(indent_num=tracker_obj['zib_indent_num'])
+                    container_indent_obj = models.ContainerIndent.objects.get(indent_num=tracker_obj['zib_indent_num'])
                     if container_indent_obj.transporter_id != tracker_obj['transporter_id']:    
-                        container_indent_obj.transporter_id=transporter_data
-                        container_indent_obj.no_of_containers=int(tracker_obj['no_of_containers'])
+                        container_indent_obj.transporter_id = transporter_data
+                        container_indent_obj.no_of_containers = int(tracker_obj['no_of_containers'])
                         container_indent_obj.save()
                 except ObjectDoesNotExist as done:
-                    container_indent_obj=models.ContainerIndent(indent_num=tracker_obj['zib_indent_num'],
-                                                                no_of_containers=int(tracker_obj['no_of_containers']),transporter= transporter_data)
+                    container_indent_obj = models.ContainerIndent(indent_num=tracker_obj['zib_indent_num'],
+                                                                no_of_containers=int(tracker_obj['no_of_containers']), transporter=transporter_data)
                     container_indent_obj.save(using=settings.BRAND)
-                if tracker_obj['lr_number']:
-                    try:
-                        container_lr_obj = models.ContainerLR.objects.get(zib_indent_num=container_indent_obj,
-                                                                           lr_number=tracker_obj['lr_number'])
-                        
-                        if container_lr_obj.transporter_id != tracker_obj['transporter_id']:    
-                            container_lr_obj.transporter_id=transporter_data 
-                            container_lr_obj.consignment_id= tracker_obj['consignment_id']
-                            container_lr_obj.lr_number = tracker_obj['lr_number']
-                            container_lr_obj.do_num= tracker_obj['do_num']
-                            container_lr_obj.save()             
-                    except ObjectDoesNotExist as done:                                       
-                        container_lr_obj = models.ContainerLR(zib_indent_num=container_indent_obj, 
-                                                        consignment_id=tracker_obj['consignment_id'],
-                                                        lr_number=tracker_obj['lr_number'],                                                                    
-                                                        do_num=tracker_obj['do_num'],
-                                                        transporter=transporter_data)
-                        container_lr_obj.ib_dispatch_dt = format_date(tracker_obj['ib_dispatch_dt'])
-                        container_lr_obj.cts_created_date = format_date(tracker_obj['created_date'])
-                        container_lr_obj.save(using=settings.BRAND)
+#                 if tracker_obj['lr_number']:
+                try:
+                    container_lr_obj = models.ContainerLR.objects.get(zib_indent_num=container_indent_obj,
+                                                                       lr_number=tracker_obj['lr_number'])
                     
-                    
+                    if container_lr_obj.transporter_id != tracker_obj['transporter_id']:    
+                        container_lr_obj.transporter_id = transporter_data 
+                        container_lr_obj.consignment_id = tracker_obj['consignment_id']
+                        container_lr_obj.lr_number = tracker_obj['lr_number']
+                        container_lr_obj.do_num = tracker_obj['do_num']
+                        container_lr_obj.save()             
+
+                except ObjectDoesNotExist as done:                                       
+                    container_lr_obj = models.ContainerLR(zib_indent_num=container_indent_obj,
+                                                    consignment_id=tracker_obj['consignment_id'],
+                                                    lr_number=tracker_obj['lr_number'],
+                                                    do_num=tracker_obj['do_num'],
+                                                    transporter=transporter_data)
+                    container_lr_obj.ib_dispatch_dt = format_date(tracker_obj['ib_dispatch_dt'])
+                    container_lr_obj.cts_created_date = format_date(tracker_obj['created_date'])
+                    container_lr_obj.save(using=settings.BRAND)
+                               
                     gatein_date = format_date(tracker_obj['gatein_date'])
-                    status="Open"               
+                    status = "Open"               
                     if tracker_obj['container_no'] and tracker_obj['seal_no']:
                         if gatein_date: 
-                            status="Closed"
+                            status = "Closed"
                         else:
-                            status="Inprogress"
-                    container_lr_obj.gatein_date=gatein_date
-                    container_lr_obj.gatein_time=tracker_obj['gatein_time']
+                            status = "Inprogress"
+                    container_lr_obj.gatein_date = gatein_date
+                    container_lr_obj.gatein_time = tracker_obj['gatein_time']
                     if tracker_obj['container_no'].upper().startswith('DUMY', 0, 4):
-                        tracker_obj['container_no']=None
-                    container_lr_obj.container_no=tracker_obj['container_no']
-                    container_lr_obj.seal_no=tracker_obj['seal_no']
+                        tracker_obj['container_no'] = None
+                    container_lr_obj.container_no = tracker_obj['container_no']
+                    container_lr_obj.seal_no = tracker_obj['seal_no']
                     container_lr_obj.lr_date = format_date(tracker_obj['lr_date'])
-                    container_lr_obj.shippingline_id=tracker_obj['shippingline_id']
-                    container_lr_obj.truck_no=tracker_obj['truck_no']
-                    container_lr_obj.partner_name=tracker_obj['partner_name']
-                    container_lr_obj.status=status
+                    container_lr_obj.shippingline_id = tracker_obj['shippingline_id']
+                    container_lr_obj.truck_no = tracker_obj['truck_no']
+                    container_lr_obj.partner_name = tracker_obj['partner_name']
+                    container_lr_obj.status = status
                     container_lr_obj.save(using=settings.BRAND)
                     
-                    if status=='Open':
+                    if status == 'Open':
                         container_indent_obj.status = status
-                    elif status=='Inprogress':
+                    elif status == 'Inprogress':
                         all_open_lr = models.ContainerLR.objects.filter(zib_indent_num=container_indent_obj, status='Open')
                         if all_open_lr:
                             container_indent_obj.status = 'Open'
@@ -620,11 +620,11 @@ class ContainerTrackerFeed(BaseFeed):
                             container_indent_obj.status = status
                     else:
                         all_indent_lr = models.ContainerLR.objects.filter(zib_indent_num=container_indent_obj, status=status)
-                        if len(all_indent_lr)==container_indent_obj.no_of_containers:
+                        if len(all_indent_lr) == container_indent_obj.no_of_containers:
                             container_indent_obj.status = status
                     container_indent_obj.save(using=settings.BRAND)
             except Exception as ex:
-                ex="[Exception: ]: ContainerTrackerFeed {0}".format(ex)
+                ex = "[Exception: ]: ContainerTrackerFeed {0}".format(ex)
                 logger.error(ex)
                 self.feed_remark.fail_remarks(ex)
         
@@ -633,7 +633,7 @@ class ContainerTrackerFeed(BaseFeed):
 
 def format_date(date):
     if date == "0000-00-00" or not date:
-        date=None
+        date = None
     else:
-        date=datetime.strptime(date, "%Y-%m-%d")
+        date = datetime.strptime(date, "%Y-%m-%d")
     return date
