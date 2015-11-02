@@ -251,9 +251,15 @@ class ContainerIndentCustomAuthorization(Authorization):
         
     def read_list(self, object_list, bundle):
         query_set = self.get_indents_query(object_list, bundle)
+        print len(query_set),"ppp"
         if query_set:
             submitted_indents=query_set.values_list('zib_indent_num_id', flat=True)
+            print submitted_indents,"indent"
+            print object_list,"jjjjjeeeeeeeee"
+            
             object_list = object_list.filter(id__in=submitted_indents)
+            
+        print len(object_list),"tttt"
         return object_list
 
 class ContainerLRCustomAuthorization(Authorization):
@@ -264,6 +270,7 @@ class ContainerLRCustomAuthorization(Authorization):
             supervisor = get_model('Supervisor').objects.get(user__user_id=bundle.request.user.id)
             object_list = object_list.filter(Q(submitted_by=supervisor.supervisor_id) | Q(submitted_by=None) 
                                                                         & Q(transporter=supervisor.transporter))
+        print object_list,"teeeee"
         return object_list
 
 class CTSCustomAuthorization(Authorization):
@@ -320,16 +327,4 @@ class DealerCustomAuthorization(Authorization):
             object_list = object_list.filter(sm__rm__circle_head__user__user_id=int(bundle.request.user.id))
         return object_list
     
-############# EPC ###############
 
-class HistoryCustomAuthorization(Authorization):
-    print "EPC"
-    def read_list(self, object_list, bundle):
-        print bundle.request.user,"visualtion"
-        if bundle.request.user.groups.filter(name=Roles.VISUALIZATIONADMIN).exists():
-                print "pending only"
-                object_list = object_list.filter(status='Pending')
-        print object_list,"objectssssssssssssss"
-        return object_list
-        
-    
