@@ -5,19 +5,19 @@ from composite_field.base import CompositeField
 from django.conf import settings
 from django.utils.translation import gettext as _
 
-from gladminds.core.managers import user_manager, coupon_manager, \
+from gladminds.core.managers import user_manager, coupon_manager,\
     service_desk_manager
-from gladminds.core.model_helpers import PhoneField, set_plate_image_path, \
-    set_plate_with_part_image_path, set_brand_product_image_path, \
+from gladminds.core.model_helpers import PhoneField, set_plate_image_path,\
+    set_plate_with_part_image_path, set_brand_product_image_path,\
     set_brand_image
 from gladminds.core import constants
-from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_id, \
-    generate_nsm_id, generate_asm_id
+from gladminds.core.core_utils.utils import generate_mech_id, generate_partner_id,\
+    generate_nsm_id,generate_asm_id
 from gladminds.core.model_helpers import validate_image, validate_file
-from gladminds.core.model_helpers import set_service_training_material_path, \
-    set_mechanic_image_path, set_product_catalog_image_path, set_redemption_pod_path, \
+from gladminds.core.model_helpers import set_service_training_material_path,\
+    set_mechanic_image_path,set_product_catalog_image_path,set_redemption_pod_path,\
     set_welcome_kit_pod_path
-from gladminds.core.managers.mail import sent_password_reset_link, \
+from gladminds.core.managers.mail import sent_password_reset_link,\
     send_email_activation
 from gladminds.core.constants import SBOM_STATUS
 from gladminds.core.managers.email_token_manager import EmailTokenManager
@@ -26,10 +26,10 @@ try:
     from django.utils.timezone import now as datetime_now
 except ImportError:
     datetime_now = datetime.datetime.now
-STATUS_CHOICES = constants.STATUS_CHOICES
+STATUS_CHOICES=constants.STATUS_CHOICES
 
 def set_user_pic_path(instance, filename):
-    return '{0}/{1}/user'.format(settings.ENV, settings.BRAND)
+    return '{0}/{1}/user'.format(settings.ENV,settings.BRAND)
 
 class BaseModel(models.Model):
     '''Base model containing created date and modified date'''
@@ -119,7 +119,7 @@ class Brand(BaseModel):
         verbose_name_plural = "Brand Data"
 
     def __unicode__(self):
-        return "Brand: " + self.name + " Industry: " + self.industry.name
+        return "Brand: "+self.name+" Industry: "+self.industry.name
 
 
 class BrandProductCategory(BaseModel):
@@ -146,7 +146,7 @@ class OTPToken(BaseModel):
         verbose_name_plural = "OTPs"
 
     def __unicode__(self):
-        return str(self.phone_number or '') + ' ' + self.token
+        return str(self.phone_number or '') + ' ' +self.token
 
      
 class ZonalServiceManager(BaseModel):
@@ -424,7 +424,7 @@ class MessageTemplate(BaseModel):
 
 class EmailTemplate(BaseModel):
     '''Email Template used for email'''
-    template_key = models.CharField(max_length=255, unique=True, null=False, \
+    template_key = models.CharField(max_length=255, unique=True, null=False,\
                                      blank=False)
     sender = models.CharField(max_length=512, null=False)
     receiver = models.CharField(max_length=512, null=False)
@@ -438,7 +438,7 @@ class EmailTemplate(BaseModel):
         verbose_name_plural = "Email Template"
 
     def __unicode__(self):
-        return self.template_key + "- " + self.subject
+        return self.template_key+"- "+ self.subject
 
 
 ########################## TempRegistration #########################
@@ -470,7 +470,7 @@ class SATempRegistration(BaseModel):
     class Meta:
         abstract = True
         db_table = "gm_satempregistration"
-        verbose_name_plural = "SA  Form"
+        verbose_name_plural = "SA Save Form"
 
 
 class CustomerTempRegistration(BaseModel):
@@ -703,7 +703,7 @@ class VinSyncFeedLog(BaseModel):
     sent_to_sap = models.BooleanField(default=False)
     
     class Meta:
-        abstract = True
+        abstract =True
         db_table = "gm_vinsyncfeedlog"
         verbose_name_plural = "Vin Sync Feed"
         
@@ -780,7 +780,7 @@ class Feedback(BaseModel):
     resolved_date = models.DateTimeField(null=True, blank=True)
     pending_from = models.DateTimeField(null=True, blank=True)
     due_date = models.DateTimeField(null=True, blank=True)
-    wait_time = models.FloatField(max_length=20, null=True, blank=True, default='0.0')
+    wait_time = models.FloatField(max_length=20, null=True, blank=True, default = '0.0')
     remarks = models.CharField(max_length=512, null=True, blank=True)
     ratings = models.CharField(max_length=20, choices=constants.RATINGS)
     root_cause = models.CharField(max_length=20, choices=constants.ROOT_CAUSE)
@@ -835,7 +835,7 @@ class FeedbackEvent(BaseModel):
 class Duration(CompositeField):
     '''Sla time and unit'''
     time = models.PositiveIntegerField()
-    unit = models.CharField(max_length=12, choices=constants.TIME_UNIT, verbose_name='unit')
+    unit = models.CharField(max_length=12, choices=constants.TIME_UNIT, verbose_name = 'unit')
 
 class SLA(models.Model):
     '''Sla for feedback'''
@@ -874,7 +874,7 @@ class ServiceType(models.Model):
     description = models.TextField(null=True, blank=True)
 
     class Meta:
-        abstract = True
+        abstract =True
         db_table = "gm_servicetype"
         verbose_name_plural = "Service Types"
         
@@ -1111,7 +1111,7 @@ class Distributor(BaseModel):
         verbose_name_plural = "Distributors"
 
     def __unicode__(self):
-        return self.distributor_id + ' ' + self.name
+        return self.distributor_id + ' ' +self.name
 
 class DistributorStaff(BaseModel):
     '''details of DistributorStaff'''
@@ -1177,7 +1177,7 @@ class Member(BaseModel):
     middle_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(null=True, blank=True, unique=True)
-    date_of_birth = models.DateField(null=True, blank=True)
+    date_of_birth = models.DateField(null=True, blank= True)
 
     address_line_1 = models.CharField(max_length=40, null=True, blank=True)
     address_line_2 = models.CharField(max_length=40, null=True, blank=True)
@@ -1187,7 +1187,7 @@ class Member(BaseModel):
     address_line_6 = models.CharField(max_length=40, null=True, blank=True)
 
     form_number = models.IntegerField(max_length=50, null=True, blank=True)
-    registered_date = models.DateTimeField(null=True, blank=True)
+    registered_date = models.DateTimeField(null=True, blank= True)
     shop_number = models.CharField(max_length=50, null=True, blank=True)
     shop_name = models.CharField(max_length=50, null=True, blank=True)
     shop_address = models.CharField(max_length=50, null=True, blank=True)
@@ -1226,15 +1226,15 @@ class Member(BaseModel):
     objects = user_manager.MemberManager()
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        form_status = True
+        form_status=True
         for field in self._meta.fields:
             if field.name in constants.MANDATORY_MECHANIC_FIELDS and not getattr(self, field.name):
                 form_status = False
 
         if not form_status:
-            self.form_status = 'Incomplete'
+            self.form_status='Incomplete'
         else:
-            self.form_status = 'Complete'
+            self.form_status='Complete'
             
         return super(Member, self).save(force_insert=force_insert, force_update=force_update,
                               using=using, update_fields=update_fields)
@@ -1286,8 +1286,8 @@ class SparePartPoint(BaseModel):
     points = models.IntegerField(max_length=50, null=True, blank=True)
     price = models.FloatField(max_length=50, null=True, blank=True)
     MRP = models.FloatField(max_length=50, null=True, blank=True)
-    valid_from = models.DateTimeField(null=True, blank=True)
-    valid_till = models.DateTimeField(null=True, blank=True)
+    valid_from =  models.DateTimeField(null=True, blank= True)
+    valid_till =  models.DateTimeField(null=True, blank= True)
     territory = models.CharField(max_length=50, null=True, blank=True)
     
     objects = user_manager.SparePartPointManager()
@@ -1364,17 +1364,17 @@ class RedemptionRequest(BaseModel):
     '''details of Redemption Request'''
     delivery_address = models.CharField(max_length=50, null=True, blank=True)
     transaction_id = models.AutoField(primary_key=True)
-    expected_delivery_date = models.DateTimeField(null=True, blank=True)
+    expected_delivery_date =  models.DateTimeField(null=True, blank= True)
     status = models.CharField(max_length=12, choices=constants.REDEMPTION_STATUS, default='Open')
     packed_by = models.CharField(max_length=50, null=True, blank=True)
     tracking_id = models.CharField(max_length=50, null=True, blank=True)
     is_approved = models.BooleanField(default=False)
     refunded_points = models.BooleanField(default=False)
-    due_date = models.DateTimeField(null=True, blank=True)
+    due_date =  models.DateTimeField(null=True, blank= True)
     resolution_flag = models.BooleanField(default=False)
-    approved_date = models.DateTimeField(null=True, blank=True)
-    shipped_date = models.DateTimeField(null=True, blank=True)
-    delivery_date = models.DateTimeField(null=True, blank=True)
+    approved_date =  models.DateTimeField(null=True, blank= True)
+    shipped_date =  models.DateTimeField(null=True, blank= True)
+    delivery_date =  models.DateTimeField(null=True, blank= True)
     pod_number = models.CharField(max_length=50, null=True, blank=True)
     image_url = models.FileField(upload_to=set_redemption_pod_path,
                               max_length=255, null=True, blank=True,
@@ -1389,8 +1389,8 @@ class RedemptionRequest(BaseModel):
     image_tag.allow_tags = True
     
     def clean(self, *args, **kwargs):
-        if self.status == 'Approved' and self.refunded_points:
-            if self.member.total_points < self.product.points:
+        if self.status=='Approved' and self.refunded_points:
+            if self.member.total_points<self.product.points:
                 raise ValidationError("Member now does not not have sufficient points to approve the request")
 #         if self.status=='Packed' and (not self.partner or self.partner.partner_type not in ['Redemption','Logistics']):
 #             raise ValidationError("Please assign a partner")
@@ -1411,14 +1411,14 @@ class WelcomeKit(BaseModel):
     '''details of welcome kit'''
     delivery_address = models.CharField(max_length=50, null=True, blank=True)
     transaction_id = models.AutoField(primary_key=True)
-    expected_delivery_date = models.DateTimeField(null=True, blank=True)
-    due_date = models.DateTimeField(null=True, blank=True)
+    expected_delivery_date =  models.DateTimeField(null=True, blank= True)
+    due_date =  models.DateTimeField(null=True, blank= True)
     status = models.CharField(max_length=12, choices=constants.WELCOME_KIT_STATUS, default='Open')
     packed_by = models.CharField(max_length=50, null=True, blank=True)
     tracking_id = models.CharField(max_length=50, null=True, blank=True)
     resolution_flag = models.BooleanField(default=False)
-    shipped_date = models.DateTimeField(null=True, blank=True)
-    delivery_date = models.DateTimeField(null=True, blank=True)
+    shipped_date =  models.DateTimeField(null=True, blank= True)
+    delivery_date =  models.DateTimeField(null=True, blank= True)
     pod_number = models.CharField(max_length=50, null=True, blank=True)
     image_url = models.FileField(upload_to=set_welcome_kit_pod_path,
                               max_length=255, null=True, blank=True,
@@ -1430,7 +1430,7 @@ class WelcomeKit(BaseModel):
     image_tag.allow_tags = True
 
     def clean(self, *args, **kwargs):
-        if self.status != 'Open' and not self.partner:
+        if self.status!='Open' and not self.partner:
             raise ValidationError("Please assign a partner")
         else:
             super(WelcomeKit, self).clean(*args, **kwargs)
@@ -1500,7 +1500,7 @@ class LoyaltySLA(models.Model):
 
 class Territory(BaseModel):
     '''Territories under a brand'''
-    territory = models.CharField(max_length=20, unique=True)
+    territory = models.CharField(max_length=20, unique = True)
     
     class Meta:
         abstract = True
@@ -1513,8 +1513,8 @@ class Territory(BaseModel):
 
 class State(BaseModel):
     '''States under a brand'''
-    state_name = models.CharField(max_length=30, unique=True)
-    state_code = models.CharField(max_length=10, unique=True)
+    state_name = models.CharField(max_length=30, unique = True)
+    state_code = models.CharField(max_length=10, unique = True)
     
     class Meta:
         abstract = True
@@ -1526,7 +1526,7 @@ class State(BaseModel):
     
 class City(BaseModel):
     '''Cities under a brand'''
-    city = models.CharField(max_length=50, unique=True)
+    city = models.CharField(max_length=50, unique = True)
     
     class Meta:
         abstract = True
@@ -1540,7 +1540,7 @@ class City(BaseModel):
 
 class ECORelease(BaseModel):
     ''' details of ECO release'''
-    eco_number = models.CharField(max_length=20, null=True, blank=True)
+    eco_number  = models.CharField(max_length=20, null=True, blank=True)
     eco_release_date = models.DateField(max_length=20, null=True, blank=True)
     eco_description = models.CharField(max_length=40, null=True, blank=True)
     action = models.CharField(max_length=20, null=True, blank=True)
@@ -1612,18 +1612,11 @@ class BrandProductRange(BaseModel):
     '''Different range of product a brand provides'''
     sku_code = models.CharField(max_length=50, unique=True)
     description = models.TextField(null=True, blank=True)
-#     image_url = models.FileField(upload_to=set_brand_product_image_path,
-#                                   max_length=255, null=True, blank=True,
-#                                   validators=[validate_image])
-    image_url = models.FileField(upload_to='image', max_length=255, null=True, blank=True)
-#     def image_tag(self):
-#         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
-#     image_tag.short_description = 'Brand Product Image'
-#     image_tag.allow_tags = True
-
-
+    image_url = models.FileField(upload_to=set_brand_product_image_path,
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_image])
     def image_tag(self):
-        return u'<img src="{0}/{1}" width="200px;"/>'.format('/static/', self.image_url)
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
     image_tag.short_description = 'Brand Product Image'
     image_tag.allow_tags = True
 
@@ -1641,9 +1634,9 @@ class BOMHeader(BaseModel):
     plant = models.CharField(max_length=10, null=True, blank=True)
     bom_type = models.CharField(max_length=10, null=True, blank=True)
     bom_number = models.CharField(max_length=10, null=True, blank=True)
-    valid_from = models.DateField(null=True, blank=True)
-    valid_to = models.DateField(null=True, blank=True)
-    created_on = models.DateField(null=True, blank=True)
+    valid_from = models.DateField(null=True, blank= True)
+    valid_to = models.DateField(null=True, blank= True)
+    created_on = models.DateField(null=True, blank= True)
     revision_number = models.IntegerField(default=0)
     eco_number = models.CharField(max_length=20, null=True, blank=True)
 
@@ -1659,32 +1652,21 @@ class BOMPlate(BaseModel):
     '''Details of BOM Plates'''
     plate_id = models.CharField(max_length=50, unique=True)
     plate_txt = models.CharField(max_length=200, null=True, blank=True)
-    plate_image = models.FileField(upload_to='image',
-                                  max_length=255, null=True, blank=True)
-    plate_image_with_part = models.FileField(upload_to='image',
-                                  max_length=255, null=True, blank=True
-                               )
-    
+    plate_image = models.FileField(upload_to=set_plate_image_path,
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_image])
+    plate_image_with_part = models.FileField(upload_to=set_plate_with_part_image_path,
+                                  max_length=255, null=True, blank=True,
+                                  validators=[validate_image])
     def plate_image_tag(self):
-        print self.plate_image, "selfieeee"
-        return u'<img src="{0}/{1}" width="200px;"/>'.format('/static/', self.plate_image)
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.plate_image)
     plate_image_tag.short_description = 'Plate Image'
     plate_image_tag.allow_tags = True
-#     def plate_image_tag(self):
-#         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.plate_image)
-#     plate_image_tag.short_description = 'Plate Image'
-#     plate_image_tag.allow_tags = True
-
+    
     def plate_image_with_part_tag(self):
-        return u'<img src="{0}/{1}" width="200px;"/>'.format('/static/', self.plate_image_with_part)
+        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.plate_image_with_part)
     plate_image_with_part_tag.short_description = 'Plate with Part Image'
     plate_image_with_part_tag.allow_tags = True
-        
-    
-#     def plate_image_with_part_tag(self):
-#         return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.plate_image_with_part)
-#     plate_image_with_part_tag.short_description = 'Plate with Part Image'
-#     plate_image_with_part_tag.allow_tags = True
 
     class Meta:
         db_table = "gm_bomplate"
@@ -1713,8 +1695,8 @@ class BOMPart(BaseModel):
 class BOMPlatePart(BaseModel):
     '''Details of BOM Plates and part relation'''
     quantity = models.CharField(max_length=20, null=True, blank=True)
-    valid_from = models.DateField(null=True, blank=True)
-    valid_to = models.DateField(null=True, blank=True)
+    valid_from = models.DateField(null=True, blank= True)
+    valid_to = models.DateField(null=True, blank= True)
     uom = models.CharField(max_length=100, null=True, blank=True)
     serial_number = models.CharField(max_length=20, null=True, blank=True)
     change_number = models.CharField(max_length=12, null=True, blank=True)
@@ -1737,7 +1719,7 @@ class VisualisationUploadHistory(BaseModel):
     plate_id = models.CharField(max_length=50)
     eco_number = models.CharField(max_length=20, null=True)
     status = models.CharField(max_length=10, choices=constants.SAVE_PLATE_PART_STATUS, default='Pending')
-    comment = models.TextField(null=True, blank=True)
+
     class Meta:
         abstract = True
         db_table = "gm_visualisationuploadhistory"
@@ -1745,9 +1727,9 @@ class VisualisationUploadHistory(BaseModel):
         
 class BOMVisualization(BaseModel):
     '''Details of BOM Plates coordinates'''
-    x_coordinate = models.IntegerField(default=0)
-    y_coordinate = models.IntegerField(default=0)
-    z_coordinate = models.IntegerField(default=0)
+    x_coordinate  = models.IntegerField(default=0)
+    y_coordinate  = models.IntegerField(default=0)
+    z_coordinate  = models.IntegerField(default=0)
     serial_number = models.IntegerField(default=0)
     part_href = models.CharField(max_length=200)
     published_date = models.DateTimeField(null=True, blank=True)
@@ -1789,7 +1771,7 @@ class ManufacturingData(models.Model):
     material_number = models.CharField(max_length=100, null=True, blank=True)
     plant = models.CharField(max_length=100, null=True, blank=True)
     engine = models.CharField(max_length=100, null=True, blank=True)
-    vehicle_off_line_date = models.DateField(null=True, blank=True)
+    vehicle_off_line_date =  models.DateField(null=True, blank= True)
     is_discrepant = models.BooleanField(default=False)
     sent_to_sap = models.BooleanField(default=False)
 
@@ -1802,8 +1784,8 @@ class ManufacturingData(models.Model):
 
 class Country(BaseModel):
     '''States under a brand'''
-    name = models.CharField(max_length=30, unique=True)
-    area_code = models.CharField(max_length=10, unique=True)
+    name = models.CharField(max_length=30, unique = True)
+    area_code = models.CharField(max_length=10, unique = True)
     
     class Meta:
         abstract = True
