@@ -858,6 +858,7 @@ class ContainerTrackerAdmin(GmModelAdmin):
             return {'class': css_class}
 
 class ContainerIndentAdmin(GmModelAdmin):
+    search_fields = ('indent_num','transporter__user__user__username')
     list_display = ('indent_num',
                     'no_of_containers',
                     'status',
@@ -874,7 +875,9 @@ class ContainerIndentAdmin(GmModelAdmin):
             return {'class': css_class}
 
 
+
 class ContainerLRAdmin(GmModelAdmin):
+    search_fields = ('zib_indent_num__indent_num',)
     list_display = ('lr_number', 'zib_indent_num',
                     'get_indent_status',
                     'consignment_id', 'container_no',
