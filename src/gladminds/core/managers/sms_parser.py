@@ -80,6 +80,7 @@ def sms_processing(phone_number, message, brand):
                              template=error_template)
     to_be_serialized = {}
     handler = utils.get_handler(sms_dict['handler'])
+
     with transaction.atomic():
         to_be_serialized = handler(sms_dict,
                         utils.mobile_format(phone_number))

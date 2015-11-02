@@ -275,10 +275,15 @@ DOWNLOAD_WELCOME_KIT_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'las
 DOWNLOAD_REDEMPTION_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'last_name', 'phone_number', 'delivery_address', 'district', 'state', 'pincode', 'product']
 DOWNLOAD_ACCUMULATION_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'last_name', 'phone_number', 'state', 'shop_name','asm', 'points', 'total_points', 'upcs', 'created_date']
 MEMBER_FIELDS = ['permanent_id','first_name', 'middle_name', 'last_name', 'phone_number', 'state', 'shop_name']
-MEMBER_API_HEADER = ['Mechanic Id', 'Mechanic Name','District','Mobile Number','State','Distributor Code','Date Of Registration','Address of garage'] 
-ACCUMULATION_API_HEADER = ['mechanic_id', 'first_name','district','phone_number','state_name','distributor_id','unique_part_code','point','created_date']
+
+
+'''Below headers are used in API for Powerrwards'''
+
+MEMBER_API_HEADER = ['Mechanic Id', 'Mechanic Name','District','Mobile Number','State','Distributor Code','Date Of Registration','Address of garage']
+ACCUMULATION_API_HEADER = ['mechanic_id', 'first_name','district','phone_number','state_name','distributor_id','unique_part_code','points','created_date']
+ACCUMULATION_API_HEADER_MEMBER_FIELDS = ['mechanic_id','first_name', 'district','phone_number']
 REDEMPTION_API_HEADER = ['mechanic_id', 'first_name','district','phone_number','state_name','distributor_id','created_date','points','product_id']
-ACCUMULATION_FITMENT_API_HEADER = ['mechanic_id', 'first_name','district','phone_number','state_name','distributor_id', 'unique_part_code','part_number', 'description', 'point','created_date']
+ACCUMULATION_FITMENT_API_HEADER = ['mechanic_id', 'first_name','district','phone_number','state_name','distributor_id', 'unique_part_code','points','part_number', 'description', 'created_date']
 MONTHLY_ACTIVE_API_HEADER = ['State', 'No of Mechanic Registered (till date)','No of Mechanic messaged','%active','ASM Name']
 
 LOYALTY_ACCESS = {

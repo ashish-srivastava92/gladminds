@@ -23,7 +23,7 @@ from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import MultiAuthorization,\
     LoyaltyCustomAuthorization,\
      ZSMCustomAuthorization, DealerCustomAuthorization,\
-     RMCustomAuthorization,CHCustomAuthorization
+     RMCustomAuthorization,CHCustomAuthorization, DistributorCustomAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.auth.access_token_handler import create_access_token, \
     delete_access_token
@@ -39,6 +39,9 @@ from gladminds.afterbuy import utils as core_utils
 from gladminds.core.model_fetcher import get_model
 import csv
 import StringIO
+
+LOG = logging.getLogger('gladminds')
+
 from celery.worker.consumer import Heart
 from boto.gs.cors import HEADERS
 
@@ -1293,6 +1296,7 @@ class DistributorResource(CustomBaseModelResource):
         queryset = models.Distributor.objects.all()
         resource_name = "distributors"
         authorization = Authorization()
+        #authorization = MultiAuthorization(DjangoAuthorization(), DistributorCustomAuthorization())
         authentication = AccessTokenAuthentication()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -1405,74 +1409,102 @@ class MemberResource(CustomBaseModelResource):
         
     def registered_members(self, request , **kwargs):
         '''
-#           Get registered member details for given filter
-#           and returns in csv format
-#       '''
-        
-        filter_param = request.GET.get('key','')
-        filter_value = request.GET.get('value','')
-        registered_date__gte = request.GET.get('registered_date__gte')
-        registered_date__lte = request.GET.get('registered_date__lte')
-        applied_filter = {filter_param: filter_value, 'registered_date__gte':registered_date__gte, 'registered_date__lte':registered_date__lte}
-        if registered_date__gte and registered_date__lte :
-            try:
-                filter_data_list = self.get_list(request, **applied_filter)
-                return self.csv_convert_registered_member(filter_data_list)
-            except Exception as ex:
-                data = {'status':0 , 'message': 'key does not exist'}
-                return HttpResponse(json.dumps(data), content_type="application/json")
-        else:
-            data = {'status':0 , 'message': 'Select a Date range'}
+            Get registered member details for given filter
+            and returns in csv format
+        '''
+        try:
+            received_csv_data = self.download_member_detail(request)
+            return received_csv_data
+        except Exception as ex:
+            data = {'status':0 , 'message': 'key does not exist'}
             return HttpResponse(json.dumps(data), content_type="application/json")
-     
-    def csv_convert_registered_member(self, data):
-        json_response = json.loads(data.content)
+        
+    def download_member_detail(self,request):
+        '''Download Registered Members Details'''
         file_name='registered_member_download' + datetime.now().strftime('%d_%m_%y')
         headers=[]
         headers=headers+constants.MEMBER_API_HEADER
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(headers)
-        for item in json_response['objects']:
+        mechanics = self.get_members_detail(request,'Member')
+        finaldata=[]
+        for mechanic in mechanics:
             data=[]
             for field in headers:
                 if field=='State':
-                    data.append(item['state']['state_name'])
+                    if mechanic.state:
+                        data.append(mechanic.state.state_name)
+                    else:
+                        data.append(mechanic.state)
                 elif field=='Distributor Code':
-                    if item['distributor']['distributor_id']:
-                        data.append(item['distributor']['distributor_id'])
+                    if mechanic.registered_by_distributor:
+                        if mechanic.registered_by_distributor.distributor_id:
+                            data.append(mechanic.registered_by_distributor.distributor_id)
+                        else:
+                            data.append("NA")
                     else:
-                        data.append("NA")
+                        data.append(mechanic.registered_by_distributor)
+                
                 elif field=='Address of garage':
-                        data.append(item['shop_name']+" ,"+item['shop_number']+" ,"+item['shop_address'] +" ,"+item['district']+" ,"+item['state']['state_name']+" ,"+item['pincode'])
+                    shop_name =self.address_get(mechanic.shop_name)
+                    shop_number=self.address_get(mechanic.shop_number)
+                    shop_address =self.address_get(mechanic.shop_address)
+                    district = self.address_get(mechanic.district)
+                    state_name= self.address_get(mechanic.state.state_name)
+                    pincode = self.address_get(mechanic.pincode)
+                    data.append(shop_name+" ,"+shop_number+" ,"+shop_address+" ,"+district+" ,"+state_name+" ,"+pincode)
                 elif field== 'Mechanic Id':
-                    if item["permanent_id"] != None:
-                        data.append(item["permanent_id"])
+                    if mechanic.permanent_id != None:
+                        data.append(mechanic.permanent_id)
                     else:
-                        data.append(item['mechanic_id'])
+                        if mechanic.mechanic_id != None:
+                            data.append(mechanic.mechanic_id)
+                        else:
+                            data.append("NA")
                 elif field== 'Mechanic Name': 
-                    data.append(item['first_name'])  
+                    data.append(mechanic.first_name)  
                 elif field== 'District': 
-                    data.append(item['district']) 
+                    data.append(mechanic.district) 
                 elif field== 'Mobile Number': 
-                    data.append(item['phone_number']) 
+                    data.append(mechanic.phone_number) 
                 else:
-                    if item['registered_date']:
-                        date_format =  datetime.strptime(item['registered_date'], '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
-                        data.append(date_format)
+                    if mechanic.registered_date:
+                        data.append(mechanic.registered_date)
+#                         date_format =  datetime.strptime(str(mechanic.registered_date), '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
+#                         data.append(date_format)
                     else:
                         data.append("NA")
-            csvwriter.writerow(data)
+                
+            finaldata.append(data)
+        csvwriter.writerows(finaldata)
         response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
         response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        LOG.error('[download_member_detail]: Download of mechanic data by user {0}'.format(request.user))
         return response
     
+    def get_members_detail(self, request,model_name):
+        kwargs={}
+        if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=get_model('AreaSparesManager').objects.get(user__user=request.user).state.all()
+            kwargs['state__in'] = asm_state_list
+        mechanics = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs).select_related('state', 'registered_by_distributor')
+        
+        return mechanics
+
+    def address_get(self, addr_data):
+        if addr_data:
+            return addr_data
+        else:
+            return "NA"
+        
+        
 
     def monthly_active_code(self, request , **kwargs):
         '''
-#           Get registered member details
-#           returns in csv format
-#       '''
+            Get registered member details
+            returns in csv format
+        '''
 #         filter_param = request.GET.get('key')
 #         filter_value = request.GET.get('value')
 #         applied_filter = {filter_param: filter_value}
@@ -1623,6 +1655,7 @@ class MemberResource(CustomBaseModelResource):
             logger.error('redemption/accumulation request count requested by {0}:: {1}'.format(request.user, ex))
             member_report = {'status': 0, 'message': 'could not retrieve the sum of points of requests'}
         return HttpResponse(json.dumps(member_report), content_type="application/json")
+    
 
 class BrandDepartmentResource(CustomBaseModelResource):
     '''
@@ -1711,3 +1744,4 @@ class SupervisorResource(CustomBaseModelResource):
                      'transporter': ALL_WITH_RELATIONS
                      }
         
+

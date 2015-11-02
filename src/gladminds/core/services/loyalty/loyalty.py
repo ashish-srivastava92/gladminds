@@ -195,11 +195,11 @@ class CoreLoyaltyService(Services):
                     upcs_data = accumulation.upcs.all()
                     upc_data_list = ' , '.join([str(upc.unique_part_code) for upc in upcs_data])
                     data.append((upc_data_list))
-                elif field == 'ams':
-                    if accumulation.asm:
-                        data.append(getattr(accumulation.asm.name, field))
-                    else:
-                        data.append(None)
+                elif field == 'asm':
+                    asm_id =  accumulation.member.registered_by_distributor.asm_id
+                    asm_obj = get_model('AreaSparesManager').objects.filter(id=asm_id)
+                    asm_name = asm_obj[0].name
+                    data.append(asm_name)
                 elif field in constants.MEMBER_FIELDS:
                     data.append(getattr(accumulation.member, field))
                 else:
