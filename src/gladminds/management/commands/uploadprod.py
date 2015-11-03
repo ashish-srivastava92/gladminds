@@ -5,12 +5,10 @@ import boto
 from boto.s3.key import Key
 import csv
 import os
+from boto.s3.connection  import S3Connection
 
-#db = MySQLdb.connect("gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com","gladminds","gladmindsqa2","bajajcv")
 db = MySQLdb.connect(settings.DB_HOST,settings.DB_USER,settings.DB_PASSWORD,"bajajcv")
 cursor = db.cursor()
-
-from boto.s3.connection  import S3Connection
 
 class Command(BaseCommand):
     
@@ -18,15 +16,14 @@ class Command(BaseCommand):
         self.upload_acc_fit_data()
         
     def upload_acc_fit_data(self):
-    
-        S3_ID = 'AKIAIL7IDCSTNCG2R6JA'
-        S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
+
+        S3_ID = settings.S3_ID
+        S3_KEY = settings.S3_KEY
         connection = S3Connection(S3_ID, S3_KEY)
         AWS_STORAGE_BUCKET_NAME = 'gladminds'
         bucket = connection.get_bucket(AWS_STORAGE_BUCKET_NAME)
         k1=Key(bucket)
         k1.key = "acc_data.csv"
-        #k1.set_contents_from_filename("acc_data.csv")
         
         fp = open('acc_data.csv','w')
         
@@ -47,15 +44,12 @@ class Command(BaseCommand):
         
         s3_key.key = 'acc_data.csv'
         s3_key.set_contents_from_filename('acc_data.csv')
-        #s3_key.upload
         
         s3_key.set_acl('public-read')
         path = s3_key.generate_url(expires_in=0, query_auth=False)
         
-        
         k2= Key(bucket)
         k2.key = "fitment_data.csv"
-        #k2.set_contents_from_filename("fitment_data.csv")
         
         fp1 = open('fitment_data.csv','w')
         
