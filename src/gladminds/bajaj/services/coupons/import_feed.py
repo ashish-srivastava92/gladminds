@@ -576,15 +576,14 @@ class ContainerTrackerFeed(BaseFeed):
                         container_lr_obj.transporter_id=transporter_data 
                         container_lr_obj.consignment_id = tracker_obj['consignment_id']
                         container_lr_obj.do_num = tracker_obj['do_num']
-                        container_lr_obj.lr_date = tracker_obj['lr_date']
+                        container_lr_obj.lr_date = format_date(tracker_obj['lr_date'])
                         container_lr_obj.save()
-                    
-                     
-                except ObjectDoesNotExist as done:                                       
+                                         
+                except ObjectDoesNotExist as done:                                    
                     container_lr_obj = models.ContainerLR(zib_indent_num=container_indent_obj, 
                                                     consignment_id=tracker_obj['consignment_id'],
                                                     lr_number=tracker_obj['lr_number'],
-                                                    lr_date=tracker_obj['lr_date'],                                                              
+                                                    lr_date=format_date(tracker_obj['lr_date']),                                                              
                                                     do_num=tracker_obj['do_num'],
                                                     transporter=transporter_data)
                     container_lr_obj.ib_dispatch_dt = format_date(tracker_obj['ib_dispatch_dt'])
@@ -592,40 +591,40 @@ class ContainerTrackerFeed(BaseFeed):
                     container_lr_obj.save(using=settings.BRAND)
                     
                     
-                    gatein_date = format_date(tracker_obj['gatein_date'])
-                    status="Open"               
-                    if tracker_obj['container_no'] and tracker_obj['seal_no']:
-                        if gatein_date: 
-                            status="Closed"
-                        else:
-                            status="Inprogress"
-                    container_lr_obj.gatein_date=gatein_date
-                    container_lr_obj.gatein_time=tracker_obj['gatein_time']
-                    if tracker_obj['container_no'].upper().startswith('DUMY', 0, 4):
-                        tracker_obj['container_no']=None
-                    container_lr_obj.container_no=tracker_obj['container_no']
-                    container_lr_obj.seal_no=tracker_obj['seal_no']
-                    container_lr_obj.lr_date = format_date(tracker_obj['lr_date'])
-                    container_lr_obj.shippingline_id=tracker_obj['shippingline_id']
-                    container_lr_obj.truck_no=tracker_obj['truck_no']
-                    container_lr_obj.partner_name=tracker_obj['partner_name']
-                    container_lr_obj.lr_date=tracker_obj['lr_date']
-                    container_lr_obj.status=status
-                    container_lr_obj.save(using=settings.BRAND)
-                    
-                    if status=='Open':
-                        container_indent_obj.status = status
-                    elif status=='Inprogress':
-                        all_open_lr = models.ContainerLR.objects.filter(zib_indent_num=container_indent_obj, status='Open')
-                        if all_open_lr:
-                            container_indent_obj.status = 'Open'
-                        else:
-                            container_indent_obj.status = status
+                gatein_date = format_date(tracker_obj['gatein_date'])
+                status="Open"               
+                if tracker_obj['container_no'] and tracker_obj['seal_no']:
+                    if gatein_date: 
+                        status="Closed"
                     else:
-                        all_indent_lr = models.ContainerLR.objects.filter(zib_indent_num=container_indent_obj, status=status)
-                        if len(all_indent_lr)==container_indent_obj.no_of_containers:
-                            container_indent_obj.status = status
-                    container_indent_obj.save(using=settings.BRAND)
+                        status="Inprogress"
+                container_lr_obj.gatein_date=gatein_date
+                container_lr_obj.gatein_time=tracker_obj['gatein_time']
+                if tracker_obj['container_no'].upper().startswith('DUMY', 0, 4):
+                    tracker_obj['container_no']=None
+                container_lr_obj.container_no=tracker_obj['container_no']
+                container_lr_obj.seal_no=tracker_obj['seal_no']
+                container_lr_obj.lr_date = format_date(tracker_obj['lr_date'])
+                container_lr_obj.shippingline_id=tracker_obj['shippingline_id']
+                container_lr_obj.truck_no=tracker_obj['truck_no']
+                container_lr_obj.partner_name=tracker_obj['partner_name']
+                container_lr_obj.lr_date=format_date(tracker_obj['lr_date'])
+                container_lr_obj.status=status
+                container_lr_obj.save(using=settings.BRAND)
+                if status=='Open':
+                    container_indent_obj.status = status
+                elif status=='Inprogress':
+                    all_open_lr = models.ContainerLR.objects.filter(zib_indent_num=container_indent_obj, status='Open')
+                    if all_open_lr:
+                        container_indent_obj.status = 'Open'
+                    else:
+                        container_indent_obj.status = status
+                else:
+                    all_indent_lr = models.ContainerLR.objects.filter(zib_indent_num=container_indent_obj, status=status)
+                    
+                    if len(all_indent_lr)==container_indent_obj.no_of_containers:
+                        container_indent_obj.status = status
+                container_indent_obj.save(using=settings.BRAND)
             except Exception as ex:
                 ex="[Exception: ]: ContainerTrackerFeed {0}".format(ex)
                 logger.error(ex)
