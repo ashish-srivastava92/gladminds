@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from gladminds import settings
+from django.conf import settings
 import MySQLdb
 import boto
 from boto.s3.key import Key
