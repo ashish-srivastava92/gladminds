@@ -8,6 +8,7 @@ from gladminds.core.auth_helper import Roles
 import operator
 from django.db.models.query_utils import Q
 from gladminds.core.model_fetcher import get_model, models
+from celery.backends.mongodb import Bunch
 
 class CustomAuthorization(Authorization):
 
@@ -170,7 +171,6 @@ class MultiAuthorization(Authorization):
 
 
 class LoyaltyCustomAuthorization(Authorization):
-
     def __init__(self, query_field=None):
         self.query_field = query_field
 
@@ -190,7 +190,7 @@ class LoyaltyCustomAuthorization(Authorization):
         return query
     
     ''' filter the object list based on query defined for specific Role'''
-    def read_list(self, object_list, bundle):           
+    def read_list(self, object_list, bundle): 
         klass_name = bundle.obj.__class__._meta.module_name
         user = bundle.request.user
         if not user.is_superuser:
