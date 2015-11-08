@@ -34,6 +34,7 @@ import os
 from gladminds.core.core_utils.utils import dictfetchall
 from django.db import connections
 from django.utils.timezone import deactivate
+from bonobo.activation import query
 
 logger = logging.getLogger("gladminds")
 LOG = logging.getLogger('gladminds')
@@ -124,7 +125,7 @@ class RedemptionResource(CustomBaseModelResource):
                 query[q_user] = nsm_territory_list
             elif user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
                 asm_state_list=models.AreaSparesManager.objects.get(user__user=user).state.all()
-                query[q_user] = asm_state_list
+                query[q_user] = asm_state_lista
             elif user.groups.filter(name=Roles.DISTRIBUTORS).exists():
                 distributor_city =  models.Distributor.objects.get(user__user=user).city
                 query[q_user] = str(distributor_city)
@@ -335,30 +336,30 @@ class AccumulationResource(CustomBaseModelResource):
                         mem.district, mem.phone_number, st.state_name, distr.distributor_id, \
                         spart.unique_part_code, pp.points, acre.created_date\
                         FROM gm_accumulationrequest AS acre\
-                        LEFT OUTER JOIN gm_member mem ON mem.id = acre.member_id\
+                        INNER  JOIN gm_member mem ON mem.id = acre.member_id\
                         LEFT OUTER JOIN gm_distributor AS distr ON mem.registered_by_distributor_id = distr.id\
-                        LEFT OUTER JOIN gm_state AS st ON distr.state_id = st.id\
-                        LEFT OUTER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
+                        INNER JOIN gm_state AS st ON mem.state_id = st.id\
+                        INNER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
                         LEFT OUTER JOIN gm_sparepartupc AS spart ON accup.sparepartupc_id = spart.id\
                         LEFT OUTER JOIN gm_sparepartmasterdata AS mdata ON mdata.id = spart.part_number_id\
                         LEFT OUTER JOIN gm_sparepartpoint AS pp ON mdata.id = pp.part_number_id\
                         WHERE mem.form_status =  'complete' and acre.created_date >=\"{0}\" \
-                        and acre.created_date<= \"{1}\" and st.state_name=\"{2}\" GROUP BY acre.transaction_id ".format(start, end, asm_state_name);
+                        and acre.created_date<= \"{1}\" and st.state_name=\"{2}\" group by accup.sparepartupc_id,acre.transaction_id  ".format(start, end, asm_state_name);
            
         else:
             query1 = "SELECT mem.mechanic_id, mem.permanent_id, mem.first_name, \
                         mem.district, mem.phone_number, st.state_name, distr.distributor_id, \
                         spart.unique_part_code, pp.points, acre.created_date\
                         FROM gm_accumulationrequest AS acre\
-                        LEFT OUTER JOIN gm_member mem ON mem.id = acre.member_id\
+                        INNER JOIN gm_member mem ON mem.id = acre.member_id\
                         LEFT OUTER JOIN gm_distributor AS distr ON mem.registered_by_distributor_id = distr.id\
-                        LEFT OUTER JOIN gm_state AS st ON distr.state_id = st.id\
-                        LEFT OUTER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
+                        INNER JOIN gm_state AS st ON mem.state_id = st.id\
+                        INNER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
                         LEFT OUTER JOIN gm_sparepartupc AS spart ON accup.sparepartupc_id = spart.id\
                         LEFT OUTER JOIN gm_sparepartmasterdata AS mdata ON mdata.id = spart.part_number_id\
                         LEFT OUTER JOIN gm_sparepartpoint AS pp ON mdata.id = pp.part_number_id\
                         WHERE mem.form_status =  'complete' and acre.created_date >=\"{0}\" \
-                        and acre.created_date<= \"{1}\" GROUP BY acre.transaction_id ".format(start, end);
+                        and acre.created_date<= \"{1}\" group by accup.sparepartupc_id,acre.transaction_id ".format(start, end);
             
         details = self.get_sql_data(query1)
         
@@ -368,7 +369,7 @@ class AccumulationResource(CustomBaseModelResource):
         file_name='accumulation_download' + datetime.now().strftime('%d_%m_%y')
         headers=[]
         #headers = headers+constants.ACCUMULATION_API_HEADER
-        headers = ['mechanic_id', 'first_name','district','phone_number','state_name','distributor_id','unique_part_code','points','created_date']
+        headers = ['Mechanic ID', 'Mechanic Name','District','Mobile No','State','Distributor Code','Unique Code Detail','Point SMSed','Date of SMSed']
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(headers)
@@ -377,23 +378,26 @@ class AccumulationResource(CustomBaseModelResource):
         for accumulation in accumulations:
             data=[]
             for field in headers:
-                if field == 'mechanic_id' :
-                    data.append(accumulation['mechanic_id']) 
-                elif field == 'first_name':
+                if field == 'Mechanic ID':
+                    if accumulation['permanent_id']:
+                        data.append(accumulation['permanent_id']) 
+                    else:
+                        data.append(accumulation['mechanic_id']) 
+                elif field == 'Mechanic Name':
                     data.append(accumulation['first_name']) 
-                elif field == 'district':
+                elif field == 'District':
                     data.append(accumulation['district']) 
-                elif field == 'phone_number':
+                elif field == 'Mobile No':
                     data.append(accumulation['phone_number']) 
-                elif field == 'state_name':
+                elif field == 'State':
                     data.append(accumulation['state_name']) 
-                elif field == 'distributor_id':
+                elif field == 'Distributor Code':
                     data.append(accumulation['distributor_id']) 
-                elif field == 'unique_part_code':
+                elif field == 'Unique Code Detail':
                     data.append(accumulation['unique_part_code']) 
-                elif field == 'points':
+                elif field == 'Point SMSed':
                     data.append(accumulation['points']) 
-                elif field == 'created_date':
+                elif field == 'Date of SMSed':
                     data.append(accumulation['created_date']) 
             finaldata.append(data)         
             
@@ -418,30 +422,30 @@ class AccumulationResource(CustomBaseModelResource):
                         mem.district, mem.phone_number, st.state_name, distr.distributor_id, \
                         spart.unique_part_code,mdata.part_number, mdata.description, pp.points, acre.created_date\
                         FROM gm_accumulationrequest AS acre\
-                        LEFT OUTER JOIN gm_member mem ON mem.id = acre.member_id\
+                        INNER JOIN gm_member mem ON mem.id = acre.member_id\
                         LEFT OUTER JOIN gm_distributor AS distr ON mem.registered_by_distributor_id = distr.id\
-                        LEFT OUTER JOIN gm_state AS st ON distr.state_id = st.id\
-                        LEFT OUTER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
+                        INNER JOIN gm_state AS st ON mem.state_id = st.id\
+                        INNER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
                         LEFT OUTER JOIN gm_sparepartupc AS spart ON accup.sparepartupc_id = spart.id\
                         LEFT OUTER JOIN gm_sparepartmasterdata AS mdata ON mdata.id = spart.part_number_id\
                         LEFT OUTER JOIN gm_sparepartpoint AS pp ON mdata.id = pp.part_number_id\
-                        WHERE mem.form_status =  'complete' and acre.created_date >=\"{0}\" \
-                        and acre.created_date<= \"{1}\" and st.state_name=\"{2}\" GROUP BY acre.transaction_id ".format(start, end, asm_state_name);
+                        WHERE mem.form_status = 'complete' and acre.created_date >=\"{0}\" \
+                        and acre.created_date<= \"{1}\" and st.state_name=\"{2}\" group by accup.sparepartupc_id,acre.transaction_id ".format(start, end, asm_state_name);
            
         else:
             query1 = "SELECT mem.mechanic_id, mem.permanent_id, mem.first_name, \
                         mem.district, mem.phone_number, st.state_name, distr.distributor_id, \
                         spart.unique_part_code,mdata.part_number, mdata.description ,pp.points, acre.created_date\
                         FROM gm_accumulationrequest AS acre\
-                        LEFT OUTER JOIN gm_member mem ON mem.id = acre.member_id\
+                        INNER JOIN gm_member mem ON mem.id = acre.member_id\
                         LEFT OUTER JOIN gm_distributor AS distr ON mem.registered_by_distributor_id = distr.id\
-                        LEFT OUTER JOIN gm_state AS st ON distr.state_id = st.id\
-                        LEFT OUTER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
+                        INNER JOIN gm_state AS st ON mem.state_id = st.id\
+                        INNER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
                         LEFT OUTER JOIN gm_sparepartupc AS spart ON accup.sparepartupc_id = spart.id\
                         LEFT OUTER JOIN gm_sparepartmasterdata AS mdata ON mdata.id = spart.part_number_id\
                         LEFT OUTER JOIN gm_sparepartpoint AS pp ON mdata.id = pp.part_number_id\
-                        WHERE mem.form_status =  'complete' and acre.created_date >=\"{0}\" \
-                        and acre.created_date<= \"{1}\" GROUP BY acre.transaction_id ".format(start, end);
+                        WHERE mem.form_status = 'complete' and acre.created_date >=\"{0}\" \
+                        and acre.created_date<= \"{1}\" group by accup.sparepartupc_id,acre.transaction_id  ".format(start, end);
             
         details = self.get_sql_data(query1)
         
@@ -451,7 +455,7 @@ class AccumulationResource(CustomBaseModelResource):
         file_name='fitment_download' + datetime.now().strftime('%d_%m_%y')
         headers=[]
         #headers = headers+constants.ACCUMULATION_API_HEADER
-        headers = ['mechanic_id', 'first_name','district','phone_number','state_name','distributor_id','unique_part_code','part_number','description','points','created_date']
+        headers = ['Mechanic ID', 'Mechanic Name','District','Mobile No','State','Distributor Code','Unique Code Detail','Part Number','Description','Point SMSed','Date of SMSed']
         csvfile = StringIO.StringIO()
         csvwriter = csv.writer(csvfile)
         csvwriter.writerow(headers)
@@ -460,27 +464,30 @@ class AccumulationResource(CustomBaseModelResource):
         for accumulation in accumulations:
             data=[]
             for field in headers:
-                if field == 'mechanic_id' :
-                    data.append(accumulation['mechanic_id']) 
-                elif field == 'first_name':
+                if field == 'Mechanic ID':
+                    if accumulation['permanent_id']:
+                        data.append(accumulation['permanent_id']) 
+                    else:
+                        data.append(accumulation['mechanic_id'])  
+                elif field == 'Mechanic Name':
                     data.append(accumulation['first_name']) 
-                elif field == 'district':
+                elif field == 'District':
                     data.append(accumulation['district']) 
-                elif field == 'phone_number':
+                elif field == 'Mobile No':
                     data.append(accumulation['phone_number']) 
-                elif field == 'state_name':
+                elif field == 'State':
                     data.append(accumulation['state_name']) 
-                elif field == 'distributor_id':
+                elif field == 'Distributor Code':
                     data.append(accumulation['distributor_id']) 
-                elif field == 'unique_part_code':
+                elif field == 'Unique Code Detail':
                     data.append(accumulation['unique_part_code'])
-                elif field == 'part_number':
+                elif field == 'Part Number':
                     data.append(accumulation['part_number'])
-                elif field == 'description':
+                elif field == 'Description':
                     data.append(accumulation['description']) 
-                elif field == 'points':
+                elif field == 'Point SMSed':
                     data.append(accumulation['points']) 
-                elif field == 'created_date':
+                elif field == 'Date of SMSed':
                     data.append(accumulation['created_date']) 
             finaldata.append(data)         
             
