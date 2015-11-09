@@ -125,7 +125,7 @@ class RedemptionResource(CustomBaseModelResource):
                 query[q_user] = nsm_territory_list
             elif user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
                 asm_state_list=models.AreaSparesManager.objects.get(user__user=user).state.all()
-                query[q_user] = asm_state_lista
+                query[q_user] = asm_state_list
             elif user.groups.filter(name=Roles.DISTRIBUTORS).exists():
                 distributor_city =  models.Distributor.objects.get(user__user=user).city
                 query[q_user] = str(distributor_city)
