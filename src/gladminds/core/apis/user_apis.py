@@ -1494,6 +1494,7 @@ class MemberResource(CustomBaseModelResource):
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm_state_list=get_model('AreaSparesManager').objects.get(user__user=request.user).state.all()
             kwargs['state__in'] = asm_state_list
+            
         mechanics = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs).select_related('state', 'registered_by_distributor')
         
         return mechanics
