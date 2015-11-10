@@ -1626,6 +1626,7 @@ class MemberResource(CustomBaseModelResource):
                 if active:
                     member_report[member[region]]['active_count']= active[0]['count']
                     member_report[member[region]]['active_percent']= round(100 * float(active[0]['count'])/float(member['count']), 2)
+            
         except Exception as ex:
             logger.error('Active member count requested by {0}:: {1}'.format(request.user, ex))
             member_report = {'status': 0, 'message': 'could not retrieve the count of active members'}
