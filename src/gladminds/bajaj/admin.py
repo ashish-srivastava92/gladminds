@@ -423,6 +423,10 @@ class NSMAdmin(GmModelAdmin):
         obj.phone_number = utils.mobile_format(obj.phone_number)
         super(NSMAdmin, self).save_model(request, obj, form, change)
 
+
+
+ 
+
 class ASMAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('asm_id', 'nsm__name',
@@ -485,6 +489,53 @@ class AreaSalesManagerAdmin(GmModelAdmin):
         self.exclude = ("nsm",)
         form = super(AreaSalesManagerAdmin, self).get_form(request, obj, **kwargs)
         return form
+
+
+    
+    
+
+'''Admin View for loyalty'''
+class NSMAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('nsm_id', 'name', 'phone_number')
+    list_display = ('nsm_id', 'name', 'email', 'phone_number','get_territory')
+
+    def get_territory(self, obj):
+        territories = obj.territory.all()
+        if territories:
+            return ' | '.join([str(territory.territory) for territory in territories])
+        else:
+            return None
+
+    get_territory.short_description = 'Territory'
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('nsm_id',)
+        form = super(NSMAdmin, self).get_form(request, obj, **kwargs)
+        return form
+
+    def save_model(self, request, obj, form, change):
+        obj.phone_number = utils.mobile_format(obj.phone_number)
+        super(NSMAdmin, self).save_model(request, obj, form, change)
+
+
+
+class ASMAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('asm_id', 'nsm__name',
+                     'phone_number', 'state')
+    list_display = ('asm_id', 'name', 'email',
+                     'phone_number', 'get_state', 'nsm')
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('asm_id',)
+        form = super(ASMAdmin, self).get_form(request, obj, **kwargs)
+        return form
+
+    def save_model(self, request, obj, form, change):
+        obj.phone_number = utils.mobile_format(obj.phone_number)
+        super(ASMAdmin, self).save_model(request, obj, form, change)
+
         
 class DistributorForm(forms.ModelForm):
     name_distributorship = forms.CharField(label = 'Name of Distributorship', max_length=300)
@@ -793,13 +844,14 @@ class RetailerAdmin(GmModelAdmin):
             obj.retailer_code = str(constants.RETAILER_SEQUENCE)
         # if dsr is added by distributorstaff, then show the concerned distributor of distributorstaff
         # else show the distributor
+        
         if DistributorStaff.objects.filter(user__user = request.user).exists():
             distributorstaff = DistributorStaff.objects.get(user__user = request.user)
             obj.distributor = Distributor.objects.get(id = distributorstaff.distributor.id)
         else:
             obj.distributor = Distributor.objects.get(user__user = request.user)
         super(RetailerAdmin, self).save_model(request, obj, form, change)
-    
+        
     def status(self, obj):
         #Added retailer by distributor/distributorstaff must be approved by the ASM/admin
         #he can also be rejected on some conditions
@@ -820,6 +872,11 @@ class RetailerAdmin(GmModelAdmin):
                     rejected_reason = "<input type=\"button\" value=\"Rejected Reason\" onclick=\"popup_rejected_reason(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.rejected_reason+"\'); return false;\">"
                     return mark_safe(rejected_reason)
     status.allow_tags = True
+    
+class CollectionAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('retailer',)
+    list_display = ('retailer', 'payment_date','payment_mode','payment_amount','invoice_date','invoice_amount','invoice_number')
     
 class SparePartMasterAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -1348,7 +1405,10 @@ def get_admin_site_custom(brand):
     brand_admin.register(User, UserAdmin)
     brand_admin.register(Group, GroupAdmin)
     brand_admin.register(get_model("UserProfile", brand), UserProfileAdmin)
+    
+    
     brand_admin.register(get_model("Distributor", brand), DistributorAdmin)
+    brand_admin.register(get_model("Collection", brand), CollectionAdmin)
     #brand_admin.register(get_model("DistributorStaff", brand), DistributorStaffAdmin)
     brand_admin.register(get_model("DistributorSalesRep", brand), DistributorSalesRepAdmin)
     brand_admin.register(get_model("Retailer", brand), RetailerAdmin)
@@ -1358,6 +1418,8 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("PartPricing", brand), PartPricingAdmin)
     brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
     
+    brand_admin.register(get_model("NationalSparesManager", brand), NSMAdmin)
+    brand_admin.register(get_model("AreaSparesManager", brand), ASMAdmin)
     brand_admin.register(get_model("NationalSalesManager", brand), NationalSalesManagerAdmin)
     brand_admin.register(get_model("AreaSalesManager", brand), AreaSalesManagerAdmin)
     brand_admin.register(get_model("DSRScorecardReport", brand), DSRScorecardReportAdmin)

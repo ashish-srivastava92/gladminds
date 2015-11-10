@@ -93,7 +93,25 @@ SUIT_CONFIG = {
                     {'model': 'authorizedservicecenter',
                      'label': 'Authorized Service Center'},
                     {'model': 'serviceadvisor',
-                     'label': 'Service Advisor'},)},
+                     'label': 'Service Advisor'},
+                    
+                    
+                    {'model': 'nationalsparesmanager',
+                     'label': 'National Spares Manager'},
+                   
+                   {'model': 'areasparesmanager',
+                     'label': 'Area Spares Manager'},
+                    {'model': 'distributor',
+                     'label': 'Distributor'},
+                       
+              {'model': 'distributorsalesrep',
+                     'label': 'Distributor Sales Rep'},
+                    
+                      {'model': 'retailer',
+                     'label': 'Retailer'},
+                    
+                    
+                    )},
         {'app': 'bajaj', 'label': 'Products', 'icon': ' icon-folder-open',
          'models':({'model': 'brandproductcategory',
                      'label': 'Brand Product Category'},
@@ -166,7 +184,46 @@ SUIT_CONFIG = {
                      'label': ' Customer registration'},)},
         {'app': 'bajaj', 'label': 'Templates', 'icon': ' icon-folder-open',
          'models':(
-                    'messagetemplate', 'emailtemplate',)},)
+                    'messagetemplate', 'emailtemplate',)},
+ 
+        
+         #  {'app': 'bajaj', 'label': 'Targets', 'icon': ' icon-folder-open',
+         # 'models':(
+         #          )},
+         
+         
+         
+            {'app': 'bajaj', 'label': 'Parts', 'icon': ' icon-folder-open',
+          'models':(
+                   
+                     {'model': 'partmastercv',
+                      'label': 'PartMasterCv'},
+                      {'model': 'partpricing',
+                      'label': 'PartPricing'},
+                     )
+                       
+          },
+          {'app': 'bajaj', 'label': 'Orders', 'icon': ' icon-folder-open',
+          'models':(
+                   
+                     {'model': 'orderpart',
+                      'label': 'DSRs Orders'},
+                          {'model': 'orderpart',
+                      'label': 'Retailers Orders'},)
+          },
+        {'app': 'bajaj', 'label': 'Collections', 'icon': ' icon-folder-open',
+         'models':(
+                  
+                    {'model': 'collection',
+                     'label': 'Distributor Collection'},
+                 
+       
+)},
+        
+        
+        
+        
+        )
 }
 
 

@@ -24,7 +24,7 @@ from gladminds.core.auth_helper import Roles
 from gladminds.core import constants
 from gladminds.core.models import Distributor, DistributorSalesRep, \
                         Retailer, UserProfile, DSRWorkAllocation, OrderPart, State, \
-                        DSRScorecardReport
+                        DSRScorecardReport, RetailerScorecardReport
 
 logger = logging.getLogger('gladminds')
 
@@ -409,6 +409,8 @@ class NSMAdmin(GmModelAdmin):
         obj.phone_number = utils.mobile_format(obj.phone_number)
         super(NSMAdmin, self).save_model(request, obj, form, change)
 
+
+
 class ASMAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('asm_id', 'nsm__name',
@@ -429,6 +431,11 @@ class AreaSalesManagerAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('user',)
     list_display = ('user',)
+    
+class RegionalManagerAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('user',)
+    list_display = ('user',)    
     
 class CvCategoriesAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -871,33 +878,66 @@ class OrderPartAdmin(GmModelAdmin):
     dsr_id.short_description = "Dsr"
     dsr_id.admin_order_field = "dsr"
     
-    def queryset(self, request):
-        qs = super(OrderPartAdmin, self).queryset(request)
-        #retrieve distinct order ids
-        distinct_orders = OrderPart.objects.values('order_id').distinct()
-        orders_id = []
-        #for each distinct order id, get the object id
-        for orders in distinct_orders:
-                object_id = OrderPart.objects.values_list('id', flat=True).\
-                        filter(order_id = orders['order_id'])[0]
-                #append the object id to the list of orders id
-                orders_id.append(object_id)
-        ids = OrderPart.objects.filter(id__in = orders_id)
-        return ids
+    # def queryset(self, request):
+    #     qs = super(OrderPartAdmin, self).queryset(request)
+    #     #retrieve distinct order ids
+    #     distinct_orders = OrderPart.objects.values('order_id').distinct()
+    #     orders_id = []
+    #     #for each distinct order id, get the object id
+    #     for orders in distinct_orders:
+    #             object_id = OrderPart.objects.values_list('id', flat=True).\
+    #                     filter(order_id = orders['order_id'])[0]
+    #             #append the object id to the list of orders id
+    #             orders_id.append(object_id)
+    #     ids = OrderPart.objects.filter(id__in = orders_id)
+    #     return ids
 
 class RetailerCollectionAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('retailer',)
     list_display = ('retailer', 'order_amount', 'collected_amount', 'outstanding_amount')
     
+class CollectionAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('retailer',)
+    list_display = ('retailer', 'payment_date','payment_mode','payment_amount','invoice_date','invoice_amount','invoice_number')
+    
 class DSRScorecardReportAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('goals', )
-    list_display = ( 'srno', 'goals', 'target', 'actual', 'measures', 'weight', 'total_score')
+    list_display = ( 'srno', 'thisgoals', 'thistarget', 'thisactual', 'thismeasures',
+                    'thisweight', 'thisscore')
     
     def srno(self, obj):
         return obj.serial_number
     srno.short_description = 'Sr.No.'
+    
+    def thisgoals(self, obj):
+        return obj.goals
+    thisgoals.short_description='Goals'
+    
+    def thistarget(self, obj):
+        return obj.target
+    thistarget.short_description='Target'
+    
+    def thisactual(self, obj):
+        return obj.actual
+    thisactual.short_description='Actual'
+    
+    def thismeasures(self, obj):
+        return obj.measures
+    thismeasures.short_description='Measures'
+    
+    def thisweight(self, obj):
+        return obj.weight
+    thisweight.short_description='Weight'
+    
+    def thisscore(self, obj):
+        if obj.actual and obj.target:
+                return float(obj.actual)/float(obj.target) * float(obj.weight)
+        else:
+                return ''
+    thisscore.short_description='Total Score'
     
     def queryset(self, request):
         qs = super(DSRScorecardReportAdmin, self).queryset(request)
@@ -905,9 +945,43 @@ class DSRScorecardReportAdmin(GmModelAdmin):
         return report_headers
 
     def get_form(self, request, obj=None, **kwargs):
-        self.exclude = ('weight', 'total_score')
+        self.exclude = ('total_score')
         form = super(DSRScorecardReportAdmin, self).get_form(request, obj, **kwargs)
         return form
+
+class RetailerScorecardReportAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ()
+    list_display = ('srno', 'thiskpi', 'thistarget', 'thisactual', 'thispercentage')
+        
+    def srno(self, obj):
+        return obj.serial_number
+    srno.short_description = 'Sr.No.'
+    
+    def thiskpi(self, obj):
+        return obj.kpi
+    thiskpi.short_description = 'KPI'
+    
+    def thisactual(self, obj):
+        return obj.actual
+    thisactual.short_description = 'Actual'
+    
+    def thistarget(self, obj):
+        return obj.target
+    thistarget.short_description = 'Target'
+    
+    def thispercentage(self,obj):
+        if obj.actual and obj.target:
+                weight =  float(obj.actual)/ float(obj.target)
+                return str(weight) + '%'
+        else:
+                return ''
+    thispercentage.short_description='Percentage'
+    
+    def queryset(self, request):
+        qs = super(RetailerScorecardReportAdmin, self).queryset(request)
+        report_headers = RetailerScorecardReport.objects.filter().order_by('serial_number')
+        return report_headers
     
 class SparePartMasterAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -1323,6 +1397,8 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("DataFeedLog", brand), FeedLogAdmin)
     brand_admin.register(get_model("FeedFailureLog", brand))
     
+    brand_admin.register(get_model("RegionalManager", brand), RegionalManagerAdmin)
+    
     brand_admin.register(get_model("NationalSparesManager", brand), NSMAdmin)
     brand_admin.register(get_model("AreaSparesManager", brand), ASMAdmin)
     brand_admin.register(get_model("AreaSalesManager", brand), AreaSalesManagerAdmin)
@@ -1338,8 +1414,9 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("PartMasterCv", brand), PartMasterCvAdmin)
     
     brand_admin.register(get_model("DSRScorecardReport", brand), DSRScorecardReportAdmin)
+    brand_admin.register(get_model("RetailerScorecardReport", brand), RetailerScorecardReportAdmin)
     brand_admin.register(get_model("RetailerCollection", brand), RetailerCollectionAdmin)
-    
+    brand_admin.register(get_model("Collection", brand), CollectionAdmin)
     brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
     brand_admin.register(get_model("SparePartMasterData", brand), SparePartMasterAdmin)
     brand_admin.register(get_model("SparePartUPC", brand), SparePartUPCAdmin)

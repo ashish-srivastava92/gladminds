@@ -449,7 +449,6 @@ class AreaSparesManager(base_models.AreaSparesManager):
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
     user = models.ForeignKey(UserProfile)
-    territory = models.CharField(max_length=15)
     mobile = models.CharField(max_length=15)
     profile = models.CharField(max_length=15)
     language = models.CharField(max_length=10, null=True, blank=True)
@@ -532,6 +531,19 @@ class DSRScorecardReport(base_models.DSRScorecardReport):
     
     class Meta(base_models.DSRScorecardReport.Meta):
         app_label = _APP_NAME
+        
+class RetailerScorecardReport(base_models.RetailerScorecardReport):
+    '''details of DSRScorecardReport'''
+    serial_number = models.CharField(max_length = 10)
+    kpi = models.CharField(max_length = 255, null = True, blank = True)
+    retailer = models.ForeignKey(Retailer)
+    target = models.CharField(max_length = 255, null = True, blank = True)
+    actual = models.CharField(max_length = 255,  null = True, blank = True)
+    
+    class Meta(base_models.RetailerScorecardReport.Meta):
+        app_label = _APP_NAME
+        
+
         
 class PartModels(base_models.PartModels):
     ''' details of parts models'''

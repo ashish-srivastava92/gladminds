@@ -608,12 +608,28 @@ class Member(base_models.Member):
     class Meta(base_models.Member.Meta):
         app_label = _APP_NAME
 
+
+
 class SparePartMasterData(base_models.SparePartMasterData):
     '''details of Spare Part'''
     product_type = models.ForeignKey(ProductType, null=True, blank=True)
 
     class Meta(base_models.SparePartMasterData.Meta):
         app_label = _APP_NAME
+
+class Collection(base_models.Collection):
+    ''' details of spare parts and pricing '''
+    retailer = models.ForeignKey(Retailer)
+    payment_date = models.DateTimeField()
+    payment_mode = models.CharField(max_length=10)
+    payment_amount = models.CharField(max_length=10)
+    invoice_date = models.DateTimeField()
+    invoice_amount = models.CharField(max_length=10)
+    invoice_number = models.CharField(max_length=15)
+    
+    class Meta(base_models.Collection.Meta):
+        app_label = _APP_NAME      
+
 
 class OrderPart(base_models.OrderPart):
     ''' details of orders placed by retailer '''

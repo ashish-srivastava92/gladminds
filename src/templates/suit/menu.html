@@ -1,8 +1,6 @@
-
 {#{% load sitetree %}#}
 {% load i18n suit_menu_custom %}
 {% load url from future %}
-{% load i18n admin_static %}
 
 <div class="left-nav" id="left-nav">
   <ul>
@@ -13,47 +11,70 @@
         </a>
       </li>
     {% endblock %}
+
+    {% get_menu request as app_list %}
+    {% if app_list %}
+      {% for app in app_list %}
+      {% if app.models %}
+        {% if app.separator %}
+          <li class="separator"></li>
+        {% else %}
+			    <!-- {% if 'Loyalty' not in app.label %}-->
+          <li{{ app.is_active|yesno:' class=active,' }}>
+            <a href="{{ app.url }}"{{ app.blank|yesno:' target=_blank,' }}><i class="{% firstof app.icon 'icon-chevron-right' %}"></i>{% trans app.label|capfirst %}
+            </a>
+		<!--{% endif %}-->
+            {% if app.models %}
+				     <!--{% if 'Loyalty' not  in app.label %}-->
+              <ul>
+                {% for model in app.models %}
+                  <li{{ model.is_active|yesno:' class=active,' }}>
+                    <a href="{{ model.url }}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a></li>
+                {% endfor %}
+              </ul>
+            <!--{% endif %}-->
+			 {% endif %}
+          </li>
+        {% endif %}
+        {% endif %}
+      {% endfor %}
+       {% for app in app_list %}
+       {% if 'Products' in app.label and  app.models  %}
+       <li {{ model.is_active|yesno:' class=active,' }}><a><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>DFSC Report
+	     </a>
+	    <ul>
+	       <li{{ model.is_active|yesno:' class=active,' }}>
+	           <a href="/coupon/report/asc" target="_blank">ASC Report</a>
+	           <a href="/coupon/report/dealer" target="_blank">Dealer Report</a>
+	       </li>
+	     </ul>
+     </li>
+     {% endif %}
+     {% endfor %}
+	 
+	  {% for app in app_list %}
+       {% if 'Orders' in app.label and  app.models  %}
+       <li {{ model.is_active|yesno:' class=active,' }}><a><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>Reports
+	     </a>
+	    <ul>
+	       <li{{ model.is_active|yesno:' class=active,' }}>
+	           <a href="#" target="_blank"> DSRs Scorecard Report</a>
+	           <a href="#" target="_blank">Retailers Scorecard Report</a>
+			    <a href="#" target="_blank">PJP Report</a>
+	       </li>
+	     </ul>
+     </li>
+     {% endif %}
+     {% endfor %}  
+	 
+     {% for app in app_list %}
+       {% if 'Products' in app.label and  app.models  %}
+       <li {{ model.is_active|yesno:' class=active,' }}>
+        <a href="/aftersell/servicedesk/helpdesk" target="_blank"><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>Contact Support
+	    </a>
+       </li> 
+     {% endif %}
+     {% endfor %}
+    {% endif %}
   </ul>
- <div class="module">
-    <table class="table-overview applist" style="width:100%"
-		   summary="{% blocktrans with name=app.name %}
-		   Models available in the {{ name }} application.{% endblocktrans %}">
-    {% for app in app_list %}
-	  {% for model in app.models %}
-	  
-		{% if "Users" in model.name %}
-		<tr>
-		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Users' %}</a></td>
-		</tr>
-		{% endif %}
-		{% if "Distributors" in model.name %}
-		<tr>
-		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Distributors' %}</a></td>
-		</tr>
-		{% endif %}
-		{% if "Retailers" in model.name %}
-		<tr>
-		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Retailers' %}</a></td>
-		</tr>
-		{% endif %}
-		{% if "Order Part" in model.name %}
-		<tr>
-		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Orders' %}</a></td>
-		</tr>
-		{% endif %}
-		{% if "Collection" in model.name %}
-		<tr>
-		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Collection' %}</a></td>
-		</tr>
-		{% endif %}
-		{% if "DSR Scorecard Report" in model.name %}
-		<tr>
-		  <td><a href="{{ model.admin_url }}" style="text-decoration: none" >{% trans 'Reports' %}</a></td>
-		</tr>
-		{% endif %}
-	  {% endfor %}  
-	{% endfor %}
-	</table>
-	</div>
-  
 </div>

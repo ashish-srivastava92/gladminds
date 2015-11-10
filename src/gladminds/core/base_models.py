@@ -1186,6 +1186,14 @@ class DSRScorecardReport(BaseModel):
         db_table = "gm_dsrscorecardreport"
         verbose_name_plural = "DSR Scorecard Report"
         
+class RetailerScorecardReport(BaseModel):
+    '''details of DSRScorecard'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_retailerscorecardreport"
+        verbose_name_plural = "Retailer Scorecard Report"
+        
 class PartModels(BaseModel):
     ''' details of parts model '''
     

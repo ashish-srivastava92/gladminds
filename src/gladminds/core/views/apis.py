@@ -188,9 +188,7 @@ def day_close_order(request, dsr_id):
     it in the database
     '''
     parts = json.loads(request.body)
-    print '---------------------'
-    print parts['dayclose_order_list']
-    print '---------------------'
+    
     for order_list in parts['dayclose_order_list']:
         for order_items in order_list['order_items']:
             orderpart = OrderPart()
@@ -216,6 +214,7 @@ def retailer_order(request, retailer_id):
     This method gets the orders placed by the retailer and puts it in the database
     '''
     parts = json.loads(request.body)
+    print parts
     date = parts['date']
     items = parts['order_items']
     for item in items:
@@ -258,6 +257,7 @@ def get_schedule(request, dsr_id, date):
         schedule_dict.update({"longitude":schedule.retailer.longitude})
         schedules_list.append(schedule_dict)
     return Response(schedules_list)
+
 
 @api_view(['GET'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
