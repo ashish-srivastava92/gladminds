@@ -9,6 +9,7 @@ import operator
 from django.db.models.query_utils import Q
 from gladminds.core.model_fetcher import get_model, models
 from celery.backends.mongodb import Bunch
+from PyQt4.Qt import QUrl
 
 class CustomAuthorization(Authorization):
 
@@ -187,6 +188,7 @@ class LoyaltyCustomAuthorization(Authorization):
             query[q_user] = str(distributor_city)
         else:
             query[q_user] = user.username
+        
         return query
     
     ''' filter the object list based on query defined for specific Role'''
@@ -280,10 +282,14 @@ class CTSCustomAuthorization(Authorization):
 
 class ZSMCustomAuthorization(Authorization):
     def read_list(self, object_list, bundle):
+        
         if bundle.request.user.groups.filter(name=Roles.ZSM):
             object_list = object_list.filter(zsm__user__user_id=int(bundle.request.user.id))
         elif bundle.request.user.groups.filter(name=Roles.AREASERVICEMANAGER):
             object_list = object_list.filter(user__user_id=int(bundle.request.user.id))
+        elif bundle.request.user.groups.filter(name=Roles.SUPERADMINS):
+            object_list = object_list
+            
         return object_list
     
 class CHCustomAuthorization(Authorization):

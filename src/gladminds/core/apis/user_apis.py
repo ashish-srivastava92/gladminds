@@ -1494,6 +1494,7 @@ class MemberResource(CustomBaseModelResource):
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm_state_list=get_model('AreaSparesManager').objects.get(user__user=request.user).state.all()
             kwargs['state__in'] = asm_state_list
+            
         mechanics = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs).select_related('state', 'registered_by_distributor')
         
         return mechanics
@@ -1625,6 +1626,7 @@ class MemberResource(CustomBaseModelResource):
                 if active:
                     member_report[member[region]]['active_count']= active[0]['count']
                     member_report[member[region]]['active_percent']= round(100 * float(active[0]['count'])/float(member['count']), 2)
+            
         except Exception as ex:
             logger.error('Active member count requested by {0}:: {1}'.format(request.user, ex))
             member_report = {'status': 0, 'message': 'could not retrieve the count of active members'}
