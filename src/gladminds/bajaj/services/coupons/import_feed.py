@@ -570,16 +570,15 @@ class ContainerTrackerFeed(BaseFeed):
                     container_indent_obj.save(using=settings.BRAND)
                 try:
                     container_lr_obj = models.ContainerLR.objects.get(zib_indent_num=container_indent_obj,
-                                                                       lr_number=tracker_obj['lr_number'])
-                    
+                                                                      lr_number=tracker_obj["lr_number"])                    
                     if container_lr_obj.transporter_id != tracker_obj['transporter_id']:    
                         container_lr_obj.transporter_id=transporter_data 
-                        container_lr_obj.consignment_id = tracker_obj['consignment_id']
-                        container_lr_obj.do_num = tracker_obj['do_num']
-                        container_lr_obj.lr_date = format_date(tracker_obj['lr_date'])
-                        container_lr_obj.save()
+                    container_lr_obj.consignment_id = tracker_obj['consignment_id']
+                    container_lr_obj.do_num = tracker_obj['do_num']
+                    container_lr_obj.lr_date = format_date(tracker_obj['lr_date'])
+                    container_lr_obj.save()
                                          
-                except ObjectDoesNotExist as done:                                    
+                except ObjectDoesNotExist as done:            
                     container_lr_obj = models.ContainerLR(zib_indent_num=container_indent_obj, 
                                                     consignment_id=tracker_obj['consignment_id'],
                                                     lr_number=tracker_obj['lr_number'],
@@ -589,8 +588,7 @@ class ContainerTrackerFeed(BaseFeed):
                     container_lr_obj.ib_dispatch_dt = format_date(tracker_obj['ib_dispatch_dt'])
                     container_lr_obj.cts_created_date = format_date(tracker_obj['created_date'])
                     container_lr_obj.save(using=settings.BRAND)
-                    
-                    
+                       
                 gatein_date = format_date(tracker_obj['gatein_date'])
                 status="Open"               
                 if tracker_obj['container_no'] and tracker_obj['seal_no']:
@@ -639,3 +637,7 @@ def format_date(date):
     else:
         date=datetime.strptime(date, "%Y-%m-%d")
     return date
+
+
+
+
