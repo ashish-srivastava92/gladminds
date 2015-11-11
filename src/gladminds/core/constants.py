@@ -331,3 +331,39 @@ WORKFLOW_STATUS = (
         ('Open', 'Open'),
         ('Completed', 'Completed')
     )
+
+STATUS = {'REJECTED': 0, 'WAITING_FOR_APPROVAL': 1, 'APPROVED': 2}
+
+FROM_EMAIL_ADMIN = "araskumar.a@gladminds.co"
+
+ADD_DISTRIBUTOR_SUBJECT = "New distributor is added"
+ADD_DISTRIBUTOR_MESSAGE = "New distributor has been added.\
+                                        Your login credentials are username: %s, password: %s "
+
+ADD_DISTRIBUTOR_STAFF_SUBJECT = "New distributor staff is added"
+ADD_DISTRIBUTOR_STAFF_MESSAGE = "New distributor staff has been added.\
+                                        Your login credentials are username: %s, password: %s "
+
+ADD_DSR_SUBJECT = "New dsr is added"
+ADD_DSR_MESSAGE = "New dsr has been added.\
+                                        Your login credentials are username: %s, password: %s "
+
+REJECT_RETAILER_SUBJECT = "retailer is rejected"
+REJECT_RETAILER_MESSAGE = "your retailer membership is rejected.. \
+                          Please contact the distributor to know the reason"
+
+APPROVE_RETAILER_SUBJECT = "retailer is approved"
+APPROVE_RETAILER_MESSAGE = "your retailer membership is approved.\
+                           you can login with your registered username and password"
+
+DISTRIBUTOR_SEQUENCE = 400001
+DISTRIBUTOR_SEQUENCE_INCREMENT = 1
+
+DSR_SEQUENCE = 500001
+DSR_SEQUENCE_INCREMENT = 1
+
+RETAILER_SEQUENCE = 600001
+RETAILER_SEQUENCE_INCREMENT = 1
+
+INVOICE_SEQUENCE = 001
+INVOICE_SEQUENCE_INCREMENT = 1

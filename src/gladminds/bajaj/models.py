@@ -1,7 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from gladminds.core import base_models, constants
+from gladminds.core.model_helpers import PhoneField
 from gladminds.core.auth_helper import GmApps
+from django import forms
 import datetime
 
 _APP_NAME = GmApps.BAJAJ
@@ -61,11 +63,21 @@ class State(base_models.State):
     class Meta(base_models.State.Meta):
         app_label = _APP_NAME
 
+class NationalSalesManager(base_models.NationalSalesManager):
+    '''details of National Sales Manager'''
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    territory = models.ManyToManyField(Territory)
+
+    class Meta(base_models.NationalSalesManager.Meta):
+        app_label = _APP_NAME
 
 class AreaSalesManager(base_models.AreaSalesManager):
     '''details of Area Sales Manager'''
     user =  models.OneToOneField(UserProfile)
-    rm = models.ForeignKey(RegionalManager, null=True, blank=True)
+    name = models.CharField(max_length=50, null=True, blank=True)
+    email = models.EmailField(max_length=50, null=True, blank=True)
+    phone_number = PhoneField(skip_check=True, null=True, blank=True)
+    nsm = models.ForeignKey(NationalSalesManager, null=True, blank=True)
     state = models.ManyToManyField(State)
     
     class Meta(base_models.AreaSalesManager.Meta):
@@ -73,7 +85,7 @@ class AreaSalesManager(base_models.AreaSalesManager):
     
     def __unicode__(self):
         return self.user.user.username
-
+    
 class AreaServiceManager(base_models.AreaServiceManager):
     '''details of Area Service Manager'''
     user = models.OneToOneField(UserProfile, null=True, blank=True)
@@ -441,13 +453,12 @@ class City(base_models.City):
 
 class NationalSparesManager(base_models.NationalSparesManager):
     '''details of National Spares Manager'''
-    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    user = models.ForeignKey(UserProfile)
     territory = models.ManyToManyField(Territory)
 
     class Meta(base_models.NationalSparesManager.Meta):
         app_label = _APP_NAME
-
-
+        
 class AreaSparesManager(base_models.AreaSparesManager):
     '''details of Area Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
@@ -457,55 +468,154 @@ class AreaSparesManager(base_models.AreaSparesManager):
     class Meta(base_models.AreaSparesManager.Meta):
         app_label = _APP_NAME
 
-
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
-    user = models.ForeignKey(UserProfile, null=True, blank=True)
-    asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
-    state = models.ForeignKey(State, null=True, blank=True)
+    user = models.ForeignKey(UserProfile)
+    territory = models.CharField(max_length=15)
+    mobile = models.CharField(max_length=15)
+    profile = models.CharField(max_length=15)
+    language = models.CharField(max_length=10, null=True, blank=True)
+    territory = models.CharField(max_length=10, null=True, blank=True)    
     
     class Meta(base_models.Distributor.Meta):
+        app_label = _APP_NAME
+        
+class DSRScorecardReport(base_models.DSRScorecardReport):
+    ''' details of report '''
+    serial_number = models.CharField(max_length = 5)
+    goals = models.CharField(max_length = 255, null = True, blank = True)
+    target = models.CharField(max_length = 255, null = True, blank = True)
+    actual = models.CharField(max_length = 255,  null = True, blank = True)
+    measures = models.CharField(max_length = 255, null = True, blank = True)
+    weight = models.CharField(max_length = 255, null = True, blank = True)
+    total_score = models.CharField(max_length = 255, null = True, blank = True)
+    
+    class Meta(base_models.DSRScorecardReport.Meta):
         app_label = _APP_NAME
 
 class DistributorStaff(base_models.DistributorStaff):
     '''details of Distributor'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
-    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    distributor = models.ForeignKey(Distributor)
     
     class Meta(base_models.DistributorStaff.Meta):
         app_label = _APP_NAME
 
 class DistributorSalesRep(base_models.DistributorSalesRep):
     '''details of Distributor Sales Rep'''
-    user = models.ForeignKey(UserProfile, null=True, blank=True)
-    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    user = models.ForeignKey(UserProfile)
+    distributor = models.ForeignKey(Distributor)
     
     class Meta(base_models.DistributorSalesRep.Meta):
         app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.distributor_sales_code + ' ' + self.user.user.first_name + \
+                                ' ' + self.user.user.last_name
 
 class Retailer(base_models.Retailer):
     '''details of retailer'''
-
+    user = models.ForeignKey(UserProfile)
+    billing_code = models.CharField(max_length=15)
+    distributor = models.ForeignKey(Distributor)
+    approved = models.PositiveSmallIntegerField(default=constants.STATUS['WAITING_FOR_APPROVAL'])
+    territory = models.CharField(max_length=15)
+    email = models.EmailField(max_length=50, null=True, blank=True)
+    mobile = models.CharField(max_length=15)
+    profile = models.CharField(max_length=15, null=True, blank=True)
+    latitude = models.DecimalField(max_digits = 10, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits = 11, decimal_places=6, null=True, blank=True)
+    language = models.CharField(max_length=10, null=True, blank=True)
+    rejected_reason = models.CharField(max_length=300, null=True, blank=True)
+    
     class Meta(base_models.Retailer.Meta):
         app_label = _APP_NAME
 
-class DSRWrokAllocation(base_models.DSRWrokAllocation):
-    '''details of DSR work allocation'''
-    distributor = models.ForeignKey(Distributor, null=True, blank=True)
-    retailer = models.ForeignKey(Retailer, null=True, blank=True)
+    def __unicode__(self):
+        return self.retailer_code + ' ' + self.retailer_name
     
-    class Meta(base_models.DSRWrokAllocation.Meta):
+class PartModels(base_models.PartModels):
+    '''details of part models'''
+    model_name = models.CharField(max_length=255)
+    image_url = models.CharField(max_length=255, null=True, blank=True)
+    active = models.BooleanField(default = True)
+    
+    class Meta(base_models.PartModels.Meta):
         app_label = _APP_NAME
-
+        
+    def __unicode__(self):
+        return self.model_name
+        
+class Categories(base_models.Categories):
+    ''' details of model categories '''
+    category_name = models.CharField(max_length=255)
+    
+    image_url = models.CharField(max_length=255, null=True, blank=True)
+    
+    active = models.BooleanField(default = True)
+    
+    
+    class Meta(base_models.Categories.Meta):
+        app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.category_name
+    
+class PartModel(base_models.PartModel):
+    ''' details of model categories '''
+    name = models.CharField(max_length=50)
+    active = models.BooleanField(default = True)
+    
+    class Meta(base_models.PartModel.Meta):
+        app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.name
+        
+class SubCategories(base_models.SubCategories):
+    ''' details of model categories '''
+    name = models.CharField(max_length=255)
+    usps = models.CharField(max_length=500, null=True, blank=True)
+    importance = models.CharField(max_length=500, null=True, blank=True)
+    image_url = models.CharField(max_length=30, null=True, blank=True)
+    part_model = models.ForeignKey(PartModel)
+    active = models.BooleanField(default = True)
+    
+    class Meta(base_models.SubCategories.Meta):
+        app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.name
+    
+class PartPricing(base_models.PartPricing):
+    ''' details of model categories '''
+    part_number = models.CharField(max_length=255, null=True, blank=True)
+    products = models.CharField(max_length=255, null=True, blank=True)
+    remarks = models.CharField(max_length=255, null=True, blank=True)
+    mrp = models.CharField(max_length=8, null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    subcategory = models.ForeignKey(SubCategories)
+    price_list = models.IntegerField()
+    available_quantity = models.IntegerField()
+    current_month_should = models.IntegerField()
+    active = models.BooleanField(default = True)
+    
+    class Meta(base_models.PartPricing.Meta):
+        app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.description
+        
 class Member(base_models.Member):
     '''details of Member'''
     registered_by_distributor = models.ForeignKey(Distributor, null=True, blank=True)
     preferred_retailer = models.ForeignKey(Retailer, null=True, blank=True)
-
     state = models.ForeignKey(State)
 
     class Meta(base_models.Member.Meta):
         app_label = _APP_NAME
+
+
 
 class SparePartMasterData(base_models.SparePartMasterData):
     '''details of Spare Part'''
@@ -514,7 +624,38 @@ class SparePartMasterData(base_models.SparePartMasterData):
     class Meta(base_models.SparePartMasterData.Meta):
         app_label = _APP_NAME
 
+class Collection(base_models.Collection):
+    ''' details of spare parts and pricing '''
+    retailer = models.ForeignKey(Retailer)
+    payment_date = models.DateTimeField()
+    payment_mode = models.CharField(max_length=10)
+    payment_amount = models.CharField(max_length=10)
+    invoice_date = models.DateTimeField()
+    invoice_amount = models.CharField(max_length=10)
+    invoice_number = models.CharField(max_length=15)
+    
+    class Meta(base_models.Collection.Meta):
+        app_label = _APP_NAME      
 
+
+class OrderPart(base_models.OrderPart):
+    ''' details of orders placed by retailer '''
+    order_id = models.CharField(max_length = 40)
+    order_date = models.DateField()
+    part = models.ForeignKey(PartPricing)
+    quantity = models.IntegerField()
+    price = models.DecimalField(max_digits = 5, decimal_places=2)
+    total_price = models.DecimalField(max_digits = 8, decimal_places=2)
+    fullfill = models.NullBooleanField()
+    delivered = models.IntegerField(null=True, blank=True)
+    no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
+    dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
+    accept = models.BooleanField(default = False)
+    retailer = models.ForeignKey(Retailer)
+    
+    class Meta(base_models.OrderPart.Meta):
+        app_label = _APP_NAME
+          
 class SparePartUPC(base_models.SparePartUPC):
     '''details of Spare Part UPC'''
     part_number = models.ForeignKey(SparePartMasterData)

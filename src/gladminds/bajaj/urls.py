@@ -4,6 +4,7 @@ from gladminds.core import urls as core_urls
 from gladminds.core.urls import api_v1
 
 urlpatterns = patterns('',
+    url(r'^bulk_upload_retailer/$', 'gladminds.bajaj.views.views.bulk_upload_retailer', name='bulk_upload_retailer'),
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
     url(r'^admin/', include(brand_admin.urls)),
     url(r'', include(api_v1.urls)),
@@ -38,7 +39,8 @@ urlpatterns = patterns('',
     url(r'^aftersell/users/otp/validate', 'gladminds.bajaj.views.views.validate_otp', name='validate_otp'),
     url(r'^aftersell/users/otp/update_pass', 'gladminds.bajaj.views.views.update_pass', name='update_pass'),
     url(r'^aftersell/provider/change-password$', 'gladminds.bajaj.views.views.change_password', name='change_password'),
-    
+    url(r'^admin/retailer/rejected_reason$', 'gladminds.bajaj.views.views.rejected_reason', name='rejected_reason'),
+        
     url(r'^aftersell/servicedesk/helpdesk$', 'gladminds.bajaj.services.service_desk.servicedesk_views.service_desk', name='service_desk'),
     url(r'^aftersell/servicedesk/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.get_servicedesk_tickets', name='get_servicedesk_tickets'),
     url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.modify_servicedesk_tickets', name='modify_servicedesk_tickets'),

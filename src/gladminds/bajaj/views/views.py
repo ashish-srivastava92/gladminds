@@ -5,6 +5,7 @@ import datetime
 import operator
 import re
 import requests
+import csv
 
 from gladminds.core.utils import check_password
 from tastypie.http import HttpBadRequest
@@ -22,7 +23,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import F
 from gladminds.settings import BRAND_META
 from gladminds.bajaj import models
-from gladminds.core import utils
+from gladminds.core import utils, constants
 from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message,\
     send_mail_for_feed_failure,send_mail_customer_phone_number_update_exceeds
 from gladminds.core.managers.mail import sent_otp_email,\
@@ -32,7 +33,7 @@ from gladminds.core.apis.coupon_apis import CouponDataResource
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
 from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING,\
-    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS
+    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS, STATUS
 from gladminds.core.utils import get_email_template, format_product_object,\
     get_file_name
 from gladminds.core.auth_helper import Roles
@@ -43,9 +44,11 @@ from gladminds.core.services.message_template import get_template
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
 from gladminds.core.auth import otp_handler
+from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template import loader
 from django.template.context import Context
+from gladminds.core.managers.mail import send_email
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
@@ -736,3 +739,71 @@ def download_reconcilation_reports(download_data):
     
     response.write(template.render(c))
     return response
+
+@login_required
+def rejected_reason(request):
+    '''
+    This method updates the retailer with the reason for rejection by the ASM/admin
+    '''
+    retailer_id = request.POST['retailer_id']
+    rejected_reason = request.POST['rejected_reason']
+    retailer_email = request.POST['retailer_email']
+    Retailer.objects.filter(id=retailer_id).update(approved=STATUS['REJECTED'],\
+                                                 rejected_reason=rejected_reason)
+    try:
+        send_email(sender = constants.FROM_EMAIL_ADMIN, receiver = retailer_email, 
+                   subject = constants.REJECT_RETAILER_SUBJECT, body = '',
+                   message = constants.REJECT_RETAILER_MESSAGE)
+    except Exception as e:
+        logger.error('Mail is not sent. Exception occurred', e)
+    return HttpResponseRedirect('/admin/bajaj/retailer/')
+
+def handle_uploaded_file(uploaded_file):
+    '''
+    This method gets the uploaded file and writes it in the upload dir under the same name
+    '''
+    path = settings.UPLOAD_DIR + uploaded_file.name
+    with open(path, 'wb+') as destination:
+        for chunk in uploaded_file.chunks():
+            destination.write(chunk)
+    return path
+
+@login_required
+def bulk_upload_retailer(request):
+    '''
+    This method uploads retailers in bulk to the retailer model
+    '''
+    #upload the file to the upload_bajaj folder
+    full_path = handle_uploaded_file(request.FILES['bulk_upload_retailer'])
+    with open(full_path) as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            #get the userprofile data and save it in userprofile model
+            userprofile = UserProfile()
+            userprofile.user = \
+                    User.objects.create_user(username = row['username'], password = row['password'])
+            userprofile.country = row['country']
+            userprofile.pincode = row['pincode']
+            userprofile.state = row['state']
+            userprofile.address = row['address']
+            userprofile.save()
+            #get the retailer data and save it in retailer model
+            retailer = Retailer()
+            retailer.retailer_name = row['retailer name']
+            retailer.retailer_town = row['retailer town']
+            retailer.billing_code = row['billing code']
+            retailer.territory = row['territory']
+            retailer.email = row['email']
+            retailer.mobile = row['mobile']
+            retailer.language = row['language']
+            retailer.user = UserProfile.objects.get(user__username = row['username'])
+            if DistributorStaff.objects.filter(user__user = request.user).exists():
+                distributorstaff = DistributorStaff.objects.get(user__user = request.user)
+                retailer.distributor = \
+                        Distributor.objects.get(id = distributorstaff.distributor.id)
+            else:
+                retailer.distributor = \
+                        Distributor.objects.get(user__user = request.user)
+            retailer.save()
+    return HttpResponseRedirect('/admin/bajaj/retailer/')
+    

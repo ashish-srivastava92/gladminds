@@ -13,6 +13,7 @@ TEMPLATE_DIR = os.path.join(PROJECT_DIR, "templates")
 EMAIL_DIR = os.path.join(TEMPLATE_DIR, "email")
 DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 LOG_BASE_PATH = '/var/log/gladminds'
+UPLOAD_DIR = os.path.join(PROJECT_DIR, "upload_bajaj/")
 
 TIMEZONE = 'Asia/Kolkata'
 
@@ -62,10 +63,12 @@ from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (
     'gladminds.core.context_processors.gm_constants',
     'django.core.context_processors.request',
+    #'django.core.context_processors.applist',
 )
 
 SUIT_CONFIG = {
-    'ADMIN_NAME': 'GladMinds',
+    #'ADMIN_NAME': 'GladMinds',
+    'ADMIN_NAME': 'Connect to BajajTeam',
     'CONFIRM_UNSAVED_CHANGES': True,
     'SEARCH_URL': '',
     'MENU_EXCLUDE': ('auth.group', 'auth', 'sites'),
@@ -90,7 +93,25 @@ SUIT_CONFIG = {
                     {'model': 'authorizedservicecenter',
                      'label': 'Authorized Service Center'},
                     {'model': 'serviceadvisor',
-                     'label': 'Service Advisor'},)},
+                     'label': 'Service Advisor'},
+                    
+                    
+                    {'model': 'nationalsparesmanager',
+                     'label': 'National Spares Manager'},
+                   
+                   {'model': 'areasparesmanager',
+                     'label': 'Area Spares Manager'},
+                    {'model': 'distributor',
+                     'label': 'Distributor'},
+                       
+              {'model': 'distributorsalesrep',
+                     'label': 'Distributor Sales Rep'},
+                    
+                      {'model': 'retailer',
+                     'label': 'Retailer'},
+                    
+                    
+                    )},
         {'app': 'bajaj', 'label': 'Products', 'icon': ' icon-folder-open',
          'models':({'model': 'brandproductcategory',
                      'label': 'Brand Product Category'},
@@ -163,17 +184,69 @@ SUIT_CONFIG = {
                      'label': ' Customer registration'},)},
         {'app': 'bajaj', 'label': 'Templates', 'icon': ' icon-folder-open',
          'models':(
-                    'messagetemplate', 'emailtemplate',)},)
+                    'messagetemplate', 'emailtemplate',)},
+ 
+        
+         #  {'app': 'bajaj', 'label': 'Targets', 'icon': ' icon-folder-open',
+         # 'models':(
+         #          )},
+         
+         
+         
+            {'app': 'bajaj', 'label': 'Parts', 'icon': ' icon-folder-open',
+          'models':(
+                   
+                     {'model': 'partmastercv',
+                      'label': 'PartMasterCv'},
+                      {'model': 'partpricing',
+                      'label': 'PartPricing'},
+                     )
+                       
+          },
+          {'app': 'bajaj', 'label': 'Orders', 'icon': ' icon-folder-open',
+          'models':(
+                   
+                     {'model': 'orderpart',
+                      'label': 'DSRs Orders'},
+                          {'model': 'orderpart',
+                      'label': 'Retailers Orders'},)
+          },
+        {'app': 'bajaj', 'label': 'Collections', 'icon': ' icon-folder-open',
+         'models':(
+                  
+                    {'model': 'collection',
+                     'label': 'Distributor Collection'},
+                 
+       
+)},
+        
+        
+        
+        
+        )
 }
 
 
 MANAGERS = ADMINS
 
 DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
+
+# for localhost
 DB_USER = os.environ.get('DB_USER', 'root')
 DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
+
+# for bajaj MC
+# DB_USER = os.environ.get('DB_USER', 'bajaj')
+# DB_HOST = os.environ.get('DB_HOST', 'bajaj.chnnvvffqwop.us-east-1.rds.amazonaws.com')
+# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Bajajsfa')
+
+#for bajaj CV
+# DB_USER = os.environ.get('DB_USER', 'bajajcv')
+# DB_HOST = os.environ.get('DB_HOST', 'bajajcv.chnnvvffqwop.us-east-1.rds.amazonaws.com')
+# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Bajajcv123')
+
 DB_PORT = os.environ.get('DB_PORT', '3306')
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'admin')
 
 class GmApps():
     AFTERBUY = 'afterbuy'
@@ -200,6 +273,7 @@ DATABASE_APPS_MAPPING = {
 db_common = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gm',
+        #'NAME':'bajaj',
         'USER': DB_USER,
         'PASSWORD': DB_PASSWORD,
         'HOST': DB_HOST,
@@ -211,9 +285,11 @@ for brand in dir(GmApps):
     if not brand.startswith('__'):
         if getattr(GmApps,brand) in ['default']:
             db_common.update({'NAME': 'gm'})
+            #db_common.update({'NAME': 'bajaj'})
         else:
             db_common.update({'NAME': getattr(GmApps,brand)})
         DATABASES[getattr(GmApps,brand)] = deepcopy(db_common)
+
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -244,8 +320,8 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
-
+#MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
+MEDIA_ROOT = os.path.join(PROJECT_DIR, "static")
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://example.com/media/", "http://media.example.com/"
@@ -364,8 +440,8 @@ ALL_APPS = (
     'storages',
     'tastypie_swagger',
     'django_otp',
-    'django_otp.plugins.otp_totp'
-   # 'debug_toolbar',
+    'django_otp.plugins.otp_totp',
+    #'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
@@ -374,10 +450,19 @@ INSTALLED_APPS = ("longerusername",) + ALL_APPS
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
-
 LOGIN_REDIRECT_URL = '/register/redirect'
 
 TASTYPIE_SWAGGER_API_MODULE = 'gladminds.urls.api_v1'
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.IsAuthenticated',
+#         ],
+#     'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'rest_framework.authentication.BasicAuthentication',            
+#         'rest_framework.authentication.SessionAuthentication',
+#     ),
+# }
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -571,15 +656,16 @@ AFTERBUY_PRODUCT_WARRENTY_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "warrenty")
 AFTERBUY_PRODUCT_INSURANCE_LOC = os.path.join(
     AFTERBUY_PRODUCT_LOC, "insurance")
 AFTERBUY_PRODUCT_INVOICE_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "invoice")
-MEDIA_ROOT = AFTERBUY_LOC
+#MEDIA_ROOT = AFTERBUY_LOC
 MEDIA_URL = '/media/'
 
 # S3 Configuration
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-
+#DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 AWS_STORAGE_BUCKET_MAP = {'afterbuy': 'afterbuy'}
 AWS_STORAGE_BUCKET_NAME = 'gladminds-brands'
-S3_BASE_URL = 'https://%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+#S3_BASE_URL = 'https://%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+S3_BASE_URL = '/static/'
 ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif']
 ALLOWED_FILE_TYPES = { 'pdf' :'pdf',
                        'ppt' : 'vnd.ms-powerpoint',
@@ -722,6 +808,8 @@ DISTRIBUTOR_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/distrib
 BRAND_META = {
                "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/", 
                          "base_url": "local.bajaj.gladminds.co"},
+               "bajajsfa": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/", 
+                         "base_url": "local.bajaj.gladminds.co"},     
                "demo": {"title": "Daimler", "logo": "daimler/img/Daimler-logo.png", "tagline": "2015 Daimler AG",
                         "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
               "daimler": {"title": "Daimler", "logo": "daimler/img/Daimler-logo.png", "tagline": "2015 Daimler AG",

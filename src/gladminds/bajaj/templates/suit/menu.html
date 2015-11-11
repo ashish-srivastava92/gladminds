@@ -19,10 +19,13 @@
         {% if app.separator %}
           <li class="separator"></li>
         {% else %}
+		  {% if  'Loyalty' not in app.label   %}
           <li{{ app.is_active|yesno:' class=active,' }}>
             <a href="{{ app.url }}"{{ app.blank|yesno:' target=_blank,' }}><i class="{% firstof app.icon 'icon-chevron-right' %}"></i>{% trans app.label|capfirst %}
             </a>
+			{% endif %}
             {% if app.models %}
+			  {% if  'Loyalty' not in app.label   %}
               <ul>
                 {% for model in app.models %}
                   <li{{ model.is_active|yesno:' class=active,' }}>
@@ -30,6 +33,7 @@
                 {% endfor %}
               </ul>
             {% endif %}
+			{% endif %}
           </li>
         {% endif %}
         {% endif %}

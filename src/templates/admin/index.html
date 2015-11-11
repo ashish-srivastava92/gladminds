@@ -15,7 +15,7 @@
   <div id="content-main">
     {% if app_list %}
       {% for app in app_list %}
-        <div class="module">
+		<div class="module">
           <table class="table-overview applist" summary="{% blocktrans with name=app.name %}Models available in the {{ name }} application.{% endblocktrans %}">
           	{% if app.name in 'Djcelery'%}
           		<caption><a href="{{ app.app_url }}" class="section">Job Management</a></caption>
@@ -27,6 +27,9 @@
             {% for model in app.models %}
               <tr>
                 <th scope="row">{{ model.name }}</th>
+				<!--{% if model.name == "Distributors" %}
+				  <meta http-equiv="REFRESH" content="0;url= core/distributor/">
+				{% endif %}-->
                 {% if model.admin_url %}
                   <td>
                     <a href="{{ model.admin_url }}" class="changelink icon">{% trans 'Change' %}</a>

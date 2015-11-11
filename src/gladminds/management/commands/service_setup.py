@@ -4,7 +4,7 @@ from gladminds.core.auth.service_handler import Services
 from gladminds.default import models
 
 
-_BAJAJ_SERVICES = [Services.AFTERBUY, Services.FREE_SERVICE_COUPON, Services.LOYALTY, Services.SERVICE_DESK]
+_BAJAJ_SERVICES = [Services.AFTERBUY, Services.FREE_SERVICE_COUPON, Services.LOYALTY, Services.SERVICE_DESK, Services.SFA]
 _DEMO_SERVICES = [Services.SERVICE_DESK]
 _DAIMLER_SERVICES = [Services.SERVICE_DESK]
 _BAJAJIB_SERVICES = [Services.AFTERBUY, Services.FREE_SERVICE_COUPON, Services.LOYALTY, Services.SERVICE_DESK]

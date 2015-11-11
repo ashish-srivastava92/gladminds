@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -22,6 +23,8 @@ from gladminds.core.managers.mail import sent_password_reset_link,\
 from gladminds.core.constants import SBOM_STATUS
 from gladminds.core.managers.email_token_manager import EmailTokenManager
 
+image_upload_directory = os.path.join(settings.PROJECT_DIR, "static")
+
 try:
     from django.utils.timezone import now as datetime_now
 except ImportError:
@@ -30,6 +33,7 @@ STATUS_CHOICES=constants.STATUS_CHOICES
 
 def set_user_pic_path(instance, filename):
     return '{0}/{1}/user'.format(settings.ENV,settings.BRAND)
+    #return '{0}/{1}/image'.format(settings.PROJECT_DIR, 'static')
 
 class BaseModel(models.Model):
     '''Base model containing created date and modified date'''
@@ -56,14 +60,16 @@ class UserProfile(BaseModel):
   
     department = models.CharField(max_length=100, null=True, blank=True)
     
-    image_url = models.FileField(upload_to=set_user_pic_path,
-                                  max_length=200, null=True, blank=True,
-                                  validators=[validate_image])
+    # image_url = models.FileField(upload_to=set_user_pic_path,
+    #                               max_length=200, null=True, blank=True,
+    #                               validators=[validate_image])
+    image_url = models.FileField(upload_to="image",
+                                   max_length=200, null=True, blank=True)
     reset_password = models.BooleanField(default=False)
     reset_date = models.DateTimeField(null=True, blank=True)
-        
+    
     def image_tag(self):
-        return u'<img src="{0}/{1}" width="200px;"/>'.format(settings.S3_BASE_URL, self.image_url)
+        return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
     image_tag.short_description = 'User Image'
     image_tag.allow_tags = True
 
@@ -1080,6 +1086,21 @@ class NationalSparesManager(BaseModel):
 
     def __unicode__(self):
         return self.name
+    
+#NSM model for SFA    
+class NationalSalesManager(BaseModel):
+    '''details of National Sales Manager'''
+    name = models.CharField(max_length=50, null=True, blank=True)
+    email = models.EmailField(max_length=50, null=True, blank=True)
+    phone_number = PhoneField(skip_check=True, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_nationalsalesmanager"
+        verbose_name_plural = "National Sales Managers"
+
+    def __unicode__(self):
+        return self.name
 
 class AreaSparesManager(BaseModel):
     '''details of Area Spares Manager'''
@@ -1115,8 +1136,9 @@ class Distributor(BaseModel):
 
 class DistributorStaff(BaseModel):
     '''details of DistributorStaff'''
-    distributor_staff_id = models.CharField(max_length=50)
+    distributor_staff_code = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
+    email = models.EmailField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -1128,22 +1150,20 @@ class DistributorStaff(BaseModel):
 
 class DistributorSalesRep(BaseModel):
     '''details of DistributorSalesRep'''
-    distributor_sales_id = models.CharField(max_length=50)
+    distributor_sales_code = models.CharField(max_length=50)
     is_active = models.BooleanField(default=True)
+    email = models.EmailField(max_length=50, null=True, blank=True)
 
     class Meta:
         abstract = True
         db_table = "gm_distributorsalesrep"
         verbose_name_plural = "Distributor Sales Rep"
-
-    def __unicode__(self):
-        return self.distributor_sales_id
     
 class Retailer(BaseModel):
     '''details of Retailer'''
+    retailer_code = models.CharField(max_length=50)
     retailer_name = models.CharField(max_length=50)
     retailer_town = models.CharField(max_length=50, null=True, blank=True)
-    approved = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -1151,22 +1171,127 @@ class Retailer(BaseModel):
         db_table = "gm_retailer"
         verbose_name_plural = "Retailers"
 
-    def __unicode__(self):
-        return self.retailer_name
- 
-class DSRWrokAllocation(BaseModel):
-    '''details of DSRWrokAllocation'''
+class DSRWorkAllocation(BaseModel):
+    '''details of DSRWorkAllocation'''
     status = models.CharField(max_length=12, choices=constants.WORKFLOW_STATUS, default='Open')
 
     class Meta:
         abstract = True
         db_table = "gm_dsrworkallocation"
         verbose_name_plural = "DSR Work Allocation"
-
-    def __unicode__(self):
-        return self.retailer_name   
-
-
+        
+class RetailerCollection(BaseModel):
+    '''details of retailer collection'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_retailercollection"
+        verbose_name_plural = "Collection"
+        
+class DSRScorecardReport(BaseModel):
+    '''details of DSRScorecard'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_dsrscorecardreport"
+        verbose_name_plural = "DSR Scorecard Report"
+        
+class RetailerScorecardReport(BaseModel):
+    '''details of DSRScorecard'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_retailerscorecardreport"
+        verbose_name_plural = "Retailer Scorecard Report"
+        
+class PartModels(BaseModel):
+    ''' details of parts model '''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_partmodels"
+        verbose_name_plural = "Part Models"
+        
+class Categories(BaseModel):
+    ''' details of categories '''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_categories"
+        verbose_name_plural = "categories"
+        
+class SubCategories(BaseModel):
+    ''' details of categories '''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_subcategories"
+        verbose_name_plural = "subcategories"
+        
+class PartModel(BaseModel):
+    ''' details of mc model '''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_partmodel"
+        verbose_name_plural = "Part Model"
+        
+class PartPricing(BaseModel):
+    ''' details of spare parts and pricing'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_partpricing"
+        verbose_name_plural = "Part Master"
+        
+class CvCategories(BaseModel):
+    ''' details of cv categories'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_cvcategories"
+        verbose_name_plural = "CV Categories"
+        
+class PartMasterCv(BaseModel):
+    ''' details of spare parts and pricing'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_partmastercv"
+        verbose_name_plural = "Part Master"
+        
+class Collection(BaseModel):
+    ''' details of payment collected from the retailer'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_collection"
+        verbose_name_plural = "Collection"
+        
+class AlternateParts(BaseModel):
+    ''' details of alternate spare parts and pricing'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_alternateparts"
+        verbose_name_plural = "Alternate Parts"
+        
+class Kit(BaseModel):
+    ''' details of kit packages and parts'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_kit"
+        verbose_name_plural = "Fast Moving Kit"
+        
+class OrderPart(BaseModel):
+    ''' details of ordering spare parts by dsr or retailer'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_orderpart"
+        verbose_name_plural = "Order Part"
+        
 class Member(BaseModel):
     '''details of Member'''
     mechanic_id = models.CharField(max_length=50, unique=True, default=generate_mech_id)

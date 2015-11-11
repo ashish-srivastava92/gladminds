@@ -3,6 +3,7 @@
 {% load admintags %}
 {% load url from future %}
 
+
 {% block extrastyle %}
   {{ block.super }}
   {# <link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}" />#}
@@ -20,7 +21,7 @@
     <style>
       {#      #changelist table thead th:first-child {width: inherit}#}
     </style>
-  {% endif %}
+   {% endif %}
 {% endblock %}
 {% block extrahead %}
   {{ block.super }}
@@ -34,6 +35,7 @@
       })(django.jQuery);
     </script>
   {% endif %}{% endif %}
+  
 {% endblock %}
 {% block bodyclass %}change-list{% endblock %}
 {% if not is_popup %}
@@ -49,8 +51,16 @@
   {% endblock %}
   
 {% endif %}
+        
 {% block coltype %}flex{% endblock %}
 {% block content %}
+
+<!--popup of rejection of retailer-->
+<div id="popup">
+  
+</div>
+
+<!--rejection popup ends here-->
   <div id="content-main">
     <div class="inner-center-column">
       <div class="module{% if cl.has_filters %} filtered{% endif %}" id="changelist">
@@ -105,9 +115,78 @@
 			    	window.location = url;
 			    }
 		      </script>
-	      {% else %}
+		  {% else %}
           	{% block search %}{% search_form cl %}{% endblock %}
-          {% endif %}	
+          {% endif %}
+          <script type="text/javascript">
+          	//to close the rejection popup
+          	function popup_close() {
+          		document.getElementById("popup").style.visibility = "hidden";
+          	}
+			//to show the popup to state the reason for rejection of retailer
+		  	function popup_reject(retailer_id, retailer_name, retailer_email, distributor_name) {
+		  		var popup_content = '<br><center><form action="/admin/retailer/rejected_reason" method="POST">' +
+		  							'<table class=tbl_popup>'+
+		  								'<tr>'+
+		  								'<td> Distributor Name </td></tr>'+
+		  								'<tr><td>'+
+										'<div class="borderbox">'+distributor_name+'</div>'+
+										'</td>'+
+		  								'</tr><tr>'+
+		  								'<td> Retailer Name </td>'+
+		  								'<tr><td>'+
+										'<div class="borderbox">'+retailer_name+'</div>'+
+										'</td>'+
+		  								'</tr><tr>'+
+		  								'<td> Reason for rejection </td></tr>'+
+		  								'<tr><td> <textarea id="txt_rejected_reason" \
+		  								name="rejected_reason"></textarea> </td>' +
+		  								'</tr><tr><td></td></tr>'+
+		  							'</table>'+
+		  							'<input type="hidden" name="retailer_id" \
+										value="'+retailer_id+'">' +
+									'<input type="hidden" name="retailer_email" \
+										value="'+retailer_email+'">' +
+		  							'<div class="btn_popup">' +
+									'<input type="submit" value="submit">&nbsp;&nbsp;&nbsp;&nbsp;'+
+		  							'<input type="button" value="cancel" id="button_cancel" \
+									onclick="popup_close()">'+
+									'</div>'+
+		  							'</form></center>'
+		  		var Msg = document.getElementById("popup");
+		  		Msg.innerHTML = popup_content;
+		  		document.getElementById("popup").style.visibility = "visible";
+			}
+			//to show the popup the reason for rejection of retailer
+			function popup_rejected_reason(retailer_id, retailer_name, rejected_reason) {
+				var popup_reject_reason = '<br><center>' +
+		  							'<table class=tbl_popup>'+
+		  								'<tr>'+
+		  								'<td> Retailer Name </td>'+
+		  								'</tr>'+
+										'<tr>'+
+										'<td><div class="borderbox">'+retailer_name+'</div></td>'+
+										'</tr>'+
+										'<tr><td>&nbsp;</td></tr>'+
+										'<tr>'+
+		  								'<td> Reason for rejection </td>'+
+										'</tr>'+
+		  								'<tr><td>'+
+										'<textarea id="txt_rejected_reason">'+rejected_reason+ '\
+										</textarea></td>' +
+		  								'</tr><tr><td>&nbsp;</td></tr>'+
+									'</table>'+
+									'<div class="btn_popup">' +
+		  							'<input type="button" value="cancel" id="button_cancel" \
+									onclick="popup_close()">'+
+									'</div>'+
+		  							'</center>'
+									
+		  		var Msg = document.getElementById("popup");
+		  		Msg.innerHTML = popup_reject_reason;
+		  		document.getElementById("popup").style.visibility = "visible";
+			}
+		  </script>
           {% if created_date_search %}
           <div style="padding: 1px; margin: 1px;">
         	<div style="display: inline-block;">From: <input type="text" class="feed_start_date" value="{{ feed_start_date|default:'' }}" placeholder="yyyy-mm-dd"></div>

@@ -1,5 +1,5 @@
 import copy
-import datetime
+import datetime, logging, os
 
 from django import forms
 from django.contrib.admin import AdminSite, TabularInline
@@ -7,7 +7,11 @@ from django.contrib.auth.models import User, Group
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib.admin import DateFieldListFilter
-from django import forms
+from django.forms.widgets import TextInput
+from django.utils.html import mark_safe
+from django.db.models import Count
+from django.db import models
+from django.contrib import admin
 
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
@@ -18,6 +22,15 @@ from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.conf import settings
 from gladminds.core.auth_helper import Roles
 from gladminds.core import constants
+from gladminds.core.models import Distributor, DistributorSalesRep, \
+                        Retailer, UserProfile, DSRWorkAllocation, OrderPart, State, \
+                        DSRScorecardReport, RetailerScorecardReport
+
+logger = logging.getLogger('gladminds')
+
+PROFILE_CHOICES = (
+        ('distributor', 'Wholesale Distributors'),
+    )
 
 class CoreAdminSite(AdminSite):
     pass
@@ -28,7 +41,7 @@ class UserProfileAdmin(GmModelAdmin):
     list_display = ('user', 'phone_number', 'status', 'address',
                     'state', 'country', 'pincode', 'date_of_birth', 'gender')
     readonly_fields = ('image_tag',)
-    
+        
 class DealerAdmin(GmModelAdmin):
     search_fields = ('dealer_id',)
     list_display = ('dealer_id', 'get_user', 'get_profile_number', 'get_profile_address')
@@ -396,6 +409,8 @@ class NSMAdmin(GmModelAdmin):
         obj.phone_number = utils.mobile_format(obj.phone_number)
         super(NSMAdmin, self).save_model(request, obj, form, change)
 
+
+
 class ASMAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('asm_id', 'nsm__name',
@@ -411,24 +426,563 @@ class ASMAdmin(GmModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.phone_number = utils.mobile_format(obj.phone_number)
         super(ASMAdmin, self).save_model(request, obj, form, change)
-
-class DistributorAdmin(GmModelAdmin):
+        
+class AreaSalesManagerAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('distributor_id', 'asm__asm_id',
-                     'phone_number', 'city')
-    list_display = ('distributor_id', 'name', 'email',
-                    'phone_number', 'city', 'asm', 'state')
-
+    search_fields = ('user',)
+    list_display = ('user',)
+    
+class RegionalManagerAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('user',)
+    list_display = ('user',)    
+    
+class CvCategoriesAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('name',)
+    list_display = ('name',)
+    
+class AlternatePartsAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('part_number', 'part_name')
+    list_display = ('part_number', 'part_name')
+    
+class KitAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('part_number', 'description', )
+    list_display = ('part_number', 'description', 'mrp')
+    
+class PartMasterCvAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('part_number', 'description', )
+    list_display = ('part_no', 'thisdescription', 'thiscategory', 'thismodel','price',
+                    'quantityavailable', 'orderpending')
+    
+    def part_no(self, obj):
+        return obj.part_number
+    part_no.short_description = 'Parts #'
+    part_no.admin_order_field = 'part_number'
+    
+    def thisdescription(self,obj):
+        return obj.description
+    thisdescription.short_description = 'Part Description'
+    
+    def thismodel(self,obj):
+        return obj.part_model
+    thismodel.short_description = 'Applicable Model'
+    
+    def thiscategory(self,obj):
+        return obj.category.name
+    thiscategory.short_description = 'Category'
+    
+    def price(self,obj):
+        return obj.mrp
+    price.short_description = 'Price'
+    
+    def quantityavailable(self,obj):
+        if obj.available is None:
+            return ''
+        else:
+            return obj.available
+    quantityavailable.short_description = 'Available Qut.'
+    
+    def orderpending(self, obj):
+        if obj.pending is None:
+            return ''
+        else:
+            return obj.pending
+    orderpending.short_description = 'Pending order Qut.'
+    
+class DistributorForm(forms.ModelForm):
+    
+    
+    
+    class Meta:
+        model = Distributor
+        exclude = ['sent_to_sap',]
+    
+class DistributorAdmin(admin.ModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    form = DistributorForm
+    search_fields = ('distributor_name', 'city')
+    list_display = ('distributor_code', 'distributor_name', 'distributor_head', \
+                    'locality', 'phone', 'email_user', 'staff_status')
+    # fieldsets = (
+    #         ('User Information', {
+    #           'fields': ('name_distributorship', 'first_name', 'last_name', 'mobile1',
+    #             'mobile2', 'email', 'email_Bajaj', 'date_birth', 'profile', 'image_url',
+    #             )
+    #         }),
+    #         ('Location', {
+    #           'fields': ('plot_no', 'street_name', 'locality', 'city',
+    #             'state', 'pincode', 'phone',
+    #             )
+    #         }),
+    #       )
+    #readonly_fields = ('image_tag',)
+    
+    def save_model(self, request, obj, form, Change):
+        # try:
+        #     distributor = Distributor.objects.filter()[0]
+        #     obj.distributor_id = str(int(distributor.distributor_id) + \
+        #                             constants.DISTRIBUTOR_SEQUENCE_INCREMENT)
+        # except:
+        #     obj.distributor_id = str(constants.DISTRIBUTOR_SEQUENCE)
+        super(DistributorAdmin, self).save_model(request, obj, form, Change)
+        try:
+            send_email(sender = constants.FROM_EMAIL_ADMIN, receiver = obj.email, 
+                   subject = constants.ADD_DISTRIBUTOR_SUBJECT, body = '',
+                   message= constants.ADD_DISTRIBUTOR_MESSAGE)
+        except Exception as e:
+            logger.error('Mail is not sent. Exception occurred',e)
+    
+    def distributor_code(self, obj):
+        return obj.distributor_id
+    distributor_code.admin_order_field = 'distributor_id'
+    
+    def distributor_name(self, obj):
+        return obj.name
+    distributor_name.short_description = 'Name of Distributorship'
+    
+    def distributor_head(self, obj):
+        return obj.user.user.first_name + ' ' + obj.user.user.last_name
+    distributor_head.short_description = 'Distributor Head'
+    
+    def locality(self, obj):
+        return obj.city
+    
+    def phone(self, obj):
+        return obj.phone_number +' ' + obj.mobile
+    phone.short_description = 'phone/ mobile'
+    
+    def email_user(self, obj):
+        return obj.email
+    email_user.short_description = 'Email'
+    
+    def staff_status(self, obj):
+        if obj.user.user.is_staff == True:
+            return '<html><img src = /static/img/active.gif></html>'
+        else:
+            return '<html><img src = /static/img/not_active.gif></html>'
+    staff_status.allow_tags = True
+    staff_status.short_description = 'status'
+    
     def queryset(self, request):
         query_set = self.model._default_manager.get_query_set()
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm_state_list=get_model("AreaSparesManager").objects.get(user__user=request.user).state.all()
+            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
             query_set=query_set.filter(state=asm_state_list)
         return query_set
 
     def changelist_view(self, request, extra_context=None):
         return super(DistributorAdmin, self).changelist_view(request)
 
+class DistributorSalesRepForm(forms.ModelForm):
+    class Meta:
+        model = get_model('DistributorSalesRep')
+        exclude = ['distributor']
+        
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(DistributorSalesRepForm, self).__init__(*args, **kwargs)
+        
+class DistributorSalesRepAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('distributor_sales_code', )
+    list_display = ('sales_representative_code', 'sales_representative_name', 'user_email',
+                    'is_active')
+    form = DistributorSalesRepForm
+    
+    def get_form(self, request, obj=None, **kwargs):
+        ModelForm = super(DistributorSalesRepAdmin, self).get_form(request, obj, **kwargs)
+        class ModelFormMetaClass(ModelForm):
+            def __new__(cls, *args, **kwargs):
+                kwargs['request'] = request
+                return ModelForm(*args, **kwargs)
+        return ModelFormMetaClass
+    
+    def save_model(self, request, obj, form, change):
+        # if DistributorStaff.objects.filter(user__user = request.user).exists():
+        #     distributorstaff = DistributorStaff.objects.get(user__user = request.user)
+        #     obj.distributor = Distributor.objects.get(id = distributorstaff.distributor.id)
+        # else:
+        obj.distributor = Distributor.objects.get(user__user = request.user)
+        try:
+            dsr = DistributorSalesRep.objects.filter().order_by("-id")[0]
+            obj.distributor_sales_code = str(int(dsr.distributor_sales_code) + \
+                                            constants.DSR_SEQUENCE_INCREMENT)
+        except:
+            obj.distributor_sales_code = str(constants.DSR_SEQUENCE)
+        super(DistributorSalesRepAdmin, self).save_model(request, obj, form, change)
+        try:
+            send_email(sender = constants.FROM_EMAIL_ADMIN, receiver = obj.email, 
+                   subject = constants.ADD_DSR_SUBJECT, body = '',
+                   message= constants.ADD_DSR_MESSAGE)
+        except Exception as e:
+            logger.error('Mail is not sent. Exception occurred',e)
+            
+    def sales_representative_code(self, obj):
+        return obj.distributor_sales_code
+    
+    def sales_representative_name(self, obj):
+        return obj.user.user.first_name + ' ' + obj.user.user.last_name
+    
+    def distributor_code(self, obj):
+        return obj.distributor.distributor_code
+    
+    def distributor_name(self, obj):
+        return obj.distributor.name
+
+    def user_email(self, obj):
+        return obj.email
+    user_email.short_description = 'email'
+    
+class RetailerForm(forms.ModelForm):
+    class Meta:
+        model = get_model('Retailer')
+        exclude = ['approved', 'rejected_reason', 'distributor', 'retailer_code']
+        
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(RetailerForm, self).__init__(*args, **kwargs)
+        self.fields['profile'].widget = TextInput(attrs={'placeholder': 'Retailer'})
+        
+class RetailerAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    form = RetailerForm
+    search_fields = ('retailer_name', 'retailer_town', 'billing_code','territory')
+    list_display = ('retailer_code', 'retailer_billing_code', 'retailer_user_name',
+                    'user_territory', 'town', 'pincode', 'user_mobile',
+                    'user_email', 'distributor_name', 'status')
+    exclude = []
+    
+    def get_form(self, request, obj=None, **kwargs):
+        ModelForm = super(RetailerAdmin, self).get_form(request, obj, **kwargs)
+        class ModelFormMetaClass(ModelForm):
+            def __new__(cls, *args, **kwargs):
+                kwargs['request'] = request
+                return ModelForm(*args, **kwargs)
+        return ModelFormMetaClass
+    
+    def get_actions(self, request):
+        #in case of administrator only, grant him the approve retailer option
+        if self.param.groups.filter(name__in =['SuperAdmins', 'Admins', 'AreaSalesManagers']).exists():
+            self.actions.append('approve')
+        actions = super(RetailerAdmin, self).get_actions(request)
+        return actions
+    
+    def queryset(self, request):
+        query_set = self.model._default_manager.get_query_set()
+        if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            query_set=query_set.filter(state=asm_state_list)
+        return query_set
+
+    def changelist_view(self, request, extra_context=None):
+        self.param = request.user
+        return super(RetailerAdmin, self).changelist_view(request)
+    
+    def approve(self, request, queryset):
+        queryset.update(approved=constants.STATUS['APPROVED'])
+        for retailer in queryset:
+            try:
+                send_email(sender = constants.FROM_EMAIL_ADMIN, receiver = retailer.email, 
+                       subject = constants.APPROVE_RETAILER_SUBJECT, body = '',
+                       message = constants.APPROVE_RETAILER_MESSAGE)
+            except Exception as e:
+                logger.error('Mail is not sent. Exception occurred ',e)
+    approve.short_description = 'Approve Selected Retailers'
+    
+    def retailer_billing_code(self, obj):
+        return obj.billing_code
+    retailer_billing_code.short_description = 'Retailer billing code'
+    
+    def retailer_user_name(self, obj):
+        return obj.retailer_name
+    retailer_user_name.short_description = 'retailer name'
+    
+    def user_territory(self, obj):
+        return obj.territory
+    user_territory.short_description = 'territory'
+    
+    def town(self,obj):
+        return obj.retailer_town
+    town.short_description = 'Town/ City'
+    
+    def pincode(self, obj):
+        return obj.user.pincode
+    
+    def city(self, obj):
+        return obj.retailer_town
+    
+    def phone(self, obj):
+        return obj.user.phone_number
+    
+    def user_mobile(self, obj):
+        return obj.mobile
+    user_mobile.short_description = 'mobile'
+
+    def user_email(self, obj):
+        return obj.email
+    user_email.short_description = 'email'
+
+    def distributor_code(self, obj):
+        return obj.distributor.distributor_id
+    distributor_code.short_description = 'Distributor Code'
+    
+    def distributor_name(self, obj):
+        return obj.distributor.name
+    distributor_name.short_description = 'Distributor Name'
+    
+    def save_model(self, request, obj, form, change):
+        obj.approved = constants.STATUS['WAITING_FOR_APPROVAL']
+        #get latest retailer code, add increment and assign it, else assign the sequence first number
+        try:
+            retailer = Retailer.objects.filter().order_by("-id")[0]
+            obj.retailer_code = str(int(retailer.retailer_code) + \
+                                    constants.RETAILER_SEQUENCE_INCREMENT)
+        except:
+            obj.retailer_code = str(constants.RETAILER_SEQUENCE)
+        # if dsr is added by distributorstaff, then show the concerned distributor of distributorstaff
+        # else show the distributor
+        # if DistributorStaff.objects.filter(user__user = request.user).exists():
+        #     distributorstaff = DistributorStaff.objects.get(user__user = request.user)
+        #     obj.distributor = Distributor.objects.get(id = distributorstaff.distributor.id)
+        # else:
+        obj.distributor = Distributor.objects.get(user__user = request.user)
+        super(RetailerAdmin, self).save_model(request, obj, form, change)
+    
+    def status(self, obj):
+        #Added retailer by distributor/distributorstaff must be approved by the ASM/admin
+        #he can also be rejected on some conditions
+        if obj.approved == constants.STATUS['APPROVED']:
+            return 'Approved'
+        elif obj.approved == constants.STATUS['WAITING_FOR_APPROVAL'] :
+            if self.param.groups.filter(name__in = \
+                                    ['SuperAdmins', 'Admins', 'AreaSalesManagers']).exists():
+                reject_button = "<a href=\"/admin/retailer/approve_retailer/retailer_id/"+str(obj.id)+"/\"><input type=button value=Approve></a>&nbsp;<input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.email+"\',\'"+obj.distributor.name+"\'); return false;\">"
+                #reject_button = "<input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(); return false;\">"
+                return mark_safe(reject_button)
+            else:
+                return 'Waiting for approval'
+        elif obj.approved == constants.STATUS['REJECTED'] :
+            if self.param.groups.filter(name__in =['SuperAdmins', 'Admins', 'AreaSalesManagers']).exists():
+                return 'Rejected'
+            else:
+                if self.param.groups.filter(name__in =['Distributors', 'DistributorStaffs']).exists():
+                    rejected_reason = "<input type=\"button\" value=\"Rejected Reason\" onclick=\"popup_rejected_reason(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.rejected_reason+"\'); return false;\">"
+                    return mark_safe(rejected_reason)
+    status.allow_tags = True
+    
+class DSRWorkAllocationForm(forms.ModelForm):
+    class Meta:
+        model = get_model('DSRWorkAllocation')
+        exclude = ['distributor', 'status']
+        
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(DSRWorkAllocationForm, self).__init__(*args, **kwargs)
+        dsr_objects = DistributorSalesRep.objects.filter(distributor__user = \
+                                                                    self.request.user)
+        if not dsr_objects:
+            dsr_objects = DistributorSalesRep.objects.all()
+        self.fields['dsr'].queryset = dsr_objects
+        #list the retailer, based on the distributor who is logged in
+        retailer_objects = Retailer.objects.filter(distributor__user = \
+                                                                    self.request.user)
+        if not retailer_objects:
+            retailer_objects = Retailer.objects.all()
+        self.fields['retailer'].queryset = retailer_objects
+            
+class DSRWorkAllocationAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    form = DSRWorkAllocationForm
+    #search_fields = ('dsr', 'date')
+    list_display = ('dsr', 'allocated_date', 'retailer')
+    list_filter = ['date', 'retailer', 'dsr',]
+    
+    def allocated_date(self, obj):
+        return obj.date
+    allocated_date.short_description = 'Date'
+    allocated_date.admin_order_field = 'date'
+    
+    def queryset(self, request):
+        qs = super(DSRWorkAllocationAdmin, self).queryset(request)
+        #get workallocation objects for the logged in distributor
+        if Distributor.objects.filter(user = request.user).exists():
+            DSRWorkAllocation_objects = DSRWorkAllocation.objects.filter(distributor__user = \
+                                                                         request.user)
+        else:
+            DSRWorkAllocation_objects = DSRWorkAllocation.objects.all()
+        return DSRWorkAllocation_objects
+    
+    def get_form(self, request, obj=None, **kwargs):
+        ModelForm = super(DSRWorkAllocationAdmin, self).get_form(request, obj, **kwargs)
+        class ModelFormMetaClass(ModelForm):
+            def __new__(cls, *args, **kwargs):
+                kwargs['request'] = request
+                return ModelForm(*args, **kwargs)
+        return ModelFormMetaClass
+    
+    def save_model(self, request, obj, form, change):
+        # if dsr is added by distributorstaff, then show the concerned distributor of distributorstaff
+        # else show the distributor
+        # if DistributorStaff.objects.filter(user__user = request.user).exists():
+        #     distributorstaff = DistributorStaff.objects.get(user__user = request.user)
+        #     obj.distributor = Distributor.objects.get(id = distributorstaff.distributor.id)
+        # else:
+        obj.distributor = Distributor.objects.get(user__user = request.user)
+        super(DSRWorkAllocationAdmin, self).save_model(request, obj, form, change)
+
+class OrderPartAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('retailer_name',)
+    # list_display = ('order_id', 'retailer', 'dsr_id', 'part_id', 'part_name', 'price', 'quantity',
+    #                 'line_total', 'accept', 'order_date')
+    list_display = ('order_link', 'retailer', 'dsr_id',
+                   'total_amount', 'accept', 'order_date')
+    list_filter = ['order_date', 'distributor', 'dsr']
+    
+    def order_link(self, obj):
+        return obj.order_id
+        #reject_button = "<input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.email+"\',\'"+obj.distributor.name+"\'); return false;\">"
+        # order_link = "<a href='#' onclick =order_link();>"+str(obj.order_id)+"</a>"
+        # return mark_safe(order_link)
+    order_link.short_description = 'order id'
+    order_link.admin_order_field = 'order_id'
+    
+    def get_actions(self, request):
+        #in case of administrator only, grant him the approve retailer option
+        #if self.param.groups.filter(name__in =['SuperAdmins', 'Admins', 'distributors']).exists():
+        self.actions.append('accept')
+        actions = super(OrderPartAdmin, self).get_actions(request)
+        return actions
+    
+    def accept(self, request, queryset):
+        queryset.update(accept = True)
+    accept.short_description = 'Accept selected orders'
+    
+    def part_id(self, obj):
+        return obj.part.part_number
+    part_id.admin_order_field = 'part'
+    
+    def part_name(self, obj):
+        return obj.part.description
+    part_name.admin_order_field = 'part__description'
+    
+    def dsr_id(self, obj):
+        if obj.dsr is None:
+            return 'NA'
+        else:
+            return obj.dsr
+    dsr_id.short_description = "Dsr"
+    dsr_id.admin_order_field = "dsr"
+    
+    # def queryset(self, request):
+    #     qs = super(OrderPartAdmin, self).queryset(request)
+    #     #retrieve distinct order ids
+    #     distinct_orders = OrderPart.objects.values('order_id').distinct()
+    #     orders_id = []
+    #     #for each distinct order id, get the object id
+    #     for orders in distinct_orders:
+    #             object_id = OrderPart.objects.values_list('id', flat=True).\
+    #                     filter(order_id = orders['order_id'])[0]
+    #             #append the object id to the list of orders id
+    #             orders_id.append(object_id)
+    #     ids = OrderPart.objects.filter(id__in = orders_id)
+    #     return ids
+
+class RetailerCollectionAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('retailer',)
+    list_display = ('retailer', 'order_amount', 'collected_amount', 'outstanding_amount')
+    
+class CollectionAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('retailer',)
+    list_display = ('retailer', 'payment_date','payment_mode','payment_amount','invoice_date','invoice_amount','invoice_number')
+    
+class DSRScorecardReportAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('goals', )
+    list_display = ( 'srno', 'thisgoals', 'thistarget', 'thisactual', 'thismeasures',
+                    'thisweight', 'thisscore')
+    
+    def srno(self, obj):
+        return obj.serial_number
+    srno.short_description = 'Sr.No.'
+    
+    def thisgoals(self, obj):
+        return obj.goals
+    thisgoals.short_description='Goals'
+    
+    def thistarget(self, obj):
+        return obj.target
+    thistarget.short_description='Target'
+    
+    def thisactual(self, obj):
+        return obj.actual
+    thisactual.short_description='Actual'
+    
+    def thismeasures(self, obj):
+        return obj.measures
+    thismeasures.short_description='Measures'
+    
+    def thisweight(self, obj):
+        return obj.weight
+    thisweight.short_description='Weight'
+    
+    def thisscore(self, obj):
+        if obj.actual and obj.target:
+                return float(obj.actual)/float(obj.target) * float(obj.weight)
+        else:
+                return ''
+    thisscore.short_description='Total Score'
+    
+    def queryset(self, request):
+        qs = super(DSRScorecardReportAdmin, self).queryset(request)
+        report_headers = DSRScorecardReport.objects.filter().order_by('serial_number')
+        return report_headers
+
+    def get_form(self, request, obj=None, **kwargs):
+        self.exclude = ('total_score')
+        form = super(DSRScorecardReportAdmin, self).get_form(request, obj, **kwargs)
+        return form
+
+class RetailerScorecardReportAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ()
+    list_display = ('srno', 'thiskpi', 'thistarget', 'thisactual', 'thispercentage')
+        
+    def srno(self, obj):
+        return obj.serial_number
+    srno.short_description = 'Sr.No.'
+    
+    def thiskpi(self, obj):
+        return obj.kpi
+    thiskpi.short_description = 'KPI'
+    
+    def thisactual(self, obj):
+        return obj.actual
+    thisactual.short_description = 'Actual'
+    
+    def thistarget(self, obj):
+        return obj.target
+    thistarget.short_description = 'Target'
+    
+    def thispercentage(self,obj):
+        if obj.actual and obj.target:
+                weight =  float(obj.actual)/ float(obj.target)
+                return str(weight) + '%'
+        else:
+                return ''
+    thispercentage.short_description='Percentage'
+    
+    def queryset(self, request):
+        qs = super(RetailerScorecardReportAdmin, self).queryset(request)
+        report_headers = RetailerScorecardReport.objects.filter().order_by('serial_number')
+        return report_headers
+    
 class SparePartMasterAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('part_number', 'category',
@@ -842,11 +1396,27 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("DataFeedLog", brand), FeedLogAdmin)
     brand_admin.register(get_model("FeedFailureLog", brand))
     
+    brand_admin.register(get_model("RegionalManager", brand), RegionalManagerAdmin)
+    
     brand_admin.register(get_model("NationalSparesManager", brand), NSMAdmin)
     brand_admin.register(get_model("AreaSparesManager", brand), ASMAdmin)
+    brand_admin.register(get_model("AreaSalesManager", brand), AreaSalesManagerAdmin)
     brand_admin.register(get_model("Distributor", brand), DistributorAdmin)
+    brand_admin.register(get_model("DistributorSalesRep", brand), DistributorSalesRepAdmin)
+    brand_admin.register(get_model("Retailer", brand), RetailerAdmin)
+    brand_admin.register(get_model("DSRWorkAllocation", brand), DSRWorkAllocationAdmin)
     brand_admin.register(get_model("Member", brand), MemberAdmin)
     
+    brand_admin.register(get_model("CvCategories", brand), CvCategoriesAdmin)
+    brand_admin.register(get_model("AlternateParts", brand), AlternatePartsAdmin)
+    brand_admin.register(get_model("Kit", brand), KitAdmin)
+    brand_admin.register(get_model("PartMasterCv", brand), PartMasterCvAdmin)
+    
+    brand_admin.register(get_model("DSRScorecardReport", brand), DSRScorecardReportAdmin)
+    brand_admin.register(get_model("RetailerScorecardReport", brand), RetailerScorecardReportAdmin)
+    brand_admin.register(get_model("RetailerCollection", brand), RetailerCollectionAdmin)
+    brand_admin.register(get_model("Collection", brand), CollectionAdmin)
+    brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
     brand_admin.register(get_model("SparePartMasterData", brand), SparePartMasterAdmin)
     brand_admin.register(get_model("SparePartUPC", brand), SparePartUPCAdmin)
     brand_admin.register(get_model("SparePartPoint", brand), SparePartPointAdmin)
@@ -869,7 +1439,7 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("Territory", brand))
     brand_admin.register(get_model("BrandDepartment", brand))
     brand_admin.register(get_model("DepartmentSubCategories", brand))
-    
+    brand_admin.disable_action('delete_selected')
     return brand_admin
 
 brand_admin = get_admin_site_custom("core")

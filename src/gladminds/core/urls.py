@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, url, include
+
 from gladminds.core.cron_jobs.taskqueue import SqsHandler
 from gladminds.sqs_tasks import _tasks_map
 
@@ -100,6 +101,23 @@ admin.autodiscover()
 api_v1.register(SMSResources())
 
 urlpatterns = patterns('',
+    # api urls             
+    #url(r'^api-token-auth/', 'rest_framework_jwt.views.obtain_jwt_token'),
+    url(r'^cv/api-token-auth/', 'gladminds.core.views.apis.authentication'),
+    url(r'^cv/get_retailers/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.core.views.apis.get_retailers'),
+    url(r'^cv/get_retailer_profile/retailer_id/(?P<retailer_id>\d+)/$',
+                                                'gladminds.core.views.apis.get_retailer_profile'),
+    url(r'^cv/get_parts/', 'gladminds.core.views.apis.get_parts'),
+    url(r'^cv/order/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.core.views.apis.dsr_order'),
+    url(r'^cv/order/$', 'gladminds.core.views.apis.retailer_order'),
+    url(r'^cv/day_close_order/dsr_id/(?P<dsr_id>\d+)/$',
+                        'gladminds.core.views.apis.day_close_order'),
+    url(r'^cv/get_outstanding/retailer_id/(?P<retailer_id>\d+)/$',
+                        'gladminds.core.views.apis.get_outstanding'),
+    url(r'^cv/get_schedule/dsr_id/(?P<dsr_id>\d+)/date/(?P<date>[-\d]+)/$',
+                        'gladminds.core.views.apis.get_schedule'),
+    
+    #api urls end here
     url(r'', include(api_v1.urls)),
     url(r'^$', 'gladminds.core.views.home'),
     url(r'^admin/', include(brand_admin.urls)),
@@ -140,7 +158,8 @@ urlpatterns = patterns('',
     url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/comments/(?P<comment_id>\d+)/$', 'gladminds.core.services.service_desk.servicedesk_views.modify_feedback_comments', name='modify_feedback_comments'),
     url(r'^aftersell/feedbackresponse/(?P<feedback_id>\d+)/$', 'gladminds.core.services.service_desk.servicedesk_views.get_feedback_response', name='get_feedback_response'),
     url(r'^aftersell/servicedesk/save-feedback/$', 'gladminds.core.services.service_desk.servicedesk_views.save_feedback', name='save_feedback'),
-
+    url(r'^admin/retailer/rejected_reason$', 'gladminds.core.views.views.rejected_reason', name='rejected_reason'),
+    url(r'^admin/retailer/approve_retailer/retailer_id/(?P<retailer_id>\d+)/$', 'gladminds.core.views.views.approve_retailer', name='approve_retailer'),
     url(r'^v1/upload', upload_files),
     # Tasks URL
     url(r'^tasks-view/$', 'gladminds.core.views.sqs_tasks_view'),
