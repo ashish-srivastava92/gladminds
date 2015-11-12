@@ -8,8 +8,6 @@ from gladminds.core.auth_helper import Roles
 import operator
 from django.db.models.query_utils import Q
 from gladminds.core.model_fetcher import get_model, models
-from celery.backends.mongodb import Bunch
-from PyQt4.Qt import QUrl
 
 class CustomAuthorization(Authorization):
 
