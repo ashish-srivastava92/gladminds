@@ -27,14 +27,9 @@ from datetime import datetime, timedelta, date
 import csv
 import StringIO
 from django.conf import settings
-from gunicorn.http.wsgi import FileWrapper
 import mimetypes
 import os
-
-from gladminds.core.core_utils.utils import dictfetchall
 from django.db import connections
-from django.utils.timezone import deactivate
-from bonobo.activation import query
 
 logger = logging.getLogger("gladminds")
 LOG = logging.getLogger('gladminds')
@@ -322,28 +317,24 @@ class AccumulationResource(CustomBaseModelResource):
     def acc_return_date_filter_data(self,request, start,end):  
         conn = connections[settings.BRAND]
         cursor = conn.cursor()
-        rows = 0
-        rows1 = []
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
-            for state in asm_state_list:
-                asm_state_name = state
-                query1 = "SELECT mem.mechanic_id, mem.permanent_id, mem.first_name, \
-                            mem.district, mem.phone_number, st.state_name, distr.distributor_id, \
-                            spart.unique_part_code, pp.points, acre.created_date\
-                            FROM gm_accumulationrequest AS acre\
-                            INNER  JOIN gm_member mem ON mem.id = acre.member_id\
-                            LEFT OUTER JOIN gm_distributor AS distr ON mem.registered_by_distributor_id = distr.id\
-                            INNER JOIN gm_state AS st ON mem.state_id = st.id\
-                            INNER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
-                            LEFT OUTER JOIN gm_sparepartupc AS spart ON accup.sparepartupc_id = spart.id\
-                            LEFT OUTER JOIN gm_sparepartmasterdata AS mdata ON mdata.id = spart.part_number_id\
-                            LEFT OUTER JOIN gm_sparepartpoint AS pp ON mdata.id = pp.part_number_id\
-                            WHERE mem.form_status =  'complete' and acre.created_date >=\"{0}\" \
-                            and acre.created_date<= \"{1}\" and st.state_name=\"{2}\" group by accup.sparepartupc_id,acre.transaction_id  ".format(start, end, state);
-                rows += cursor.execute(query1)
-                rows1.extend(cursor.fetchall())
-            
+            state_list = []
+            state_list_join = ','.join("'"+str(state)+"'" for state in asm_state_list)
+                
+            query1 = "SELECT mem.mechanic_id, mem.permanent_id, mem.first_name, \
+                        mem.district, mem.phone_number, st.state_name, distr.distributor_id, \
+                        spart.unique_part_code, pp.points, acre.created_date\
+                        FROM gm_accumulationrequest AS acre\
+                        INNER  JOIN gm_member mem ON mem.id = acre.member_id\
+                        LEFT OUTER JOIN gm_distributor AS distr ON mem.registered_by_distributor_id = distr.id\
+                        INNER JOIN gm_state AS st ON mem.state_id = st.id\
+                        INNER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
+                        LEFT OUTER JOIN gm_sparepartupc AS spart ON accup.sparepartupc_id = spart.id\
+                        LEFT OUTER JOIN gm_sparepartmasterdata AS mdata ON mdata.id = spart.part_number_id\
+                        LEFT OUTER JOIN gm_sparepartpoint AS pp ON mdata.id = pp.part_number_id\
+                        WHERE mem.form_status =  'complete' and acre.created_date >=\"{0}\" \
+                        and acre.created_date<= \"{1}\" and st.state_name in({2}) group by accup.sparepartupc_id,acre.transaction_id  ".format(start, end, state_list_join);
            
         else:
             query1 = "SELECT mem.mechanic_id, mem.permanent_id, mem.first_name, \
@@ -360,8 +351,8 @@ class AccumulationResource(CustomBaseModelResource):
                         WHERE mem.form_status =  'complete' and acre.created_date >=\"{0}\" \
                         and acre.created_date<= \"{1}\" group by accup.sparepartupc_id,acre.transaction_id ".format(start, end);
       
-            rows = cursor.execute(query1)
-            rows1 = cursor.fetchall()
+        rows = cursor.execute(query1)
+        rows1 = cursor.fetchall()
         conn.close()
         return rows1
 
@@ -387,27 +378,23 @@ class AccumulationResource(CustomBaseModelResource):
     def fitment_return_date_filter_data(self,request, start,end): 
         conn = connections[settings.BRAND]
         cursor = conn.cursor() 
-        rows = 0
-        rows1 = []
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
-            for state in asm_state_list:
-                asm_state_name = state
-                query1 = "SELECT mem.mechanic_id, mem.permanent_id, mem.first_name, \
-                            mem.district, mem.phone_number, st.state_name, distr.distributor_id, \
-                            spart.unique_part_code,mdata.part_number, mdata.description, pp.points, acre.created_date\
-                            FROM gm_accumulationrequest AS acre\
-                            INNER JOIN gm_member mem ON mem.id = acre.member_id\
-                            LEFT OUTER JOIN gm_distributor AS distr ON mem.registered_by_distributor_id = distr.id\
-                            INNER JOIN gm_state AS st ON mem.state_id = st.id\
-                            INNER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
-                            LEFT OUTER JOIN gm_sparepartupc AS spart ON accup.sparepartupc_id = spart.id\
-                            LEFT OUTER JOIN gm_sparepartmasterdata AS mdata ON mdata.id = spart.part_number_id\
-                            LEFT OUTER JOIN gm_sparepartpoint AS pp ON mdata.id = pp.part_number_id\
-                            WHERE mem.form_status = 'complete' and acre.created_date >=\"{0}\" \
-                            and acre.created_date<= \"{1}\" and st.state_name=\"{2}\" group by accup.sparepartupc_id,acre.transaction_id ".format(start, end, asm_state_name);
-                rows += cursor.execute(query1)
-                rows1.extend(cursor.fetchall())
+            state_list_join = ','.join("'"+str(state)+"'" for state in asm_state_list)
+            
+            query1 = "SELECT mem.mechanic_id, mem.permanent_id, mem.first_name, \
+                        mem.district, mem.phone_number, st.state_name, distr.distributor_id, \
+                        spart.unique_part_code,mdata.part_number, mdata.description, pp.points, acre.created_date\
+                        FROM gm_accumulationrequest AS acre\
+                        INNER JOIN gm_member mem ON mem.id = acre.member_id\
+                        LEFT OUTER JOIN gm_distributor AS distr ON mem.registered_by_distributor_id = distr.id\
+                        INNER JOIN gm_state AS st ON mem.state_id = st.id\
+                        INNER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
+                        LEFT OUTER JOIN gm_sparepartupc AS spart ON accup.sparepartupc_id = spart.id\
+                        LEFT OUTER JOIN gm_sparepartmasterdata AS mdata ON mdata.id = spart.part_number_id\
+                        LEFT OUTER JOIN gm_sparepartpoint AS pp ON mdata.id = pp.part_number_id\
+                        WHERE mem.form_status = 'complete' and acre.created_date >=\"{0}\" \
+                        and acre.created_date<= \"{1}\" and st.state_name in({2}) group by accup.sparepartupc_id,acre.transaction_id ".format(start, end, state_list_join);
            
         else:
             query1 = "SELECT mem.mechanic_id, mem.permanent_id, mem.first_name, \
@@ -423,9 +410,8 @@ class AccumulationResource(CustomBaseModelResource):
                         LEFT OUTER JOIN gm_sparepartpoint AS pp ON mdata.id = pp.part_number_id\
                         WHERE mem.form_status = 'complete' and acre.created_date >=\"{0}\" \
                         and acre.created_date<= \"{1}\" group by accup.sparepartupc_id,acre.transaction_id  ".format(start, end);
-            rows = cursor.execute(query1)
-            rows1 = cursor.fetchall()
-            
+        rows = cursor.execute(query1)
+        rows1 = cursor.fetchall()
         conn.close()
         return rows1 
         
