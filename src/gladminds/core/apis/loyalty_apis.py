@@ -34,7 +34,6 @@ import os
 from gladminds.core.core_utils.utils import dictfetchall
 from django.db import connections
 from django.utils.timezone import deactivate
-from bonobo.activation import query
 
 logger = logging.getLogger("gladminds")
 LOG = logging.getLogger('gladminds')
