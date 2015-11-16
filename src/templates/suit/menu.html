@@ -19,21 +19,21 @@
         {% if app.separator %}
           <li class="separator"></li>
         {% else %}
-			    <!-- {% if 'Loyalty' not in app.label %}-->
+       
           <li{{ app.is_active|yesno:' class=active,' }}>
             <a href="{{ app.url }}"{{ app.blank|yesno:' target=_blank,' }}><i class="{% firstof app.icon 'icon-chevron-right' %}"></i>{% trans app.label|capfirst %}
             </a>
-		<!--{% endif %}-->
+            
             {% if app.models %}
-				     <!--{% if 'Loyalty' not  in app.label %}-->
+              
               <ul>
                 {% for model in app.models %}
                   <li{{ model.is_active|yesno:' class=active,' }}>
                     <a href="{{ model.url }}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a></li>
                 {% endfor %}
               </ul>
-            <!--{% endif %}-->
-			 {% endif %}
+            {% endif %}
+            
           </li>
         {% endif %}
         {% endif %}
@@ -51,22 +51,45 @@
      </li>
      {% endif %}
      {% endfor %}
-	 
-	  {% for app in app_list %}
-       {% if 'Orders' in app.label and  app.models  %}
-       <li {{ model.is_active|yesno:' class=active,' }}><a><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>Reports
+     
+    {% for app in app_list %}
+ 
+       {% if 'Loyalty' in app.label and app.models and  request.user.username == "bajajcv"  %}
+
+<li {{ model.is_active|yesno:' class=active,' }}><a><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>Reports
 	     </a>
+	     
 	    <ul>
 	       <li{{ model.is_active|yesno:' class=active,' }}>
+	       
+	           <a href="/loyalty/report" target="_blank">Loyalty Report</a>
+	             <a href="#" target="_blank"> DSRs Scorecard Report</a>
+	           <a href="#" target="_blank">Retailers Scorecard Report</a>
+	           <a href="#" target="_blank">PJP Report</a>
+	         </li>
+	    </ul>
+	        </li>
+	        
+	        {% else %}
+	         {% if 'Orders' in app.label and  app.models and request.user.username != "bajajcv"  %}
+	     
+      
+	         <li {{ model.is_active|yesno:' class=active,' }}><a><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>Reports
+	     </a>
+	         <ul>
+	       <li{{ model.is_active|yesno:' class=active,' }}>
+	       
 	           <a href="#" target="_blank"> DSRs Scorecard Report</a>
 	           <a href="#" target="_blank">Retailers Scorecard Report</a>
-			    <a href="#" target="_blank">PJP Report</a>
+	           <a href="#" target="_blank">PJP Report</a>
 	       </li>
 	     </ul>
      </li>
      {% endif %}
-     {% endfor %}  
-	 
+     {%endif%}
+ {%endfor%}
+
+          
      {% for app in app_list %}
        {% if 'Products' in app.label and  app.models  %}
        <li {{ model.is_active|yesno:' class=active,' }}>

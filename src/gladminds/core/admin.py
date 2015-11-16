@@ -24,7 +24,8 @@ from gladminds.core.auth_helper import Roles
 from gladminds.core import constants
 from gladminds.core.models import Distributor, DistributorSalesRep, \
                         Retailer, UserProfile, DSRWorkAllocation, OrderPart, State, \
-                        DSRScorecardReport, RetailerScorecardReport
+                        DSRScorecardReport, RetailerScorecardReport,\
+                        AreaSparesManager
 
 logger = logging.getLogger('gladminds')
 
@@ -427,10 +428,10 @@ class ASMAdmin(GmModelAdmin):
         obj.phone_number = utils.mobile_format(obj.phone_number)
         super(ASMAdmin, self).save_model(request, obj, form, change)
         
-class AreaSalesManagerAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('user',)
-    list_display = ('user',)
+# class AreaSalesManagerAdmin(GmModelAdmin):
+#     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+#     search_fields = ('user',)
+#     list_display = ('user',)
     
 class RegionalManagerAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -570,7 +571,9 @@ class DistributorAdmin(admin.ModelAdmin):
     def queryset(self, request):
         query_set = self.model._default_manager.get_query_set()
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            asm_state_list=AreaSparesManager.objects.get(user__user=request.user).state.all()
+            print asm_state_list
+            
             query_set=query_set.filter(state=asm_state_list)
         return query_set
 
@@ -640,7 +643,7 @@ class DistributorSalesRepAdmin(GmModelAdmin):
 class RetailerForm(forms.ModelForm):
     class Meta:
         model = get_model('Retailer')
-        exclude = ['approved', 'rejected_reason', 'distributor', 'retailer_code']
+        exclude = ['approved', 'rejected_reason',  'retailer_code']
         
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -648,13 +651,17 @@ class RetailerForm(forms.ModelForm):
         self.fields['profile'].widget = TextInput(attrs={'placeholder': 'Retailer'})
         
 class RetailerAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    groups_update_not_allowed = [Roles.NATIONALSPARESMANAGERS,Roles.AREASPARESMANAGERS]
     form = RetailerForm
     search_fields = ('retailer_name', 'retailer_town', 'billing_code','territory')
     list_display = ('retailer_code', 'retailer_billing_code', 'retailer_user_name',
                     'user_territory', 'town', 'pincode', 'user_mobile',
                     'user_email', 'distributor_name', 'status')
     exclude = []
+    
+    def suit_cell_attributes(self, obj, column):
+        if column == 'status':
+            return {'width': '500px'}
     
     def get_form(self, request, obj=None, **kwargs):
         ModelForm = super(RetailerAdmin, self).get_form(request, obj, **kwargs)
@@ -665,8 +672,9 @@ class RetailerAdmin(GmModelAdmin):
         return ModelFormMetaClass
     
     def get_actions(self, request):
+        print request.user.groups.all()
         #in case of administrator only, grant him the approve retailer option
-        if self.param.groups.filter(name__in =['SuperAdmins', 'Admins', 'AreaSalesManagers']).exists():
+        if self.param.groups.filter(name__in =['SuperAdmins', 'Admins', 'SFAAdmins', 'AreaSparesManagers']).exists():
             self.actions.append('approve')
         actions = super(RetailerAdmin, self).get_actions(request)
         return actions
@@ -674,8 +682,9 @@ class RetailerAdmin(GmModelAdmin):
     def queryset(self, request):
         query_set = self.model._default_manager.get_query_set()
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
-            query_set=query_set.filter(state=asm_state_list)
+            asm_state_list=AreaSparesManager.objects.get(user__user__username=request.user).state.all()
+            # ask if this is ok
+            query_set=query_set.filter(territory = asm_state_list[0])
         return query_set
 
     def changelist_view(self, request, extra_context=None):
@@ -735,23 +744,50 @@ class RetailerAdmin(GmModelAdmin):
     distributor_name.short_description = 'Distributor Name'
     
     def save_model(self, request, obj, form, change):
-        obj.approved = constants.STATUS['WAITING_FOR_APPROVAL']
-        #get latest retailer code, add increment and assign it, else assign the sequence first number
-        try:
-            retailer = Retailer.objects.filter().order_by("-id")[0]
-            obj.retailer_code = str(int(retailer.retailer_code) + \
-                                    constants.RETAILER_SEQUENCE_INCREMENT)
-        except:
-            obj.retailer_code = str(constants.RETAILER_SEQUENCE)
-        # if dsr is added by distributorstaff, then show the concerned distributor of distributorstaff
-        # else show the distributor
-        # if DistributorStaff.objects.filter(user__user = request.user).exists():
-        #     distributorstaff = DistributorStaff.objects.get(user__user = request.user)
-        #     obj.distributor = Distributor.objects.get(id = distributorstaff.distributor.id)
-        # else:
-        obj.distributor = Distributor.objects.get(user__user = request.user)
-        super(RetailerAdmin, self).save_model(request, obj, form, change)
-    
+        print request.user.groups.all()
+#         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+        if request.user.groups.filter(name__in=[Roles.DISTRIBUTORS,Roles.DISTRIBUTORSALESREP,Roles.SUPERADMINS]).exists():
+#         if self.param.groups.filter(name__in =['Distributors','DisitrbutorSalesReps']).exists():
+            obj.approved = constants.STATUS['WAITING_FOR_APPROVAL']
+            #get latest retailer code, add increment and assign it, else assign the sequence first number
+            try:
+                retailer = Retailer.objects.filter().order_by("-id")[0]
+                obj.retailer_code = str(int(retailer.retailer_code) + \
+                                        constants.RETAILER_SEQUENCE_INCREMENT)
+            except:
+                obj.retailer_code = str(constants.RETAILER_SEQUENCE)
+                
+          
+    #         if request.user.groups.filter(name=Roles.DISTRIBUTORSALESREP,Roles.DISTRIBUTORS).exists():
+            
+            # if dsr is added by distributorstaff, then show the concerned distributor of distributorstaff
+            # else show the distributor
+#             if DistributorStaff.objects.filter(user__user = request.user).exists():
+#             if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+#                 print request.user.id
+#                 print request.user.groups
+#                 distributor = Distributor.objects.get(user__user = request.user.id)
+#     #             obj.distributor = Distributor.objects.get(id = request.user.id)
+# #             print distributor.distributor_id
+#                 # else:
+#                 obj.distributor = distributor
+#             elif request.user.groups.filter(name=Roles.DISTRIBUTORSALESREP).exists():
+#                 print request.user.id
+#                 print "dist"
+#                 distributor = DistributorSalesRep.objects.get(user__user = request.user.id)
+#                 print distributor.distributor_id
+#                 distributor_obj = Distributor.objects.get(id = distributor.distributor_id)
+#                 
+#                 
+#                 print distributor,"teeeeeeeeeeeeeeeee"
+#                 obj.distributor = distributor_obj
+                
+            super(RetailerAdmin, self).save_model(request, obj, form, change)   
+      
+      
+        
+      
+      
     def status(self, obj):
         #Added retailer by distributor/distributorstaff must be approved by the ASM/admin
         #he can also be rejected on some conditions
@@ -759,14 +795,16 @@ class RetailerAdmin(GmModelAdmin):
             return 'Approved'
         elif obj.approved == constants.STATUS['WAITING_FOR_APPROVAL'] :
             if self.param.groups.filter(name__in = \
-                                    ['SuperAdmins', 'Admins', 'AreaSalesManagers']).exists():
-                reject_button = "<a href=\"/admin/retailer/approve_retailer/retailer_id/"+str(obj.id)+"/\"><input type=button value=Approve></a>&nbsp;<input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.email+"\',\'"+obj.distributor.name+"\'); return false;\">"
+                                    ['SuperAdmins', 'Admins','SFAAdmins', 'AreaSparesManagers']).exists():
+                
+#                 <a href="" class="btn btn-info" data-toggle="modal" data-target="#downloadModal">Download welcome kit details</a>
+                reject_button = "<a  class='btn btn-success' data-toggle='modal'  href=\"/admin/retailer/approve_retailer/retailer_id/"+str(obj.id)+"\">Approve</a>&nbsp;<input type=\"button\"  class='btn btn-danger' data-toggle='modal'  id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.email+"\',\'"+obj.distributor.name+"\'); return false;\">"
                 #reject_button = "<input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(); return false;\">"
                 return mark_safe(reject_button)
             else:
                 return 'Waiting for approval'
         elif obj.approved == constants.STATUS['REJECTED'] :
-            if self.param.groups.filter(name__in =['SuperAdmins', 'Admins', 'AreaSalesManagers']).exists():
+            if self.param.groups.filter(name__in =['SuperAdmins', 'Admins', 'AreaSparesManagers']).exists():
                 return 'Rejected'
             else:
                 if self.param.groups.filter(name__in =['Distributors', 'DistributorStaffs']).exists():
@@ -1400,7 +1438,7 @@ def get_admin_site_custom(brand):
     
     brand_admin.register(get_model("NationalSparesManager", brand), NSMAdmin)
     brand_admin.register(get_model("AreaSparesManager", brand), ASMAdmin)
-    brand_admin.register(get_model("AreaSalesManager", brand), AreaSalesManagerAdmin)
+#     brand_admin.register(get_model("AreaSalesManager", brand), AreaSalesManagerAdmin)
     brand_admin.register(get_model("Distributor", brand), DistributorAdmin)
     brand_admin.register(get_model("DistributorSalesRep", brand), DistributorSalesRepAdmin)
     brand_admin.register(get_model("Retailer", brand), RetailerAdmin)

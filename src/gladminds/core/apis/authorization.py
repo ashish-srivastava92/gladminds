@@ -2,7 +2,6 @@ from tastypie.authorization import Authorization
 from tastypie.exceptions import Unauthorized
 from provider.oauth2.models import AccessToken
 from django.conf import settings
-
 from gladminds.afterbuy import models as afterbuy
 from gladminds.core.auth_helper import Roles
 import operator

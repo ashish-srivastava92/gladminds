@@ -1132,7 +1132,9 @@ class Distributor(BaseModel):
         verbose_name_plural = "Distributors"
 
     def __unicode__(self):
-        return self.distributor_id + ' ' +self.name
+        print self.name,"fjfjfjfdn"
+        print self.distributor_id,"disttttttttttttttttttt"
+        return self.distributor_id + ' '+self.name
 
 class DistributorStaff(BaseModel):
     '''details of DistributorStaff'''

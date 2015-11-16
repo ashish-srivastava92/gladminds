@@ -56,7 +56,6 @@ class CustomMenu(Menu):
         self.conf_icons = get_config('MENU_ICONS')
         self.conf_menu_order = get_config('MENU_ORDER')
         self.conf_menu = get_config('MENU')
-        
         for menu in self.conf_menu:
             try:
                 import_module('gladminds.{0}.admin'.format(settings.BRAND))

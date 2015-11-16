@@ -9,9 +9,9 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.http import HttpResponse
 
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.views import obtain_jwt_token
+# from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+# from rest_framework.permissions import IsAuthenticated
+# from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework_jwt.settings import api_settings
@@ -20,7 +20,7 @@ from rest_framework_jwt.settings import api_settings
 #                             PartPricing, OrderPart
 from gladminds.core.models import DistributorSalesRep, Retailer, CvCategories, \
                              OrderPart, DSRWorkAllocation, AlternateParts, Collection, \
-                             PartMasterCv
+                             PartMasterCv,PartPricing
 from gladminds.core import constants
 
 @api_view(['POST'])
