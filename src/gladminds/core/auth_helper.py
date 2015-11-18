@@ -72,6 +72,8 @@ class Roles():
     
     DISTRIBUTORSTAFF = 'DistributorStaffs'
     DISTRIBUTORSALESREP = 'DisitrbutorSalesReps'
+    SFAADMIN = 'SFAAdmins'
+    
     
 AFTERBUY_ADMIN_GROUPS = [Roles.SUPERADMINS, Roles.ADMINS]
 AFTERBUY_GROUPS = [Roles.SUPERADMINS, Roles.ADMINS, Roles.USERS]

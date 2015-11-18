@@ -96,9 +96,24 @@ rename table gm_constant to afterbuy_constant;
 --alter table gm_dealer add foreign key(sm_id) references gm_areasalesmanager(id);
 --alter table auth_user modify username varchar(250);
 --alter table gm_comment modify column comment varchar(512);
-
+--------------------------------------------------------------------------------------------
 DROP INDEX constant_name ON gm_constant;
 
+alter table gm_bomvisualization drop column status;
+alter table gm_bomvisualization add column is_published boolean default False;
+alter table gm_bomvisualization add column is_approved boolean default False;
+
+
+--------------------------bajajcv-----------------------------
+alter table gm_dealer add column asm_id integer
+alter table gm_dealer add foreign key(asm_id) references gm_areaservicemanager(id);
+alter table gm_dealer add column area varchar(250);
+alter table gm_dealer add column last_transaction_date datetime null;
+alter table gm_dealer add column regional_office varchar(250);
+-------------------------------------------------------
+
+ALTER TABLE gm_bomvisualization ADD is_published tinyint(1)  NOT NULL DEFAULT 0;
+ALTER TABLE gm_bomvisualization ADD is_approved tinyint(1)  NOT NULL DEFAULT 0;
 
 
 

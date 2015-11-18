@@ -23,7 +23,16 @@ from gladminds.core.auth_helper import Roles
 from gladminds.core.apis.user_apis import MemberResource, AreaSparesManagerResource, PartnerResource,UserResource
 from gladminds.core.apis.product_apis import ProductCatalogResource,\
     SparePartUPCResource
+from datetime import datetime, timedelta, date
+import csv
+import StringIO
+from django.conf import settings
+from gunicorn.http.wsgi import FileWrapper
+import mimetypes
+import os
+
 logger = logging.getLogger("gladminds")
+LOG = logging.getLogger('gladminds')
 
 class LoyaltySLAResource(CustomBaseModelResource):
     class Meta:
@@ -97,6 +106,9 @@ class RedemptionResource(CustomBaseModelResource):
                                                         self.wrap_view('pending_redemption_request'), name="pending_redemption_request"),
                 url(r"^(?P<resource_name>%s)/count%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('count_redemption_request'), name="count_redemption_request"),
+                url(r"^(?P<resource_name>%s)/redemption-download%s" % (self._meta.resource_name,trailing_slash()),
+                                                        self.wrap_view('redemption_download'), name="redemption_download"),
+                
                 ]
 
     def get_filter_query(self, user, query):
@@ -157,6 +169,68 @@ class RedemptionResource(CustomBaseModelResource):
             return HttpResponse(json.dumps(requests), content_type="application/json")
         else: 
             return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json",status=401)
+        
+    
+    def redemption_download(self, request, **kwargs):
+        '''
+#          Get Rdemption report details for given filter
+#          and returns in csv format
+#       '''
+        filter_param = request.GET.get('key','')
+        filter_value = request.GET.get('value','')
+        created_date__gte = request.GET.get('created_date__gte')
+        created_date__lte = request.GET.get('created_date__lte')
+        applied_filter = {filter_param: filter_value, 'created_date__gte':created_date__gte, 'created_date__lte':created_date__lte}
+        if created_date__gte and created_date__lte :
+            try:
+                filter_data_list = self.get_list(request, **applied_filter)
+                return self.csv_convert_redemption(filter_data_list)
+            except Exception as ex:
+                data = {'status':0 , 'message': 'key does not exist'}
+                return HttpResponse(json.dumps(data), content_type="application/json")
+        else:
+            data = {'status':0 , 'message': 'Select a Date range'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
+
+        
+    def csv_convert_redemption(self, data):
+        json_response = json.loads(data.content)
+        file_name='redemption_download' + datetime.now().strftime('%d_%m_%y')
+        headers = []
+        headers = headers+constants.REDEMPTION_API_HEADER
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(headers)
+        for item in json_response['objects']:
+            data=[]
+            for field in headers:
+                if field=='state_name':
+                    data.append(item['member']['state']['state_name'])
+                elif field=='distributor_id':
+                        data.append(item['member']['distributor']['distributor_id'])
+                elif field== 'mechanic_id':
+                    if item['member']["permanent_id"] != None:
+                        data.append(item['member']["permanent_id"])
+                    else:
+                        data.append(item['member']['mechanic_id'])
+                elif field== 'first_name': 
+                    data.append(item['member']['first_name'])  
+                elif field== 'district': 
+                    data.append(item['member']['district']) 
+                elif field== 'phone_number': 
+                    data.append(item['member']['phone_number'])
+                elif field== 'points': 
+                    data.append(item['product_catalog']['points'])  
+                elif field== 'product_id': 
+                    data.append(item['product_catalog']['product_id'])
+                else:
+                    date_format = datetime.strptime(item['created_date'], '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
+                    data.append(date_format)
+            csvwriter.writerow(data)
+            
+        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        return response
 
        
 class AccumulationResource(CustomBaseModelResource):
@@ -179,11 +253,12 @@ class AccumulationResource(CustomBaseModelResource):
                      "created_date" : ALL
                      }
     
+    
     def build_filters(self, filters=None):
         if filters is None:
             filters = {}
         orm_filters = super(AccumulationResource, self).build_filters(filters)
-        
+          
         if 'member_id' in filters:
             query = filters['member_id']
             qset = (
@@ -193,6 +268,7 @@ class AccumulationResource(CustomBaseModelResource):
             orm_filters.update({'custom':  qset})
         return orm_filters  
                      
+
             
     def apply_filters(self, request, applicable_filters):
         if 'custom' in applicable_filters:
@@ -212,17 +288,64 @@ class AccumulationResource(CustomBaseModelResource):
                     part_numbers.append(upc.data['part_number'].data['id'])
         
         points = models.SparePartPoint.objects.filter(part_number__in=part_numbers).values('part_number__id', 'points')
-
         for object in data['objects']:
             if object.data.has_key('upcs'):
                 for upc in object.data['upcs']:
                     part_number = upc.data['part_number'].data['id']
                     upc_mapping = filter(lambda point: point['part_number__id']==part_number, points)
                     upc.data['part_number'].data['point'] = upc_mapping[0]['points']
-                    
         return data
+    
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/accumulation-report%s" % (self._meta.resource_name,
+                                                     trailing_slash()),
+                self.wrap_view('accumulation_report'), name="accumulation_report"),
+            url(r"^(?P<resource_name>%s)/product-fitment%s" % (self._meta.resource_name,
+                                                     trailing_slash()),
+                self.wrap_view('product_fitment'), name="product_fitment"),
+        ]
 
-
+    def accumulation_report(self, request, **kwargs):
+        '''
+           Get Accumulation report details for given filter
+           and returns in csv format
+#         '''
+        from boto.s3.connection import S3Connection
+        from boto.s3.key import  Key
+        S3_ID = 'AKIAIL7IDCSTNCG2R6JA'
+        S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
+        connection = S3Connection(S3_ID, S3_KEY)
+        AWS_STORAGE_BUCKET_NAME = 'gladminds'
+        fname = 'acc_data.csv'
+        bucket_name = AWS_STORAGE_BUCKET_NAME
+        key = connection.get_bucket(bucket_name).get_key(fname)
+        value = key.get_contents_as_string()
+        response = HttpResponse(value, content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename=%s' %(fname)
+        LOG.error('[download_member_detail]: Download of fitment data by user {0}'.format(request.user))
+        return response
+    
+    def product_fitment(self, request, **kwargs):
+        '''
+            Get Report product fitment for given filter
+            and returns in csv format
+        '''
+        from boto.s3.connection import S3Connection
+        from boto.s3.key import  Key
+        S3_ID = 'AKIAIL7IDCSTNCG2R6JA'
+        S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
+        connection = S3Connection(S3_ID, S3_KEY)
+        AWS_STORAGE_BUCKET_NAME = 'gladminds'
+        fname = 'fitment_data.csv'
+        bucket_name = AWS_STORAGE_BUCKET_NAME
+        key = connection.get_bucket(bucket_name).get_key(fname)
+        value = key.get_contents_as_string()
+        response = HttpResponse(value, content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename=%s' %(fname)
+        LOG.error('[download_member_detail]: Download of fitment data by user {0}'.format(request.user))
+        return response
+        
 class WelcomeKitResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
     partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)

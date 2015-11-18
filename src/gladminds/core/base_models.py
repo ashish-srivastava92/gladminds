@@ -819,6 +819,16 @@ class Comment(BaseModel):
         abstract = True
         db_table = "gm_comment"
         verbose_name_plural = "Comment info"
+        
+class EpcCommentThread(BaseModel):
+    '''details of comments'''
+    user = models.CharField(max_length=20, null=False, blank=False)
+    comment = models.TextField(null=True, blank=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_epccommentthread"
+        verbose_name_plural = "Comments information"
 
 class FeedbackEvent(BaseModel):
     '''details of events for a feedback'''
@@ -1122,7 +1132,7 @@ class Distributor(BaseModel):
         verbose_name_plural = "Distributors"
 
     def __unicode__(self):
-        return self.distributor_id + ' ' +self.name
+        return self.distributor_id 
 
 class DistributorStaff(BaseModel):
     '''details of DistributorStaff'''
@@ -1692,6 +1702,7 @@ class ECORelease(BaseModel):
     serviceability = models.CharField(max_length=20, null=True, blank=True)
     interchangebility = models.CharField(max_length=20, null=True, blank=True)
     reason_for_change = models.CharField(max_length=90, null=True, blank=True)
+    status = models.CharField(max_length=10, choices=constants.ECO_RELEASE_STATUS, default='Open')
 
     class Meta:
         abstract = True
@@ -1717,6 +1728,7 @@ class ECOImplementation(BaseModel):
     eco_number = models.CharField(max_length=20, null=True, blank=True)
     reason_code = models.CharField(max_length=20, null=True, blank=True)
     remarks = models.CharField(max_length=20, null=True, blank=True)
+    status = models.CharField(max_length=10, choices=constants.ECO_IMPLEMENTATION_STATUS, default='Open')
     
     class Meta:
         abstract = True
@@ -1839,6 +1851,22 @@ class BOMPlatePart(BaseModel):
         db_table = "gm_bomplatepart"
         verbose_name_plural = "BOM plate Parts"
         
+class VisualisationUploadHistory(BaseModel):
+    '''
+        Upload history which has been saved along with status of
+        approved or rejected
+    '''
+    sku_code = models.CharField(max_length=20)
+    bom_number = models.CharField(max_length=10)
+    plate_id = models.CharField(max_length=50)
+    eco_number = models.CharField(max_length=20, null=True)
+    status = models.CharField(max_length=10, choices=constants.SAVE_PLATE_PART_STATUS, default='Pending')
+
+    class Meta:
+        abstract = True
+        db_table = "gm_visualisationuploadhistory"
+        verbose_name_plural = "Visualisation Upload History"
+        
 class BOMVisualization(BaseModel):
     '''Details of BOM Plates coordinates'''
     x_coordinate  = models.IntegerField(default=0)
@@ -1846,11 +1874,10 @@ class BOMVisualization(BaseModel):
     z_coordinate  = models.IntegerField(default=0)
     serial_number = models.IntegerField(default=0)
     part_href = models.CharField(max_length=200)
-    status =  models.CharField(max_length=25, choices=SBOM_STATUS,
-                              blank=True, null=True)
     published_date = models.DateTimeField(null=True, blank=True)
     remarks = models.CharField(max_length=500, null=True, blank=True)
-
+    is_published = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False)
     
     class Meta:
         abstract = True
@@ -1946,7 +1973,30 @@ class FleetRider(BaseModel):
     def __unicode__(self):
         return self.phone_number
     
+
+
     
+    
+class DistributorDistrict(BaseModel):
+    active = models.BooleanField(default=False)
+    class Meta:
+        abstract = True
+        db_table = "gm_distributor_district"
+        verbose_name_plural = "Distributor District"
+
+#     def __unicode__(self):
+#         return self.assignee_id
+
+
+class OrderPartDetails(BaseModel):
+    ''' details of ordering spare parts by dsr or retailer'''
+    
+    class Meta:
+#         abstract = True
+        db_table = "gm_orderpart_details"
+        verbose_name_plural = "Order Part Details"
+    
+<<<<<<< HEAD
 class OrderPartDetails(BaseModel):
     ''' details of ordering spare parts by dsr or retailer'''
     
@@ -1956,3 +2006,6 @@ class OrderPartDetails(BaseModel):
         verbose_name_plural = "Order Part Details"
     
     
+=======
+    
+>>>>>>> 14c2a5f23c6feef8aa15eb5fe707048533513793

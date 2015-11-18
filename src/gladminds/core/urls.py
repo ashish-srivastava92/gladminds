@@ -86,6 +86,7 @@ api_v1.register(part_change_apis.BrandProductRangeResource())
 api_v1.register(part_change_apis.BrandVerticalResource())
 api_v1.register(part_change_apis.BOMHeaderResource())
 api_v1.register(part_change_apis.BOMPlatePartResource())
+api_v1.register(part_change_apis.VisualisationUploadHistoryResource())
 api_v1.register(part_change_apis.ECOReleaseResource())
 api_v1.register(part_change_apis.ECOImplementationResource())
 api_v1.register(part_change_apis.BOMVisualizationResource())
@@ -128,7 +129,15 @@ urlpatterns = patterns('',
     
     url(r'^cv/get_outstanding/dsr_id/(?P<retailer_id>\d+)/$',
                         'gladminds.core.views.apis.get_outstanding'),
+<<<<<<< HEAD
     
+=======
+    url(r'^cv/get_schedule/dsr_id/(?P<dsr_id>\d+)/date/(?P<date>[-\d]+)/$',
+                        'gladminds.core.views.apis.get_schedule'),
+    url(r'^cv/place_order/dsr_id/(?P<dsr_id>\d+)$',
+                        'gladminds.core.views.apis.place_order'),
+#     url(r'^cv/place_order/dsr_id/(?P<dsr_id>\d+)$', 'gladminds.core.views.apis.place_order'
+>>>>>>> 14c2a5f23c6feef8aa15eb5fe707048533513793
     #api urls end here
     url(r'', include(api_v1.urls)),
     url(r'^$', 'gladminds.core.views.home'),
@@ -171,7 +180,7 @@ urlpatterns = patterns('',
     url(r'^aftersell/feedbackresponse/(?P<feedback_id>\d+)/$', 'gladminds.core.services.service_desk.servicedesk_views.get_feedback_response', name='get_feedback_response'),
     url(r'^aftersell/servicedesk/save-feedback/$', 'gladminds.core.services.service_desk.servicedesk_views.save_feedback', name='save_feedback'),
     url(r'^admin/retailer/rejected_reason$', 'gladminds.core.views.views.rejected_reason', name='rejected_reason'),
-    url(r'^admin/retailer/approve_retailer/retailer_id/(?P<retailer_id>\d+)/$', 'gladminds.core.views.views.approve_retailer', name='approve_retailer'),
+#     url(r'^admin/retailer/approve_retailer/retailer_id/(?P<retailer_id>\d+)/$', 'gladminds.core.views.views.approve_retailer', name='approve_retailer'),
     url(r'^v1/upload', upload_files),
     # Tasks URL
     url(r'^tasks-view/$', 'gladminds.core.views.sqs_tasks_view'),

@@ -78,6 +78,20 @@ FEEDBACK_STATUS_LEVEL_TWO = (
         ('Pending', 'Pending')
     )
 
+ECO_RELEASE_STATUS = (
+                      ('Open', 'Open'),
+                      ('Closed', 'Closed'),
+                      ('Under Review', 'Under Review'),
+    )
+
+ECO_IMPLEMENTATION_STATUS = (
+                      ('Open', 'Open'),
+                      ('Closed', 'Closed'),
+                      ('Rejected', 'Rejected'),
+                      ('Approved', 'Approved'),
+                      ('Under Review', 'Under Review'),
+    )
+
 
 PRIORITY = (
         ('Low', 'Low'),
@@ -134,6 +148,12 @@ RATINGS = (
            ('2','Very Glad'),
            ('3','Not Glad')
         )
+
+SAVE_PLATE_PART_STATUS = (
+                          ('Pending','Pending'),
+                          ('Approved','Approved'),
+                          ('Rejected','Rejected')
+                          )
 
 ROOT_CAUSE = (('Data','Data'),
               ('Infrastructure','Infrastructure'),
@@ -256,6 +276,15 @@ DOWNLOAD_REDEMPTION_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'last
 DOWNLOAD_ACCUMULATION_FIELDS = ['permanent_id', 'first_name', 'middle_name', 'last_name', 'phone_number', 'state', 'shop_name','asm', 'points', 'total_points', 'upcs', 'created_date']
 MEMBER_FIELDS = ['permanent_id','first_name', 'middle_name', 'last_name', 'phone_number', 'state', 'shop_name']
 
+
+'''Below headers are used in API for Powerrwards'''
+
+MEMBER_API_HEADER = ['Mechanic Id', 'Mechanic Name','District','Mobile Number','State','Distributor Code','Date Of Registration','Address of garage']
+ACCUMULATION_API_HEADER = ['mechanic_id', 'first_name','district','phone_number','state_name','distributor_id','unique_part_code','points','created_date']
+ACCUMULATION_API_HEADER_MEMBER_FIELDS = ['mechanic_id','first_name', 'district','phone_number']
+REDEMPTION_API_HEADER = ['mechanic_id', 'first_name','district','phone_number','state_name','distributor_id','created_date','points','product_id']
+ACCUMULATION_FITMENT_API_HEADER = ['mechanic_id', 'first_name','district','phone_number','state_name','distributor_id', 'unique_part_code','points','part_number', 'description', 'created_date']
+MONTHLY_ACTIVE_API_HEADER = ['State', 'No of Mechanic Registered (till date)','No of Mechanic messaged','%active','ASM Name']
 
 LOYALTY_ACCESS = {
                 'query_field' : {

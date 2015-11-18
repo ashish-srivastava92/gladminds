@@ -1227,13 +1227,15 @@ body .ui-tooltip {
 		{
 		  visibility: hidden;
 		  position: absolute;
-		  left: 250px;
+		  left: 150px;
 		  top: 120px;
+		  
 		  width:500px;
 		  height:280px;
-		  text-align:center;
-		  border: 1px solid #000000;
-		  border-radius: 10px;
+		  /*text-align:center;*/
+		  /*border-style: double;*/
+		  /*border: 1px solid #000000;*/
+		 /*border-radius: 10px;*/
 		  background-color: #FFFFFF;
 		}
 #order_link

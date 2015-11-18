@@ -12,19 +12,18 @@ from django.db.models.query_utils import Q
 from django.contrib.sites.models import RequestSite
 
 from tastypie.utils.urls import trailing_slash
-from tastypie import fields,http
+from tastypie import fields,http, bundle
 from tastypie.http import HttpBadRequest
 from tastypie.authorization import Authorization
 from tastypie.authorization import DjangoAuthorization
 from tastypie.constants import ALL_WITH_RELATIONS, ALL
 from tastypie.exceptions import ImmediateHttpResponse
-
 from gladminds.core import constants
 from gladminds.core.apis.authentication import AccessTokenAuthentication
 from gladminds.core.apis.authorization import MultiAuthorization,\
     LoyaltyCustomAuthorization,\
      ZSMCustomAuthorization, DealerCustomAuthorization,\
-     RMCustomAuthorization
+     RMCustomAuthorization,CHCustomAuthorization,DistributorCustomAuthorization
 from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.auth.access_token_handler import create_access_token, \
     delete_access_token
@@ -38,6 +37,13 @@ from gladminds.core.model_helpers import format_phone_number
 from gladminds.core.utils import check_password
 from gladminds.afterbuy import utils as core_utils
 from gladminds.core.model_fetcher import get_model
+import csv
+import StringIO
+
+LOG = logging.getLogger('gladminds')
+
+from celery.worker.consumer import Heart
+from boto.gs.cors import HEADERS
 
 logger = logging.getLogger('gladminds')
 
@@ -86,6 +92,7 @@ class UserProfileResource(CustomBaseModelResource):
                      }
         always_return_data = True 
         ordering = ['user', 'phone_number']
+        
         
     def prepend_urls(self):
         return [
@@ -562,12 +569,12 @@ class RegionalManagerResource(CustomBaseModelResource):
         queryset = models.RegionalManager.objects.all()
         resource_name = "regional-sales-managers"
         authentication = AccessTokenAuthentication()
-        authorization = MultiAuthorization(DjangoAuthorization())
+        authorization = MultiAuthorization(DjangoAuthorization(),CHCustomAuthorization())
         allowed_methods = ['get']
         filtering = {
                      "user": ALL_WITH_RELATIONS,
                      "region": ALL,
-                     "circle_head": ALL_WITH_RELATIONS,
+                     "circle_head": ALL_WITH_RELATIONS                  
                      }
         always_return_data = True
         
@@ -579,6 +586,9 @@ class RegionalManagerResource(CustomBaseModelResource):
                      self.wrap_view('update_regional_sales_manager'), name="update_regional_sales_manager"),
                ]
         
+   
+   
+               
     def register_regional_sales_manager(self, request, **kwargs):
         '''
            Register a new RM
@@ -651,11 +661,9 @@ class RegionalManagerResource(CustomBaseModelResource):
             
             rm_profile = rm_obj.user
             rm_profile.phone_number = load.get('phone_number')
-            
             rm_user= rm_obj.user.user
             rm_user.first_name=load.get('name')
-            rm_user.email=load.get('email')
-            
+            rm_user.email=load.get('email')           
             rm_obj.region = load.get('regional-office')
             ch_user_id = load.get('ch_user_id')
             try:
@@ -683,7 +691,7 @@ class AreaSalesManagerResource(CustomBaseModelResource):
             queryset = models.AreaSalesManager.objects.all()
             resource_name = "area-sales-managers"
             authentication = AccessTokenAuthentication()
-            authorization = MultiAuthorization(DjangoAuthorization(), RMCustomAuthorization())
+            authorization = MultiAuthorization(DjangoAuthorization(),RMCustomAuthorization())
             allowed_methods = ['get']
             filtering = {
                      "user": ALL_WITH_RELATIONS, 
@@ -698,9 +706,11 @@ class AreaSalesManagerResource(CustomBaseModelResource):
                     url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),
                      self.wrap_view('register_area_sales_manager'), name="register_area_sales_manager"),
                     url(r"^(?P<resource_name>%s)/update/(?P<user_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
-                     self.wrap_view('update_area_sales_manager'), name="update_area_sales_manager"),
-                    ]
-            
+                     self.wrap_view('update_area_sales_manager'), name="update_area_sales_manager")
+                
+                ]
+    
+     
         def register_area_sales_manager(self, request, **kwargs):
             '''
                Register a new sm
@@ -1051,7 +1061,8 @@ class DealerResource(CustomBaseModelResource):
                 url(r"^(?P<resource_name>%s)/active%s" % (self._meta.resource_name,trailing_slash()),
                                                         self.wrap_view('get_active_dealer'), name="get_active_dealer"),
                 url(r"^(?P<resource_name>%s)/update/(?P<dealer_id>\d+)%s" % (self._meta.resource_name,trailing_slash()),
-                     self.wrap_view('update_dealer'), name="update_dealer"),
+                     self.wrap_view('update_dealer'), name="update_dealer")
+               
                 ]
     
     
@@ -1285,6 +1296,7 @@ class DistributorResource(CustomBaseModelResource):
         queryset = models.Distributor.objects.all()
         resource_name = "distributors"
         authorization = Authorization()
+        #authorization = MultiAuthorization(DjangoAuthorization(), DistributorCustomAuthorization())
         authentication = AccessTokenAuthentication()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
@@ -1321,6 +1333,8 @@ class MemberResource(CustomBaseModelResource):
         authentication = AccessTokenAuthentication()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
+        max_limit= None
+        
         filtering = {
                      "state": ALL_WITH_RELATIONS,
                      "distributor" : ALL_WITH_RELATIONS,
@@ -1344,12 +1358,12 @@ class MemberResource(CustomBaseModelResource):
         ordering = ["state", "locality", "district", "registered_date",
                     "created_date", "mechanic_id", "last_transaction_date", "total_accumulation_req"
                     "total_accumulation_points", "total_redemption_points", "total_redemption_req" ]
-    
+        
     def build_filters(self, filters=None):
         if filters is None:
             filters = {}
         orm_filters = super(MemberResource, self).build_filters(filters)
-        
+         
         if 'member_id' in filters:
             query = filters['member_id']
             qset = (
@@ -1378,14 +1392,187 @@ class MemberResource(CustomBaseModelResource):
             url(r"^(?P<resource_name>%s)/points%s" % (self._meta.resource_name,
                                                      trailing_slash()),
                 self.wrap_view('get_total_points'), name="get_total_points"),
+                
+            url(r"^(?P<resource_name>%s)/registered-members%s" % (self._meta.resource_name,
+                                                     trailing_slash()),
+                self.wrap_view('registered_members'), name="registered_members"),
+                
+            url(r"^(?P<resource_name>%s)/monthly-active-count%s" % (self._meta.resource_name,
+                                                     trailing_slash()),
+                self.wrap_view('monthly_active_code'), name="monthly_active_code"),
+                
+            url(r"^(?P<resource_name>%s)/monthly-inactive-count%s" % (self._meta.resource_name,
+                                                     trailing_slash()),
+                self.wrap_view('monthly_inactive_code'), name="monthly_inactive_code"),
+            
         ]
-   
+        
+    def registered_members(self, request , **kwargs):
+        '''
+            Get registered member details for given filter
+            and returns in csv format
+        '''
+        try:
+            received_csv_data = self.download_member_detail(request)
+            return received_csv_data
+        except Exception as ex:
+            data = {'status':0 , 'message': 'key does not exist'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
+        
+    def download_member_detail(self,request):
+        '''Download Registered Members Details'''
+        file_name='registered_member_download' + datetime.now().strftime('%d_%m_%y')
+        headers=[]
+        headers=headers+constants.MEMBER_API_HEADER
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(headers)
+        mechanics = self.get_members_detail(request,'Member')
+        finaldata=[]
+        for mechanic in mechanics:
+            data=[]
+            for field in headers:
+                if field=='State':
+                    if mechanic.state:
+                        data.append(mechanic.state.state_name)
+                    else:
+                        data.append(mechanic.state)
+                elif field=='Distributor Code':
+                    if mechanic.registered_by_distributor:
+                        if mechanic.registered_by_distributor.distributor_id:
+                            data.append(mechanic.registered_by_distributor.distributor_id)
+                        else:
+                            data.append("NA")
+                    else:
+                        data.append(mechanic.registered_by_distributor)
+                
+                elif field=='Address of garage':
+                    shop_name =self.address_get(mechanic.shop_name)
+                    shop_number=self.address_get(mechanic.shop_number)
+                    shop_address =self.address_get(mechanic.shop_address)
+                    district = self.address_get(mechanic.district)
+                    state_name= self.address_get(mechanic.state.state_name)
+                    pincode = self.address_get(mechanic.pincode)
+                    data.append(shop_name+" ,"+shop_number+" ,"+shop_address+" ,"+district+" ,"+state_name+" ,"+pincode)
+                elif field== 'Mechanic Id':
+                    if mechanic.permanent_id != None:
+                        data.append(mechanic.permanent_id)
+                    else:
+                        if mechanic.mechanic_id != None:
+                            data.append(mechanic.mechanic_id)
+                        else:
+                            data.append("NA")
+                elif field== 'Mechanic Name': 
+                    data.append(mechanic.first_name)  
+                elif field== 'District': 
+                    data.append(mechanic.district) 
+                elif field== 'Mobile Number': 
+                    data.append(mechanic.phone_number) 
+                else:
+                    if mechanic.registered_date:
+                        data.append(mechanic.registered_date)
+#                         date_format =  datetime.strptime(str(mechanic.registered_date), '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
+#                         data.append(date_format)
+                    else:
+                        data.append("NA")
+                
+            finaldata.append(data)
+        csvwriter.writerows(finaldata)
+        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        LOG.error('[download_member_detail]: Download of mechanic data by user {0}'.format(request.user))
+        return response
+    
+    def get_members_detail(self, request,model_name):
+        kwargs={}
+        if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=get_model('AreaSparesManager').objects.get(user__user=request.user).state.all()
+            kwargs['state__in'] = asm_state_list
+        mechanics = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs).select_related('state', 'registered_by_distributor')
+        
+        return mechanics
 
+    def address_get(self, addr_data):
+        if addr_data:
+            return addr_data
+        else:
+            return "NA"
+        
+        
+
+    def monthly_active_code(self, request , **kwargs):
+        '''
+            Get registered member details
+            returns in csv format
+        '''
+#         filter_param = request.GET.get('key')
+#         filter_value = request.GET.get('value')
+#         applied_filter = {filter_param: filter_value}
+        try:
+            #filter_data_list = self.get_list(request, **applied_filter)
+            active_member_data = self.get_active_member(request, **kwargs)
+            csv =  self.csv_convert_monthly_active(active_member_data)
+            return csv
+        except Exception as ex:
+            logger.error(ex)
+            data = {'status':0 , 'message': 'key does not exist'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
+        
+    def csv_convert_monthly_active(self, data):
+        data_received = json.loads(data.content)
+        file_name='monthly_active_download' + datetime.now().strftime('%d_%m_%y')
+        headers = []
+        headers = headers+constants.MONTHLY_ACTIVE_API_HEADER
+        #headers= ['State', 'No of Mechanic Registered (till date)','No of Mechanic messaged','%active','ASM Name']
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(headers)
+        for k, v in data_received.items():
+            data=[]
+            for field in headers:
+                if field=='State':
+                    data.append(k)
+                elif field=='No of Mechanic Registered (till date)':
+                    data.append(v['registered_count'])
+                elif field== 'No of Mechanic messaged': 
+                    data.append(v['active_count'])  
+                elif field== '%active': 
+                    data.append(v['active_percent'])
+                else:
+                    data.append(v['asm'])
+            csvwriter.writerow(data)
+        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        return response
+    
+    def monthly_inactive_code(self, request , **kwargs):
+        '''
+#           Get registered member details
+#           returns in csv format
+#       '''
+        filter_param = request.GET.get('key')
+        filter_value = request.GET.get('value')
+        applied_filter = {filter_param: filter_value}
+        try:
+            filter_data_list = self.get_list(request, **applied_filter)
+            csv =  self.csv_convert_monthly_inactive(filter_data_list)
+            return csv
+        except Exception as ex:
+            logger.error(ex)
+            data = {'status':0 , 'message': 'key does not exist'}
+            return HttpResponse(json.dumps(data), content_type="application/json")
+    
+    def csv_convert_monthly_inactive(self, data):
+        pass
+
+          
+        
     def get_active_member(self, request, **kwargs):
         '''
            Get active member counts and
            registered member count based on region
         '''
+        
         self.is_authenticated(request)
         args={}
         try:
@@ -1468,6 +1655,7 @@ class MemberResource(CustomBaseModelResource):
             logger.error('redemption/accumulation request count requested by {0}:: {1}'.format(request.user, ex))
             member_report = {'status': 0, 'message': 'could not retrieve the sum of points of requests'}
         return HttpResponse(json.dumps(member_report), content_type="application/json")
+    
 
 class BrandDepartmentResource(CustomBaseModelResource):
     '''
@@ -1555,4 +1743,5 @@ class SupervisorResource(CustomBaseModelResource):
         filtering = {
                      'transporter': ALL_WITH_RELATIONS
                      }
+        
 

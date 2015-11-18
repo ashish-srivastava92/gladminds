@@ -139,6 +139,12 @@ class BrandDepartment(base_models.BrandDepartment):
     class Meta(base_models.BrandDepartment.Meta):
         app_label = _APP_NAME
         verbose_name_plural = "Brand Department"
+        
+class EpcCommentThread(base_models.EpcCommentThread):
+    
+    class Meta(base_models.EpcCommentThread.Meta):
+        app_label = _APP_NAME
+        verbose_name_plural = "Comments For EPC"
 
 class DepartmentSubCategories(base_models.DepartmentSubCategories):
     department = models.ForeignKey(BrandDepartment, null=True, blank=True)
@@ -416,6 +422,7 @@ class Supervisor(base_models.Supervisor):
 
 class ContainerIndent(base_models.ContainerIndent):
     ''' details of Container Indent'''
+    transporter = models.ForeignKey(Transporter,null=True,blank=True)
 
     class Meta(base_models.ContainerIndent.Meta):
         app_label = _APP_NAME
@@ -440,7 +447,7 @@ class ContainerTracker(base_models.ContainerTracker):
 class City(base_models.City):
     ''' List of cities mapped to states'''
     state = models.ForeignKey(State, null=True, blank=True)    
-   
+#     distibutor_id= 
     class Meta(base_models.City.Meta):
         app_label = _APP_NAME
 
@@ -474,17 +481,22 @@ class AreaSparesManager(base_models.AreaSparesManager):
      #   app_label = _APP_NAME
         
 class Distributor(base_models.Distributor):
+    '''details of Distributor'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
     asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
     state = models.ForeignKey(State,null=True, blank=True)
-    mobile_1 = PhoneField(skip_check=True, null=True, blank=True)
-    mobile_2 = PhoneField(skip_check=True, null=True, blank=True)
+    territory = models.CharField(max_length=15)
+    mobile1 = models.CharField(max_length=15)
+    mobile2 = models.CharField(max_length=15)
     email_bajaj = models.EmailField(max_length=50, null=True, blank=True)
     address_line_2 = models.CharField(max_length=40, null=True, blank=True)
     address_line_3 = models.CharField(max_length=40, null=True, blank=True)
-    address_line_4 = models.CharField(max_length=40, null=True, blank=True)
-
-        
+    profile = models.CharField(max_length=15)
+    language = models.CharField(max_length=10, null=True, blank=True)
+    territory = models.CharField(max_length=10, null=True, blank=True)    
+    
+    class Meta(base_models.Distributor.Meta):
+        app_label = _APP_NAME
         
 class DSRScorecardReport(base_models.DSRScorecardReport):
     ''' details of report '''
@@ -528,6 +540,8 @@ class Retailer(base_models.Retailer):
     territory = models.CharField(max_length=15)
     email = models.EmailField(max_length=50, null=True, blank=True)
     mobile = models.CharField(max_length=15)
+    address_line_2 = models.CharField(max_length=40, null=True, blank=True)
+    address_line_3 = models.CharField(max_length=40, null=True, blank=True)
     profile = models.CharField(max_length=15, null=True, blank=True)
     latitude = models.DecimalField(max_digits = 10, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits = 11, decimal_places=6, null=True, blank=True)
@@ -539,7 +553,7 @@ class Retailer(base_models.Retailer):
         app_label = _APP_NAME
 
     def __unicode__(self):
-        return self.retailer_code + ' ' + self.retailer_name
+        return self.retailer_code 
     
 class PartModels(base_models.PartModels):
     '''details of part models'''
@@ -647,25 +661,23 @@ class Collection(base_models.Collection):
 
 class OrderPart(base_models.OrderPart):
     ''' details of orders placed by retailer '''
-    order_id = models.CharField(max_length = 40)
+#     order_id = models.CharField(max_length = 40)
     order_date = models.DateField()
-    part = models.ForeignKey(PartPricing)
-    quantity = models.IntegerField()
-    price = models.DecimalField(max_digits = 5, decimal_places=2)
-    total_price = models.DecimalField(max_digits = 8, decimal_places=2)
+    retailer = models.ForeignKey(Retailer)
+    dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+
+    so_id = models.IntegerField(null=True, blank=True)
+    po_id = models.IntegerField(null=True, blank=True)
+    do_id = models.IntegerField(null=True, blank=True)
     fullfill = models.NullBooleanField()
     delivered = models.IntegerField(null=True, blank=True)
     no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
-    dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
     accept = models.BooleanField(default = False)
-    retailer = models.ForeignKey(Retailer)
-    distributor = models.ForeignKey(Distributor)
     order_placed_by = models.IntegerField()
     
     class Meta(base_models.OrderPart.Meta):
         app_label = _APP_NAME
-        
-            
           
 class SparePartUPC(base_models.SparePartUPC):
     '''details of Spare Part UPC'''
@@ -799,6 +811,13 @@ class BOMPlatePart(base_models.BOMPlatePart):
 
     class Meta(base_models.BOMPlatePart.Meta):
         app_label = _APP_NAME
+        
+class VisualisationUploadHistory(base_models.VisualisationUploadHistory):
+    '''Upload history with status'''
+
+    comments = models.ManyToManyField(EpcCommentThread)
+    class Meta(base_models.VisualisationUploadHistory.Meta):
+        app_label = _APP_NAME
 
 class BOMVisualization(base_models.BOMVisualization):
     '''Details of BOM Plates cordinates'''
@@ -820,8 +839,6 @@ class ManufacturingData(base_models.ManufacturingData):
         app_label = _APP_NAME
 
 ########Added for SFA from bajajcv#####################
-
-
 class CvCategories(base_models.CvCategories):
     ''' details of alternate parts and pricing '''
     name = models.CharField(max_length = 255)
@@ -882,13 +899,20 @@ class OrderPart(base_models.OrderPart):
     class Meta(base_models.OrderPart.Meta):
         app_label = _APP_NAME
 
+class DistributorDistrict(base_models.DistributorDistrict):
+     distributor = models.ForeignKey(Distributor)
+     district = models.ForeignKey(City)
+     class Meta(base_models.DistributorDistrict.Meta):
+        app_label = _APP_NAME
+        verbose_name_plural = "Distributor District"
+
 class OrderPartDetails(base_models.OrderPartDetails):
     part_number = models.IntegerField(null=True, blank=True)
     quantity = models.IntegerField(null=True, blank=True)
     active = models.IntegerField(null=True, blank=True, default =1)
     order_id = models.ForeignKey(OrderPart)
     
-    class Meta(base_models.PartMasterCv.Meta):
+    class Meta(base_models.OrderPartDetails.Meta):
         app_label = _APP_NAME
-
+#         verbose_name_plural = "Order Part Details"
 

@@ -2,7 +2,6 @@ from tastypie.authorization import Authorization
 from tastypie.exceptions import Unauthorized
 from provider.oauth2.models import AccessToken
 from django.conf import settings
-
 from gladminds.afterbuy import models as afterbuy
 from gladminds.core.auth_helper import Roles
 import operator
@@ -286,13 +285,25 @@ class ZSMCustomAuthorization(Authorization):
             object_list = object_list.filter(user__user_id=int(bundle.request.user.id))
         return object_list
     
+class CHCustomAuthorization(Authorization):
+    def read_list(self, object_list, bundle):
+        if bundle.request.user.groups.filter(name=Roles.CIRCLEHEADS):
+            object_list = object_list.filter(circle_head__user__user_id=int(bundle.request.user.id))
+        return object_list
+
+
+
+
 class RMCustomAuthorization(Authorization):
     def read_list(self, object_list, bundle):
-        if bundle.request.user.groups.filter(name=Roles.REGIONALMANAGERS):
+        if bundle.request.user.groups.filter(name=Roles.CIRCLEHEADS):
+            object_list = object_list.filter(rm__circle_head__user__user_id=int(bundle.request.user.id))
+        elif bundle.request.user.groups.filter(name=Roles.REGIONALMANAGERS):
             object_list = object_list.filter(rm__user__user_id=int(bundle.request.user.id))
         elif bundle.request.user.groups.filter(name=Roles.AREASALESMANAGERS):
             object_list = object_list.filter(user__user_id=int(bundle.request.user.id))
         return object_list
+
 
 class DealerCustomAuthorization(Authorization):
     def read_list(self, object_list, bundle):
@@ -304,4 +315,13 @@ class DealerCustomAuthorization(Authorization):
             object_list = object_list.filter(sm__rm__user__user_id=int(bundle.request.user.id))
         elif bundle.request.user.groups.filter(name=Roles.AREASALESMANAGERS):
             object_list = object_list.filter(sm__user__user_id=int(bundle.request.user.id))
+        elif bundle.request.user.groups.filter(name=Roles.CIRCLEHEADS):
+            object_list = object_list.filter(sm__rm__circle_head__user__user_id=int(bundle.request.user.id))
+        return object_list
+    
+
+class DistributorCustomAuthorization(Authorization):
+    def read_list(self, object_list, bundle):
+        if bundle.request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            object_list = object_list.filter(asm__user=int(bundle.request.user.id))
         return object_list

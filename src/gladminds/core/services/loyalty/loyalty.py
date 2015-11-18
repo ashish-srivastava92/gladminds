@@ -195,11 +195,11 @@ class CoreLoyaltyService(Services):
                     upcs_data = accumulation.upcs.all()
                     upc_data_list = ' , '.join([str(upc.unique_part_code) for upc in upcs_data])
                     data.append((upc_data_list))
-                elif field == 'ams':
-                    if accumulation.asm:
-                        data.append(getattr(accumulation.asm.name, field))
-                    else:
-                        data.append(None)
+                elif field == 'asm':
+                    asm_id =  accumulation.member.registered_by_distributor.asm_id
+                    asm_obj = get_model('AreaSparesManager').objects.filter(id=asm_id)
+                    asm_name = asm_obj[0].name
+                    data.append(asm_name)
                 elif field in constants.MEMBER_FIELDS:
                     data.append(getattr(accumulation.member, field))
                 else:
@@ -211,6 +211,7 @@ class CoreLoyaltyService(Services):
     
     def get_accumulation_detail(self, request, choice, model_name):
         kwargs={}
+        
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm_state_list=get_model('AreaSparesManager').objects.get(user__user=request.user).state.all()
             kwargs['member__state__in'] = asm_state_list
@@ -403,15 +404,13 @@ class CoreLoyaltyService(Services):
         return {'status': True, 'message': message}
     
     def check_date_validity(self,valid_from,valid_till):
-        if settings.ENV not in ['prod']:
-            utc=pytz.UTC
-            date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            current_date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
-            current_date_with_tz = utc.localize(current_date)
-            if valid_from<=current_date_with_tz<=valid_till:
-                return True
-            return False
-        return True
+        utc=pytz.UTC
+        date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        current_date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
+        current_date_with_tz = utc.localize(current_date)
+        if valid_from<=current_date_with_tz<=valid_till:
+            return True
+        return False
 
     def accumulate_point(self, sms_dict, phone_number):
         '''accumulate points with given upc'''
@@ -448,11 +447,16 @@ class CoreLoyaltyService(Services):
                     accumulation_log=get_model('AccumulationRequest')(member=mechanic[0],
                                                             points=0,total_points=0)
                     accumulation_log.save(using=settings.BRAND)
+                    
                     for spare_point in spare_points:
-                        if self.check_date_validity(spare_point.valid_from,spare_point.valid_till):
+                        if spare_point.valid_from and spare_point.valid_till:
+                            if self.check_date_validity(spare_point.valid_from,spare_point.valid_till):
+                                added_points=added_points+(len(spare_upc_part_map[spare_point.part_number]) * spare_point.points)
+                                valid_upc.extend(spare_upc_part_map[spare_point.part_number])
+                        else: 
                             added_points=added_points+(len(spare_upc_part_map[spare_point.part_number]) * spare_point.points)
                             valid_upc.extend(spare_upc_part_map[spare_point.part_number])
-                    
+                            
                     total_points=self.update_points(mechanic[0],
                                     accumulate=added_points)
                     valid_spares = get_model('SparePartUPC').objects.get_spare_parts(valid_upc)

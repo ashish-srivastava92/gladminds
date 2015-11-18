@@ -63,11 +63,11 @@ from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 TEMPLATE_CONTEXT_PROCESSORS = TCP + (
     'gladminds.core.context_processors.gm_constants',
     'django.core.context_processors.request',
-    #'django.core.context_processors.applist',
+    # 'django.core.context_processors.applist',
 )
 
 SUIT_CONFIG = {
-    #'ADMIN_NAME': 'GladMinds',
+    # 'ADMIN_NAME': 'GladMinds',
     'ADMIN_NAME': 'Connect to BajajTeam',
     'CONFIRM_UNSAVED_CHANGES': True,
     'SEARCH_URL': '',
@@ -98,17 +98,16 @@ SUIT_CONFIG = {
                     
                     {'model': 'nationalsparesmanager',
                      'label': 'National Spares Manager'},
-                   
                    {'model': 'areasparesmanager',
                      'label': 'Area Spares Manager'},
                     {'model': 'distributor',
                      'label': 'Distributor'},
-                       
-              {'model': 'distributorsalesrep',
+                     {'model': 'distributorsalesrep',
                      'label': 'Distributor Sales Rep'},
-                    
-                      {'model': 'retailer',
+                     {'model': 'retailer',
                      'label': 'Retailer'},
+                    
+   
                     
                     
                     )},
@@ -124,7 +123,9 @@ SUIT_CONFIG = {
                     {'model': 'coupondata',
                      'label': 'Coupon Redemption'},
                    {'model': 'fleetrider',
-                     'label': 'Fleet Rider'},)},
+                     'label': 'Fleet Rider'},
+             
+                   )},
         {'app': 'bajaj', 'label': 'Logs', 'icon': ' icon-folder-open',
          'models':(
                     {'model': 'smslog',
@@ -137,12 +138,7 @@ SUIT_CONFIG = {
                      'label': 'Feed Failure Log'})},
         {'app': 'bajaj', 'label': 'Loyalty', 'icon': ' icon-folder-open',
          'models':(
-                    {'model': 'nationalsparesmanager',
-                     'label': 'National Spares Manager'},
-                   {'model': 'areasparesmanager',
-                     'label': 'Area Spares Manager'},
-                    {'model': 'distributor',
-                     'label': 'Distributor'},
+
                    {'model': 'member',
                      'label': 'Member'},
                    {'model': 'sparepartmasterdata',
@@ -162,7 +158,17 @@ SUIT_CONFIG = {
                    {'model': 'welcomekit',
                      'label': 'Welcome Kit'},
                    {'model': 'loyaltysla',
-                     'label': 'Loyalty Sla'},)},
+                     'label': 'Loyalty Sla'},
+                                  
+            
+            
+                       
+#                   {'model': 'distributorsalesrep',
+#                      'label': 'Distributor Sales Rep'},
+#                   {'model': 'retailer',
+#                      'label': 'Retailer'},
+                   
+                   )},
         {'app': 'bajaj', 'label': 'CTS', 'icon': ' icon-folder-open',
          'models':(
                     {'model': 'transporter',
@@ -241,7 +247,7 @@ DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
 # DB_HOST = os.environ.get('DB_HOST', 'bajaj.chnnvvffqwop.us-east-1.rds.amazonaws.com')
 # DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Bajajsfa')
 
-#for bajaj CV
+# for bajaj CV
 # DB_USER = os.environ.get('DB_USER', 'bajajcv')
 # DB_HOST = os.environ.get('DB_HOST', 'bajajcv.chnnvvffqwop.us-east-1.rds.amazonaws.com')
 # DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Bajajcv123')
@@ -256,7 +262,7 @@ class GmApps():
     GM = 'default'
     DAIMLER = 'daimler'
     PROBIKING = 'probiking'
-    BAJAJIB= 'bajajib'
+    BAJAJIB = 'bajajib'
 
 # Mapping is first app name then db name
 DATABASE_APPS_MAPPING = {
@@ -273,7 +279,7 @@ DATABASE_APPS_MAPPING = {
 db_common = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gm',
-        #'NAME':'bajaj',
+        # 'NAME':'bajaj',
         'USER': DB_USER,
         'PASSWORD': DB_PASSWORD,
         'HOST': DB_HOST,
@@ -283,12 +289,12 @@ DATABASES = {}
 
 for brand in dir(GmApps):
     if not brand.startswith('__'):
-        if getattr(GmApps,brand) in ['default']:
+        if getattr(GmApps, brand) in ['default']:
             db_common.update({'NAME': 'gm'})
-            #db_common.update({'NAME': 'bajaj'})
+            # db_common.update({'NAME': 'bajaj'})
         else:
-            db_common.update({'NAME': getattr(GmApps,brand)})
-        DATABASES[getattr(GmApps,brand)] = deepcopy(db_common)
+            db_common.update({'NAME': getattr(GmApps, brand)})
+        DATABASES[getattr(GmApps, brand)] = deepcopy(db_common)
 
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
@@ -320,7 +326,7 @@ USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-#MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
+# MEDIA_ROOT = 'afterbuy.s3-website-us-east-1.amazonaws.com'
 MEDIA_ROOT = os.path.join(PROJECT_DIR, "static")
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -412,7 +418,7 @@ TEMPLATE_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
-TEST_IGNORE_APPS = ( 'south',
+TEST_IGNORE_APPS = ('south',
                     )
 
 ALL_APPS = (
@@ -441,7 +447,9 @@ ALL_APPS = (
     'tastypie_swagger',
     'django_otp',
     'django_otp.plugins.otp_totp',
-    #'debug_toolbar',
+    'rest_framework'
+
+    # 'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
@@ -459,8 +467,16 @@ TASTYPIE_SWAGGER_API_MODULE = 'gladminds.urls.api_v1'
 #         'rest_framework.permissions.IsAuthenticated',
 #         ],
 #     'DEFAULT_AUTHENTICATION_CLASSES': (
-#         'rest_framework.authentication.BasicAuthentication',            
+#         'rest_framework.authentication.BasicAuthentication',
 #         'rest_framework.authentication.SessionAuthentication',
+#            'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+#     ),
+# }
+
+# 'DEFAULT_AUTHENTICATION_CLASSES': (
+#         'rest_framework.authentication.SessionAuthentication',
+#         'rest_framework.authentication.BasicAuthentication',
+#         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
 #     ),
 # }
 
@@ -585,7 +601,7 @@ PHONE_NUMBER_UPDATE_COUNT_EXCEEDED_MAIL_TO_ASM = {
 
 DISCREPANCY_MAIL_TO_MANAGER = {
     "sender": "feed-report@gladminds.co",
-    "receiver": ["naureen.razi@hashedin.com",],
+    "receiver": ["naureen.razi@hashedin.com", ],
     "subject": "Gladminds customer phone number update",
     "body": """""",
 }
@@ -656,15 +672,15 @@ AFTERBUY_PRODUCT_WARRENTY_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "warrenty")
 AFTERBUY_PRODUCT_INSURANCE_LOC = os.path.join(
     AFTERBUY_PRODUCT_LOC, "insurance")
 AFTERBUY_PRODUCT_INVOICE_LOC = os.path.join(AFTERBUY_PRODUCT_LOC, "invoice")
-#MEDIA_ROOT = AFTERBUY_LOC
+# MEDIA_ROOT = AFTERBUY_LOC
 MEDIA_URL = '/media/'
 
 # S3 Configuration
-#DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 AWS_STORAGE_BUCKET_MAP = {'afterbuy': 'afterbuy'}
 AWS_STORAGE_BUCKET_NAME = 'gladminds-brands'
-#S3_BASE_URL = 'https://%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+# S3_BASE_URL = 'https://%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 S3_BASE_URL = '/static/'
 ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif']
 ALLOWED_FILE_TYPES = { 'pdf' :'pdf',
@@ -717,13 +733,13 @@ FEED_HEALTH_CHECK_INTERVAL = 8
 ################################################
 BRAND = None
 GM_BRAND = 'default'
-OUTSIDE_BRANDS = ['bajaj', 'demo','bajajcv','daimler']
+OUTSIDE_BRANDS = ['bajaj', 'demo', 'bajajcv', 'daimler']
 
 BRANDS = OUTSIDE_BRANDS + ['afterbuy']
 ###############################################
 AIRTEL_IP = '54.84.243.77'
 SMS_CLIENT = "MOCK"
-BRAND_SMS_GATEWAY={'bajaj':'AIRTEL', 'daimler':'KAP', 'bajajcv': 'AIRTEL', 'afterbuy': 'KAP', 'bajajib': 'KAP'}
+BRAND_SMS_GATEWAY = {'bajaj':'AIRTEL', 'daimler':'KAP', 'bajajcv': 'AIRTEL', 'afterbuy': 'KAP', 'bajajib': 'KAP'}
 SMS_CLIENT_DETAIL = { 'AIRTEL': {'login':'bajajauto',
                               'pass':'bajaj',
                               'authenticate_url':'http://117.99.128.32:80/login/pushsms.php',
@@ -784,36 +800,36 @@ FILE_CACHE_DURATION = 0
 
 COUPON_WSDL = 'qa_wsdl/qa_coupon_redeem.wsdl'
 CUSTOMER_REGISTRATION_WSDL = 'qa_wsdl/qa_customer_registration.wsdl'
-VIN_SYNC_WSDL='qa_wsdl/qa_vin_sync.wsdl'
-PURCHASE_SYNC_WSDL='qa_wsdl/qa_purchase_sync_feed.wsdl'
+VIN_SYNC_WSDL = 'qa_wsdl/qa_vin_sync.wsdl'
+PURCHASE_SYNC_WSDL = 'qa_wsdl/qa_purchase_sync_feed.wsdl'
 CTS_WSDL = 'qa_wsdl/qa_container_tracker_feed.wsdl'
 
-MEMBER_SYNC_WSDL='qa_wsdl/qa_member_sync_feed.wsdl'
+MEMBER_SYNC_WSDL = 'qa_wsdl/qa_member_sync_feed.wsdl'
 ACCUMULATION_SYNC_WSDL = 'qa_wsdl/qa_accumulation_feed.wsdl'
 REDEMPTION_SYNC_WSDL = 'qa_wsdl/qa_redemption_feed.wsdl'
 DISTRIBUTOR_SYNC_WSDL = 'qa_wsdl/qa_distributor_sync_feed.wsdl'                
 
 COUPON_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/coupon-redeem/?wsdl&v0"
 CUSTOMER_REGISTRATION_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/customer-feed/?wsdl&v0"
-VIN_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/vin-sync/?wsdl&v0"
-PURCHASE_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/purchase-sync/?wsdl&v0"
+VIN_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/vin-sync/?wsdl&v0"
+PURCHASE_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/purchase-sync/?wsdl&v0"
 CTS_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/container-tracker/?wsdl&v0"
 
-MEMBER_SYNC_WSDL_URL="http://local.bajaj.gladminds.co:8000/api/v1/member-sync/?wsdl&v0"
+MEMBER_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/member-sync/?wsdl&v0"
 ACCUMULATION_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/accumulation-request/?wsdl&v0"
 REDEMPTION_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/redemption-request/?wsdl&v0"
 DISTRIBUTOR_SYNC_WSDL_URL = "http://local.bajaj.gladminds.co:8000/api/v1/distributor-sync/?wsdl&v0"
 
 
 BRAND_META = {
-               "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/", 
+               "bajaj": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/",
                          "base_url": "local.bajaj.gladminds.co"},
-               "bajajsfa": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/", 
-                         "base_url": "local.bajaj.gladminds.co"},     
+               "bajajsfa": {"title": "Bajaj", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/",
+                         "base_url": "local.bajaj.gladminds.co"},
                "demo": {"title": "Daimler", "logo": "daimler/img/Daimler-logo.png", "tagline": "2015 Daimler AG",
-                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
+                        "basecss": "/daimler/css/base.css", "admin_url" :"/admin/"},
               "daimler": {"title": "Daimler", "logo": "daimler/img/Daimler-logo.png", "tagline": "2015 Daimler AG",
-                        "basecss": "/daimler/css/base.css","admin_url" :"/admin/"},
+                        "basecss": "/daimler/css/base.css", "admin_url" :"/admin/"},
             "bajajcv": {"title": "BajajCV", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/",
                         "basecss": "/css/portal.css"},
             "bajajib": {"title": "BajajIB", "logo": "img/bajaj_logo.jpg", "tagline": "Bajaj Auto Pvt Ltd", "admin_url":"/admin/",
@@ -843,6 +859,6 @@ HOME_URLS = {
                        }
              }
 
-LOGIN_URL='/login'
+LOGIN_URL = '/login'
 BATCH_SIZE = 100
 LOGAN_ACTIVE = False

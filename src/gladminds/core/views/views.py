@@ -693,12 +693,12 @@ def rejected_reason(request):
     except Exception as e:
         logger.error('Mail is not sent. Exception occurred', e)
     return HttpResponseRedirect('/admin/core/retailer/')
-
-@login_required
-def approve_retailer(request, retailer_id):
-    '''
-    This method approves the retailer by the ASM/admin
-    '''
-    
-    retailer = Retailer.objects.filter(id=retailer_id).update(approved=STATUS['APPROVED'])
-    return HttpResponseRedirect('/admin/core/retailer/')
+# 
+# @login_required
+# def approve_retailer(request, retailer_id):
+#     '''
+#     This method approves the retailer by the ASM/admin
+#     '''
+#       
+#     retailer = Retailer.objects.filter(id=retailer_id).update(approved=STATUS['APPROVED'])
+#     return HttpResponseRedirect('/admin/core/retailer/')

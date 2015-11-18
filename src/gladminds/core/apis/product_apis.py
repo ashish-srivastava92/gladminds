@@ -21,7 +21,7 @@ from gladminds.core.apis.user_apis import DealerResource, PartnerResource,\
     TransporterResource
 from gladminds.core.auth_helper import Roles
 from gladminds.core.model_fetcher import get_model
-
+from gladminds.sqs_tasks import export_cts_to_sap
 
 
 LOG = logging.getLogger('gladminds')
@@ -144,6 +144,7 @@ class ContainerIndentResource(CustomBaseModelResource):
     '''
 	   Container tracker Indent resource
 	'''
+    transporter = fields.ForeignKey(TransporterResource, 'transporter', null=True, blank=True,full=True)
     class Meta:
         queryset = get_model('ContainerIndent').objects.all()
         resource_name = 'container-indents'
@@ -265,11 +266,13 @@ class ContainerLRResource(CustomBaseModelResource):
          seal_no: new seal number
          container_no: new container number
         '''
+        
         self.is_authenticated(request)
         transaction_id=kwargs['transaction_id']
         load = json.loads(request.body)
         modified_date = load.get('modified_date', None)
         status = load.get('status', None)
+
         seal_no = load.get('seal_no', None)
         container_no = load.get('container_no', None)
         try:
@@ -294,7 +297,11 @@ class ContainerLRResource(CustomBaseModelResource):
                 all_indent_lr = get_model('ContainerLR').objects.filter(zib_indent_num=container_indent, status=status)
                 if len(all_indent_lr)==container_indent.no_of_containers:
                     container_indent.status = status
-            container_indent.save()
+            container_indent.save()           
+            if status=="Inprogress":
+                kwargs = {"brand":"bajaj"}
+                export_cts_to_sap(**kwargs)
+
             data=[{'status':1, 'message': 'LR updated successfully'}]
         except Exception as ex:
             data=[{'status':0,'message': 'LR update was unsuccessful'}]

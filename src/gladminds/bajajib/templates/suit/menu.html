@@ -12,7 +12,7 @@
       </li>
     {% endblock %}
 
-    {% get_menu request as app_list %}
+    {% get_menu request as app_list %}{{app_list}}
     {% if app_list %}
       {% for app in app_list %}
       {% if app.models %}
