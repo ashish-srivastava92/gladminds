@@ -49,27 +49,17 @@ def authentication(request):
                 else:
                     return Response({'message': 'you are not \
                                   a DSR or retailer. Please contact your distributor', 'status':0})
-                    # return HttpResponse(json.dumps({'message': 'you are not \
-                    #              a DSR or retailer. Please contact your distributor', 'status':0}), \
-                    #                     content_type="application/json")
             # now, he is a valid user, generate token
             jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
             jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
             payload = jwt_payload_handler(user)
             data = {"Id": role_id,
                       "token": jwt_encode_handler(payload), "status":1, "login_type":login_type}
-            #data = {"Id": role_id,
-             #      "status":1, "login_type":login_type}
             return Response(data, content_type="application/json")
-            #return HttpResponse(json.dumps(data), content_type="application/json")
         else:
             return Response({'message': 'you are not active. Please contact your distributor', 'status':0})
-         #return HttpResponse(json.dumps({'message': 'you are not active. \
-          #              Please contact your distributor', 'status':0}), content_type="application/json")   
     else:
         return Response({'message': 'you are not a registered user', 'status':0})
-        #return HttpResponse(json.dumps({'message': 'you are not a registered user', 'status':0}), \
-                        #content_type="application/json")
     
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
