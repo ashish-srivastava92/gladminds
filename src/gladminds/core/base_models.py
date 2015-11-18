@@ -1132,9 +1132,7 @@ class Distributor(BaseModel):
         verbose_name_plural = "Distributors"
 
     def __unicode__(self):
-        print self.name,"fjfjfjfdn"
-        print self.distributor_id,"disttttttttttttttttttt"
-        return self.distributor_id + ' '+self.name
+        return self.distributor_id 
 
 class DistributorStaff(BaseModel):
     '''details of DistributorStaff'''
@@ -1957,5 +1955,28 @@ class FleetRider(BaseModel):
 
     def __unicode__(self):
         return self.phone_number
+    
+
+
+    
+    
+class DistributorDistrict(BaseModel):
+    active = models.BooleanField(default=False)
+    class Meta:
+        abstract = True
+        db_table = "gm_distributor_district"
+        verbose_name_plural = "Distributor District"
+
+#     def __unicode__(self):
+#         return self.assignee_id
+
+
+class OrderPartDetails(BaseModel):
+    ''' details of ordering spare parts by dsr or retailer'''
+    
+    class Meta:
+#         abstract = True
+        db_table = "gm_orderpart_details"
+        verbose_name_plural = "Order Part Details"
     
     

@@ -118,7 +118,10 @@
 		  {% else %}
           	{% block search %}{% search_form cl %}{% endblock %}
           {% endif %}
-          <script type="text/javascript">
+          
+          
+
+            <script type="text/javascript">
           	//to close the rejection popup
           	function popup_close() {
           		document.getElementById("popup").style.visibility = "hidden";
@@ -191,6 +194,24 @@ var Msg = document.getElementById("popup");
 		  		document.getElementById("popup").style.visibility = "visible";
 			}
 		  </script>
+		  
+		  
+		  
+		  
+		
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
           {% if created_date_search %}
           <div style="padding: 1px; margin: 1px;">
         	<div style="display: inline-block;">From: <input type="text" class="feed_start_date" value="{{ feed_start_date|default:'' }}" placeholder="yyyy-mm-dd"></div>

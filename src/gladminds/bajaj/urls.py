@@ -47,4 +47,9 @@ urlpatterns = patterns('',
     url(r'^aftersell/feedbackdetails/(?P<feedback_id>\d+)/comments/(?P<comment_id>\d+)/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.modify_feedback_comments', name='modify_feedback_comments'),
     url(r'^aftersell/feedbackresponse/(?P<feedback_id>\d+)/$', 'gladminds.bajaj.services.service_desk.servicedesk_views.get_feedback_response', name='get_feedback_response'),
     url(r'', include(core_urls)),
+    url(r'^get_user_info/$', 'gladminds.bajaj.views.views.get_user_info', name='get_user_info'),
+    url(r'^get_districts/$', 'gladminds.bajaj.views.views.get_districts', name='get_districts'),
+    
+    url(r'^admin/retailer/approve_retailer/retailer_id/(?P<retailer_id>\d+)/$', 'gladminds.bajaj.views.views.approve_retailer', name='approve_retailer'),
+    
 )

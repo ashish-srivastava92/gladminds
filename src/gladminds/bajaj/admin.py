@@ -11,7 +11,7 @@ from django.utils.html import mark_safe
 
 from gladminds.bajaj import models
 from gladminds.bajaj.models import Distributor, DistributorStaff, DistributorSalesRep, \
-                        Retailer, UserProfile, SparePartPoint, State,AreaSparesManager
+                        Retailer, UserProfile, SparePartPoint, State,AreaSparesManager,City,DistributorDistrict
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
@@ -515,12 +515,12 @@ class ASMAdmin(GmModelAdmin):
          
 class DistributorForm(forms.ModelForm):
 #     distributor_id = forms.CharField(max_length=30,required=True)
-    name_distributorship = forms.CharField(label = 'Name of Distributorship', max_length=300)
-    last_name = forms.CharField(max_length=30)
-    first_name = forms.CharField(max_length=30)
+    name = forms.CharField(label = 'Name of Distributorship', max_length=300)
+    last_name = forms.CharField(max_length=30,required=False)
+    first_name = forms.CharField(max_length=40, label = 'First Name',required=False)
     mobile1 = forms.CharField(max_length=15)
     mobile2 = forms.CharField(max_length=15)
-    email = forms.CharField(max_length=50)
+    email = forms.CharField(max_length=50,required=False)
     email_Bajaj = forms.CharField(max_length=50)
     date_birth = forms.DateTimeField(label = 'Date of birth')
     profile = forms.ChoiceField(choices = PROFILE_CHOICES, required=True)
@@ -529,26 +529,39 @@ class DistributorForm(forms.ModelForm):
     street_name = forms.CharField(max_length=30)
     locality = forms.CharField(max_length=30)
     city = forms.CharField(max_length=20)
-    pincode = forms.CharField(max_length=15)
+    pincode = forms.CharField(max_length=15,required=False)
     phone_number = forms.CharField(max_length=15, label = 'Phone (Land line)')
     
     states = State.objects.all()
 #     print states
+#     states.append()
+#     print states
+#     a=(("-------","--------"))
+#     states.append()
 #      op_status = models.CharField(verbose_name="Status",max_length=135, blank=False,choices=status_choices)
     states = forms.ChoiceField(choices =((st.state_code, st.state_name) for st in states ))
                                           
     # multiple_states = forms.ChoiceField(choices = ((st.state_code, st.state_name) \
     #                                         for st in states ), label = 'states')
 #     state = forms.CharField(max_length = 20)
-    districts = forms.CharField(max_length = 20)
+
+    
+#     districts = forms.CharField(max_length = 20)
     DISTRICTS= (
-    ('R', 'kasargod'),
-    ('B', 'Kannur'),
-#     ('G', 'White'),
+  
+    ('madurai','madurai'),
 )
-    districts = forms.MultipleChoiceField(choices = DISTRICTS)
+    city = City.objects.all()
+    districts = forms.MultipleChoiceField(required=True,choices=((ct.id, ct.city) for ct in city ))
     
-    
+#     def clean_districts(self):
+#         print self,""
+#         data = self.cleaned_data.get('districts')
+#         print data,"dataa"
+#         if data == self.fields['districts'].choices[0][0]:
+#             raise forms.ValidationError('This field is required')
+#         return data
+#     
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
     image_tag.short_description = 'User Image'
@@ -564,23 +577,30 @@ class DistributorForm(forms.ModelForm):
     
     class Meta:
         model = Distributor
-        exclude = ['sent_to_sap', 'phone_number',
-                   'user', 'mobile', 'profile', 'language', 'territory']
+#         exclude = ['sent_to_sap', 'phone_number', 'profile', 'language', 'territory']
         
 class DistributorAdmin(GmModelAdmin):
+    class Media:
+        js = ['js/user.js']
+#         js = (
+#          'portal/user.js'
+#         )
+    
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = DistributorForm
     search_fields = ('name', 'email',)
     list_display = ('distributor_code', 'distributor_name', 'head', 'city', 'phone',
-                    'mail')
+                    'email')
+    
+#     readonly_fields = ['lastname']
     fieldsets = (
             ('User Information', {
-              'fields': ('distributor_id','name_distributorship', 'first_name', 'last_name', 'mobile1',
-                'mobile2', 'email', 'email_Bajaj', 'date_birth', 'profile', 'image_url',)
+              'fields': ('user','distributor_id','name', ['first_name'],['last_name'], ['email'],'mobile1',
+                'mobile2', 'email_Bajaj', 'date_birth', 'profile')
             }),
             ('Location', {
               'fields': ('plot_no', 'locality','phone_number','street_name','city',
-               'pincode')
+               ['pincode'])
             }),
             ('Territory', {
               'fields': ( 'states','districts')
@@ -589,9 +609,43 @@ class DistributorAdmin(GmModelAdmin):
    
 #     readonly_fields = ('image_tag',)
     
+    def name(self,obj):
+            print obj,"objj"
+            return obj.name
+    name.short_description = 'Last Name'
+        
+    
+    def lastname(self, obj):
+        if obj.user:
+            return obj.user.user.last_name
+        return None
+    lastname.short_description = 'Last Name'
+    
+    def pincode(self, obj):
+        if obj.user:
+            return obj.user.user.pincode
+        return None
+    pincode.short_description = 'PinCode'
+    
+    
+    
+    def email(self, obj):
+        if obj.user:
+            return obj.user.user.email
+        return None
+    email.short_description = 'Email'
+    
+    def first_name(self, obj):
+        if obj.user:
+         return obj.user.user.first_name
+        return None
+    first_name.short_description = 'First Name'
+    
     
     def save_model(self, request, obj, form, Change):
-#         print "teeena"
+
+#         print obj.districts
+        
         # try:
         #     distributor = Distributor.objects.filter()[0]
         #     obj.distributor_id = str(int(distributor.distributor_id) + \
@@ -607,19 +661,16 @@ class DistributorAdmin(GmModelAdmin):
                    subject = constants.ADD_DISTRIBUTOR_SUBJECT, body = '',
                    message= constants.ADD_DISTRIBUTOR_MESSAGE)
         except Exception as e:
-            print e
+#             print e
             logger.error('Mail is not sent. Exception occurred',e)
     
     def distributor_code(self, obj):
-        print obj.distributor_id,"idddddddddddddddd"
+#         print obj.distributor_id,"idddddddddddddddd"
         return obj.distributor_id
     distributor_code.admin_order_field = 'distributor_id'
     
     def distributor_name(self, obj):
-        print self,"selffffffffffffffff"
-        print obj.name
-#         print 
-#         print self.cleaned_data.get('name_distributorship'),"dbhjbsd"
+
         return obj.name
     distributor_name.short_description = 'Name of Distributorship'
     
@@ -647,16 +698,73 @@ class DistributorAdmin(GmModelAdmin):
             return '<html><img src = /static/img/not_active.gif></html>'
     staff_status.allow_tags = True
     
+#     def get_form(self, request, obj=None, **kwargs):
+#         ModelForm = super(DistributorAdmin, self).get_form(request, obj, **kwargs)
+#      
+#         dist =  request.POST.get("districts")
+#         print dist
+#         print ModelForm
+#         
+#         class ModelFormMetaClass(ModelForm):
+#             def __new__(cls, *args, **kwargs):
+#                 kwargs['request'] = request
+#                 return ModelForm(*args, **kwargs)
+#         return ModelFormMetaClass
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(DistributorAdmin, self).get_form(request, obj, **kwargs)
+#         print "objecttttttttttttttttttttttt",obj
+        if obj is not None and request.POST:
+#             print request,"request"
+            dist =  request.POST.get("districts")
+            dist_id =  request.POST.get("distributor_id")
+            
+    #         dist =  request.POST.get("districts")
+            print dist,"dist============="
+            print dist_id,"disttt idddddddddddddddd"
+            form = copy.deepcopy(form)
+            print form,"formmmm"
+            for each in dist:
+                print type(each)
+                city_obj = DistributorDistrict(distributor_id = request.POST.get("distributor_id"))
+                print "======",city_obj
+                print type(each)
+                city_obj.district_id=each
+                
+                print settings.BRAND
+                city_obj.save(using=settings.BRAND)
+#         print form,"form"
+#         if request.user.groups.filter(name=Roles.RPS).exists():
+#             form.base_fields['status'].choices = constants.GP_REDEMPTION_STATUS
+#         elif request.user.groups.filter(name=Roles.LPS).exists():
+#             form.base_fields['status'].choices = constants.LP_REDEMPTION_STATUS
+#         else:
+#             form.base_fields['status'].choices = constants.REDEMPTION_STATUS
+#         form.current_user=request.user
+        return form
+    
     def queryset(self, request):
         query_set = self.model._default_manager.get_query_set()
+        print query_set,"queryyyyyyyyyyyyyyyyyyyyyy"
+        for each in query_set:
+            print each.distributor_id
+            each.first_name="teena"
+#             print each
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
             query_set=query_set.filter(state=asm_state_list)
+        for each in query_set:
+            print each.first_name,"my name"
         return query_set
 
     def changelist_view(self, request, extra_context=None):
+        self.param = request.user
         return super(DistributorAdmin, self).changelist_view(request)
     
+#      def changelist_view(self, request, extra_context=None):
+#         self.param = request.user
+#         return super(RetailerAdmin, self).changelist_view(request)
+#     
 class DistributorSalesRepForm(forms.ModelForm):
     class Meta:
         model = get_model('DistributorSalesRep')
@@ -690,11 +798,11 @@ class DistributorSalesRepAdmin(GmModelAdmin):
         return actions
     
     def save_model(self, request, obj, form, change):
-        if DistributorStaff.objects.filter(user__user = request.user).exists():
-            distributorstaff = DistributorStaff.objects.get(user__user = request.user)
-            obj.distributor = Distributor.objects.get(id = distributorstaff.distributor.id)
-        else:
-            obj.distributor = Distributor.objects.get(user__user = request.user)
+#         if DistributorStaff.objects.filter(user__user = request.user).exists():
+#             distributorstaff = DistributorStaff.objects.get(user__user = request.user)
+#             obj.distributor = Distributor.objects.get(id = distributorstaff.distributor.id)
+#         else:
+#             obj.distributor = Distributor.objects.get(user__user = request.user)
         try:
             dsr = DistributorSalesRep.objects.filter()[0]
             obj.distributor_sales_code = str(int(dsr.distributor_sales_code) + \
@@ -760,6 +868,9 @@ class DistributorStaffAdmin(GmModelAdmin):
     def staff_name(self, obj):
         return obj.user.user.first_name + ' ' + obj.user.user.last_name
     
+    
+   
+    
 class RetailerForm(forms.ModelForm):
     class Meta:
         model = get_model('Retailer')
@@ -774,9 +885,9 @@ class RetailerAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = RetailerForm
     search_fields = ('retailer_name', 'retailer_town', 'billing_code','territory')
-    list_display = ('retailer_code', 'billing_code', 'name', 'contact', 'city','phone',
+    list_display = ('retailer_code', 'billing_code', 'name', 'territory', 'city','pincode','phone','mobile',
                     'mail','status')
-    exclude = []
+    exclude = ['mobile']
     
     def pincode(self, obj):
         return obj.user.pincode
@@ -788,23 +899,38 @@ class RetailerAdmin(GmModelAdmin):
     
     def name(self,obj):
         return obj.retailer_name
-    name.short_description = 'Name of the shop'
+    name.short_description = 'Retailer Name'
     
     def contact(self,obj):
         return obj.user.user.first_name + ' ' + obj.user.user.last_name
     contact.short_description = 'Contact Person'
     
+    def territory(self, obj):
+        return obj.territory
+    territory.short_description = 'Territory'
+    
     def city(self, obj):
         return obj.retailer_town
-    city.short_description = 'locality'
+    city.short_description = 'Town/City'
     
     def phone(self, obj):
-        return obj.user.phone_number + ' ' + obj.mobile
-    phone.short_description = 'Phone / Mobile'
+        return obj.user.phone_number 
+    phone.short_description = 'Phone '
+    
+#     
+#     def mobile(self, obj):
+#         return obj.mobile
+#     phone.short_description = 'Mobile' 
+    
+#     + ' ' + obj.mobile
     
     def mail(self, obj):
         return obj.email
     mail.short_description = 'Email'
+#     
+#     def pincode(self, obj):
+#         return obj.email
+#     mail.short_description = 'Email'
     
     def get_form(self, request, obj=None, **kwargs):
         ModelForm = super(RetailerAdmin, self).get_form(request, obj, **kwargs)
@@ -816,7 +942,7 @@ class RetailerAdmin(GmModelAdmin):
     
     def get_actions(self, request):
         #in case of administrator only, grant him the approve retailer option
-        if self.param.groups.filter(name__in =['SuperAdmins', 'Admins', 'AreaSalesManagers']).exists():
+        if self.param.groups.filter(name__in =['SuperAdmins', 'Admins', 'AreaSparesManagers']).exists():
             self.actions.append('approve')
         actions = super(RetailerAdmin, self).get_actions(request)
         return actions
@@ -876,7 +1002,7 @@ class RetailerAdmin(GmModelAdmin):
         
         print request.user.groups.all()
 #         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-        if request.user.groups.filter(name__in=[Roles.DISTRIBUTORS,Roles.DISTRIBUTORSALESREP,Roles.SUPERADMINS]).exists():
+        if request.user.groups.filter(name__in=[Roles.DISTRIBUTORS,Roles.DISTRIBUTORSALESREP,Roles.SUPERADMINS,Roles.SFAADMIN]).exists():
 #         if self.param.groups.filter(name__in =['Distributors','DisitrbutorSalesReps']).exists():
             obj.approved = constants.STATUS['WAITING_FOR_APPROVAL']
         
@@ -901,19 +1027,22 @@ class RetailerAdmin(GmModelAdmin):
     def status(self, obj):
         #Added retailer by distributor/distributorstaff must be approved by the ASM/admin
         #he can also be rejected on some conditions
+        print obj,"objectttttttt"
         if obj.approved == constants.STATUS['APPROVED']:
+            print "mon"
             return 'Approved'
+            
         elif obj.approved == constants.STATUS['WAITING_FOR_APPROVAL'] :
             if self.param.groups.filter(name__in = \
-                                    ['SuperAdmins', 'Admins', 'AreaSalesManagers']).exists():
+                                    ['SuperAdmins', 'Admins', 'AreaSparesManagers','SFAAdmins']).exists():
                 
-                reject_button = "<a  class='btn btn-success' data-toggle='modal'  href=\"/admin/retailer/approve_retailer/retailer_id/"+str(obj.id)+"\">Approve</a>&nbsp;<input type=\"button\"  class='btn btn-danger' data-toggle='modal'  id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.email+"\',\'"+obj.distributor.name+"\'); return false;\">"
+                reject_button = "<a  class='btn btn-success' data-toggle='modal'  href=\"/admin/retailer/approve_retailer/retailer_id/"+str(obj.id)+"\">Approve</a>&nbsp;<input type=\"button\"  class='btn btn-warning' data-toggle='modal'  id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.email+"\',\'"+obj.distributor.name+"\'); return false;\">"
 #                 reject_button = "<input type=\"button\" id=\"button_reject\" value=\"Reject\" onclick=\"popup_reject(\'"+str(obj.id)+"\',\'"+obj.retailer_name+"\',\'"+obj.email+"\',\'"+obj.distributor.name+"\'); return false;\">"
                 return mark_safe(reject_button)
             else:
                 return 'Waiting for approval'
         elif obj.approved == constants.STATUS['REJECTED'] :
-            if self.param.groups.filter(name__in =['SuperAdmins', 'Admins', 'AreaSalesManagers']).exists():
+            if self.param.groups.filter(name__in =['SuperAdmins', 'Admins', 'AreaSparesManagers','SFAAdmins']).exists():
                 return 'Rejected'
             else:
                 if self.param.groups.filter(name__in =['Distributors', 'DistributorStaffs']).exists():
@@ -953,7 +1082,7 @@ class CategoriesAdmin(GmModelAdmin):
 #     list_display = ('subcategory_name', 'category', 'active')
     
 class PartPricingAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS,Roles.DISTRIBUTORSALESREP]
     search_fields = ('part_number', 'description')
     list_display = ('part_no', 'Part_Description','Category', 'Applicable_Model',
                     'Price', 'Available', 'Pending',
@@ -1027,11 +1156,30 @@ class SparePartPointAdmin(GmModelAdmin):
         return form
     
 class OrderPartAdmin(GmModelAdmin):
-    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS,Roles.DISTRIBUTORSALESREP]
     # search_fields = ('retailer_name',)
-    # list_display = ('retailer', 'dsr', 'part', 'price', 'quantity', 'total_price',
-    #                 'accept', 'order_date')
+    list_display = ('retailer', 'retailer_id','total_value','address_line_2')
+    exclude= ['so_id','po_id','do_id']
     # list_filter = ['order_date']
+    
+    def total_value(self,obj):
+        return "980"
+        
+    
+    def retailer(self,obj):
+        
+        return obj.retailer.retailer_code
+    retailer.short_description='Retailer Code'
+    
+    def address_line_2(self,obj):
+#         print obj.retailer,"ret"
+        return obj.retailer.address_line_2
+    address_line_2.short_description='Locality'
+    
+    def retailer_id(self,obj):
+        return obj.retailer.retailer_name
+    retailer_id.short_description='Retailer Name'
+    
     
     def get_actions(self, request):
         #in case of administrator only, grant him the approve retailer option

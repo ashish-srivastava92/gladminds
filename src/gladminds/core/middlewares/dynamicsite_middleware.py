@@ -49,9 +49,13 @@ class DynamicSitesMiddleware(object):
         if BRAND.value == 'tatamotors':
             BRAND.value = 'daimler'
     #Note its a hack for bajaj
-#         if BRAND.value == '127' or BRAND.value == '192':
-#             BRAND.value = 'bajajcv'
-      #  BRAND.value = 'bajajcv'
+        if BRAND.value == '192' or BRAND.value == "127":
+            BRAND.value = 'bajaj'
+#         print BRAND.value
+#         if BRAND.value == 'bajajcv':
+#             BRAND.value = 'bajajcv'    
+        
+#         BRAND.value = 'bajajcv'
     # hack for bajaj ends here      
         if BRAND.value == 'admin':
             request.urlconf = 'gladminds.urls'

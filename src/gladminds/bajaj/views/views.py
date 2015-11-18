@@ -44,16 +44,45 @@ from gladminds.core.services.message_template import get_template
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
 from gladminds.core.auth import otp_handler
-from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor
+from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor,City,State
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template import loader
 from django.template.context import Context
 from gladminds.core.managers.mail import send_email
 
+
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
 AUDIT_ACTION = 'SEND TO QUEUE'
+
+
+def get_user_info(request):
+    user_id = request.GET.get('user_id')
+    user_obj = UserProfile.objects.get(user_id = user_id)
+#     print user_obj.user.first_name,"teee"
+    data = {"first_name": user_obj.user.first_name ,"last_name": user_obj.user.last_name , "email" : user_obj.user.email,"pincode":user_obj.pincode}
+    print data
+    return HttpResponse(json.dumps(data), content_type="application/json")
+    
+def get_districts(request):
+#     print request
+    state = request.GET.get('selected_state')
+#     print state,"state"
+    state_obj = State.objects.get(state_code = state )
+#     print state_obj.id
+    districts = City.objects.filter(state=state_obj.id).values("city","id")
+    return HttpResponse(json.dumps(list(districts), cls=DjangoJSONEncoder), content_type="application/json")
+    
+ 
+@login_required
+def approve_retailer(request, retailer_id):
+    '''
+    This method approves the retailer by the ASM/admin
+    '''
+      
+    retailer = Retailer.objects.filter(id=retailer_id).update(approved=STATUS['APPROVED'])
+    return HttpResponseRedirect('/admin/bajaj/retailer/')
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def auth_login(request, provider):
