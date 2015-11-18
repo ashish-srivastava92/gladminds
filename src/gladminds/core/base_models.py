@@ -1996,7 +1996,6 @@ class OrderPartDetails(BaseModel):
         db_table = "gm_orderpart_details"
         verbose_name_plural = "Order Part Details"
     
-<<<<<<< HEAD
 class OrderPartDetails(BaseModel):
     ''' details of ordering spare parts by dsr or retailer'''
     
@@ -2004,8 +2003,4 @@ class OrderPartDetails(BaseModel):
         abstract = True
         db_table = "gm_orderpart_details"
         verbose_name_plural = "Order Part Details"
-    
-    
-=======
-    
->>>>>>> 14c2a5f23c6feef8aa15eb5fe707048533513793
+

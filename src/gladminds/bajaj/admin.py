@@ -595,8 +595,8 @@ class DistributorAdmin(GmModelAdmin):
 #     readonly_fields = ['lastname']
     fieldsets = (
             ('User Information', {
-              'fields': ('user','distributor_id','name', ['first_name'],['last_name'], ['email'],'mobile1',
-                'mobile2', 'email_Bajaj', 'date_birth', 'profile')
+              'fields': ('user','distributor_id','name', ['first_name'],['last_name'], ['email'],
+                'mobile1', 'mobile2', 'email_Bajaj', 'date_birth', 'profile')
             }),
             ('Location', {
               'fields': ('plot_no', 'locality','phone_number','street_name','city',
@@ -665,7 +665,6 @@ class DistributorAdmin(GmModelAdmin):
             logger.error('Mail is not sent. Exception occurred',e)
     
     def distributor_code(self, obj):
-#         print obj.distributor_id,"idddddddddddddddd"
         return obj.distributor_id
     distributor_code.admin_order_field = 'distributor_id'
     
@@ -698,40 +697,15 @@ class DistributorAdmin(GmModelAdmin):
             return '<html><img src = /static/img/not_active.gif></html>'
     staff_status.allow_tags = True
     
-#     def get_form(self, request, obj=None, **kwargs):
-#         ModelForm = super(DistributorAdmin, self).get_form(request, obj, **kwargs)
-#      
-#         dist =  request.POST.get("districts")
-#         print dist
-#         print ModelForm
-#         
-#         class ModelFormMetaClass(ModelForm):
-#             def __new__(cls, *args, **kwargs):
-#                 kwargs['request'] = request
-#                 return ModelForm(*args, **kwargs)
-#         return ModelFormMetaClass
-
     def get_form(self, request, obj=None, **kwargs):
         form = super(DistributorAdmin, self).get_form(request, obj, **kwargs)
-#         print "objecttttttttttttttttttttttt",obj
         if obj is not None and request.POST:
-#             print request,"request"
             dist =  request.POST.get("districts")
             dist_id =  request.POST.get("distributor_id")
-            
-    #         dist =  request.POST.get("districts")
-            print dist,"dist============="
-            print dist_id,"disttt idddddddddddddddd"
             form = copy.deepcopy(form)
-            print form,"formmmm"
             for each in dist:
-                print type(each)
                 city_obj = DistributorDistrict(distributor_id = request.POST.get("distributor_id"))
-                print "======",city_obj
-                print type(each)
                 city_obj.district_id=each
-                
-                print settings.BRAND
                 city_obj.save(using=settings.BRAND)
 #         print form,"form"
 #         if request.user.groups.filter(name=Roles.RPS).exists():
@@ -745,7 +719,6 @@ class DistributorAdmin(GmModelAdmin):
     
     def queryset(self, request):
         query_set = self.model._default_manager.get_query_set()
-        print query_set,"queryyyyyyyyyyyyyyyyyyyyyy"
         for each in query_set:
             print each.distributor_id
             each.first_name="teena"
@@ -753,18 +726,12 @@ class DistributorAdmin(GmModelAdmin):
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
             query_set=query_set.filter(state=asm_state_list)
-        for each in query_set:
-            print each.first_name,"my name"
         return query_set
 
     def changelist_view(self, request, extra_context=None):
         self.param = request.user
         return super(DistributorAdmin, self).changelist_view(request)
     
-#      def changelist_view(self, request, extra_context=None):
-#         self.param = request.user
-#         return super(RetailerAdmin, self).changelist_view(request)
-#     
 class DistributorSalesRepForm(forms.ModelForm):
     class Meta:
         model = get_model('DistributorSalesRep')
@@ -887,7 +854,7 @@ class RetailerAdmin(GmModelAdmin):
     search_fields = ('retailer_name', 'retailer_town', 'billing_code','territory')
     list_display = ('retailer_code', 'billing_code', 'name', 'territory', 'city','pincode','phone','mobile',
                     'mail','status')
-    exclude = ['mobile']
+    exclude = []
     
     def pincode(self, obj):
         return obj.user.pincode
@@ -1027,9 +994,8 @@ class RetailerAdmin(GmModelAdmin):
     def status(self, obj):
         #Added retailer by distributor/distributorstaff must be approved by the ASM/admin
         #he can also be rejected on some conditions
-        print obj,"objectttttttt"
+        
         if obj.approved == constants.STATUS['APPROVED']:
-            print "mon"
             return 'Approved'
             
         elif obj.approved == constants.STATUS['WAITING_FOR_APPROVAL'] :

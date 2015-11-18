@@ -18,8 +18,8 @@ from rest_framework_jwt.settings import api_settings
 
 from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
                             PartPricing, OrderPart
-from gladminds.core.models import DistributorSalesRep, Retailer,PartModels, CvCategories, \
-                             OrderPart, DSRWorkAllocation, AlternateParts
+# from gladminds.core.models import DistributorSalesRep, Retailer,PartModels, CvCategories, \
+#                              OrderPart, DSRWorkAllocation, AlternateParts
 from gladminds.core import constants
 
 @api_view(['POST'])

@@ -4,6 +4,44 @@ from gladminds.core import urls as core_urls
 from gladminds.core.urls import api_v1
 
 urlpatterns = patterns('',
+    #api urls
+    # url(r'^mc/api-token-auth/', 'gladminds.bajaj.views.apis.authentication'),
+    # 
+    
+    url(r'^mc/api-token-auth/', 'gladminds.bajaj.views.apis.authentication'),
+    url(r'^mc/get_retailers/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.bajaj.views.apis.get_retailers'),
+    url(r'^mc/get_retailer_profile/retailer_id/(?P<retailer_id>\d+)/$',
+                                                'gladminds.bajaj.views.apis.get_retailer_profile'),
+    
+    url(r'^mc/get_parts/', 'gladminds.bajaj.views.apis.get_parts'),
+    
+    #url(r'^mc/place_order/dsr_id/(?P<dsr_id>\d+)$', 'gladminds.bajaj.views.apis.place_order'),
+    
+    url(r'^mc/order/$', 'gladminds.core.views.apis.retailer_order'),
+    
+    url(r'^mc/day_close_order/dsr_id/(?P<dsr_id>\d+)/$',
+                        'gladminds.bajaj.views.apis.day_close_order'),
+    
+    
+    url(r'^mc/get_outstanding/dsr_id/(?P<dsr_id>\d+)/$',
+                        'gladminds.bajaj.views.apis.get_outstanding'),
+    
+    url(r'^mc/get_collection/dsr_id/(?P<dsr_id>\d+)$',
+                        'gladminds.bajaj.views.apis.get_collection'),
+    
+    url(r'^mc/get_distributor_for_retailer/retailer_id/(?P<retailer_id>\d+)/$',
+                        'gladminds.bajaj.views.apis.get_distributor_for_retailer'),
+    
+    url(r'^mc/get_outstanding/dsr_id/(?P<retailer_id>\d+)/$',
+                        'gladminds.bajaj.views.apis.get_outstanding'),
+    url(r'^mc/get_schedule/dsr_id/(?P<dsr_id>\d+)/date/(?P<date>[-\d]+)/$',
+                        'gladminds.bajaj.views.apis.get_schedule'),
+    url(r'^mc/place_order/dsr_id/(?P<dsr_id>\d+)$',
+                        'gladminds.bajaj.views.apis.place_order'),
+    
+    
+    #end of api urls
+    
     url(r'^bulk_upload_retailer/$', 'gladminds.bajaj.views.views.bulk_upload_retailer', name='bulk_upload_retailer'),
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
     url(r'^admin/', include(brand_admin.urls)),

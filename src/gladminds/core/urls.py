@@ -103,6 +103,7 @@ api_v1.register(SMSResources())
 urlpatterns = patterns('',
     # api urls             
     #url(r'^api-token-auth/', 'rest_framework_jwt.views.obtain_jwt_token'),
+    
     url(r'^cv/api-token-auth/', 'gladminds.core.views.apis.authentication'),
     url(r'^cv/get_retailers/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.core.views.apis.get_retailers'),
     url(r'^cv/get_retailer_profile/retailer_id/(?P<retailer_id>\d+)/$',
@@ -129,15 +130,12 @@ urlpatterns = patterns('',
     
     url(r'^cv/get_outstanding/dsr_id/(?P<retailer_id>\d+)/$',
                         'gladminds.core.views.apis.get_outstanding'),
-<<<<<<< HEAD
-    
-=======
     url(r'^cv/get_schedule/dsr_id/(?P<dsr_id>\d+)/date/(?P<date>[-\d]+)/$',
                         'gladminds.core.views.apis.get_schedule'),
     url(r'^cv/place_order/dsr_id/(?P<dsr_id>\d+)$',
                         'gladminds.core.views.apis.place_order'),
 #     url(r'^cv/place_order/dsr_id/(?P<dsr_id>\d+)$', 'gladminds.core.views.apis.place_order'
->>>>>>> 14c2a5f23c6feef8aa15eb5fe707048533513793
+
     #api urls end here
     url(r'', include(api_v1.urls)),
     url(r'^$', 'gladminds.core.views.home'),

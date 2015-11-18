@@ -20,15 +20,14 @@ from rest_framework_jwt.settings import api_settings
 #                             PartPricing, OrderPart
 
 from gladminds.core.models import DistributorSalesRep, Retailer, CvCategories, \
-                             OrderPart, DSRWorkAllocation, AlternateParts, Collection, \
-<<<<<<< HEAD
-                             PartMasterCv,RetailerCollection
+                            OrderPart, DSRWorkAllocation, AlternateParts, Collection, \
+                            PartMasterCv,RetailerCollection
 # from gladminds.bajaj.models import Distributor, DistributorSalesRep, Retailer,\
 #             PartMasterCv, CvCategories, OrderPartDetails,OrderPart
 
-=======
-                             PartMasterCv,PartPricing
->>>>>>> 14c2a5f23c6feef8aa15eb5fe707048533513793
+
+                            # PartMasterCv,PartPricing
+
 from gladminds.core import constants
 
 @api_view(['POST'])
