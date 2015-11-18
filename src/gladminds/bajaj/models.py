@@ -461,17 +461,30 @@ class AreaSparesManager(base_models.AreaSparesManager):
     class Meta(base_models.AreaSparesManager.Meta):
         app_label = _APP_NAME
 
-class Distributor(base_models.Distributor):
-    '''details of Distributor'''
-    user = models.ForeignKey(UserProfile)
-    territory = models.CharField(max_length=15)
-    mobile = models.CharField(max_length=15)
-    profile = models.CharField(max_length=15)
-    language = models.CharField(max_length=10, null=True, blank=True)
-    territory = models.CharField(max_length=10, null=True, blank=True)    
+#class Distributor(base_models.Distributor):
+ #   '''details of Distributor'''
+  #  user = models.ForeignKey(UserProfile)
+   # territory = models.CharField(max_length=15)
+    #mobile = models.CharField(max_length=15)
+    #profile = models.CharField(max_length=15)
+    #language = models.CharField(max_length=10, null=True, blank=True)
+    #territory = models.CharField(max_length=10, null=True, blank=True)    
     
-    class Meta(base_models.Distributor.Meta):
-        app_label = _APP_NAME
+    #class Meta(base_models.Distributor.Meta):
+     #   app_label = _APP_NAME
+        
+class Distributor(base_models.Distributor):
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
+    state = models.ForeignKey(State,null=True, blank=True)
+    mobile_1 = PhoneField(skip_check=True, null=True, blank=True)
+    mobile_2 = PhoneField(skip_check=True, null=True, blank=True)
+    email_bajaj = models.EmailField(max_length=50, null=True, blank=True)
+    address_line_2 = models.CharField(max_length=40, null=True, blank=True)
+    address_line_3 = models.CharField(max_length=40, null=True, blank=True)
+    address_line_4 = models.CharField(max_length=40, null=True, blank=True)
+
+        
         
 class DSRScorecardReport(base_models.DSRScorecardReport):
     ''' details of report '''
@@ -520,6 +533,7 @@ class Retailer(base_models.Retailer):
     longitude = models.DecimalField(max_digits = 11, decimal_places=6, null=True, blank=True)
     language = models.CharField(max_length=10, null=True, blank=True)
     rejected_reason = models.CharField(max_length=300, null=True, blank=True)
+    
     
     class Meta(base_models.Retailer.Meta):
         app_label = _APP_NAME
@@ -645,9 +659,13 @@ class OrderPart(base_models.OrderPart):
     dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
     accept = models.BooleanField(default = False)
     retailer = models.ForeignKey(Retailer)
+    distributor = models.ForeignKey(Distributor)
+    order_placed_by = models.IntegerField()
     
     class Meta(base_models.OrderPart.Meta):
         app_label = _APP_NAME
+        
+            
           
 class SparePartUPC(base_models.SparePartUPC):
     '''details of Spare Part UPC'''
@@ -800,4 +818,77 @@ class ManufacturingData(base_models.ManufacturingData):
     '''Manufacturing data of a product'''
     class Meta(base_models.ManufacturingData.Meta):
         app_label = _APP_NAME
+
+########Added for SFA from bajajcv#####################
+
+
+class CvCategories(base_models.CvCategories):
+    ''' details of alternate parts and pricing '''
+    name = models.CharField(max_length = 255)
+    usps = models.TextField(null=True,blank=True)
+    importance = models.TextField(null=True,blank=True)
+    image_url = models.CharField(max_length = 255, null=True,blank=True)
+    active = models.BooleanField(default = True)
+    
+    class Meta(base_models.CvCategories.Meta):
+        app_label = _APP_NAME
+
+
+class PartMasterCv(base_models.PartMasterCv):
+    ''' details of spare parts and pricing '''
+    bajaj_id = models.IntegerField()
+    part_number = models.CharField(max_length = 255)
+    description = models.TextField()
+    part_model = models.TextField()
+    valid_from = models.DateField()
+    part_models = models.CharField(max_length = 255)
+    category = models.ForeignKey(CvCategories)
+    mrp = models.CharField(max_length = 255)
+    active = models.BooleanField(default = True)
+    available = models.CharField(max_length=25)
+    pending = models.CharField(max_length=25)
+    
+    class Meta(base_models.PartMasterCv.Meta):
+        app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.description
+    
+    
+    
+    
+    
+    
+class OrderPart(base_models.OrderPart):
+    ''' details of orders placed by retailer '''
+#    order_id = models.CharField(max_length = 40)
+    order_date = models.DateField()
+    #retailer = models.ForeignKey(Retailer)
+    #dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
+    #distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    dsr_id = models.IntegerField(null=True, blank=True)
+    distributor_id = models.IntegerField(null=True, blank=True)
+    retailer_id = models.IntegerField(null=True, blank=True)
+
+    so_id = models.IntegerField(null=True, blank=True)
+    po_id = models.IntegerField(null=True, blank=True)
+    do_id = models.IntegerField(null=True, blank=True)
+    fullfill = models.NullBooleanField()
+    delivered = models.IntegerField(null=True, blank=True)
+    no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
+    accept = models.BooleanField(default = False)
+ 
+    
+    class Meta(base_models.OrderPart.Meta):
+        app_label = _APP_NAME
+
+class OrderPartDetails(base_models.OrderPartDetails):
+    part_number = models.IntegerField(null=True, blank=True)
+    quantity = models.IntegerField(null=True, blank=True)
+    active = models.IntegerField(null=True, blank=True, default =1)
+    order_id = models.ForeignKey(OrderPart)
+    
+    class Meta(base_models.PartMasterCv.Meta):
+        app_label = _APP_NAME
+
 

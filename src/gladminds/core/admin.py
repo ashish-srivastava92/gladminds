@@ -552,7 +552,7 @@ class DistributorAdmin(admin.ModelAdmin):
         return obj.city
     
     def phone(self, obj):
-        return obj.phone_number +' ' + obj.mobile
+        return obj.phone_number +' ' + obj.mobile_1
     phone.short_description = 'phone/ mobile'
     
     def email_user(self, obj):

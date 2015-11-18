@@ -1148,18 +1148,35 @@ class DistributorSalesRep(BaseModel):
         abstract = True
         db_table = "gm_distributorsalesrep"
         verbose_name_plural = "Distributor Sales Rep"
+#     
+# class Retailer(BaseModel):
+#     '''details of Retailer'''
+#     retailer_code = models.CharField(max_length=50)
+#     retailer_name = models.CharField(max_length=50)
+#     retailer_town = models.CharField(max_length=50, null=True, blank=True)
+#     is_active = models.BooleanField(default=True)
+# 
+#     class Meta:
+#         abstract = True
+#         db_table = "gm_retailer"
+#         verbose_name_plural = "Retailers"
+    
     
 class Retailer(BaseModel):
     '''details of Retailer'''
     retailer_code = models.CharField(max_length=50)
     retailer_name = models.CharField(max_length=50)
     retailer_town = models.CharField(max_length=50, null=True, blank=True)
+    #approved = models.BooleanField(default=False)# we have to uncomment it after SFA API-Test
     is_active = models.BooleanField(default=True)
 
     class Meta:
         abstract = True
         db_table = "gm_retailer"
         verbose_name_plural = "Retailers"
+
+    def __unicode__(self):
+        return self.retailer_name
 
 class DSRWorkAllocation(BaseModel):
     '''details of DSRWorkAllocation'''
@@ -1928,5 +1945,14 @@ class FleetRider(BaseModel):
 
     def __unicode__(self):
         return self.phone_number
+    
+    
+class OrderPartDetails(BaseModel):
+    ''' details of ordering spare parts by dsr or retailer'''
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_orderpart_details"
+        verbose_name_plural = "Order Part Details"
     
     

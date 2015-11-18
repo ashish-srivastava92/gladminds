@@ -505,6 +505,8 @@ class RetailerCollection(base_models.RetailerCollection):
     order_amount = models.CharField(max_length = 20)
     collected_amount = models.CharField(max_length = 20)
     outstanding_amount = models.CharField(max_length = 20)
+    amount_collected_date = models.DateTimeField()
+
     
     class Meta(base_models.RetailerCollection.Meta):
         app_label = _APP_NAME
@@ -610,13 +612,18 @@ class Collection(base_models.Collection):
     invoice_amount = models.CharField(max_length=10)
     invoice_number = models.CharField(max_length=15)
     
+    dsr = models.ForeignKey(DistributorSalesRep)
+    outstanding_amount = models.CharField(max_length = 20)
+    amount_collected_date = models.DateTimeField()
+    
+    
     class Meta(base_models.Collection.Meta):
         app_label = _APP_NAME      
 
         
 class OrderPart(base_models.OrderPart):
     ''' details of ordering spare parts by dsr or retailer'''
-    order_id = models.IntegerField()
+    #order_id = models.IntegerField()
     order_date = models.DateTimeField(auto_now_add=True)
     part = models.ForeignKey(PartMasterCv)
     quantity = models.IntegerField()

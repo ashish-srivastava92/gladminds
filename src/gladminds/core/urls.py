@@ -106,15 +106,28 @@ urlpatterns = patterns('',
     url(r'^cv/get_retailers/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.core.views.apis.get_retailers'),
     url(r'^cv/get_retailer_profile/retailer_id/(?P<retailer_id>\d+)/$',
                                                 'gladminds.core.views.apis.get_retailer_profile'),
+    
     url(r'^cv/get_parts/', 'gladminds.core.views.apis.get_parts'),
-    url(r'^cv/order/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.core.views.apis.dsr_order'),
+    
+    url(r'^cv/place_order/dsr_id/(?P<dsr_id>\d+)$', 'gladminds.core.views.apis.place_order'),
+    
     url(r'^cv/order/$', 'gladminds.core.views.apis.retailer_order'),
+    
     url(r'^cv/day_close_order/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.core.views.apis.day_close_order'),
-    url(r'^cv/get_outstanding/retailer_id/(?P<retailer_id>\d+)/$',
+    
+    
+    url(r'^cv/get_outstanding/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.core.views.apis.get_outstanding'),
-    url(r'^cv/get_schedule/dsr_id/(?P<dsr_id>\d+)/date/(?P<date>[-\d]+)/$',
-                        'gladminds.core.views.apis.get_schedule'),
+    
+    url(r'^cv/get_collection/dsr_id/(?P<dsr_id>\d+)$',
+                        'gladminds.core.views.apis.get_collection'),
+    
+    url(r'^cv/get_distributor_for_retailer/retailer_id/(?P<retailer_id>\d+)/$',
+                        'gladminds.core.views.apis.get_distributor_for_retailer'),
+    
+    url(r'^cv/get_outstanding/dsr_id/(?P<retailer_id>\d+)/$',
+                        'gladminds.core.views.apis.get_outstanding'),
     
     #api urls end here
     url(r'', include(api_v1.urls)),
