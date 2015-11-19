@@ -32,6 +32,7 @@
               $('#id_districts').val(data.first_name);
               $('#id_last_name').val(data.last_name);             
                $('#id_email').val(data.email);
+               ('#id_date_of_birth').val(data.dob);
                $('#id_pincode').val(data.pincode);
            
             },
@@ -42,4 +43,12 @@
 
         
       });
+
+
+
+  $(function() {
+  	
+  
+    $( "#datepicker" ).datepicker();
+  });
 

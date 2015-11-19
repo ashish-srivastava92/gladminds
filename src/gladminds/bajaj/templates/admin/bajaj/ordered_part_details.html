@@ -1,0 +1,51 @@
+
+<script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+<script src="/static/js/1.10.3_jquery-ui.js" type="text/javascript"></script>
+
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+  <link rel="stylesheet" type="text/css" href="/static/suit/bootstrap/css/bootstrap.min.css" media="all"/>
+  <script src="/static/suit/bootstrap/js/bootstrap.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+
+
+  <link rel="stylesheet" type="text/css" href="/static/suit/css/suit.css" media="all">
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+
+<style>
+	.table-data {
+		position : absolute;
+	}
+</style>
+ 
+	<table class="table table-bordered table-responsive table-data" >
+        <thead>
+				<tr>
+				  <th>DO_Number</th>
+					<th>Quantity</th>
+					<th>Delivered Date</th>
+				 
+				</tr>
+				
+			</thead>
+			
+			
+        <tbody>
+        
+        	
+				{% for each in data %}
+				<tr> 
+					<td align="center">{{each.id}}</td>
+					<td align="center">{{each.quantity}}</td>
+					<td align="center">{{each.delivered_date}}</td>
+					
+		
+				</tr>
+			
+					</tbody>
+				
+					{% endfor %}
+				
+		</table>
+
+ 
+ 

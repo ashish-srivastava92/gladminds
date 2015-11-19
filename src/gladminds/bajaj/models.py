@@ -36,7 +36,7 @@ class ZonalServiceManager(base_models.ZonalServiceManager):
 
 class CircleHead(base_models.CircleHead):
     '''details of Circle Heads'''
-    user =  models.OneToOneField(UserProfile)
+    user = models.OneToOneField(UserProfile)
     
     class Meta(base_models.CircleHead.Meta):
         app_label = _APP_NAME
@@ -44,7 +44,7 @@ class CircleHead(base_models.CircleHead):
         
 class RegionalManager(base_models.RegionalManager):
     '''details of Regional Manager'''
-    user =  models.OneToOneField(UserProfile)
+    user = models.OneToOneField(UserProfile)
     circle_head = models.ForeignKey(CircleHead, null=True, blank=True)
 
     class Meta(base_models.RegionalManager.Meta):
@@ -73,7 +73,7 @@ class NationalSalesManager(base_models.NationalSalesManager):
 
 class AreaSalesManager(base_models.AreaSalesManager):
     '''details of Area Sales Manager'''
-    user =  models.OneToOneField(UserProfile)
+    user = models.OneToOneField(UserProfile)
     name = models.CharField(max_length=50, null=True, blank=True)
     email = models.EmailField(max_length=50, null=True, blank=True)
     phone_number = PhoneField(skip_check=True, null=True, blank=True)
@@ -158,7 +158,7 @@ class Feedback(base_models.Feedback):
     reporter = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_feedback_reporter')
     assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_feedback_assignee')
     previous_assignee = models.ForeignKey(ServiceDeskUser, null=True, blank=True, related_name='bajaj_previous_assignee')
-    sub_department = models.ForeignKey(DepartmentSubCategories,null=True, blank=True) 
+    sub_department = models.ForeignKey(DepartmentSubCategories, null=True, blank=True) 
     
     class Meta(base_models.Feedback.Meta):
         app_label = _APP_NAME
@@ -175,7 +175,7 @@ class Activity(base_models.Activity):
 
 
 class Comment(base_models.Comment):
-    feedback_object = models.ForeignKey(Feedback,null=True, blank=True)
+    feedback_object = models.ForeignKey(Feedback, null=True, blank=True)
 
     class Meta(base_models.Comment.Meta):
         app_label = _APP_NAME
@@ -422,7 +422,7 @@ class Supervisor(base_models.Supervisor):
 
 class ContainerIndent(base_models.ContainerIndent):
     ''' details of Container Indent'''
-    transporter = models.ForeignKey(Transporter,null=True,blank=True)
+    transporter = models.ForeignKey(Transporter, null=True, blank=True)
 
     class Meta(base_models.ContainerIndent.Meta):
         app_label = _APP_NAME
@@ -495,13 +495,13 @@ class Distributor(base_models.Distributor):
         
 class DSRScorecardReport(base_models.DSRScorecardReport):
     ''' details of report '''
-    serial_number = models.CharField(max_length = 5)
-    goals = models.CharField(max_length = 255, null = True, blank = True)
-    target = models.CharField(max_length = 255, null = True, blank = True)
-    actual = models.CharField(max_length = 255,  null = True, blank = True)
-    measures = models.CharField(max_length = 255, null = True, blank = True)
-    weight = models.CharField(max_length = 255, null = True, blank = True)
-    total_score = models.CharField(max_length = 255, null = True, blank = True)
+    serial_number = models.CharField(max_length=5)
+    goals = models.CharField(max_length=255, null=True, blank=True)
+    target = models.CharField(max_length=255, null=True, blank=True)
+    actual = models.CharField(max_length=255, null=True, blank=True)
+    measures = models.CharField(max_length=255, null=True, blank=True)
+    weight = models.CharField(max_length=255, null=True, blank=True)
+    total_score = models.CharField(max_length=255, null=True, blank=True)
     
     class Meta(base_models.DSRScorecardReport.Meta):
         app_label = _APP_NAME
@@ -532,14 +532,13 @@ class Retailer(base_models.Retailer):
     billing_code = models.CharField(max_length=15)
     distributor = models.ForeignKey(Distributor)
     approved = models.PositiveSmallIntegerField(default=constants.STATUS['WAITING_FOR_APPROVAL'])
-    territory = models.CharField(max_length=15)
     email = models.EmailField(max_length=50, null=True, blank=True)
     mobile = models.CharField(max_length=15)
     address_line_2 = models.CharField(max_length=40, null=True, blank=True)
     address_line_3 = models.CharField(max_length=40, null=True, blank=True)
     profile = models.CharField(max_length=15, null=True, blank=True)
-    latitude = models.DecimalField(max_digits = 10, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits = 11, decimal_places=6, null=True, blank=True)
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=11, decimal_places=6, null=True, blank=True)
     language = models.CharField(max_length=10, null=True, blank=True)
     rejected_reason = models.CharField(max_length=300, null=True, blank=True)
     
@@ -553,7 +552,7 @@ class PartModels(base_models.PartModels):
     '''details of part models'''
     model_name = models.CharField(max_length=255)
     image_url = models.CharField(max_length=255, null=True, blank=True)
-    active = models.BooleanField(default = True)
+    active = models.BooleanField(default=True)
     
     class Meta(base_models.PartModels.Meta):
         app_label = _APP_NAME
@@ -567,7 +566,7 @@ class Categories(base_models.Categories):
     
     image_url = models.CharField(max_length=255, null=True, blank=True)
     
-    active = models.BooleanField(default = True)
+    active = models.BooleanField(default=True)
     
     
     class Meta(base_models.Categories.Meta):
@@ -579,7 +578,7 @@ class Categories(base_models.Categories):
 class PartModel(base_models.PartModel):
     ''' details of model categories '''
     name = models.CharField(max_length=50)
-    active = models.BooleanField(default = True)
+    active = models.BooleanField(default=True)
     
     class Meta(base_models.PartModel.Meta):
         app_label = _APP_NAME
@@ -594,7 +593,7 @@ class SubCategories(base_models.SubCategories):
     importance = models.CharField(max_length=500, null=True, blank=True)
     image_url = models.CharField(max_length=30, null=True, blank=True)
     part_model = models.ForeignKey(PartModel)
-    active = models.BooleanField(default = True)
+    active = models.BooleanField(default=True)
     
     class Meta(base_models.SubCategories.Meta):
         app_label = _APP_NAME
@@ -613,7 +612,7 @@ class PartPricing(base_models.PartPricing):
     price_list = models.IntegerField()
     available_quantity = models.IntegerField()
     current_month_should = models.IntegerField()
-    active = models.BooleanField(default = True)
+    active = models.BooleanField(default=True)
     
     class Meta(base_models.PartPricing.Meta):
         app_label = _APP_NAME
@@ -667,7 +666,8 @@ class OrderPart(base_models.OrderPart):
     fullfill = models.NullBooleanField()
     delivered = models.IntegerField(null=True, blank=True)
     no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
-    accept = models.BooleanField(default = False)
+    accept = models.BooleanField(default=False)
+    order_placed_by = models.IntegerField()
  
     
     class Meta(base_models.OrderPart.Meta):
@@ -843,10 +843,21 @@ class DistributorDistrict(base_models.DistributorDistrict):
         verbose_name_plural = "Distributor District"
 
 class OrderPartDetails(base_models.OrderPartDetails):
-    part_number = models.IntegerField(null=True, blank=True)
+    part_number = models.ForeignKey(PartPricing)
     quantity = models.IntegerField(null=True, blank=True)
-    active = models.IntegerField(null=True, blank=True, default =1)
-    order_id = models.ForeignKey(OrderPart)
+    active = models.IntegerField(null=True, blank=True, default=1)
+    order = models.ForeignKey(OrderPart)
+    line_total = models.DecimalField(max_digits = 10, decimal_places=6, null=True, blank=True)
     class Meta(base_models.OrderPartDetails.Meta):
         app_label = _APP_NAME
-#         verbose_name_plural = "Order Part Details"
+        verbose_name_plural = "Order Part Details"
+
+class OrderDeliveredHistory(base_models.OrderDeliveredHistory):
+    part_number = models.ForeignKey(PartPricing)
+    quantity = models.IntegerField(null=True, blank=True)
+    active = models.IntegerField(null=True, blank=True, default=1)
+    order = models.ForeignKey(OrderPart)
+    delivered_date = models.DateTimeField(null=True, blank=True)
+    class Meta(base_models.OrderDeliveredHistory.Meta):
+        app_label = _APP_NAME
+        verbose_name_plural = "Order Delivered History"

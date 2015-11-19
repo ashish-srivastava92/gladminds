@@ -44,7 +44,7 @@ from gladminds.core.services.message_template import get_template
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
 from gladminds.core.auth import otp_handler
-from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor,City,State
+from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor,City,State,OrderPartDetails,PartPricing,OrderDeliveredHistory
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template import loader
 from django.template.context import Context
@@ -60,21 +60,79 @@ AUDIT_ACTION = 'SEND TO QUEUE'
 def get_user_info(request):
     user_id = request.GET.get('user_id')
     user_obj = UserProfile.objects.get(user_id = user_id)
-#     print user_obj.user.first_name,"teee"
-    data = {"first_name": user_obj.user.first_name ,"last_name": user_obj.user.last_name , "email" : user_obj.user.email,"pincode":user_obj.pincode}
-    print data
+    print user_obj.user.email,"emaillll"
+    data = {"first_name": user_obj.user.first_name ,"last_name": user_obj.user.last_name , "email" : user_obj.user.email,"dob" : user_obj.date_of_birth,"pincode":user_obj.pincode}
     return HttpResponse(json.dumps(data), content_type="application/json")
     
 def get_districts(request):
-#     print request
     state = request.GET.get('selected_state')
-#     print state,"state"
     state_obj = State.objects.get(state_code = state )
-#     print state_obj.id
     districts = City.objects.filter(state=state_obj.id).values("city","id")
     return HttpResponse(json.dumps(list(districts), cls=DjangoJSONEncoder), content_type="application/json")
     
- 
+# def list_orders(request,order_id):
+#     orders_obj = OrderPartDetails.objects.select_related("part_number","order").filter(order = order_id)
+#     order_display=[]
+#     orders={}
+#     for each_order in orders_obj:
+#         print each_order.order_id,"pppp"
+#         orders['mrp']= each_order.part_number.mrp
+#         orders['part_number'] = each_order.part_number.part_number
+#         orders['quantity'] = each_order.quantity
+#         print each_order.order_id,"orrrr"
+#         orders['order_id'] = each_order.order_id
+#         order_display.append(orders)
+#         template = 'admin/bajaj/parts_list.html'
+#         return render(request, template,{"data":order_display})
+     
+#     
+     
+def save_order_history(request):
+    print request.POST
+#     dates = request.POST["delivered_date"]
+    len =  request.POST["orders_length"]
+    order_id =  request.POST["order_id"]
+    print order_id,"oooooooooooooooooo"
+    print len,"lennnn"
+    total_amount = 0
+    for each in range(1,int(len)+1):
+        print each
+        delivered_stock = request.POST["delivered_stock_"+str(each)]
+        date = request.POST["delivered_date_"+str(each)]
+        part_number = request.POST["part_number_"+str(each)]
+        line_total = request.POST["line_total_"+str(each)]
+        part_obj = PartPricing.objects.get(part_number = part_number)
+        part_obj.available_quantity = int(part_obj.available_quantity)-int(delivered_stock)
+        part_obj.save(using = settings.BRAND)
+#         total_amount +=line_total
+#         part_num = part_obj[0].part_number
+        print part_obj,"nummm"
+        print date,"datess"
+        print delivered_stock,"stock"
+        ordered_date = datetime.datetime.strptime(date, "%m/%d/%Y") 
+        print ordered_date
+        order_obj = OrderDeliveredHistory(delivered_date = ordered_date,quantity = delivered_stock,order_id= order_id,part_number = part_obj)
+        order_obj.save(using = settings.BRAND)
+        
+        
+        
+        
+        
+    return HttpResponseRedirect('/admin/bajaj/orderpart/')
+     
+def ordered_part_details(request,part_number):
+
+    print part_number  
+    part_obj = PartPricing.objects.get(part_number = part_number)
+    print part_obj.description
+#     orders_obj = OrderPartDetails.objects.select_related("part_number","order").filter(order = order_id)
+    ordered_part_details = OrderDeliveredHistory.objects.filter(part_number = part_obj.id).values("id","order_id","quantity","part_number_id","delivered_date")
+    print ordered_part_details
+    
+    context={"data":ordered_part_details}
+    template = 'admin/bajaj/ordered_part_details.html'
+    return render(request,template,{"data":ordered_part_details,"part_number":part_number,"part_description":part_obj.description})
+     
 @login_required
 def approve_retailer(request, retailer_id):
     '''
