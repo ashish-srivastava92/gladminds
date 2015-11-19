@@ -178,7 +178,6 @@ def place_order(request, dsr_id):
 
             for item in order['order_items']:
                 orderpart = OrderPart()
-                print"------------------",orderpart.id
                 part_number = item['part_number']
                 quantity = item['qty']
                 orderpart_details = OrderPartDetails()
@@ -387,7 +386,7 @@ def get_distributor_for_retailer(request, retailer_id):
                     'distributor_name':distributor.name,
                     'distributor_id':distributor.distributor_id,
                     'distributor_phone_number':distributor.phone_number,
-                    'distributor_mobile1':distributor.mobile_1,
+                    'distributor_mobile1':distributor.mobile1,
                     'distributor_email':distributor.email
                 }
             distributor_list.append(distributor_dict)
