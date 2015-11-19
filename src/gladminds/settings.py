@@ -242,6 +242,11 @@ DB_USER = os.environ.get('DB_USER', 'root')
 DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
 
+# for server
+DB_USER = os.environ.get('DB_USER', 'gladminds')
+DB_HOST = os.environ.get('DB_HOST', 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladmindsqa2')
+
 # for bajaj MC
 # DB_USER = os.environ.get('DB_USER', 'bajaj')
 # DB_HOST = os.environ.get('DB_HOST', 'bajaj.chnnvvffqwop.us-east-1.rds.amazonaws.com')
