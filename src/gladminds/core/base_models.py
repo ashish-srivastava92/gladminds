@@ -2016,9 +2016,21 @@ class Part_subcategory(BaseModel):
 
 class OrderPartDetails(BaseModel):
     ''' details of ordering spare parts by dsr or retailer'''
-    
+        
     class Meta:
         abstract = True
         db_table = "gm_orderpart_details"
         verbose_name_plural = "Order Part Details"
+
+class OrderDeliveredHistory(BaseModel):
+    ''' details of order history'''
+
+    class Meta:
+        abstract = True
+        db_table = "gm_order_delivered_details"
+        verbose_name_plural = "Order Delivered History"
+      
+
+
+
 

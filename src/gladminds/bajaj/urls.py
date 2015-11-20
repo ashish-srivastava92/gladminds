@@ -43,6 +43,7 @@ urlpatterns = patterns('',
     #end of api urls
     
     url(r'^bulk_upload_retailer/$', 'gladminds.bajaj.views.views.bulk_upload_retailer', name='bulk_upload_retailer'),
+    
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
     url(r'^admin/', include(brand_admin.urls)),
     url(r'', include(api_v1.urls)),
@@ -87,7 +88,11 @@ urlpatterns = patterns('',
     url(r'', include(core_urls)),
     url(r'^get_user_info/$', 'gladminds.bajaj.views.views.get_user_info', name='get_user_info'),
     url(r'^get_districts/$', 'gladminds.bajaj.views.views.get_districts', name='get_districts'),
+    url(r'^save_order_history/$', 'gladminds.bajaj.views.views.save_order_history', name='save_order_history'),
+    
+    url(r'^ordered_part_details/(?P<part_number>\w+)/$', 'gladminds.bajaj.views.views.ordered_part_details', name='ordered_part_details'),
+    
     
     url(r'^admin/retailer/approve_retailer/retailer_id/(?P<retailer_id>\d+)/$', 'gladminds.bajaj.views.views.approve_retailer', name='approve_retailer'),
-    
+#     url(r'^admin/bajaj/view_orders/(?P<order_id>\d+)$', 'gladminds.bajaj.views.views.list_orders', name='list_orders'),
 )

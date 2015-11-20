@@ -1,10 +1,8 @@
 {% extends "admin/change_form.html" %}
+   
 
 
-    
-    
-    
-{% ifequal opts.verbose_name 'retailer' %}
+{% ifequal opts.verbose_name 'orderpart' %}
     <form action="{% url 'bulk_upload_retailer' %}" method="POST" enctype="multipart/form-data">
         <table>
         <tr> <td> Bulk upload of retailer:
@@ -12,34 +10,5 @@
         <tr> <td></td> <td> <input type="submit" value="upload"> </td></tr>
         </table>
     </form>
-    
-    
-    		
-    
 {% endifequal %}
     
-
-
-		  
-            
-  <script type="text/javascript">
-      $(document).ready(function() {
-      	alert("hhhdhgsd");
-        $('#id_user').change(function() {
-        alert("hello");
-          $.ajax({
-            type: 'GET',
-            url: "{% url 'get_user_info' %}",
-            data: {'user_id': $('#id_user').val()},
-            success: function(data, _status) {
-              $('#id_throttle').val(data.throttle);
-              $('#id_rate_limit').val(data.rate_limit);
-              $('#id_product').val(data.product);
-              $('#id_tier_group').val(data.tier_group);
-            },
-            dataType: "json"
-          });               
-        });
-      });
-    </script>
-		  

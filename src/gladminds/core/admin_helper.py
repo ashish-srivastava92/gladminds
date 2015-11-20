@@ -23,6 +23,12 @@ class GmModelAdmin(ModelAdmin):
         return super(GmModelAdmin, self).changelist_view(request, extra_context=extra_context)     
 
     def change_view(self, request, object_id, form_url='', extra_context=None):
+#         
+#         extra_context = extra_context or {}
+#         extra_context['some_var'] = 'This is what I want to show'
+#         return super(GmModelAdmin, self).changelist_view(request, extra_context=extra_context)
+#         
+        
         model = self.model
         opts = model._meta
         self.groups_update_not_allowed.append(Roles.READONLY)

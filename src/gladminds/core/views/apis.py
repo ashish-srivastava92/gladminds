@@ -30,6 +30,8 @@ from gladminds.core.models import DistributorSalesRep, Retailer, CvCategories, \
 
 from gladminds.core import constants
 
+# from gladminds.bajaj.models import Distributor, DistributorSalesRep, Retailer, OrderPartDetails,OrderPart
+
 @api_view(['POST'])
 def authentication(request):
     '''
@@ -116,6 +118,43 @@ def get_retailer_profile(request, retailer_id):
         retailer_dict.update({"latitude":retailer.latitude})
         retailer_dict.update({"longitude":retailer.longitude})
         return Response(retailer_dict)
+
+
+from django.conf import settings
+@api_view(['POST'])
+# @authentication_classes((JSONWebTokenAuthentication,))
+# @permission_classes((IsAuthenticated,))
+def place_order(request, dsr_id):
+    '''
+    This method gets the orders placed by the dsr on behalf of the retailer and puts
+    it in the database
+    '''
+    parts = json.loads(request.body)
+    dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+    print "================dsr",dsr.id
+    id = dsr.id
+    if dsr:
+        for order in parts :
+#             try:
+                orderpart = OrderPart(dsr =  dsr)
+#                 orderpart.save(using=settings.BRAND)
+                print "-[[o id============",orderpart.id
+#             except Exception as ex:
+#                 print "ex=============",ex
+                orderpart.dsr = dsr
+                orderpart.order_date = datetime.datetime.now()
+                print settings.BRAND,"bradnndddddddddddddd"
+                orderpart.save(using=settings.BRAND)
+                for item in order['order_items']:
+                    part_number = item['part_number']
+                    quantity = item['qty']
+                    orderpart_details = OrderPartDetails()
+                    orderpart_details.part_number = part_number
+                    orderpart_details.quantity = quantity
+                    orderpart_details.order_id = orderpart.id
+                    orderpart_details.save()
+                return Response({'message': 'Order updated successfully', 'status':1})
+        
 
 
 @api_view(['GET'])
