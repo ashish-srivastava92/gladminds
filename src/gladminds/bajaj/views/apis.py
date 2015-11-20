@@ -17,7 +17,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework_jwt.settings import api_settings
 
 from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
-                            PartPricing, OrderPart
+                            PartPricing, OrderPart, Distributor, OrderPartDetails
 # from gladminds.core.models import DistributorSalesRep, Retailer,PartModels, CvCategories, \
 #                              OrderPart, DSRWorkAllocation, AlternateParts
 from gladminds.core import constants
@@ -119,9 +119,8 @@ def get_parts(request):
         parts_dict = {}
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
-        # parts_dict.update({"part_model":part.part_model})
-        # parts_dict.update({"part_category":part.category.name})
-        # parts_dict.update({"part_subcategory":part.part_models})
+        parts_dict.update({"part_category":part.category.category_name})
+        parts_dict.update({"part_model":part.category.model.model_name})
         parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
     return Response(parts_list)
@@ -256,27 +255,59 @@ def place_order(request, dsr_id):
     it in the database
     '''
     parts = json.loads(request.body)
+    
     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+    
     
     if dsr:
         for order in parts :
             orderpart = OrderPart()
-            orderpart.dsr_id = dsr
-            orderpart.retailer_id = order['retailer_id']
+            orderpart.dsr = dsr
+            retailer = Retailer.objects.get(retailer_code = order['retailer_id'])
+            orderpart.retailer = retailer
+            orderpart.order_date = order['date']
             orderpart.order_date = datetime.datetime.now()
-            orderpart.save(using=settings.BRAND)
-
+            orderpart.save()
+            #push all the items into the orderpart details
             for item in order['order_items']:
-                orderpart = OrderPart()
-                part_number = item['part_number']
-                quantity = item['qty']
                 orderpart_details = OrderPartDetails()
-                orderpart_details.part_number = part_number
-                orderpart_details.quantity = quantity
-                orderpart_details.order_id = orderpart.id
-                
-                orderpart_details.save(using=settings.BRAND)
+                orderpart_details.part_number = PartPricing.objects.\
+                                                get(part_number = item['part_number'])
+                orderpart_details.quantity = item['qty']
+                orderpart_details.order = orderpart
+                orderpart_details.line_total = item['line_total']
+                orderpart_details.save()
     return Response({'message': 'Order updated successfully', 'status':1})
+
+@api_view(['POST'])
+# @authentication_classes((JSONWebTokenAuthentication,))
+# @permission_classes((IsAuthenticated,))
+def retailer_place_order(request, retailer_id):
+    '''
+    This method gets the orders placed by the retailer and puts
+    it in the database
+    '''
+    parts = json.loads(request.body)
+    
+    for order in parts :
+            orderpart = OrderPart()
+            retailer = Retailer.objects.get(retailer_code = retailer_id)
+            orderpart.retailer = retailer
+            orderpart.distributor = Distributor.objects.get(distributor_id = order['distributor_id'])
+            orderpart.order_date = order['date']
+            #orderpart.order_date = datetime.datetime.now()
+            orderpart.save()
+            #push all the items into the orderpart details
+            for item in order['order_items']:
+                orderpart_details = OrderPartDetails()
+                orderpart_details.part_number = PartPricing.objects.\
+                                                get(part_number = item['part_number'])
+                orderpart_details.quantity = item['qty']
+                orderpart_details.order = orderpart
+                orderpart_details.line_total = item['line_total']
+                orderpart_details.save()
+    return Response({'message': 'Order updated successfully', 'status':1})
+
 
 @api_view(['GET'])
 # # @authentication_classes((JSONWebTokenAuthentication,))

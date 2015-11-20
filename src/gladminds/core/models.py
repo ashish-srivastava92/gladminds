@@ -453,7 +453,8 @@ class Distributor(base_models.Distributor):
     profile = models.CharField(max_length=15)
     language = models.CharField(max_length=10, null=True, blank=True)
     territory = models.CharField(max_length=10, null=True, blank=True) 
-    
+    mobile1 = models.CharField(max_length=15)
+    mobile2 = models.CharField(max_length=15)
     class Meta(base_models.Distributor.Meta):
         app_label = _APP_NAME
 
@@ -576,12 +577,6 @@ class CvCategories(base_models.CvCategories):
     class Meta(base_models.CvCategories.Meta):
         app_label = _APP_NAME
         
-class PartPricing(base_models.PartPricing):
-    ''' details of parts models'''
-    
-    class Meta(base_models.PartPricing.Meta):
-        app_label = _APP_NAME
-        
 class PartMasterCv(base_models.PartMasterCv):
     ''' details of spare parts and pricing '''
     bajaj_id = models.IntegerField()
@@ -616,11 +611,9 @@ class Collection(base_models.Collection):
     outstanding_amount = models.CharField(max_length = 20)
     amount_collected_date = models.DateTimeField()
     
-    
     class Meta(base_models.Collection.Meta):
         app_label = _APP_NAME      
 
-        
 class OrderPart(base_models.OrderPart):
     ''' details of ordering spare parts by dsr or retailer'''
     #order_id = models.IntegerField()

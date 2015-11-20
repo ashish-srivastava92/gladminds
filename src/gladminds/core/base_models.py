@@ -1972,10 +1972,6 @@ class FleetRider(BaseModel):
     def __unicode__(self):
         return self.phone_number
     
-
-
-    
-    
 class DistributorDistrict(BaseModel):
     active = models.BooleanField(default=False)
     class Meta:
@@ -1986,10 +1982,40 @@ class DistributorDistrict(BaseModel):
 #     def __unicode__(self):
 #         return self.assignee_id
 
+#parts model for bajaj mc
+class Parts(BaseModel):
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_parts"
+        verbose_name_plural = "parts"
+        
+class Part_Category(BaseModel):
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_part_category"
+        verbose_name_plural = "part_category"
+        
+class Part_Models(BaseModel):
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_part_models"
+        verbose_name_plural = "Part_models"
+        
+class Part_subcategory(BaseModel):
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_Part_subcategories"
+        verbose_name_plural = "Part_Subcategories"
+
+# ends here
 
 class OrderPartDetails(BaseModel):
     ''' details of ordering spare parts by dsr or retailer'''
-    
+        
     class Meta:
         abstract = True
         db_table = "gm_orderpart_details"
@@ -1997,7 +2023,7 @@ class OrderPartDetails(BaseModel):
 
 class OrderDeliveredHistory(BaseModel):
     ''' details of order history'''
-    
+
     class Meta:
         abstract = True
         db_table = "gm_order_delivered_details"

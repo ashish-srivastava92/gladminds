@@ -51,6 +51,7 @@ class DynamicSitesMiddleware(object):
     #Note its a hack for bajaj
         if BRAND.value == '52' or BRAND.value == '54':
             BRAND.value = 'bajaj'
+        BRAND.value = 'bajaj'
 
     
       #   if BRAND.value == '192' :#or BRAND.value == '192':
@@ -96,7 +97,7 @@ class DynamicSitesMiddleware(object):
         Domain will be lowercased
         """
         host = self.request.get_host()
-        print host
+        
         if ':' in host:
             domain, port = host.split(':')
             return (domain.lower(), port)

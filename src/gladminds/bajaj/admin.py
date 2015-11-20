@@ -10,7 +10,8 @@ from django.utils.html import mark_safe
 
 from gladminds.bajaj import models
 from gladminds.bajaj.models import Distributor, DistributorStaff, DistributorSalesRep,DSRWorkAllocation, \
-                        Retailer, UserProfile, SparePartPoint, State,AreaSparesManager,City,DistributorDistrict,OrderPartDetails,OrderDeliveredHistory
+                        Retailer, UserProfile,\
+                         SparePartPoint, State,AreaSparesManager,City,DistributorDistrict,OrderPartDetails,OrderDeliveredHistory
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
@@ -600,7 +601,6 @@ class DistributorAdmin(GmModelAdmin):
 #     readonly_fields = ('image_tag',)
     
     def name(self,obj):
-            print obj,"objj"
             return obj.name
     name.short_description = 'Last Name'
         
