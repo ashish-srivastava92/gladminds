@@ -491,6 +491,7 @@ class Distributor(base_models.Distributor):
     email_bajaj = models.EmailField(max_length=50, null=True, blank=True)
     address_line_2 = models.CharField(max_length=40, null=True, blank=True)
     address_line_3 = models.CharField(max_length=40, null=True, blank=True)
+    address_line_4 = models.CharField(max_length=40, null=True, blank=True)
     profile = models.CharField(max_length=15)
     language = models.CharField(max_length=10, null=True, blank=True)
     territory = models.CharField(max_length=10, null=True, blank=True)    
@@ -510,6 +511,14 @@ class DSRScorecardReport(base_models.DSRScorecardReport):
     
     class Meta(base_models.DSRScorecardReport.Meta):
         app_label = _APP_NAME
+
+
+
+
+
+        
+
+
 
 class DistributorStaff(base_models.DistributorStaff):
     '''details of Distributor'''
@@ -531,6 +540,11 @@ class DistributorSalesRep(base_models.DistributorSalesRep):
         return self.distributor_sales_code + ' ' + self.user.user.first_name + \
                                 ' ' + self.user.user.last_name
 
+
+
+
+
+
 class Retailer(base_models.Retailer):
     '''details of retailer'''
     user = models.ForeignKey(UserProfile)
@@ -541,6 +555,7 @@ class Retailer(base_models.Retailer):
     mobile = models.CharField(max_length=15)
     address_line_2 = models.CharField(max_length=40, null=True, blank=True)
     address_line_3 = models.CharField(max_length=40, null=True, blank=True)
+    address_line_4 = models.CharField(max_length=40, null=True, blank=True)
     profile = models.CharField(max_length=15, null=True, blank=True)
     latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=11, decimal_places=6, null=True, blank=True)
@@ -554,6 +569,19 @@ class Retailer(base_models.Retailer):
     def __unicode__(self):
         return self.retailer_code 
     
+    
+class DSRWorkAllocation(base_models.DSRWorkAllocation):
+    '''details of DSR work allocation'''
+    distributor = models.ForeignKey(Distributor)
+    dsr = models.ForeignKey(DistributorSalesRep)
+    retailer = models.ForeignKey(Retailer)
+    date = models.DateTimeField(null = True, blank=True)
+    
+    class Meta(base_models.DSRWorkAllocation.Meta):
+        app_label = _APP_NAME
+
+
+
 class PartModels(base_models.PartModels):
     '''details of part models'''
     model_name = models.CharField(max_length=255)
@@ -658,13 +686,40 @@ class Collection(base_models.Collection):
         app_label = _APP_NAME      
 
 
+# class OrderPart(base_models.OrderPart):
+#     ''' details of orders placed by retailer '''
+# #     order_id = models.CharField(max_length = 40)
+#     order_date = models.DateField()
+#     retailer = models.ForeignKey(Retailer)
+#     dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
+#     distributor = models.ForeignKey(Distributor, null=True, blank=True)
+# 
+#     so_id = models.IntegerField(null=True, blank=True)
+#     po_id = models.IntegerField(null=True, blank=True)
+#     do_id = models.IntegerField(null=True, blank=True)
+#     fullfill = models.NullBooleanField()
+#     delivered = models.IntegerField(null=True, blank=True)
+#     no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
+#     accept = models.BooleanField(default=False)
+#     order_placed_by = models.IntegerField()
+# 
+#     
+#     class Meta(base_models.OrderPart.Meta):
+#         app_label = _APP_NAME
+#           
+
+
+    
 class OrderPart(base_models.OrderPart):
     ''' details of orders placed by retailer '''
-#     order_id = models.CharField(max_length = 40)
+#    order_id = models.CharField(max_length = 40)
     order_date = models.DateField()
-    retailer = models.ForeignKey(Retailer)
-    dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
-    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+#     retailer = models.ForeignKey(Retailer)
+#     dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
+#     distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    dsr_id = models.IntegerField(null=True, blank=True)
+    distributor_id = models.IntegerField(null=True, blank=True)
+    retailer_id = models.IntegerField(null=True, blank=True)
 
     so_id = models.IntegerField(null=True, blank=True)
     po_id = models.IntegerField(null=True, blank=True)
@@ -672,18 +727,14 @@ class OrderPart(base_models.OrderPart):
     fullfill = models.NullBooleanField()
     delivered = models.IntegerField(null=True, blank=True)
     no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
-<<<<<<< HEAD
-    accept = models.BooleanField(default=False)
-    order_placed_by = models.IntegerField()
- 
-=======
     accept = models.BooleanField(default = False)
     order_placed_by = models.IntegerField()
->>>>>>> 5ec3ab1242859eaab9debbadd430d9776f94cff8
     
     class Meta(base_models.OrderPart.Meta):
         app_label = _APP_NAME
-          
+
+
+
 class SparePartUPC(base_models.SparePartUPC):
     '''details of Spare Part UPC'''
     part_number = models.ForeignKey(SparePartMasterData)
@@ -880,29 +931,6 @@ class PartMasterCv(base_models.PartMasterCv):
     
     
     
-    
-class OrderPart(base_models.OrderPart):
-    ''' details of orders placed by retailer '''
-#    order_id = models.CharField(max_length = 40)
-    order_date = models.DateField()
-    #retailer = models.ForeignKey(Retailer)
-    #dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
-    #distributor = models.ForeignKey(Distributor, null=True, blank=True)
-    dsr_id = models.IntegerField(null=True, blank=True)
-    distributor_id = models.IntegerField(null=True, blank=True)
-    retailer_id = models.IntegerField(null=True, blank=True)
-
-    so_id = models.IntegerField(null=True, blank=True)
-    po_id = models.IntegerField(null=True, blank=True)
-    do_id = models.IntegerField(null=True, blank=True)
-    fullfill = models.NullBooleanField()
-    delivered = models.IntegerField(null=True, blank=True)
-    no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
-    accept = models.BooleanField(default = False)
- 
-    
-    class Meta(base_models.OrderPart.Meta):
-        app_label = _APP_NAME
 
 class DistributorDistrict(base_models.DistributorDistrict):
      distributor = models.ForeignKey(Distributor)

@@ -107,6 +107,11 @@ SUIT_CONFIG = {
                      {'model': 'retailer',
                      'label': 'Retailer'},
                     
+                    
+                    
+#                              {'model': 'dsrworkallocation',
+#                       'label': 'DSR Work Allocation'}
+#                     
    
                     
                     
@@ -215,8 +220,13 @@ SUIT_CONFIG = {
                      {'model': 'orderpart',
                       'label': 'DSRs Orders'},
                           {'model': 'orderpart',
-                      'label': 'Retailers Orders'},)
-          },
+                      'label': 'Retailers Orders'},
+                     {'model': 'dsrworkallocation',
+                      'label': 'DSR Work Allocation'})
+                    },
+                    
+#                     brand_admin.register(get_model("DSRWorkAllocation", brand), DSRWorkAllocationAdmin))
+          
         {'app': 'bajaj', 'label': 'Collections', 'icon': ' icon-folder-open',
          'models':(
                   
@@ -242,10 +252,10 @@ DB_USER = os.environ.get('DB_USER', 'root')
 DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
 
-# for server
-DB_USER = os.environ.get('DB_USER', 'gladminds')
-DB_HOST = os.environ.get('DB_HOST', 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com')
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladmindsqa2')
+# # for server
+# DB_USER = os.environ.get('DB_USER', 'gladminds')
+# DB_HOST = os.environ.get('DB_HOST', 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com')
+# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladmindsqa2')
 
 # for bajaj MC
 # DB_USER = os.environ.get('DB_USER', 'bajaj')
@@ -521,7 +531,6 @@ LOGGING = {
             'level': 'DEBUG',
             'filename': '/var/log/gladminds/sql.log',
             'class': 'logging.FileHandler',
-            'formatter': 'verbose',
         },
         'gladminds_logs': {
             'level': 'INFO',

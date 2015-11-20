@@ -1133,7 +1133,6 @@ class Distributor(BaseModel):
 
     def __unicode__(self):
         return self.distributor_id 
-
 class DistributorStaff(BaseModel):
     '''details of DistributorStaff'''
     distributor_staff_code = models.CharField(max_length=50)

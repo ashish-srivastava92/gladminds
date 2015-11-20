@@ -88,29 +88,26 @@ def get_districts(request):
 #     
      
 def save_order_history(request):
-    print request.POST
-#     dates = request.POST["delivered_date"]
-    len =  request.POST["orders_length"]
+
+    stock =  request.POST.getlist("delivered_stock")
     order_id =  request.POST["order_id"]
-    print order_id,"oooooooooooooooooo"
-    print len,"lennnn"
     total_amount = 0
-    for each in range(1,int(len)+1):
-        print each
-        delivered_stock = request.POST["delivered_stock_"+str(each)]
-        date = request.POST["delivered_date_"+str(each)]
-        part_number = request.POST["part_number_"+str(each)]
-        line_total = request.POST["line_total_"+str(each)]
+
+    
+    
+#     print request.POST["delivered_stock[]"],"jkkkkk"
+    
+    for each in range(0,int(len(stock))):
+
+        delivered_stock = request.POST.getlist("delivered_stock")[each]
+        date = request.POST.getlist("delivered_date")[each]
+
+        part_number = request.POST.getlist("part_number")[each]
         part_obj = PartPricing.objects.get(part_number = part_number)
         part_obj.available_quantity = int(part_obj.available_quantity)-int(delivered_stock)
         part_obj.save(using = settings.BRAND)
-#         total_amount +=line_total
-#         part_num = part_obj[0].part_number
-        print part_obj,"nummm"
-        print date,"datess"
-        print delivered_stock,"stock"
+#
         ordered_date = datetime.datetime.strptime(date, "%m/%d/%Y") 
-        print ordered_date
         order_obj = OrderDeliveredHistory(delivered_date = ordered_date,quantity = delivered_stock,order_id= order_id,part_number = part_obj)
         order_obj.save(using = settings.BRAND)
         
@@ -122,13 +119,10 @@ def save_order_history(request):
      
 def ordered_part_details(request,part_number):
 
-    print part_number  
     part_obj = PartPricing.objects.get(part_number = part_number)
-    print part_obj.description
-#     orders_obj = OrderPartDetails.objects.select_related("part_number","order").filter(order = order_id)
+
     ordered_part_details = OrderDeliveredHistory.objects.filter(part_number = part_obj.id).values("id","order_id","quantity","part_number_id","delivered_date")
-    print ordered_part_details
-    
+
     context={"data":ordered_part_details}
     template = 'admin/bajaj/ordered_part_details.html'
     return render(request,template,{"data":ordered_part_details,"part_number":part_number,"part_description":part_obj.description})
@@ -152,6 +146,7 @@ def auth_login(request, provider):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
+        print password,"passss"
         user = authenticate(username=username, password=password)
         if user is not None:
             if user.is_active:
