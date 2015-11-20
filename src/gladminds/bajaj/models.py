@@ -666,14 +666,14 @@ class SparePartMasterData(base_models.SparePartMasterData):
     class Meta(base_models.SparePartMasterData.Meta):
         app_label = _APP_NAME
         
-class Invoices(base_models.Invoices):
-    invoice_id = models.CharField(max_length=25)
-    invoice_amount = models.DecimalField(max_digits = 10, decimal_places=6, null=True, blank=True)
-    retailer = models.ForeignKey(Retailer)
-    invoice_date = models.DateTimeField()
-    
-    class Meta(base_models.Invoices.Meta):
-        app_label = _APP_NAME
+# class Invoices(base_models.Invoices):
+#     invoice_id = models.CharField(max_length=25)
+#     invoice_amount = models.DecimalField(max_digits = 10, decimal_places=6, null=True, blank=True)
+#     retailer = models.ForeignKey(Retailer)
+#     invoice_date = models.DateTimeField()
+#     
+#     class Meta(base_models.Invoices.Meta):
+#         app_label = _APP_NAME
 
 class Collection(base_models.Collection):
     ''' details of spare parts and pricing '''
