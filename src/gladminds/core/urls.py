@@ -116,7 +116,6 @@ urlpatterns = patterns('',
     url(r'^mc/day_close_order/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.bajaj.views.apis.day_close_order'),
     
-    
     url(r'^mc/get_outstanding/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.bajaj.views.apis.get_outstanding'),
     
@@ -130,8 +129,11 @@ urlpatterns = patterns('',
                         'gladminds.bajaj.views.apis.get_outstanding'),
     url(r'^mc/get_schedule/dsr_id/(?P<dsr_id>\d+)/date/(?P<date>[-\d]+)/$',
                         'gladminds.bajaj.views.apis.get_schedule'),
-    url(r'^mc/place_order/dsr_id/(?P<dsr_id>\d+)$',
+    url(r'^mc/place_order/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.bajaj.views.apis.place_order'),
+    url(r'^mc/place_order/retailer_id/(?P<retailer_id>\d+)/$',
+                        'gladminds.bajaj.views.apis.retailer_place_order'),
+    
     #end of mc urls
     url(r'^cv/api-token-auth/', 'gladminds.core.views.apis.authentication'),
     url(r'^cv/get_retailers/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.core.views.apis.get_retailers'),
@@ -146,7 +148,6 @@ urlpatterns = patterns('',
     
     url(r'^cv/day_close_order/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.core.views.apis.day_close_order'),
-    
     
     url(r'^cv/get_outstanding/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.core.views.apis.get_outstanding'),

@@ -131,9 +131,9 @@ def get_parts(request):
         parts_dict = {}
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
-        parts_dict.update({"part_model":part.part_model})
-        parts_dict.update({"part_category":part.category.name})
-        parts_dict.update({"part_subcategory":part.part_models})
+        # parts_dict.update({"part_model":part.part_model})
+        # parts_dict.update({"part_category":part.category.name})
+        # parts_dict.update({"part_subcategory":part.part_models})
         parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
     return Response(parts_list)
@@ -390,7 +390,6 @@ def get_distributor_for_retailer(request, retailer_id):
                     'distributor_email':distributor.email
                 }
             distributor_list.append(distributor_dict)
-        
     return Response(distributor_list)
     
    

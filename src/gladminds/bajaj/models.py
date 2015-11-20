@@ -479,6 +479,8 @@ class AreaSparesManager(base_models.AreaSparesManager):
     
     #class Meta(base_models.Distributor.Meta):
      #   app_label = _APP_NAME
+     
+######################## sfa models #################################
         
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
@@ -548,7 +550,6 @@ class Retailer(base_models.Retailer):
     language = models.CharField(max_length=10, null=True, blank=True)
     rejected_reason = models.CharField(max_length=300, null=True, blank=True)
     
-    
     class Meta(base_models.Retailer.Meta):
         app_label = _APP_NAME
 
@@ -574,6 +575,7 @@ class Categories(base_models.Categories):
     image_url = models.CharField(max_length=255, null=True, blank=True)
     
     active = models.BooleanField(default = True)
+    model = models.ForeignKey(PartModels)
     
     
     class Meta(base_models.Categories.Meta):
@@ -594,12 +596,13 @@ class PartModel(base_models.PartModel):
         return self.name
         
 class SubCategories(base_models.SubCategories):
-    ''' details of model categories '''
+    ''' details of model subcategories '''
     name = models.CharField(max_length=255)
     usps = models.CharField(max_length=500, null=True, blank=True)
     importance = models.CharField(max_length=500, null=True, blank=True)
     image_url = models.CharField(max_length=30, null=True, blank=True)
     part_model = models.ForeignKey(PartModel)
+    category = models.ForeignKey(Categories)
     active = models.BooleanField(default = True)
     
     class Meta(base_models.SubCategories.Meta):
@@ -608,17 +611,32 @@ class SubCategories(base_models.SubCategories):
     def __unicode__(self):
         return self.name
     
+# parts model 
+# class Parts(base_models.Parts):
+#     part_number = models.CharField(max_length=255, null=True, blank=True)
+#     products = models.CharField(max_length=255, null=True, blank=True)
+#     remarks = models.CharField(max_length=255, null=True, blank=True)
+#     mrp = models.CharField(max_length=8, null=True, blank=True)
+#     description = models.CharField(max_length=255, null=True, blank=True)
+#     category = models.ForeignKey(Categories)
+#     active = models.BooleanField(default = True)
+#     
+#     class Meta(base_models.Parts.Meta):
+#         app_label = _APP_NAME
+#         
+#     def __unicode__(self):
+#         return self.description
+        
+# ends here
+    
 class PartPricing(base_models.PartPricing):
-    ''' details of model categories '''
+    ''' details of parts '''
     part_number = models.CharField(max_length=255, null=True, blank=True)
     products = models.CharField(max_length=255, null=True, blank=True)
     remarks = models.CharField(max_length=255, null=True, blank=True)
     mrp = models.CharField(max_length=8, null=True, blank=True)
     description = models.CharField(max_length=255, null=True, blank=True)
-    subcategory = models.ForeignKey(SubCategories)
-    price_list = models.IntegerField()
-    available_quantity = models.IntegerField()
-    current_month_should = models.IntegerField()
+    category = models.ForeignKey(Categories)
     active = models.BooleanField(default = True)
     
     class Meta(base_models.PartPricing.Meta):
@@ -635,8 +653,6 @@ class Member(base_models.Member):
 
     class Meta(base_models.Member.Meta):
         app_label = _APP_NAME
-
-
 
 class SparePartMasterData(base_models.SparePartMasterData):
     '''details of Spare Part'''
@@ -678,6 +694,18 @@ class OrderPart(base_models.OrderPart):
     
     class Meta(base_models.OrderPart.Meta):
         app_label = _APP_NAME
+        
+class OrderPartDetails(base_models.OrderPartDetails):
+    part_number = models.ForeignKey(PartPricing)
+    quantity = models.IntegerField(null=True, blank=True)
+    active = models.IntegerField(null=True, blank=True, default=1)
+    order = models.ForeignKey(OrderPart)
+    line_total = models.DecimalField(max_digits = 10, decimal_places=6, null=True, blank=True)
+    
+    class Meta(base_models.OrderPartDetails.Meta):
+        app_label = _APP_NAME
+        verbose_name_plural = "Order Part Details"
+
           
 class SparePartUPC(base_models.SparePartUPC):
     '''details of Spare Part UPC'''
@@ -838,55 +866,12 @@ class ManufacturingData(base_models.ManufacturingData):
     class Meta(base_models.ManufacturingData.Meta):
         app_label = _APP_NAME
 
-########Added for SFA from bajajcv#####################
-class CvCategories(base_models.CvCategories):
-    ''' details of alternate parts and pricing '''
-    name = models.CharField(max_length = 255)
-    usps = models.TextField(null=True,blank=True)
-    importance = models.TextField(null=True,blank=True)
-    image_url = models.CharField(max_length = 255, null=True,blank=True)
-    active = models.BooleanField(default = True)
-    
-    class Meta(base_models.CvCategories.Meta):
-        app_label = _APP_NAME
-
-
-class PartMasterCv(base_models.PartMasterCv):
-    ''' details of spare parts and pricing '''
-    bajaj_id = models.IntegerField()
-    part_number = models.CharField(max_length = 255)
-    description = models.TextField()
-    part_model = models.TextField()
-    valid_from = models.DateField()
-    part_models = models.CharField(max_length = 255)
-    category = models.ForeignKey(CvCategories)
-    mrp = models.CharField(max_length = 255)
-    active = models.BooleanField(default = True)
-    available = models.CharField(max_length=25)
-    pending = models.CharField(max_length=25)
-    
-    class Meta(base_models.PartMasterCv.Meta):
-        app_label = _APP_NAME
-        
-    def __unicode__(self):
-        return self.description
-    
-    
-    
-    
-    
-    
 class OrderPart(base_models.OrderPart):
-    ''' details of orders placed by retailer '''
-#    order_id = models.CharField(max_length = 40)
+    ''' details of orders placed  '''
     order_date = models.DateField()
-    #retailer = models.ForeignKey(Retailer)
-    #dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
-    #distributor = models.ForeignKey(Distributor, null=True, blank=True)
     dsr_id = models.IntegerField(null=True, blank=True)
     distributor_id = models.IntegerField(null=True, blank=True)
     retailer_id = models.IntegerField(null=True, blank=True)
-
     so_id = models.IntegerField(null=True, blank=True)
     po_id = models.IntegerField(null=True, blank=True)
     do_id = models.IntegerField(null=True, blank=True)
@@ -895,7 +880,6 @@ class OrderPart(base_models.OrderPart):
     no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
     accept = models.BooleanField(default = False)
  
-    
     class Meta(base_models.OrderPart.Meta):
         app_label = _APP_NAME
 
@@ -914,5 +898,3 @@ class OrderPartDetails(base_models.OrderPartDetails):
     
     class Meta(base_models.OrderPartDetails.Meta):
         app_label = _APP_NAME
-#         verbose_name_plural = "Order Part Details"
-

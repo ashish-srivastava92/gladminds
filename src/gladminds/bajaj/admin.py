@@ -610,7 +610,6 @@ class DistributorAdmin(GmModelAdmin):
 #     readonly_fields = ('image_tag',)
     
     def name(self,obj):
-            print obj,"objj"
             return obj.name
     name.short_description = 'Last Name'
         
