@@ -554,8 +554,8 @@ class DistributorForm(forms.ModelForm):
     
 #     
     def image_tag(self):
-        print self.image_tag,"urrrrlll"
-        return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_tag)
+        
+        return u'<img src="{0}/{1}" width="200px;"/>'.format('settings.S3_BASE_URL', self.image_tag)
     image_tag.short_description = 'User Image'
     image_tag.allow_tags = True
     
@@ -649,7 +649,7 @@ class DistributorAdmin(GmModelAdmin):
         
 #         obj.user.user.is_active = form.cleaned_data['is_active']
         obj.save(using=settings.BRAND)
-        print obj.user_id,"shanky"
+        
         user_obj = User.objects.get(id=obj.user_id)
         print user_obj,"obhhh"
         user_obj.is_active = form.cleaned_data['is_active']
@@ -1106,7 +1106,7 @@ class CollectionAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.RETAILERS]
     form = CollectionAdminForm
 #     search_fields = ('dsr',)
-    list_display = ('get_retailer','retailer_contact','Outstanding', 'collections','Total_Order_value','dsr','payment_date', 'payment_mode',)
+    list_display = ('get_retailer','retailer_contact','Outstanding', 'collections','Total_Order_value','cheque_image','dsr','payment_date', 'payment_mode',)
 #     list_display_links = [None]
     
     def __init__(self, *args, **kwargs):
@@ -1123,7 +1123,7 @@ class CollectionAdmin(GmModelAdmin):
     dsr.short_description = 'DSR'
     
     def Total_Order_value(self,obj):
-        return "900"
+        return "5000"
     
     
 #     def 
@@ -1133,7 +1133,7 @@ class CollectionAdmin(GmModelAdmin):
 #     retailer_contact.admin_order_field = 'retailer'
 
     def Outstanding(self,obj):
-        return "900"
+        return "5000"
     
     
     def get_invoice(self, obj):
@@ -1287,16 +1287,20 @@ class PartListAdmin(GmModelAdmin):
     Part_Description.short_description = 'Part Description'
     
     def Category(self, obj):
-        return None
-#         return obj.category.model.model_name
+        #return None
+         return obj.subcategory.name
     Category.short_description = 'Category'
     
     def Applicable_Model(self, obj):
-        return obj.category.model.model_name
+        return obj.products
         
 #         return obj.subcategory.part_model.name
     Applicable_Model.short_description='Applicable Model'
     
+    def moq(self,obj):
+	return obj.moq    
+    moq.short_description='MOQ'
+
     def Price(self, obj):
         return obj.mrp
     Price.short_description = 'MRP'
@@ -1351,13 +1355,13 @@ class PartListAdmin(GmModelAdmin):
         if request.user.is_superuser or request.user.groups.filter(name=Roles.SFAADMIN).exists():
 
             self. list_display = ('part_no', 'Part_Description','Applicable_Model', 'Category',
-                    'Price', 'active')
+                    'Price', 'moq','active')
             
             
         else:
             self.list_display = ('part_no', 'Part_Description', 'Applicable_Model','Category',
                     'Price', 'Available', 'Pending',
-                    'Current')
+                    'Current','moq')
         if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
             extra_context["show_upload_stock"] = True
         return super(PartListAdmin, self).changelist_view(request, extra_context=extra_context)
@@ -1434,12 +1438,13 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
         qs = super(DSRWorkAllocationAdmin, self).queryset(request)
         # get workallocation objects for the logged in distributor
         if Distributor.objects.filter(user=request.user).exists():
-            DSRWorkAllocation_objects = DSRWorkAllocation.objects.filter(distributor__user=\
-                                                                         request.user)
-        else:
+            #DSRWorkAllocation_objects = DSRWorkAllocation.objects.filter(distributor__user=\
+                                            #                            request.user)
+       # else:
             DSRWorkAllocation_objects = DSRWorkAllocation.objects.all()
-        return DSRWorkAllocation_objects
-    
+            return DSRWorkAllocation_objects
+        return qs
+
     def get_form(self, request, obj=None, **kwargs):
         ModelForm = super(DSRWorkAllocationAdmin, self).get_form(request, obj, **kwargs)
         class ModelFormMetaClass(ModelForm):
@@ -1450,9 +1455,10 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
     
     def save_model(self, request, obj, form, change):
 
-    
-        obj.distributor = Distributor.objects.get(user__user=request.user)
-        super(DSRWorkAllocationAdmin, self).save_model(request, obj, form, change)
+#	if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():    
+ #       	obj = Distributor.objects.get(user__user=request.user)
+        
+	super(DSRWorkAllocationAdmin, self).save_model(request, obj, form, change)
 
 
 

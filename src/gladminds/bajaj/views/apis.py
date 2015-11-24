@@ -18,7 +18,7 @@ from rest_framework_jwt.settings import api_settings
 
 from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
                             PartPricing, OrderPart, Distributor, OrderPartDetails, Invoices, \
-                            Collection,CollectionDetails,PartsStock
+                           DSRWorkAllocation ,Collection,CollectionDetails,PartsStock
 # from gladminds.core.models import DistributorSalesRep, Retailer,PartModels, CvCategories, \
 #                              OrderPart, DSRWorkAllocation, AlternateParts
 from gladminds.core import constants
@@ -180,6 +180,55 @@ def get_alternateparts(request):
 #         schedule_dict.update({"longitude":schedule.retailer.longitude})
 #         schedules_list.append(schedule_dict)
 #     return Response(schedules_list)
+
+
+def get_schedule(request, dsr_id, date):
+    '''
+    This method gets the schedule(the retailers he has to visit) for today, given the dsr id
+    '''
+    schedule_date = split_date(date)
+    dsr = DistributorSalesRep.objects.filter(distributor_sales_code = dsr_id)
+    schedules = DSRWorkAllocation.objects.filter(date__startswith = \
+                    datetime.date(int(schedule_date[2]),int(schedule_date[1]),int(schedule_date[0])), dsr=dsr)
+                       
+    schedules_list = []
+    for schedule in schedules:
+        schedule_dict = {}
+        schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
+        schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
+        tm = time.strptime(str(schedule.date.time()), "%H:%M:%S")
+        schedule_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
+        schedule_dict.update({"retailer_address":schedule.retailer.user.address})
+        schedule_dict.update({"latitude":schedule.retailer.latitude})
+        schedule_dict.update({"longitude":schedule.retailer.longitude})
+        schedules_list.append(schedule_dict)
+    return Response(schedules_list)
+
+@api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def get_schedule(request, dsr_id, date):
+    '''
+    This method gets the schedule(the retailers he has to visit) for today, given the dsr id
+    '''
+    schedule_date = split_date(date)
+    dsr = DistributorSalesRep.objects.filter(distributor_sales_code = dsr_id)
+    schedules = DSRWorkAllocation.objects.filter(date__startswith = \
+                    datetime.date(int(schedule_date[2]),int(schedule_date[1]),int(schedule_date[0])), dsr=dsr)
+                       
+    schedules_list = []
+    for schedule in schedules:
+        schedule_dict = {}
+        schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
+        schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
+        tm = time.strptime(str(schedule.date.time()), "%H:%M:%S")
+        schedule_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
+        schedule_dict.update({"retailer_address":schedule.retailer.user.address})
+        schedule_dict.update({"latitude":schedule.retailer.latitude})
+        schedule_dict.update({"longitude":schedule.retailer.longitude})
+        schedules_list.append(schedule_dict)
+    return Response(schedules_list)
+
 
 def split_date(date):
     date_array = date.split('-')

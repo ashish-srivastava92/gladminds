@@ -602,8 +602,7 @@ class DSRWorkAllocation(base_models.DSRWorkAllocation):
     
     class Meta(base_models.DSRWorkAllocation.Meta):
         app_label = _APP_NAME
-    def __unicode__(self):
-        return self.distributor
+    
 
 
 
