@@ -1,14 +1,36 @@
 {% extends "admin/change_form.html" %}
-   
 
+{% block content %}
+{{block.super}}
+{{optssss}}jjj
+{% ifequal opts.verbose_name 'distributor' %}
+<div class="suit-tab suit-tab-TAB_NAME">
+
+	<h2 align="left" class="legend">Store and Staff</h2>
+	<p>
+		DSR Count:{{dist_count}}
+	</p>
+	<p>
+		Retailer changeCount:{{retailer_count}}
+	</p>
+</div>
+{% endifequal %}
 
 {% ifequal opts.verbose_name 'orderpart' %}
-    <form action="{% url 'bulk_upload_retailer' %}" method="POST" enctype="multipart/form-data">
-        <table>
-        <tr> <td> Bulk upload of retailer:
-				<input type="file" name="bulk_upload_retailer"> </td> </tr>
-        <tr> <td></td> <td> <input type="submit" value="upload"> </td></tr>
-        </table>
-    </form>
+<form action="{% url 'bulk_upload_retailer' %}" method="POST" enctype="multipart/form-data">
+	<table>
+		<tr>
+			<td> Bulk upload of retailer:
+			<input type="file" name="bulk_upload_retailer">
+			</td>
+		</tr>
+		<tr>
+			<td></td><td>
+			<input type="submit" value="upload">
+			</td>
+		</tr>
+	</table>
+</form>
 {% endifequal %}
-    
+
+{% endblock %}

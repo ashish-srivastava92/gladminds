@@ -22,7 +22,16 @@
        {% if 'Loyalty' not in app.label and  app.models  %}
 
           <li{{ app.is_active|yesno:' class=active,' }}>
-            <a href="{{ app.url }}"{{ app.blank|yesno:' target=_blank,' }}><i class="{% firstof app.icon 'icon-chevron-right' %}"></i>{% trans app.label|capfirst %}
+          
+ 
+          
+          {% if app.label == "DSRs Orders" %}
+ <a href="{{app.url}}" {{ app.blank|yesno:' target=_blank,' }}><i class="{% firstof app.icon 'icon-chevron-right' %}"></i>{% trans app.label|capfirst %}</a>
+                  {% else %}
+                     <a href="{% url 'dsr_orders' %}" {{ app.blank|yesno:' target=_blank,' }}><i class="{% firstof app.icon 'icon-chevron-right' %}"></i>{% trans app.label|capfirst %}</a>
+                  {% endif %}
+          
+        
       {% endif %}
             {% if app.models %}
 			       {% if 'Loyalty' not in app.label and  app.models  %}
@@ -30,7 +39,13 @@
               <ul>
                 {% for model in app.models %}
                   <li{{ model.is_active|yesno:' class=active,' }}>
-                    <a href="{{ model.url }}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a></li>
+                  {% if model.label == "DSRs Orders" %}
+                  <a href="{% url 'dsr_orders' %}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                  {% else %}
+                    <a href="{{ model.url }}"{{ model.blank|yesno:' target=_blank,' }}>{{ model.label }}</a>
+                  {% endif %}
+                 </li>
+                  
                 {% endfor %}
               </ul>
       {% endif %}

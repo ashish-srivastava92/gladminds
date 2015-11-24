@@ -1132,7 +1132,9 @@ class Distributor(BaseModel):
         verbose_name_plural = "Distributors"
 
     def __unicode__(self):
-        return self.distributor_id 
+        return self.distributor_id + ' ' + self.name
+    
+    
 class DistributorStaff(BaseModel):
     '''details of DistributorStaff'''
     distributor_staff_code = models.CharField(max_length=50)
@@ -1258,7 +1260,7 @@ class PartPricing(BaseModel):
     class Meta:
         abstract = True
         db_table = "gm_partpricing"
-        verbose_name_plural = "Part Master"
+        verbose_name_plural = "Parts List"
         
 class CvCategories(BaseModel):
     ''' details of cv categories'''
@@ -1282,7 +1284,7 @@ class Collection(BaseModel):
     class Meta:
         abstract = True
         db_table = "gm_collection"
-        verbose_name_plural = "Collection"
+        verbose_name_plural = "Collections"
         
 class AlternateParts(BaseModel):
     ''' details of alternate spare parts and pricing'''
@@ -1306,7 +1308,7 @@ class OrderPart(BaseModel):
     class Meta:
         abstract = True
         db_table = "gm_orderpart"
-        verbose_name_plural = "Order Part"
+        verbose_name_plural = "Orders"
         
 class Member(BaseModel):
     '''details of Member'''
@@ -2033,3 +2035,64 @@ class OrderDeliveredHistory(BaseModel):
 
 
 
+class District(BaseModel):
+    '''Districts under a brand'''
+    name = models.CharField(max_length=50, unique = True)
+    active = models.BooleanField(default=True)
+    
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_district"
+        verbose_name_plural = "Districts info"
+
+    def __unicode__(self):
+        return self.name
+    
+    
+    
+    
+    
+    
+class DoDetails(BaseModel):
+    ''' details of order history'''
+#     delivered_date = models.DateTimeField(null=True, blank=True)
+    active = models.IntegerField(null=True, blank=True, default=1)   
+    class Meta:
+        abstract = True
+        db_table = "gm_do_details"
+        verbose_name_plural = "Do Details"
+      
+      
+class Invoices(BaseModel):
+   invoice_amount = models.DecimalField(max_digits = 10, decimal_places=6, null=True, blank=True)
+   
+   class Meta:
+        abstract = True
+        db_table = "gm_invoices"
+        verbose_name_plural = "Invoice"
+        
+        
+class InvoicesDetails(BaseModel):
+
+   class Meta:
+        abstract = True
+        db_table = "gm_invoices_details"
+        verbose_name_plural = "Invoice Details"
+  
+  
+class PartsStock(BaseModel):
+
+   class Meta:
+        abstract = True
+        db_table = "gm_parts_stock"
+        verbose_name_plural = "Parts Stock Details"      
+        
+class CollectionDetails(BaseModel):
+       class Meta:
+            abstract = True
+            db_table = "gm_collection_details"
+            verbose_name_plural = "Collection Details"
+        
+
+    
