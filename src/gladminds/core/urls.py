@@ -105,7 +105,7 @@ urlpatterns = patterns('',
     #for mc
     #url(r'^api-token-auth/', 'rest_framework_jwt.views.obtain_jwt_token'),
     url(r'^mc/get_parts/', 'gladminds.bajaj.views.apis.get_parts'),
-    url(r'^mc/get_retailers/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.bajaj.views.apis.get_retailers'),
+#     url(r'^mc/get_retailers/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.bajaj.views.apis.apis'),
     url(r'^mc/api-token-auth/', 'gladminds.bajaj.views.apis.authentication'),
     url(r'^mc/get_retailers/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.bajaj.views.apis.get_retailers'),
     url(r'^mc/get_retailer_profile/retailer_id/(?P<retailer_id>\d+)/$',
@@ -113,13 +113,13 @@ urlpatterns = patterns('',
     
     url(r'^mc/order/$', 'gladminds.core.views.apis.retailer_order'),
     
-    url(r'^mc/day_close_order/dsr_id/(?P<dsr_id>\d+)/$',
-                        'gladminds.bajaj.views.apis.day_close_order'),
+#     url(r'^mc/day_close_order/dsr_id/(?P<dsr_id>\d+)/$',
+#                         'gladminds.bajaj.views.apis.day_close_order'),
     
     url(r'^mc/get_outstanding/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.bajaj.views.apis.get_outstanding'),
     
-    url(r'^mc/get_collection/dsr_id/(?P<dsr_id>\d+)$',
+    url(r'^mc/post_collection/dsr_id/(?P<dsr_id>\d+)$',
                         'gladminds.bajaj.views.apis.get_collection'),
     
     url(r'^mc/get_distributor_for_retailer/retailer_id/(?P<retailer_id>\d+)/$',
@@ -128,12 +128,11 @@ urlpatterns = patterns('',
     url(r'^mc/get_outstanding/dsr_id/(?P<retailer_id>\d+)/$',
                         'gladminds.bajaj.views.apis.get_outstanding'),
     url(r'^mc/get_schedule/dsr_id/(?P<dsr_id>\d+)/date/(?P<date>[-\d]+)/$',
-                        'gladminds.bajaj.views.apis.get_schedule'),
+                       'gladminds.bajaj.views.apis.get_schedule'),
     url(r'^mc/place_order/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.bajaj.views.apis.place_order'),
     url(r'^mc/place_order/retailer_id/(?P<retailer_id>\d+)/$',
                         'gladminds.bajaj.views.apis.retailer_place_order'),
-    
     #end of mc urls
     url(r'^cv/api-token-auth/', 'gladminds.core.views.apis.authentication'),
     url(r'^cv/get_retailers/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.core.views.apis.get_retailers'),

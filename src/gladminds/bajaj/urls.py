@@ -18,9 +18,7 @@ urlpatterns = patterns('',
     # #url(r'^mc/place_order/dsr_id/(?P<dsr_id>\d+)$', 'gladminds.bajaj.views.apis.place_order'),
     # 
     # url(r'^mc/order/$', 'gladminds.core.views.apis.retailer_order'),
-    # 
-    # url(r'^mc/day_close_order/dsr_id/(?P<dsr_id>\d+)/$',
-    #                     'gladminds.bajaj.views.apis.day_close_order'),
+    #
     # 
     # 
     # url(r'^mc/get_outstanding/dsr_id/(?P<dsr_id>\d+)/$',
@@ -90,9 +88,11 @@ urlpatterns = patterns('',
     url(r'^get_districts/$', 'gladminds.bajaj.views.views.get_districts', name='get_districts'),
     url(r'^save_order_history/$', 'gladminds.bajaj.views.views.save_order_history', name='save_order_history'),
     
-    url(r'^ordered_part_details/(?P<part_number>\w+)/$', 'gladminds.bajaj.views.views.ordered_part_details', name='ordered_part_details'),
+    url(r'^ordered_part_details/(?P<part_number>\w+)/(?P<order_id>\w+)/$', 'gladminds.bajaj.views.views.ordered_part_details', name='ordered_part_details'),
     
+    url(r'^admin/upload-part-sfa/$', 'gladminds.bajaj.views.upload_part_pricing',name="upload_part_pricing"),
     
+    url(r'^admin/retailer/orders/$','gladminds.bajaj.views.views.dsr_orders', name='dsr_orders'),
     url(r'^admin/retailer/approve_retailer/retailer_id/(?P<retailer_id>\d+)/$', 'gladminds.bajaj.views.views.approve_retailer', name='approve_retailer'),
 #     url(r'^admin/bajaj/view_orders/(?P<order_id>\d+)$', 'gladminds.bajaj.views.views.list_orders', name='list_orders'),
 )

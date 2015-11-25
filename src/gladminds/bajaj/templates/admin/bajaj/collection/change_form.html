@@ -27,22 +27,21 @@
 
 <p><b>Order ID:{{original.id}}</b></p>
 
- <form action="{% url 'save_order_history' %}" method="POST" enctyype="multipart/form-data">
+ <!-- <form action="{% url 'save_order_history' %}" method="POST" enctyype="multipart/form-data"> -->
 	<table class="table table-striped table-bordered table-responsive	" >
         <thead>
 				<tr>
 					<th> </th>
-				    <th class="text-center">PartNumber</th>
-				    	 <th class="text-center">Available Qty</th>
-					<th class="text-center">Ordered Qty</th>
-					<th class="text-center">MRP</th>
+				    <th class="text-center">Order ID</th>
+					<th class="text-center">Do Number</th>
+					<th class="text-center">Part Name</th>
+					<th class="text-center">Quantity</th>
 					<th class="text-center">Line Total</th>
-					<th class="text-center">Pending</th>
-				    <th class="text-center">Delivery Qty</th>
-			
+				    <th class="text-center">Amount</th>
+				    <!-- <th class="text-center">Available Qty</th>
 				    <th class="text-center">Delivered date</th>
-				    <td class="text-center">Ordered Date</td>
-				</tr>
+				    <td class="text-center">Ordered Date</td> -->
+				</tr> 
 				
 			</thead>
 			
@@ -52,37 +51,21 @@
         	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
 				{% for each in data %}
 				<tr> 
-					<td> <input type="checkbox" class="chk-box" value="" rel="{{each.part_number}}"/></td>
-					<td class="text-center"><a  data-toggle="modal" data-target="#myModal" href="javascript:void(0)" onclick="loadOrderDetails('{% url 'ordered_part_details' each.part_number order_id %}','{{each.part_number}}','{{each.part_description}}')">{{each.part_number}}</a></td>
-							<td class="text-center">{{each.available_quantity}}</td>
+			
 					<td class="text-center">{{each.quantity}}</td>
 					<td class="text-center">{{each.mrp}}</td>
 					<td class="text-center">{{each.line_total}}</td>
-					{% if each.pending == 0 %}
-					
 					<td class="text-center">{{each.pending }}</td>
-					{% else %}
-					<td class="text-center"><font color="red">{{each.pending }}</font></td>
-					{% endif %}
-					<td class="text-center"><input type ="text" required="true"  autocomplete="off" style="width:50px;text-align:center;" class="delivered-stock" name="delivered_stock" disabled/></td>
-			
-					<td class="text-center">
-						<input type="text" required="true" autocomplete="off" style="width:100px;text-align:center;" class="datepick" name="delivered_date" disabled>
-						</td>
-
-				<td>{{ original.order_date }}</td>
+					
+				    <td>{{ original.order_date }}</td>
 				</tr>
 			
 					</tbody>
 				
 					{% endfor %}
-					<input type="hidden" id="order_id"  name="order_id" value='{{order_id}}' >
-						<input type="hidden" id="orders_length" value='{{orders_length}}' name="orders_length"  >
+		
 		</table>
-		<button type="submit" class="btn btn-primary" id="_savesubmit1">
-					Submit
-				</button></td>
- </form>
+
  <script>
 
 	$(document).ready(function() {

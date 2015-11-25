@@ -17,7 +17,8 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework_jwt.settings import api_settings
 
 from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
-                            PartPricing, OrderPart, Distributor, OrderPartDetails
+                            PartPricing, OrderPart, Distributor, OrderPartDetails, Invoices, \
+                           DSRWorkAllocation ,Collection,CollectionDetails,PartsStock
 # from gladminds.core.models import DistributorSalesRep, Retailer,PartModels, CvCategories, \
 #                              OrderPart, DSRWorkAllocation, AlternateParts
 from gladminds.core import constants
@@ -68,6 +69,7 @@ def get_retailers(request, dsr_id):
     '''
     This method returns all the retailers of the distributor given the dsr id 
     '''
+    
     distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
     retailers = Retailer.objects.filter(distributor = distributor.distributor, \
                                 approved = constants.STATUS['APPROVED'] )
@@ -113,17 +115,26 @@ def get_parts(request):
     '''
     This method returns all the spare parts details
     '''
+    print "gladminds"
     parts = PartPricing.objects.filter(active = True)
     parts_list =[]
     for part in parts:
+        print part.part_number
+        available_quantity = PartsStock.objects.get(part_number_id = part.id ).available_quantity
+        print available_quantity
         parts_dict = {}
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
-        parts_dict.update({"part_category":part.category.category_name})
-        parts_dict.update({"part_model":part.category.model.model_name})
+        parts_dict.update({"part_sub_category":part.subcategory.name})
+        parts_dict.update({"part_products":part.products})
+        parts_dict.update({"part_available_quantity":available_quantity})
         parts_dict.update({"mrp":part.mrp})
+        
+        parts_dict.update({"moq":part.moq})
         parts_list.append(parts_dict)
+    print parts_list
     return Response(parts_list)
+
 
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
@@ -143,73 +154,40 @@ def get_alternateparts(request):
         parts_list.append(parts_dict)
     return Response(parts_list)
 
-@api_view(['POST'])
-# @authentication_classes((JSONWebTokenAuthentication,))
-# @permission_classes((IsAuthenticated,))
-def dsr_order(request, dsr_id, retailer_id):
-    '''
-    This method gets the orders placed by the dsr on behalf of the retailer and puts
-    it in the database
-    '''
-    parts = json.loads(request.body)
-    total = parts['total_price']
-    date = parts['date']
-    items = parts['order_items']
-    for item in items:
-        orderpart = OrderPart()
-        dd, mm, yyyy = split_date(parts['date'])
-        orderpart.order_date = parts['date']
-        orderpart.order_id = parts['order_id']
-        orderpart.quantity = item['qty']
-        orderpart.price = item['unit_price']
-        orderpart.line_total = item['sub_total']
-        orderpart.total_price = float(total) #total_price
-        orderpart.part = PartPricing.objects.get(part_number = item['part_number'])
-        orderpart.dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-        retailer = Retailer.objects.get(retailer_code = retailer_id)
-        orderpart.retailer = retailer
-        orderpart.distributor = retailer.distributor
-        orderpart.save()
-    return Response({'message': 'Order(s) has been placed successfully', 'status':1})
-    
+# @api_view(['GET'])
+# # # @authentication_classes((JSONWebTokenAuthentication,))
+# # # @permission_classes((IsAuthenticated,))
+# def get_schedule(request, dsr_id, date):
+#     '''
+#     This method gets the schedule(the retailers he has to visit) for today, given the dsr id
+#     '''
+#     schedule_date = split_date(date)
+#     dsr = DistributorSalesRep.objects.filter(distributor_sales_code = dsr_id)
+#     #schedules = DSRWorkAllocation.objects.filter(date__year = schedule_date[2],\
+#     #                         date__month = schedule_date[1], date__day = schedule_date[0])
+#     schedules = DSRWorkAllocation.objects.filter(date__startswith = \
+#                     datetime.date(int(schedule_date[2]),int(schedule_date[1]),int(schedule_date[0])), dsr=dsr)
+#                        
+#     schedules_list = []
+#     for schedule in schedules:
+#         schedule_dict = {}
+#         schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
+#         schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
+#         tm = time.strptime(str(schedule.date.time()), "%H:%M:%S")
+#         schedule_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
+#         schedule_dict.update({"retailer_address":schedule.retailer.user.address})
+#         schedule_dict.update({"latitude":schedule.retailer.latitude})
+#         schedule_dict.update({"longitude":schedule.retailer.longitude})
+#         schedules_list.append(schedule_dict)
+#     return Response(schedules_list)
 
-@api_view(['POST'])
-# @authentication_classes((JSONWebTokenAuthentication,))
-# @permission_classes((IsAuthenticated,))
-def retailer_order(request, retailer_id):
-    '''
-    This method gets the orders placed by the retailer and puts it in the database
-    '''
-    parts = json.loads(request.body)
-    date = parts['date']
-    items = parts['order_items']
-    for item in items:
-        orderpart = OrderPart()
-        dd, mm, yyyy = split_date(parts['date'])
-        orderpart.order_date = parts['date']
-        orderpart.order_id = parts['order_id']
-        orderpart.quantity = item['qty']
-        orderpart.price = item['unit_price']
-        orderpart.line_total = item['sub_total']
-        orderpart.total_price = parts['total_price']
-        orderpart.part = PartPricing.objects.get(part_number = item['part_number'])
-        retailer = Retailer.objects.get(retailer_code = retailer_id)
-        orderpart.retailer = retailer
-        orderpart.distributor = retailer.distributor
-        orderpart.save()
-    return Response({'message': 'Order(s) has been placed successfully', 'status':1})
 
-@api_view(['GET'])
-# # @authentication_classes((JSONWebTokenAuthentication,))
-# # @permission_classes((IsAuthenticated,))
 def get_schedule(request, dsr_id, date):
     '''
     This method gets the schedule(the retailers he has to visit) for today, given the dsr id
     '''
     schedule_date = split_date(date)
     dsr = DistributorSalesRep.objects.filter(distributor_sales_code = dsr_id)
-    #schedules = DSRWorkAllocation.objects.filter(date__year = schedule_date[2],\
-    #                         date__month = schedule_date[1], date__day = schedule_date[0])
     schedules = DSRWorkAllocation.objects.filter(date__startswith = \
                     datetime.date(int(schedule_date[2]),int(schedule_date[1]),int(schedule_date[0])), dsr=dsr)
                        
@@ -229,16 +207,29 @@ def get_schedule(request, dsr_id, date):
 @api_view(['GET'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
-def get_retailer_transaction(request):
+def get_schedule(request, dsr_id, date):
     '''
-    This method returns retailer transaction details like paid amount, outstanding, cheque number, etc
-    given the retailer Id
+    This method gets the schedule(the retailers he has to visit) for today, given the dsr id
     '''
-    
-    return Response({'retailer': 'retailer id'})
-    #return HttpResponse(json.dumps({'message': 'Order(s) has been placed successfully', 'status':1}), \
-     #                   content_type="application/json")
-    
+    schedule_date = split_date(date)
+    dsr = DistributorSalesRep.objects.filter(distributor_sales_code = dsr_id)
+    schedules = DSRWorkAllocation.objects.filter(date__startswith = \
+                    datetime.date(int(schedule_date[2]),int(schedule_date[1]),int(schedule_date[0])), dsr=dsr)
+                       
+    schedules_list = []
+    for schedule in schedules:
+        schedule_dict = {}
+        schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
+        schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
+        tm = time.strptime(str(schedule.date.time()), "%H:%M:%S")
+        schedule_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
+        schedule_dict.update({"retailer_address":schedule.retailer.user.address})
+        schedule_dict.update({"latitude":schedule.retailer.latitude})
+        schedule_dict.update({"longitude":schedule.retailer.longitude})
+        schedules_list.append(schedule_dict)
+    return Response(schedules_list)
+
+
 def split_date(date):
     date_array = date.split('-')
     dd = date_array[2]
@@ -257,16 +248,17 @@ def place_order(request, dsr_id):
     parts = json.loads(request.body)
     
     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-    
-    
     if dsr:
         for order in parts :
             orderpart = OrderPart()
+            
+            
             orderpart.dsr = dsr
             retailer = Retailer.objects.get(retailer_code = order['retailer_id'])
             orderpart.retailer = retailer
-            orderpart.order_date = order['date']
             orderpart.order_date = datetime.datetime.now()
+            #orderpart.order_date = datetime.datetime.now()
+            orderpart.order_placed_by = order['order_placed_by']
             orderpart.save()
             #push all the items into the orderpart details
             for item in order['order_items']:
@@ -276,6 +268,7 @@ def place_order(request, dsr_id):
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
+                print orderpart_details.line_total
                 orderpart_details.save()
     return Response({'message': 'Order updated successfully', 'status':1})
 
@@ -288,13 +281,13 @@ def retailer_place_order(request, retailer_id):
     it in the database
     '''
     parts = json.loads(request.body)
-    
     for order in parts :
             orderpart = OrderPart()
             retailer = Retailer.objects.get(retailer_code = retailer_id)
             orderpart.retailer = retailer
             orderpart.distributor = Distributor.objects.get(distributor_id = order['distributor_id'])
             orderpart.order_date = order['date']
+            orderpart.order_placed_by = order['order_placed_by']
             #orderpart.order_date = datetime.datetime.now()
             orderpart.save()
             #push all the items into the orderpart details
@@ -314,25 +307,44 @@ def retailer_place_order(request, retailer_id):
 # # @permission_classes((IsAuthenticated,))
 def get_outstanding(request, dsr_id):
     '''
-    This method returns retailer transaction details like paid amount, outstanding, cheque number, etc
-    given the retailer Id
-    '''
-    retailer_detail = DSRWorkAllocation.objects.filter(dsr = dsr_id)
-    payment_list = []
-    payment_dict = {}
-    for retailer in retailer_detail:
-        collection_data  =Collection.objects.filter(retailer = retailer.retailer)
-        
-        for collection in collection_data:
-            payment_dict ={
-                'invoice_id':collection.invoice_number,
-                'retailer_id':collection.retailer_id,
-                'invoice_created_date':collection.created_date,
-                'invoice_amount':collection.invoice_amount,
-            }
-            payment_list.append(payment_dict)
-            
-    return Response(payment_list)
+    This method returns the outstanding amount of all the retailers under the distributor pertaining
+    to the dsr '''
+    
+    dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+    retailers = Retailer.objects.filter(distributor = dsr.distributor)
+    retailer_list = []
+    
+    #for a particular retailer, get all the invoices and total the invoice amount
+    for retailer in retailers:
+        invoices = Invoices.objects.filter(retailer = retailer)
+        if invoices:
+            for invoice in invoices:
+                retailer_dict = {}
+                outstanding = 0
+                collection = 0
+                outstanding = outstanding + invoice.invoice_amount
+                retailer_dict.update({'retailer_id':retailer.retailer_code})
+                retailer_dict.update({'invoice_id': invoice.id})
+                retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
+                tm = time.strptime(str(invoice.invoice_date.time()), "%H:%M:%S")
+                retailer_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
+                #get the collections for that invoice
+                
+                
+                collection_objs = Collection.objects.filter(invoice_id = invoice.id)
+                for each in collection_objs:
+                   
+                    collections = CollectionDetails.objects.filter(collection_id = each.id)
+                
+                    print collections,"collections"
+                    if collections:
+                        for each_collections in collections:
+                            collection = collection + each_collections.collected_amount
+                    outstanding = outstanding - collection
+                    retailer_dict.update({'outstanding':outstanding})
+                    retailer_list.append(retailer_dict)
+                    print retailer_list
+    return Response(retailer_list)
 
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
@@ -366,13 +378,13 @@ def get_distributor_for_retailer(request, retailer_id):
 # # @permission_classes((IsAuthenticated,))
 def get_collection(request, dsr_id):
     '''
-    This method returns retailer transaction details like paid amount, outstanding, cheque number, etc
-    given the retailer Id
+    This method gets the collected amount from each retailer by the dsr and updates the collection
+    table for each retailer
     '''
     collection_body = json.loads(request.body)
     retailer_id = collection_body['retailer_id']
     collected_amount = collection_body['amount']
-    amount_collected_date  =collection_body['amount_collected_date']
+    amount_collected_date = collection_body['amount_collected_date']
     retailer_detail = Collection.objects.filter(retailer = retailer_id)
     
     for outstanding in retailer_detail:
@@ -384,38 +396,39 @@ def get_collection(request, dsr_id):
         outstanding.save()
     return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
 
-@api_view(['POST'])
-# @authentication_classes((JSONWebTokenAuthentication,))
-# @permission_classes((IsAuthenticated,))
-def day_close_order(request, dsr_id):
-    '''
-    This method gets the orders placed by the dsr on behalf of the retailer and puts
-    it in the database
-    '''
-    parts = json.loads(request.body)
-    
-    for order_list in parts['dayclose_order_list']:
-        for order_items in order_list['order_items']:
-            orderpart = OrderPart()
-            orderpart.order_id = order_list['order_number']
-            orderpart.quantity = order_items['item_qty']
-            orderpart.price = order_items['unit_price']
-            orderpart.line_total = order_items['item_sub_total']
-            orderpart.total_amount = float(order_list['total_price']) #total_price
-            orderpart.part = PartMasterCv.objects.get(part_number = order_items['item_number'])
-            orderpart.dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-            retailer = Retailer.objects.get(retailer_code = order_list['retailer_id'])
-            orderpart.retailer = retailer
-            orderpart.distributor = retailer.distributor
-            orderpart.save()
-    return Response({'message': 'Order(s) has been placed successfully', 'status':1})
-    
-    
+# @api_view(['POST'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+# def day_close_order(request, dsr_id):
+#     '''
+#     This method gets the orders placed by the dsr on behalf of the retailer and puts
+#     it in the database
+#     '''
+#     parts = json.loads(request.body)
+#     
+#     for order_list in parts['dayclose_order_list']:
+#         for order_items in order_list['order_items']:
+#             orderpart = OrderPart()
+#             orderpart.order_id = order_list['order_number']
+#             orderpart.quantity = order_items['item_qty']
+#             orderpart.price = order_items['unit_price']
+#             orderpart.line_total = order_items['item_sub_total']
+#             orderpart.total_amount = float(order_list['total_price']) #total_price
+#             orderpart.part = PartMasterCv.objects.get(part_number = order_items['item_number'])
+#             orderpart.dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+#             retailer = Retailer.objects.get(retailer_code = order_list['retailer_id'])
+#             orderpart.retailer = retailer
+#             orderpart.distributor = retailer.distributor
+#             orderpart.save()
+#     return Response({'message': 'Order(s) has been placed successfully', 'status':1})
     
     
-
-
+    
     
 
+
     
+
+    
+
 

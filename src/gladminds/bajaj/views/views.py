@@ -44,13 +44,15 @@ from gladminds.core.services.message_template import get_template
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
 from gladminds.core.auth import otp_handler
-from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor,City,State,OrderPartDetails,PartPricing,OrderDeliveredHistory
+from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor,District,State,OrderPartDetails,\
+PartPricing,OrderDeliveredHistory,DoDetails,PartsStock
+
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template import loader
 from django.template.context import Context
 from gladminds.core.managers.mail import send_email
 
-
+from django.contrib import messages
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
@@ -66,8 +68,10 @@ def get_user_info(request):
     
 def get_districts(request):
     state = request.GET.get('selected_state')
+    print state
     state_obj = State.objects.get(state_code = state )
-    districts = City.objects.filter(state=state_obj.id).values("city","id")
+    districts = District.objects.filter(state=state_obj.id).values("name","id")
+    print districts
     return HttpResponse(json.dumps(list(districts), cls=DjangoJSONEncoder), content_type="application/json")
     
 # def list_orders(request,order_id):
@@ -88,51 +92,98 @@ def get_districts(request):
 #     
      
 def save_order_history(request):
-    print request.POST
-#     dates = request.POST["delivered_date"]
-    len =  request.POST["orders_length"]
+    stock =  request.POST.getlist("delivered_stock")
     order_id =  request.POST["order_id"]
-    print order_id,"oooooooooooooooooo"
-    print len,"lennnn"
-    total_amount = 0
-    for each in range(1,int(len)+1):
-        print each
-        delivered_stock = request.POST["delivered_stock_"+str(each)]
-        date = request.POST["delivered_date_"+str(each)]
-        part_number = request.POST["part_number_"+str(each)]
-        line_total = request.POST["line_total_"+str(each)]
-        part_obj = PartPricing.objects.get(part_number = part_number)
+    total_amount = 0    
+    
+    do_obj = DoDetails(order_id = order_id)
+    do_obj.save(using = settings.BRAND)
+    print do_obj.id
+    
+    for each in range(0,int(len(stock))):
+        delivered_stock = request.POST.getlist("delivered_stock")[each]
+        date = request.POST.getlist("delivered_date")[each]
+        part_number = request.POST.getlist("part_number")[each]
+        part_pricing_obj = PartPricing.objects.get(part_number = part_number)
+        part_obj = PartsStock.objects.get(part_number = part_pricing_obj.id)
         part_obj.available_quantity = int(part_obj.available_quantity)-int(delivered_stock)
         part_obj.save(using = settings.BRAND)
-#         total_amount +=line_total
-#         part_num = part_obj[0].part_number
-        print part_obj,"nummm"
-        print date,"datess"
-        print delivered_stock,"stock"
         ordered_date = datetime.datetime.strptime(date, "%m/%d/%Y") 
-        print ordered_date
-        order_obj = OrderDeliveredHistory(delivered_date = ordered_date,quantity = delivered_stock,order_id= order_id,part_number = part_obj)
+        
+        order_obj = OrderDeliveredHistory(delivered_date = ordered_date,delivered_quantity = delivered_stock,order_id= order_id,part_number = part_pricing_obj,do_id=do_obj.id )
         order_obj.save(using = settings.BRAND)
-        
-        
-        
-        
-        
-    return HttpResponseRedirect('/admin/bajaj/orderpart/')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
      
-def ordered_part_details(request,part_number):
+     
+def dsr_orders(request):    
+    return HttpResponseRedirect('/admin/bajaj/orderpart/'+ "?orders=dsr")
 
-    print part_number  
+
+def ordered_part_details(request,part_number,order_id):
     part_obj = PartPricing.objects.get(part_number = part_number)
-    print part_obj.description
-#     orders_obj = OrderPartDetails.objects.select_related("part_number","order").filter(order = order_id)
-    ordered_part_details = OrderDeliveredHistory.objects.filter(part_number = part_obj.id).values("id","order_id","quantity","part_number_id","delivered_date")
-    print ordered_part_details
-    
+    ordered_part_details = OrderDeliveredHistory.objects.filter(part_number = part_obj.id,order_id = order_id).values("id","order_id","delivered_quantity","part_number_id","delivered_date")
     context={"data":ordered_part_details}
     template = 'admin/bajaj/ordered_part_details.html'
     return render(request,template,{"data":ordered_part_details,"part_number":part_number,"part_description":part_obj.description})
+
+
+import csv
+def upload_part_pricing(request):
+    '''
+    This method uploads stock availability in partpricing table
+    '''
+    #upload the file to the upload_bajaj folder
      
+    dist_id = Distributor.objects.get(user__user=request.user)
+    part_pricing_list =[]
+    msg =""
+    flag=0
+    full_path = handle_uploaded_file(request.FILES['upload_part_pricing'])
+    with open(full_path) as csvfile:
+        partreader = csv.DictReader(csvfile)
+        next(partreader)
+        for row_list in partreader:
+            part_pricing_list.append(row_list)            
+        for part in part_pricing_list:
+            print "part==========",part['Part Number']
+            try:
+                part_pricing_object = PartPricing.objects.get(part_number=part['Part Number'])
+                print part_pricing_object,"part"
+                print dist_id,"disttttttttttttt"
+                try:
+                    print "existing"
+                    print dist_id.id,"disttt"
+                    print part_pricing_object.id,"obj"
+                    part_stock_object = PartsStock.objects.filter(part_number_id = part_pricing_object.id,distributor_id= dist_id).update(available_quantity = part['Available Quantity'])
+#                     part_stock_object.available_quantity = part['Available Quantity']
+#                     part_stock_object.save(using=settings.BRAND)
+                except Exception as ex:
+                    print ex,"ooooo"
+                    part_stock_obj = PartsStock(part_number =  part_pricing_object,available_quantity = part['Available Quantity'] ,distributor = dist_id )
+                    part_stock_obj.save(using=settings.BRAND)
+                
+            except Exception as ex:
+                flag=1
+                msg=msg+part['Part Number']+","
+        if flag==1:
+            messages.error(request,'Part Number {0} does not exist'.format(msg))
+        else:
+            messages.success(request, "Stock updated successfully")
+            
+        return HttpResponseRedirect('/admin/bajaj/partpricing/')
+
+ 
+def handle_uploaded_file(uploaded_file):
+    '''
+    This method gets the uploaded file and writes it in the upload dir under the same name
+   '''
+    path = settings.UPLOAD_DIR + uploaded_file.name
+    with open(path, 'wb+') as destination:
+        for chunk in uploaded_file.chunks():
+            destination.write(chunk)
+    return path
+
+
 @login_required
 def approve_retailer(request, retailer_id):
     '''
@@ -152,9 +203,11 @@ def auth_login(request, provider):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
+        print password,"passss"
         user = authenticate(username=username, password=password)
         if user is not None:
             if user.is_active:
+                
                 login(request, user)
                 return HttpResponseRedirect('/aftersell/provider/redirect')
     return HttpResponseRedirect(request.path_info+'?auth_error=true')

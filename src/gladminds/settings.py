@@ -15,6 +15,8 @@ DATA_CSV_PATH = os.path.join(BASE_DIR, "src/data")
 LOG_BASE_PATH = '/var/log/gladminds'
 UPLOAD_DIR = os.path.join(PROJECT_DIR, "upload_bajaj/")
 
+UPLOAD_DIR_1 = os.path.join(PROJECT_DIR, "upload_data/")
+
 TIMEZONE = 'Asia/Kolkata'
 
 ALLOWED_HOSTS = ['*']
@@ -107,6 +109,10 @@ SUIT_CONFIG = {
                      {'model': 'retailer',
                      'label': 'Retailer'},
                     
+                    
+                    
+                    
+                    
    
                     
                     
@@ -161,12 +167,7 @@ SUIT_CONFIG = {
                      'label': 'Loyalty Sla'},
                                   
             
-            
-                       
-#                   {'model': 'distributorsalesrep',
-#                      'label': 'Distributor Sales Rep'},
-#                   {'model': 'retailer',
-#                      'label': 'Retailer'},
+ 
                    
                    )},
         {'app': 'bajaj', 'label': 'CTS', 'icon': ' icon-folder-open',
@@ -205,7 +206,7 @@ SUIT_CONFIG = {
                      {'model': 'partmastercv',
                       'label': 'PartMasterCv'},
                       {'model': 'partpricing',
-                      'label': 'PartPricing'},
+                      'label': 'Parts List'},
                      )
                        
           },
@@ -215,12 +216,18 @@ SUIT_CONFIG = {
                      {'model': 'orderpart',
                       'label': 'DSRs Orders'},
                           {'model': 'orderpart',
-                      'label': 'Retailers Orders'},)
-          },
+                      'label': 'Retailers Orders'},
+                     {'model': 'dsrworkallocation',
+                      'label': 'DSR Work Allocation'}
+                    )
+                    },
+                    
+#               
+          
         {'app': 'bajaj', 'label': 'Collections', 'icon': ' icon-folder-open',
          'models':(
                   
-                    {'model': 'collection',
+                    {'model': 'collectiondetails',
                      'label': 'Distributor Collection'},
                  
        
@@ -238,23 +245,31 @@ MANAGERS = ADMINS
 DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
 
 # for localhost
+
 # DB_USER = os.environ.get('DB_USER', 'root')
 # DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
 # DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
 
-DB_USER = os.environ.get('DB_USER', 'aftersell')
-DB_HOST = os.environ.get('DB_HOST', 'aftersell-api.chnnvvffqwop.us-east-1.rds.amazonaws.com')
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
+# DB_USER = os.environ.get('DB_USER', 'aftersell')
+# DB_HOST = os.environ.get('DB_HOST', 'aftersell-api.chnnvvffqwop.us-east-1.rds.amazonaws.com')
+# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
 
 # for server
+
+DB_USER = os.environ.get('DB_USER', 'root')
+DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
+
+# # for server
+
 # DB_USER = os.environ.get('DB_USER', 'gladminds')
 # DB_HOST = os.environ.get('DB_HOST', 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com')
 # DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladmindsqa2')
 
 # for bajaj MC
-# DB_USER = os.environ.get('DB_USER', 'bajaj')
-# DB_HOST = os.environ.get('DB_HOST', 'bajaj.chnnvvffqwop.us-east-1.rds.amazonaws.com')
-# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Bajajsfa')
+# DB_USER = os.environ.get('DB_USER', 'aftersell')
+# DB_HOST = os.environ.get('DB_HOST', 'aftersell-api.chnnvvffqwop.us-east-1.rds.amazonaws.com')
+# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
 
 # for bajaj CV
 # DB_USER = os.environ.get('DB_USER', 'bajajcv')
@@ -525,7 +540,6 @@ LOGGING = {
             'level': 'DEBUG',
             'filename': '/var/log/gladminds/sql.log',
             'class': 'logging.FileHandler',
-            'formatter': 'verbose',
         },
         'gladminds_logs': {
             'level': 'INFO',
