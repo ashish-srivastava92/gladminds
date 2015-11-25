@@ -205,8 +205,6 @@ SUIT_CONFIG = {
                    
                      {'model': 'partmastercv',
                       'label': 'PartMasterCv'},
-                      {'model': 'partpricing',
-                      'label': 'Parts List'},
                      )
                        
           },

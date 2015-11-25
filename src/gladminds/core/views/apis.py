@@ -21,10 +21,14 @@ from rest_framework_jwt.settings import api_settings
 
 from gladminds.core.models import DistributorSalesRep, Retailer, CvCategories, \
                             OrderPart, DSRWorkAllocation, AlternateParts, Collection, \
-                            PartMasterCv,RetailerCollection
+                            PartMasterCv,RetailerCollection,PartsStock,DSRWorkAllocation,OrderPartDetails
+                            
 # from gladminds.bajaj.models import Distributor, DistributorSalesRep, Retailer,\
 #             PartMasterCv, CvCategories, OrderPartDetails,OrderPart
-
+# from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
+#                             PartPricing, OrderPart, Distributor, OrderPartDetails, Invoices, \
+#                             Collection,CollectionDetails,PartsStock,DSRWorkAllocation
+from gladminds.core.models import PartMasterCv,OrderPart
 
                             # PartMasterCv,PartPricing
 
@@ -124,37 +128,70 @@ from django.conf import settings
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
+# def place_order(request, dsr_id):
+#     '''
+#     This method gets the orders placed by the dsr on behalf of the retailer and puts
+#     it in the database
+#     '''
+#     parts = json.loads(request.body)
+#     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+#     print "================dsr",dsr.id
+#     id = dsr.id
+#     if dsr:
+#         for order in parts :
+# #             try:
+#                 orderpart = OrderPart(dsr =  dsr)
+# #                 orderpart.save(using=settings.BRAND)
+#                 print "-[[o id============",orderpart.id
+# #             except Exception as ex:
+# #                 print "ex=============",ex
+#                 orderpart.dsr = dsr
+#                 orderpart.order_date = datetime.datetime.now()
+#                 print settings.BRAND,"bradnndddddddddddddd"
+#                 orderpart.save(using=settings.BRAND)
+#                 for item in order['order_items']:
+#                     part_number = item['part_number']
+#                     quantity = item['qty']
+#                     orderpart_details = OrderPartDetails()
+#                     orderpart_details.part_number = part_number
+#                     orderpart_details.quantity = quantity
+#                     orderpart_details.order_id = orderpart.id
+#                     orderpart_details.save()
+#                 return Response({'message': 'Order updated successfully', 'status':1})
+        
+
 def place_order(request, dsr_id):
     '''
     This method gets the orders placed by the dsr on behalf of the retailer and puts
     it in the database
     '''
     parts = json.loads(request.body)
+    print parts
     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-    print "================dsr",dsr.id
-    id = dsr.id
     if dsr:
         for order in parts :
-#             try:
-                orderpart = OrderPart(dsr =  dsr)
-#                 orderpart.save(using=settings.BRAND)
-                print "-[[o id============",orderpart.id
-#             except Exception as ex:
-#                 print "ex=============",ex
-                orderpart.dsr = dsr
-                orderpart.order_date = datetime.datetime.now()
-                print settings.BRAND,"bradnndddddddddddddd"
-                orderpart.save(using=settings.BRAND)
-                for item in order['order_items']:
-                    part_number = item['part_number']
-                    quantity = item['qty']
-                    orderpart_details = OrderPartDetails()
-                    orderpart_details.part_number = part_number
-                    orderpart_details.quantity = quantity
-                    orderpart_details.order_id = orderpart.id
-                    orderpart_details.save()
-                return Response({'message': 'Order updated successfully', 'status':1})
-        
+            orderpart = OrderPart()
+            
+            
+            orderpart.dsr = dsr
+            retailer = Retailer.objects.get(retailer_code = order['retailer_id'])
+            orderpart.retailer = retailer
+            orderpart.order_date = datetime.datetime.now()
+            #orderpart.order_date = datetime.datetime.now()
+            orderpart.order_placed_by = order['order_placed_by']
+            orderpart.save()
+            #push all the items into the orderpart details
+            for item in order['order_items']:
+                orderpart_details = OrderPartDetails()
+                orderpart_details.part_number = PartMasterCv.objects.\
+                                                get(part_number = item['part_number'])
+                orderpart_details.quantity = item['qty']
+                orderpart_details.order = orderpart
+                orderpart_details.line_total = item['line_total']
+                print orderpart_details.line_total
+                orderpart_details.save()
+    return Response({'message': 'Order updated successfully', 'status':1})
+
 
 
 @api_view(['GET'])

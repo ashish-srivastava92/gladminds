@@ -878,7 +878,7 @@ class OrderPartAdmin(GmModelAdmin):
     # list_display = ('order_id', 'retailer', 'dsr_id', 'part_id', 'part_name', 'price', 'quantity',
     #                 'line_total', 'accept', 'order_date')
     list_display = ('order_link', 'retailer', 'dsr_id',
-                   'total_amount', 'accept', 'order_date')
+                'accept', 'order_date')
     list_filter = ['order_date', 'distributor', 'dsr']
     
     def order_link(self, obj):

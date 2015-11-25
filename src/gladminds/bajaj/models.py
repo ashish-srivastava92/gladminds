@@ -602,8 +602,8 @@ class DSRWorkAllocation(base_models.DSRWorkAllocation):
     
     class Meta(base_models.DSRWorkAllocation.Meta):
         app_label = _APP_NAME
-    def __unicode__(self):
-        return self.distributor
+#     def __unicode__(self):
+#         return self.distributor
 
 
 
@@ -662,6 +662,39 @@ class SubCategories(base_models.SubCategories):
          
     def __unicode__(self):
         return self.name
+ 
+ 
+class CvCategories(base_models.CvCategories):
+    ''' details of alternate parts and pricing '''
+    name = models.CharField(max_length = 255)
+    usps = models.TextField(null=True,blank=True)
+    importance = models.TextField(null=True,blank=True)
+    image_url = models.CharField(max_length = 255, null=True,blank=True)
+    active = models.BooleanField(default = True)
+    
+    class Meta(base_models.CvCategories.Meta):
+        app_label = _APP_NAME
+        
+
+class PartMasterCv(base_models.PartMasterCv):
+    ''' details of spare parts and pricing '''
+    bajaj_id = models.IntegerField()
+    part_number = models.CharField(max_length = 255)
+    description = models.TextField()
+    part_model = models.TextField()
+    valid_from = models.DateField()
+    part_models = models.CharField(max_length = 255)
+    category = models.ForeignKey(CvCategories)
+    mrp = models.CharField(max_length = 255)
+    active = models.BooleanField(default = True)
+    available = models.CharField(max_length=25)
+    pending = models.CharField(max_length=25)
+    
+    class Meta(base_models.PartMasterCv.Meta):
+        app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.description
      
 # parts model 
 # class Parts(base_models.Parts):
@@ -945,7 +978,7 @@ class OrderPartDetails(base_models.OrderPartDetails):
     quantity = models.IntegerField(null=True, blank=True)
     active = models.IntegerField(null=True, blank=True, default=1)
     order = models.ForeignKey(OrderPart)
-    line_total = models.DecimalField(max_digits = 20, decimal_places=6, null=True, blank=True)
+    line_total = models.DecimalField(max_digits = 20, decimal_places=10, null=True, blank=True)
     
     class Meta(base_models.OrderPartDetails.Meta):
         app_label = _APP_NAME

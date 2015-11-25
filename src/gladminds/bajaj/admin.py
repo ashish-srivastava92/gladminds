@@ -813,7 +813,53 @@ class DistributorAdmin(GmModelAdmin):
 #      def changelist_view(self, request, extra_context=None):
 #         self.param = request.user
 #         return super(RetailerAdmin, self).changelist_view(request)
-#     
+#  
+
+
+class PartMasterCvAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('part_number', 'description', )
+    list_display = ('part_no', 'thisdescription', 'thiscategory', 'Applicable_model','price',
+                    'quantityavailable', 'orderpending')
+    
+    def part_no(self, obj):
+        return obj.part_number
+    part_no.short_description = 'Parts #'
+    part_no.admin_order_field = 'part_number'
+    
+    def thisdescription(self,obj):
+        return obj.description
+    thisdescription.short_description = 'Part Description'
+    
+    def Applicable_model(self,obj):
+        print "ooooooooooooooooooo"
+        return obj.part_model
+    Applicable_model.short_description = 'Applicable Model'
+    
+    def thiscategory(self,obj):
+        return obj.category.name
+    thiscategory.short_description = 'Category'
+    
+    def price(self,obj):
+        return obj.mrp
+    price.short_description = 'Price'
+    
+    def quantityavailable(self,obj):
+        if obj.available is None:
+            return ''
+        else:
+            return obj.available
+    quantityavailable.short_description = 'Available Qut.'
+    
+    def orderpending(self, obj):
+        if obj.pending is None:
+            return ''
+        else:
+            return obj.pending
+    orderpending.short_description = 'Pending order Qut.'
+
+
+   
 class DistributorSalesRepForm(forms.ModelForm):
     class Meta:
         model = get_model('DistributorSalesRep')
@@ -1283,16 +1329,20 @@ class PartListAdmin(GmModelAdmin):
     
     def Part_Description(self, obj):
 #         print "objjjjj"
-        return obj.description
+        return obj.part_model
     Part_Description.short_description = 'Part Description'
     
     def Category(self, obj):
-        return None
-#         return obj.category.model.model_name
+#         return None
+#         return obj.part_model
+#         if obj.category.name:
+            return obj.description
+#         else:
+#             return None
     Category.short_description = 'Category'
     
     def Applicable_Model(self, obj):
-        return obj.category.model.model_name
+        return obj.part_models
         
 #         return obj.subcategory.part_model.name
     Applicable_Model.short_description='Applicable Model'
@@ -1300,6 +1350,8 @@ class PartListAdmin(GmModelAdmin):
     def Price(self, obj):
         return obj.mrp
     Price.short_description = 'MRP'
+    
+    
 #     
 #     def Subcategory(self,obj):
 #         return None
@@ -1356,8 +1408,8 @@ class PartListAdmin(GmModelAdmin):
             
         else:
             self.list_display = ('part_no', 'Part_Description', 'Applicable_Model','Category',
-                    'Price', 'Available', 'Pending',
-                    'Current')
+                    'Price', 'Available', 'Pending')
+                    
         if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
             extra_context["show_upload_stock"] = True
         return super(PartListAdmin, self).changelist_view(request, extra_context=extra_context)
@@ -1421,7 +1473,24 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = DSRWorkAllocationForm
     search_fields = ('dsr', 'date')
-    list_display = ('allocated_date',)
+    list_display = ('allocated_date','dsr_id','dist_id')
+    
+    
+    def dsr_id(self,obj):
+        return obj.dsr.user.user.username
+    dsr_id.short_description = "DSR"
+    
+    def dist_id(self,obj):
+        print "distttt"
+        return obj.dsr.distributor.name
+#         print obj.distributor
+#         return obj.distributor.distributor_id
+       
+    dist_id.short_description = "Distributor"
+#     
+    
+#     def distributor(self,obj):
+#         return obj.distributor.user.user.username
 
     
     
@@ -1432,8 +1501,9 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
     
     def queryset(self, request):
         qs = super(DSRWorkAllocationAdmin, self).queryset(request)
+        print request.user
         # get workallocation objects for the logged in distributor
-        if Distributor.objects.filter(user=request.user).exists():
+        if Distributor.objects.filter(user__user=request.user).exists():
             DSRWorkAllocation_objects = DSRWorkAllocation.objects.filter(distributor__user=\
                                                                          request.user)
         else:
@@ -1451,7 +1521,7 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
     def save_model(self, request, obj, form, change):
 
     
-        obj.distributor = Distributor.objects.get(user__user=request.user)
+#         obj.distributor = Distributor.objects.get(user__user=request.user)
         super(DSRWorkAllocationAdmin, self).save_model(request, obj, form, change)
 
 
@@ -1461,9 +1531,14 @@ from django.conf import  settings
 class OrderPartAdmin(GmModelAdmin):
     change_form_template = 'admin/bajaj/orderpart/change_form.html'
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.DISTRIBUTORSALESREP, Roles.RETAILERS]
+    
+#     
+#     if obj.order_placed_by == 1:
+        
+    
     exclude = ['so_id', 'po_id', 'do_id']    
-    list_display = ('order_link', 'retailer_name', 'dsr_id',
-                   'total_value', 'order_date')
+#     list_display = ('order_link', 'retailer_name', 'dsr_id',
+#                    'total_value', 'order_date')
 #     list_filter = ['order_date', 'distributor', 'dsr']
     
     class Media:
@@ -1491,9 +1566,6 @@ class OrderPartAdmin(GmModelAdmin):
     order_link.admin_order_field = 'order_id'
 
     def dsr_id(self, obj):
-        if obj.dsr is None:
-            return 'NA'
-        else:
             return obj.dsr
     dsr_id.short_description = "DSR"
     dsr_id.admin_order_field = "DSR"
@@ -1575,10 +1647,27 @@ class OrderPartAdmin(GmModelAdmin):
 #                  
 #                 return super(OrderPartAdmin, self).changelist_view(request, extra_context={})
 #     
-
     
+       
+    def changelist_view(self, request, extra_context={}):
+#         if request.user.is_superuser or request.user.groups.filter(name=Roles.SFAADMIN).exists():
+# 
+#             self. list_display = ('part_no', 'Part_Description','Applicable_Model', 'Category',
+#                     'Price', 'active')
+#             
+#             
+#         else:
+#             self.list_display = ('part_no', 'Part_Description', 'Applicable_Model','Category',
+#                     'Price', 'Available', 'Pending')
+#                     
+#         if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+#             extra_context["show_upload_stock"] = True
+        return super(OrderPartAdmin, self).changelist_view(request, extra_context=extra_context)
+    
+     
 
     def admin_change_view(self, request, model_admin, order_id=None):
+  
         opts = model_admin.model._meta
         obj = None
      
@@ -1586,6 +1675,7 @@ class OrderPartAdmin(GmModelAdmin):
         length_orders = orders_obj.count() 
         if length_orders == 0:
             delivered = 0
+        print length_orders,"lenhhh"
         order_display = []
         orders = {}
         for each_order in orders_obj:
@@ -1594,7 +1684,7 @@ class OrderPartAdmin(GmModelAdmin):
             orders['part_description'] = each_order.part_number.description
             orders['quantity'] = each_order.quantity
             orders['order_id'] = each_order.order_id
-            orders['line_total'] = int(each_order.part_number.mrp) * int(each_order.quantity)
+            orders['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
             available_quantity = PartsStock.objects.filter(part_number = each_order.part_number.id)
             
             
@@ -1616,11 +1706,11 @@ class OrderPartAdmin(GmModelAdmin):
                 orders['delivered_quantity']=""
                 
             if order_obj["delivered_quantity__sum"] != None:
-                orders['pending'] = int(each_order.quantity) - int(order_obj["delivered_quantity__sum"])
+                orders['pending'] = (each_order.quantity) - int(order_obj["delivered_quantity__sum"])
             else:
                 orders['pending'] = each_order.quantity
             order_display.append(orders.copy())
-            print order_display
+            print order_display,"disppp"
         context = { 
                    'opts':opts,
                     'obj':obj,
@@ -1636,7 +1726,6 @@ class OrderPartAdmin(GmModelAdmin):
         
            
     def change_view(self, request, order_link):
-        print order_link,"orderrr"
         return self.admin_change_view(request, self, order_link)
    
    
@@ -1651,12 +1740,19 @@ class OrderPartAdmin(GmModelAdmin):
             Returns a QuerySet of all model instances that can be edited by the
             admin site. This is used by changelist_view.
             """
-
+            
+#             list_display = ('order_link', 'retailer_name', 'dsr_id',
+#                    'total_value', 'order_date')
+            
             query_set = self.model._default_manager.get_query_set()
             if request.GET:
                     query_set = query_set.filter(order_placed_by=2)
+#                     print query_set
+                    self.list_display = ('order_link', 'retailer_name', 'dsr_id','total_value', 'order_date')
             else:
                     query_set = query_set.filter(order_placed_by=1)
+#                     print query_set
+                    self.list_display = ('order_link', 'retailer_name', 'total_value', 'order_date')
             return query_set
 
     
@@ -2084,7 +2180,7 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("PartModel", brand), PartModelAdmin)
     brand_admin.register(get_model("Categories", brand), CategoriesAdmin)
     # brand_admin.register(get_model("SubCategories", brand), SubCategoriesAdmin)
-    brand_admin.register(get_model("PartPricing", brand), PartListAdmin)
+    brand_admin.register(get_model("PartMasterCv", brand), PartListAdmin)
     brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
     
     brand_admin.register(get_model("NationalSparesManager", brand), NSMAdmin)

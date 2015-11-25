@@ -17,8 +17,11 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework_jwt.settings import api_settings
 
 from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
-                            PartPricing, OrderPart, Distributor, OrderPartDetails, Invoices, \
-                            Collection,CollectionDetails,PartsStock
+                            PartPricing, Distributor,  Invoices, \
+                            Collection,CollectionDetails,PartsStock,DSRWorkAllocation
+from gladminds.core.models import PartMasterCv,OrderPart,OrderPartDetails
+#PartMasterCv                          
+                            
 # from gladminds.core.models import DistributorSalesRep, Retailer,PartModels, CvCategories, \
 #                              OrderPart, DSRWorkAllocation, AlternateParts
 from gladminds.core import constants
@@ -62,6 +65,7 @@ def authentication(request):
     else:
         return Response({'message': 'you are not a registered user', 'status':0})
     
+    
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
@@ -69,24 +73,53 @@ def get_retailers(request, dsr_id):
     '''
     This method returns all the retailers of the distributor given the dsr id 
     '''
-    
+    print dsr_id,"iddddd"
     distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
     retailers = Retailer.objects.filter(distributor = distributor.distributor, \
                                 approved = constants.STATUS['APPROVED'] )
     #retailers = Retailer.objects.all()
     retailer_list = []
-    
-    for retailer in retailers:
-        retailer_dict = {}
-        retailer_dict.update({"retailer_Id":retailer.retailer_code})
-        retailer_dict.update({"retailer_name":retailer.retailer_name})
-        retailer_dict.update({"retailer_mobile":retailer.mobile})
-        retailer_dict.update({"retailer_email":retailer.email})
-        retailer_dict.update({"retailer_address":retailer.user.address})
-        retailer_dict.update({"latitude":retailer.latitude})
-        retailer_dict.update({"longitude":retailer.longitude})
-        retailer_list.append(retailer_dict)
-    return Response(retailer_list)
+    if retailers:
+        for retailer in retailers:
+            retailer_dict = {}
+            retailer_dict.update({"retailer_Id":retailer.retailer_code})
+            retailer_dict.update({"retailer_name":retailer.retailer_name})
+            retailer_dict.update({"retailer_mobile":retailer.mobile})
+            retailer_dict.update({"retailer_email":retailer.email})
+            retailer_dict.update({"retailer_address":retailer.user.address})
+            retailer_dict.update({"latitude":retailer.latitude})
+            retailer_dict.update({"longitude":retailer.longitude})
+            retailer_list.append(retailer_dict)
+        return Response(retailer_list)
+    else:
+        return Response({'message': 'There are no approved retailers'})
+            
+# 
+# @api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+# def get_retailers(request, dsr_id):
+#     '''
+#     This method returns all the retailers of the distributor given the dsr id 
+#     '''
+#     
+#     distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+#     retailers = Retailer.objects.filter(distributor = distributor.distributor, \
+#                                 approved = constants.STATUS['APPROVED'] )
+#     #retailers = Retailer.objects.all()
+#     retailer_list = []
+#     
+#     for retailer in retailers:
+#         retailer_dict = {}
+#         retailer_dict.update({"retailer_Id":retailer.retailer_code})
+#         retailer_dict.update({"retailer_name":retailer.retailer_name})
+#         retailer_dict.update({"retailer_mobile":retailer.mobile})
+#         retailer_dict.update({"retailer_email":retailer.email})
+#         retailer_dict.update({"retailer_address":retailer.user.address})
+#         retailer_dict.update({"latitude":retailer.latitude})
+#         retailer_dict.update({"longitude":retailer.longitude})
+#         retailer_list.append(retailer_dict)
+#     return Response(retailer_list)
 
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
@@ -115,25 +148,46 @@ def get_parts(request):
     '''
     This method returns all the spare parts details
     '''
-    print "gladminds"
-    parts = PartPricing.objects.filter(active = True)
+    parts = PartMasterCv.objects.filter(active = True)
     parts_list =[]
     for part in parts:
-        print part.part_number
-        available_quantity = PartsStock.objects.get(part_number_id = part.id ).available_quantity
-        print available_quantity
         parts_dict = {}
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
-        parts_dict.update({"part_sub_category":part.subcategory.name})
-        parts_dict.update({"part_products":part.products})
-        parts_dict.update({"part_available_quantity":available_quantity})
+        # parts_dict.update({"part_model":part.part_model})
+        # parts_dict.update({"part_category":part.category.name})
+        # parts_dict.update({"part_subcategory":part.part_models})
         parts_dict.update({"mrp":part.mrp})
-        
-        parts_dict.update({"moq":part.moq})
         parts_list.append(parts_dict)
-    print parts_list
     return Response(parts_list)
+
+# 
+# @api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+# def get_parts(request):
+#     '''
+#     This method returns all the spare parts details
+#     '''
+#     print "gladminds"
+#     parts = PartPricing.objects.filter(active = True)
+#     parts_list =[]
+#     for part in parts:
+#         print part.part_number
+#         available_quantity = PartsStock.objects.get(part_number_id = part.id ).available_quantity
+#         print available_quantity
+#         parts_dict = {}
+#         parts_dict.update({"part_name":part.description})
+#         parts_dict.update({"part_number":part.part_number})
+#         parts_dict.update({"part_sub_category":part.subcategory.name})
+#         parts_dict.update({"part_products":part.products})
+#         parts_dict.update({"part_available_quantity":available_quantity})
+#         parts_dict.update({"mrp":part.mrp})
+#         
+#         parts_dict.update({"moq":part.moq})
+#         parts_list.append(parts_dict)
+#     print parts_list
+#     return Response(parts_list)
 
 
 @api_view(['GET'])
@@ -149,6 +203,10 @@ def get_alternateparts(request):
         parts_dict = {}
         parts_dict.update({"part_name":part.name})
         parts_dict.update({"part_number":part.part_number})
+        parts_dict.update({"part_sub_category":None})
+        parts_dict.update({"moq":None})
+        parts_dict.update({"products":None})
+        parts_dict.update({"available_quantity":"10"})
         parts_dict.update({"part_model":part.model_name})
         #parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
@@ -181,6 +239,42 @@ def get_alternateparts(request):
 #         schedules_list.append(schedule_dict)
 #     return Response(schedules_list)
 
+
+@api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def get_schedule(request, dsr_id, date):
+    '''
+    This method gets the schedule(the retailers he has to visit) for today, given the dsr id
+    '''
+    schedule_date = split_date(date)
+    dsr = DistributorSalesRep.objects.filter(distributor_sales_code = dsr_id)
+    schedules = DSRWorkAllocation.objects.filter(date__startswith = \
+                    datetime.date(int(schedule_date[2]),int(schedule_date[1]),int(schedule_date[0])), dsr=dsr)
+    print schedules,"iiiiiiiiiii"          
+    schedules_list = []
+    for schedule in schedules:
+        schedule_dict = {}
+        schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
+        schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
+        tm = time.strptime(str(schedule.date.time()), "%H:%M:%S")
+        schedule_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
+        schedule_dict.update({"retailer_address":schedule.retailer.user.address})
+        schedule_dict.update({"latitude":schedule.retailer.latitude})
+        schedule_dict.update({"longitude":schedule.retailer.longitude})
+        schedules_list.append(schedule_dict)
+    print schedules_list,"ppp"
+    return Response(schedules_list)
+
+
+
+
+
+
+
+
+
+
 def split_date(date):
     date_array = date.split('-')
     dd = date_array[2]
@@ -188,6 +282,7 @@ def split_date(date):
     yyyy = date_array[0]
     return dd, mm, yyyy
 
+from django.conf import settings
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
@@ -197,24 +292,31 @@ def place_order(request, dsr_id):
     it in the database
     '''
     parts = json.loads(request.body)
-    
+    print parts
     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+    print dsr,"dsrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
+    
+    print dsr.id
     if dsr:
         for order in parts :
             orderpart = OrderPart()
             
             
-            orderpart.dsr = dsr
+            orderpart.dsr_id = dsr.id
             retailer = Retailer.objects.get(retailer_code = order['retailer_id'])
-            orderpart.retailer = retailer
+            print retailer.id
+            orderpart.retailer_id = retailer.id
             orderpart.order_date = datetime.datetime.now()
             #orderpart.order_date = datetime.datetime.now()
             orderpart.order_placed_by = order['order_placed_by']
-            orderpart.save()
+            orderpart.save(using=settings.BRAND)
+            
+            print "retailer"
             #push all the items into the orderpart details
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
-                orderpart_details.part_number = PartPricing.objects.\
+                print item['part_number'],"numberrrrrrrrrrrrrrrrr"
+                orderpart_details.part_number = PartMasterCv.objects.\
                                                 get(part_number = item['part_number'])
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
@@ -232,11 +334,15 @@ def retailer_place_order(request, retailer_id):
     it in the database
     '''
     parts = json.loads(request.body)
+    print parts
     for order in parts :
             orderpart = OrderPart()
             retailer = Retailer.objects.get(retailer_code = retailer_id)
-            orderpart.retailer = retailer
-            orderpart.distributor = Distributor.objects.get(distributor_id = order['distributor_id'])
+            print retailer,"rett"
+            print order['distributor_id']
+            orderpart.retailer_id = retailer.id
+            dist_obj =  Distributor.objects.get(distributor_id = order['distributor_id'])
+            orderpart.distributor_id = dist_obj.id
             orderpart.order_date = order['date']
             orderpart.order_placed_by = order['order_placed_by']
             #orderpart.order_date = datetime.datetime.now()
@@ -244,10 +350,11 @@ def retailer_place_order(request, retailer_id):
             #push all the items into the orderpart details
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
-                orderpart_details.part_number = PartPricing.objects.\
+                orderpart_details.part_number = PartMasterCv.objects.\
                                                 get(part_number = item['part_number'])
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
+                print item['line_total']
                 orderpart_details.line_total = item['line_total']
                 orderpart_details.save()
     return Response({'message': 'Order updated successfully', 'status':1})
