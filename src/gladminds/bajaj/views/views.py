@@ -46,7 +46,7 @@ from gladminds.bajaj.services.coupons import export_feed
 from gladminds.core.auth import otp_handler
 from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor,District,State,OrderPartDetails,\
 PartPricing,OrderDeliveredHistory,DoDetails,PartsStock
-
+from gladminds.bajaj.models import PartMasterCv
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template import loader
 from django.template.context import Context
@@ -104,13 +104,13 @@ def save_order_history(request):
         delivered_stock = request.POST.getlist("delivered_stock")[each]
         date = request.POST.getlist("delivered_date")[each]
         part_number = request.POST.getlist("part_number")[each]
-        part_pricing_obj = PartPricing.objects.get(part_number = part_number)
+        part_pricing_obj = PartMasterCv.objects.get(part_number = part_number)
         part_obj = PartsStock.objects.get(part_number = part_pricing_obj.id)
         part_obj.available_quantity = int(part_obj.available_quantity)-int(delivered_stock)
         part_obj.save(using = settings.BRAND)
         ordered_date = datetime.datetime.strptime(date, "%m/%d/%Y") 
         
-        order_obj = OrderDeliveredHistory(delivered_date = ordered_date,delivered_quantity = delivered_stock,order_id= order_id,part_number = part_pricing_obj,do_id=do_obj.id )
+        order_obj = OrderDeliveredHistory(delivered_date = ordered_date,delivered_quantity = delivered_stock,order_id= order_id,part_number_id = part_pricing_obj.id,do_id=do_obj.id )
         order_obj.save(using = settings.BRAND)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
      
@@ -120,7 +120,7 @@ def dsr_orders(request):
 
 
 def ordered_part_details(request,part_number,order_id):
-    part_obj = PartPricing.objects.get(part_number = part_number)
+    part_obj = PartMasterCv.objects.get(part_number = part_number)
     ordered_part_details = OrderDeliveredHistory.objects.filter(part_number = part_obj.id,order_id = order_id).values("id","order_id","delivered_quantity","part_number_id","delivered_date")
     context={"data":ordered_part_details}
     template = 'admin/bajaj/ordered_part_details.html'

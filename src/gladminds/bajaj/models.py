@@ -974,7 +974,7 @@ class OrderPart(base_models.OrderPart):
 
 
 class OrderPartDetails(base_models.OrderPartDetails):
-    part_number = models.ForeignKey(PartPricing)
+    part_number = models.ForeignKey(PartMasterCv)
     quantity = models.IntegerField(null=True, blank=True)
     active = models.IntegerField(null=True, blank=True, default=1)
     order = models.ForeignKey(OrderPart)
