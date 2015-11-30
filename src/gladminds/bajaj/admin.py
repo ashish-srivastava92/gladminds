@@ -1133,7 +1133,7 @@ class CollectionAdmin(GmModelAdmin):
 #     retailer_contact.admin_order_field = 'retailer'
 
     def Outstanding(self,obj):
-        return "5000"
+        return "50000"
     
     
     def get_invoice(self, obj):
