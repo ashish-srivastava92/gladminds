@@ -426,10 +426,21 @@
 							         // showLoading();
 							        				  /* var col=$('#select-native-3').val();
 				                        var val=$('#search-1').val();
-											          
+				                        */
+
 				                        var from=$('#from').val();
 				                        var to=$('#to').val();
-
+				                        
+				                        if ((from == '' && to == '') || (from == '' && to != '') || (from != '' && to == '')){
+				                        	alert("Please Select a Date Range")
+				                        	return false;
+				                        } else {						
+				                        	var downloadURL = "/v1/accumulations/product-fitment/?access_token="+access_token+"&created_date__gte="+from+"&created_date__lte="+to+"&limit=0";
+				                        	location.href=downloadURL;
+				                        	 }
+				                        
+				                        
+				                        /*
 				                        if ((from == '' && to == '') || (from == '' && to != '') || (from != '' && to == '')){
 				                        	alert("Please Select a Date Range")
 				                        	return false;
@@ -453,12 +464,18 @@
 											        	  
 											        	  
 											        	 // var downloadURL = "/v1/accumulations/product-fitment/?access_token="+access_token+"&key="+col+"&value="+val+"&created_date__gte="+from+"&created_date__lte="+to+"&limit=0";
+											        	 
+											        	 //var downloadURL = "/v1/accumulations/product-fitment/?access_token="+access_token+"&created_date__gte="+from+"&created_date__lte="+to+"&limit=0";
+											        	 
+											        	 /*
 											        	 var downloadURL = "/v1/accumulations/product-fitment/?access_token="+access_token;
+											        	* /
+											        	 
 											         // } else {
 											        	 // var downloadURL = "/v1/accumulations/product-fitment/?access_token="+access_token+"&created_date__gte="+from+"&created_date__lte="+to+"&limit=0";
-											         // }
+											         // }*/
 											          
-											          location.href=downloadURL;
+											         /*  location.href=downloadURL; */
 											         // window.open(downloadURL)
 											          //alert("Your Download is in Progress...")
 											          hideLoading();

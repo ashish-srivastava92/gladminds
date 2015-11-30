@@ -316,13 +316,19 @@ def place_order(request, dsr_id):
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
                 print item['part_number'],"numberrrrrrrrrrrrrrrrr"
-                orderpart_details.part_number = PartMasterCv.objects.\
+                
+                
+                part_obj = PartMasterCv.objects.\
                                                 get(part_number = item['part_number'])
+                
+                orderpart_details.part_number_id = part_obj.id
+                  
+                print orderpart_details.part_number,"printt"    
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
                 print orderpart_details.line_total
-                orderpart_details.save()
+                #-------------------------------------- orderpart_details.save()
     return Response({'message': 'Order updated successfully', 'status':1})
 
 @api_view(['POST'])

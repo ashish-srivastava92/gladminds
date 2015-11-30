@@ -1503,12 +1503,12 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
         qs = super(DSRWorkAllocationAdmin, self).queryset(request)
         print request.user
         # get workallocation objects for the logged in distributor
-        if Distributor.objects.filter(user__user=request.user).exists():
-            DSRWorkAllocation_objects = DSRWorkAllocation.objects.filter(distributor__user=\
-                                                                         request.user)
-        else:
-            DSRWorkAllocation_objects = DSRWorkAllocation.objects.all()
-        return DSRWorkAllocation_objects
+#         if Distributor.objects.filter(user__user=request.user).exists():
+#             DSRWorkAllocation_objects = DSRWorkAllocation.objects.filter(distributor__user=\
+#                                                                          request.user)
+#         else:
+#         qs = DSRWorkAllocation.objects.all()
+        return qs
     
     def get_form(self, request, obj=None, **kwargs):
         ModelForm = super(DSRWorkAllocationAdmin, self).get_form(request, obj, **kwargs)
@@ -1681,6 +1681,8 @@ class OrderPartAdmin(GmModelAdmin):
         for each_order in orders_obj:
             orders['mrp'] = each_order.part_number.mrp
             orders['part_number'] = each_order.part_number.part_number
+            
+            
             orders['part_description'] = each_order.part_number.description
             orders['quantity'] = each_order.quantity
             orders['order_id'] = each_order.order_id
