@@ -164,7 +164,11 @@ urlpatterns = patterns('',
     url(r'^cv/place_order/dsr_id/(?P<dsr_id>\d+)$',
                         'gladminds.core.views.apis.place_order'),
 #     url(r'^cv/place_order/dsr_id/(?P<dsr_id>\d+)$', 'gladminds.core.views.apis.place_order'
-
+    
+    # Reports url
+    url(r'^distributorscorecard/$',
+                        'gladminds.bajaj.views.distributorscorecard', name = 'distributorscorecard'),
+    # reports url ends here
     #api urls end here
     url(r'', include(api_v1.urls)),
     url(r'^$', 'gladminds.core.views.home'),

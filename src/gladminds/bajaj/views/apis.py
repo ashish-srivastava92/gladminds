@@ -326,24 +326,21 @@ def get_outstanding(request, dsr_id):
                 retailer_dict.update({'retailer_id':retailer.retailer_code})
                 retailer_dict.update({'invoice_id': invoice.id})
                 retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
-                tm = time.strptime(str(invoice.invoice_date.time()), "%H:%M:%S")
-                retailer_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
+                # tm = time.strptime(str(invoice.invoice_date.time()), "%H:%M:%S")
+                # retailer_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
                 #get the collections for that invoice
-                
                 
                 collection_objs = Collection.objects.filter(invoice_id = invoice.id)
                 for each in collection_objs:
                    
                     collections = CollectionDetails.objects.filter(collection_id = each.id)
-                
-                    print collections,"collections"
+                    
                     if collections:
                         for each_collections in collections:
                             collection = collection + each_collections.collected_amount
                     outstanding = outstanding - collection
                     retailer_dict.update({'outstanding':outstanding})
                     retailer_list.append(retailer_dict)
-                    print retailer_list
     return Response(retailer_list)
 
 @api_view(['GET'])

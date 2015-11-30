@@ -946,4 +946,16 @@ def bulk_upload_retailer(request):
                         Distributor.objects.get(user__user = request.user)
             retailer.save()
     return HttpResponseRedirect('/admin/bajaj/retailer/')
+
+@login_required
+def distributorscorecard(request):
+    distributors_list = []
+    distributors = Distributor.objects.filter().select_related()
+    for distributor in distributors:
+        distributors_list.append(distributor)
+    print distributors_list
+    return render(request, "admin/distributorscorecard.html", locals())
+    
+    
+    
     

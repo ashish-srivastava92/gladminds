@@ -1105,8 +1105,11 @@ class CollectionAdminForm(forms.ModelForm):
 class CollectionAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.RETAILERS]
     form = CollectionAdminForm
+    #list_display = ('retailer_contact','Outstanding', 'collections','Total_Order_value','cheque_image','dsr','payment_date', )
+    
 #     search_fields = ('dsr',)
-    list_display = ('get_retailer','retailer_contact','Outstanding', 'collections','Total_Order_value','cheque_image','dsr','payment_date', 'payment_mode',)
+    #list_display = ('get_retailer','retailer_contact','Outstanding', 'collections','Total_Order_value','cheque_image','dsr','payment_date', 'payment_mode',)
+        
 #     list_display_links = [None]
     
     def __init__(self, *args, **kwargs):
@@ -1468,8 +1471,8 @@ class OrderPartAdmin(GmModelAdmin):
     change_form_template = 'admin/bajaj/orderpart/change_form.html'
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.DISTRIBUTORSALESREP, Roles.RETAILERS]
     exclude = ['so_id', 'po_id', 'do_id']    
-    list_display = ('order_link', 'retailer_name', 'dsr_id',
-                   'total_value', 'order_date')
+    #list_display = ('order_link', 'retailer_name', 'dsr_id',
+                   #'total_value', 'order_date')
 #     list_filter = ['order_date', 'distributor', 'dsr']
     
     class Media:

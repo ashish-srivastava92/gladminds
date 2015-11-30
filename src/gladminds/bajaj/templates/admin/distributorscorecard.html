@@ -1,0 +1,76 @@
+{% extends "admin/change_form.html" %}
+% load i18n admin_static admin_list admin_urls suit_list suit_tags %}
+{% load admintags %}
+{% load url from future %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  {# <link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}" />#}
+  <link rel="stylesheet" type="text/css" href="/static/libs/datepicker/css/jquery-ui.css" />
+  <link rel="stylesheet" type="text/css" href="/static/css/wait-modal.css" />
+  <link rel="stylesheet" type="text/css" href="/static/css/report_style.css" />
+  {% if cl.formset %}
+    {#    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />#}
+  {% endif %}
+  {% if cl.formset or action_form %}
+    {% url 'admin:jsi18n' as jsi18nurl %}
+    <script type="text/javascript" src="{{ jsi18nurl|default:'../../jsi18n/' }}"></script>
+  {% endif %}
+  {{ media.css }}
+  {% if not actions_on_top and not actions_on_bottom %}
+    <style>
+      {#      #changelist table thead th:first-child {width: inherit}#}
+    </style>
+   {% endif %}
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  {{ media.js }}
+  {% if action_form %}{% if actions_on_top or actions_on_bottom %}
+    <script type="text/javascript">
+      (function ($) {
+        $(document).ready(function ($) {
+          $("tr input.action-select").actions();
+        });
+      })(django.jQuery);
+    </script>
+  {% endif %}{% endif %}
+  
+{% endblock %}
+{% block bodyclass %}change-list{% endblock %}
+{% if not is_popup %}
+  {% block breadcrumbs %}
+    <ul class="breadcrumb">
+      <li><a href="{% url 'admin:index' %}">Home</a>
+        <span class="divider">&raquo;</span></li>
+      <li>
+        <a href="#">Bajaj</a>
+        <span class="divider">&raquo;</span></li>
+      <li class="active">{{ cl.opts.verbose_name_plural|capfirst }}</li>
+    </ul>
+  {% endblock %}
+{% endif %}
+
+{% block coltype %}flex{% endblock %}
+{% block content %}
+    <div>
+        <table name = "tbl_distributorscorecard" class = "disscrcard">
+            <tr class = "disscrheader">
+                <td class = "disscrfirstcolom"> Dist. Code</td> 
+                <td> Name</td>
+                <td> Order value till date</td>
+                <td> Orders till date</td>
+                <td> No.Retailers Active</td>
+                <td> Fullfilled Orders</td>
+                <td> Fullfillment/ Orders</td>
+                <td> Contribution</td>
+                <td> Target</td>
+            </tr>
+        
+            <tr>
+                <td> {{ </td>
+            </tr>
+        </table>    
+    </div>
+{% endblock %}

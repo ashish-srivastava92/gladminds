@@ -431,7 +431,17 @@ def get_distributor_for_retailer(request, retailer_id):
             distributor_list.append(distributor_dict)
     return Response(distributor_list)
     
-   
+@api_view(['POST'])
+# @authentication_classes((JSONWebTokenAuthentication,))
+# @permission_classes((IsAuthenticated,))
+def add_retailer(request, ):
+    # get the retailer details from the api payload
+    retailer_profile = json.loads(request.body)
+    
+    
+    return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
+
+
     
     
     
