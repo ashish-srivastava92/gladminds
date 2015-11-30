@@ -169,7 +169,6 @@ class MultiAuthorization(Authorization):
 
 
 class LoyaltyCustomAuthorization(Authorization):
-
     def __init__(self, query_field=None):
         self.query_field = query_field
 
@@ -186,10 +185,11 @@ class LoyaltyCustomAuthorization(Authorization):
             query[q_user] = str(distributor_city)
         else:
             query[q_user] = user.username
+        
         return query
     
     ''' filter the object list based on query defined for specific Role'''
-    def read_list(self, object_list, bundle):           
+    def read_list(self, object_list, bundle): 
         klass_name = bundle.obj.__class__._meta.module_name
         user = bundle.request.user
         if not user.is_superuser:
@@ -279,10 +279,14 @@ class CTSCustomAuthorization(Authorization):
 
 class ZSMCustomAuthorization(Authorization):
     def read_list(self, object_list, bundle):
+        
         if bundle.request.user.groups.filter(name=Roles.ZSM):
             object_list = object_list.filter(zsm__user__user_id=int(bundle.request.user.id))
         elif bundle.request.user.groups.filter(name=Roles.AREASERVICEMANAGER):
             object_list = object_list.filter(user__user_id=int(bundle.request.user.id))
+        elif bundle.request.user.groups.filter(name=Roles.SUPERADMINS):
+            object_list = object_list
+            
         return object_list
     
 class CHCustomAuthorization(Authorization):

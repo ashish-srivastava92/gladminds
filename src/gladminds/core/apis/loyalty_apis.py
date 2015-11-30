@@ -27,9 +27,9 @@ from datetime import datetime, timedelta, date
 import csv
 import StringIO
 from django.conf import settings
-from gunicorn.http.wsgi import FileWrapper
 import mimetypes
 import os
+from django.db import connections
 
 logger = logging.getLogger("gladminds")
 LOG = logging.getLogger('gladminds')
@@ -305,47 +305,128 @@ class AccumulationResource(CustomBaseModelResource):
                                                      trailing_slash()),
                 self.wrap_view('product_fitment'), name="product_fitment"),
         ]
-
-    def accumulation_report(self, request, **kwargs):
-        '''
-           Get Accumulation report details for given filter
-           and returns in csv format
-#         '''
-        from boto.s3.connection import S3Connection
-        from boto.s3.key import  Key
-        S3_ID = 'AKIAIL7IDCSTNCG2R6JA'
-        S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
-        connection = S3Connection(S3_ID, S3_KEY)
-        AWS_STORAGE_BUCKET_NAME = 'gladminds'
-        fname = 'acc_data.csv'
-        bucket_name = AWS_STORAGE_BUCKET_NAME
-        key = connection.get_bucket(bucket_name).get_key(fname)
-        value = key.get_contents_as_string()
-        response = HttpResponse(value, content_type='application/csv')
-        response['Content-Disposition'] = 'attachment; filename=%s' %(fname)
-        LOG.error('[download_member_detail]: Download of fitment data by user {0}'.format(request.user))
-        return response
     
-    def product_fitment(self, request, **kwargs):
-        '''
-            Get Report product fitment for given filter
-            and returns in csv format
-        '''
-        from boto.s3.connection import S3Connection
-        from boto.s3.key import  Key
-        S3_ID = 'AKIAIL7IDCSTNCG2R6JA'
-        S3_KEY = '+5iYfw0LzN8gPNONTSEtyUfmsauUchW1bLX3QL9A'
-        connection = S3Connection(S3_ID, S3_KEY)
-        AWS_STORAGE_BUCKET_NAME = 'gladminds'
-        fname = 'fitment_data.csv'
-        bucket_name = AWS_STORAGE_BUCKET_NAME
-        key = connection.get_bucket(bucket_name).get_key(fname)
-        value = key.get_contents_as_string()
-        response = HttpResponse(value, content_type='application/csv')
-        response['Content-Disposition'] = 'attachment; filename=%s' %(fname)
-        LOG.error('[download_member_detail]: Download of fitment data by user {0}'.format(request.user))
-        return response
+    def accumulation_report(self, request, **kwargs):
+        created_date__gte = request.GET.get('created_date__gte')
+        created_date__lte = request.GET.get('created_date__lte')
+        details = self.acc_return_date_filter_data(request, created_date__gte , created_date__lte)
+        csv_data_rcv = self.csv_member_download(details)
         
+        return csv_data_rcv
+    
+    def acc_return_date_filter_data(self,request, start,end):  
+        conn = connections[settings.BRAND]
+        cursor = conn.cursor()
+        if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            state_list = []
+            state_list_join = ','.join("'"+str(state)+"'" for state in asm_state_list)
+                
+            query1 = "SELECT mem.mechanic_id, mem.permanent_id, mem.first_name, \
+                        mem.district, mem.phone_number, st.state_name, distr.distributor_id, \
+                        spart.unique_part_code, pp.points, acre.created_date\
+                        FROM gm_accumulationrequest AS acre\
+                        INNER  JOIN gm_member mem ON mem.id = acre.member_id\
+                        LEFT OUTER JOIN gm_distributor AS distr ON mem.registered_by_distributor_id = distr.id\
+                        INNER JOIN gm_state AS st ON mem.state_id = st.id\
+                        INNER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
+                        LEFT OUTER JOIN gm_sparepartupc AS spart ON accup.sparepartupc_id = spart.id\
+                        LEFT OUTER JOIN gm_sparepartmasterdata AS mdata ON mdata.id = spart.part_number_id\
+                        LEFT OUTER JOIN gm_sparepartpoint AS pp ON mdata.id = pp.part_number_id\
+                        WHERE mem.form_status =  'complete' and acre.created_date >=\"{0}\" \
+                        and acre.created_date<= \"{1}\" and st.state_name in({2}) group by accup.sparepartupc_id,acre.transaction_id  ".format(start, end, state_list_join);
+           
+        else:
+            query1 = "SELECT mem.mechanic_id, mem.permanent_id, mem.first_name, \
+                        mem.district, mem.phone_number, st.state_name, distr.distributor_id, \
+                        spart.unique_part_code, pp.points, acre.created_date\
+                        FROM gm_accumulationrequest AS acre\
+                        INNER JOIN gm_member mem ON mem.id = acre.member_id\
+                        LEFT OUTER JOIN gm_distributor AS distr ON mem.registered_by_distributor_id = distr.id\
+                        INNER JOIN gm_state AS st ON mem.state_id = st.id\
+                        INNER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
+                        LEFT OUTER JOIN gm_sparepartupc AS spart ON accup.sparepartupc_id = spart.id\
+                        LEFT OUTER JOIN gm_sparepartmasterdata AS mdata ON mdata.id = spart.part_number_id\
+                        LEFT OUTER JOIN gm_sparepartpoint AS pp ON mdata.id = pp.part_number_id\
+                        WHERE mem.form_status =  'complete' and acre.created_date >=\"{0}\" \
+                        and acre.created_date<= \"{1}\" group by accup.sparepartupc_id,acre.transaction_id ".format(start, end);
+      
+        rows = cursor.execute(query1)
+        rows1 = cursor.fetchall()
+        conn.close()
+        return rows1
+
+    def csv_member_download(self,rows1):
+        file_name='accumulation_download' + datetime.now().strftime('%d_%m_%y')
+        headers = ['Mechanic ID','Permanent Id', 'Mechanic Name','District','Mobile No','State','Distributor Code','Unique Code Detail','Point SMSed','Date of SMSed']
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)  
+        csvwriter.writerow(headers)   
+        csvwriter.writerows(rows1)
+        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        return response    
+    
+
+    def product_fitment(self, request, **kwargs):
+        created_date__gte = request.GET.get('created_date__gte')
+        created_date__lte = request.GET.get('created_date__lte')
+        details = self.fitment_return_date_filter_data(request, created_date__gte , created_date__lte)
+        csv_data_rcv_fitment = self.csv_fitment_download(details)
+        return csv_data_rcv_fitment
+    
+    def fitment_return_date_filter_data(self,request, start,end): 
+        conn = connections[settings.BRAND]
+        cursor = conn.cursor() 
+        if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list=models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            state_list_join = ','.join("'"+str(state)+"'" for state in asm_state_list)
+            
+            query1 = "SELECT mem.mechanic_id, mem.permanent_id, mem.first_name, \
+                        mem.district, mem.phone_number, st.state_name, distr.distributor_id, \
+                        spart.unique_part_code,mdata.part_number, mdata.description, pp.points, acre.created_date\
+                        FROM gm_accumulationrequest AS acre\
+                        INNER JOIN gm_member mem ON mem.id = acre.member_id\
+                        LEFT OUTER JOIN gm_distributor AS distr ON mem.registered_by_distributor_id = distr.id\
+                        INNER JOIN gm_state AS st ON mem.state_id = st.id\
+                        INNER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
+                        LEFT OUTER JOIN gm_sparepartupc AS spart ON accup.sparepartupc_id = spart.id\
+                        LEFT OUTER JOIN gm_sparepartmasterdata AS mdata ON mdata.id = spart.part_number_id\
+                        LEFT OUTER JOIN gm_sparepartpoint AS pp ON mdata.id = pp.part_number_id\
+                        WHERE mem.form_status = 'complete' and acre.created_date >=\"{0}\" \
+                        and acre.created_date<= \"{1}\" and st.state_name in({2}) group by accup.sparepartupc_id,acre.transaction_id ".format(start, end, state_list_join);
+           
+        else:
+            query1 = "SELECT mem.mechanic_id, mem.permanent_id, mem.first_name, \
+                        mem.district, mem.phone_number, st.state_name, distr.distributor_id, \
+                        spart.unique_part_code,mdata.part_number, mdata.description ,pp.points, acre.created_date\
+                        FROM gm_accumulationrequest AS acre\
+                        INNER JOIN gm_member mem ON mem.id = acre.member_id\
+                        LEFT OUTER JOIN gm_distributor AS distr ON mem.registered_by_distributor_id = distr.id\
+                        INNER JOIN gm_state AS st ON mem.state_id = st.id\
+                        INNER JOIN gm_accumulationrequest_upcs AS accup ON acre.transaction_id = accup.accumulationrequest_id\
+                        LEFT OUTER JOIN gm_sparepartupc AS spart ON accup.sparepartupc_id = spart.id\
+                        LEFT OUTER JOIN gm_sparepartmasterdata AS mdata ON mdata.id = spart.part_number_id\
+                        LEFT OUTER JOIN gm_sparepartpoint AS pp ON mdata.id = pp.part_number_id\
+                        WHERE mem.form_status = 'complete' and acre.created_date >=\"{0}\" \
+                        and acre.created_date<= \"{1}\" group by accup.sparepartupc_id,acre.transaction_id  ".format(start, end);
+        rows = cursor.execute(query1)
+        rows1 = cursor.fetchall()
+        conn.close()
+        return rows1 
+        
+    def csv_fitment_download(self,rows1):
+        file_name='fitment_download' + datetime.now().strftime('%d_%m_%y')
+        headers = ['Mechanic ID','Permanent ID', 'Mechanic Name','District','Mobile No','State','Distributor Code','Unique Code Detail','Part Number','Description','Point SMSed','Date of SMSed']
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)  
+        csvwriter.writerow(headers)   
+        csvwriter.writerows(rows1)
+        response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+        response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+        return response 
+    
+    
 class WelcomeKitResource(CustomBaseModelResource):
     member = fields.ForeignKey(MemberResource, 'member')
     partner = fields.ForeignKey(PartnerResource, 'partner', null=True, blank=True, full=True)

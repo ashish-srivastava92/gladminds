@@ -916,7 +916,7 @@ class AreaServiceManagerResource(CustomBaseModelResource):
        Area service managers resource
     '''
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
-    zsm = fields.ForeignKey(ZonalServiceManagerResource, 'zsm')
+    zsm = fields.ForeignKey(ZonalServiceManagerResource, 'zsm', full =True)
 
     class Meta:
         queryset = models.AreaServiceManager.objects.all()
@@ -1465,11 +1465,17 @@ class MemberResource(CustomBaseModelResource):
                 elif field== 'Mechanic Name': 
                     data.append(mechanic.first_name)  
                 elif field== 'District': 
-                    data.append(mechanic.district) 
+                    if mechanic.district != None:
+                        data.append(mechanic.district) 
+                    else:
+                        data.append("NA")
                 elif field== 'Mobile Number': 
-                    data.append(mechanic.phone_number) 
+                    if mechanic.phone_number != None:
+                        data.append(mechanic.phone_number) 
+                    else:
+                        data.append("NA")
                 else:
-                    if mechanic.registered_date:
+                    if mechanic.registered_date != None:
                         data.append(mechanic.registered_date)
 #                         date_format =  datetime.strptime(str(mechanic.registered_date), '%Y-%m-%dT%H:%M:%S').strftime('%B %d %Y')
 #                         data.append(date_format)
@@ -1488,6 +1494,7 @@ class MemberResource(CustomBaseModelResource):
         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
             asm_state_list=get_model('AreaSparesManager').objects.get(user__user=request.user).state.all()
             kwargs['state__in'] = asm_state_list
+            
         mechanics = get_model(model_name).objects.using(settings.BRAND).filter(**kwargs).select_related('state', 'registered_by_distributor')
         
         return mechanics
@@ -1619,6 +1626,7 @@ class MemberResource(CustomBaseModelResource):
                 if active:
                     member_report[member[region]]['active_count']= active[0]['count']
                     member_report[member[region]]['active_percent']= round(100 * float(active[0]['count'])/float(member['count']), 2)
+            
         except Exception as ex:
             logger.error('Active member count requested by {0}:: {1}'.format(request.user, ex))
             member_report = {'status': 0, 'message': 'could not retrieve the count of active members'}
