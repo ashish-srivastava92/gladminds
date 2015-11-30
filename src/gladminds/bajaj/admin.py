@@ -1126,7 +1126,7 @@ class CollectionAdmin(GmModelAdmin):
     dsr.short_description = 'DSR'
     
     def Total_Order_value(self,obj):
-        return "5000"
+        return "50000"
     
     
 #     def 
@@ -1472,7 +1472,11 @@ class OrderPartAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.DISTRIBUTORSALESREP, Roles.RETAILERS]
     exclude = ['so_id', 'po_id', 'do_id']    
     #list_display = ('order_link', 'retailer_name', 'dsr_id',
+<<<<<<< HEAD
                    #'total_value', 'order_date')
+=======
+     #              'total_value', 'order_date')
+>>>>>>> 5f9fca58c93033f996d28c70cbdd2799e24f8dc5
 #     list_filter = ['order_date', 'distributor', 'dsr']
     
     class Media:
@@ -1603,7 +1607,9 @@ class OrderPartAdmin(GmModelAdmin):
             orders['part_description'] = each_order.part_number.description
             orders['quantity'] = each_order.quantity
             orders['order_id'] = each_order.order_id
-            orders['line_total'] = int(each_order.part_number.mrp) * int(each_order.quantity)
+            orders['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
+
+
             available_quantity = PartsStock.objects.filter(part_number = each_order.part_number.id)
             
             
@@ -1664,9 +1670,11 @@ class OrderPartAdmin(GmModelAdmin):
             query_set = self.model._default_manager.get_query_set()
             if request.GET:
                     query_set = query_set.filter(order_placed_by=2)
-            else:
+            	    self.list_display = ('order_link', 'retailer_name', 'dsr_id','total_value', 'order_date')
+	    else:
                     query_set = query_set.filter(order_placed_by=1)
-            return query_set
+            	    self.list_display = ('order_link', 'retailer_name', 'total_value', 'order_date')
+	    return query_set
 
     
 class SparePartline(TabularInline):

@@ -264,7 +264,7 @@ DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
 
 # DB_USER = os.environ.get('DB_USER', 'gladminds')
 # DB_HOST = os.environ.get('DB_HOST', 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com')
-# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladmindsqa2')
+# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladmindsqa1')
 
 # for bajaj MC
 # DB_USER = os.environ.get('DB_USER', 'aftersell')
@@ -272,9 +272,9 @@ DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
 # DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
 
 # for bajaj CV
-# DB_USER = os.environ.get('DB_USER', 'bajajcv')
-# DB_HOST = os.environ.get('DB_HOST', 'bajajcv.chnnvvffqwop.us-east-1.rds.amazonaws.com')
-# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Bajajcv123')
+#DB_USER = os.environ.get('DB_USER', 'dssoffline')
+#DB_HOST = os.environ.get('DB_HOST', 'dssoffline.chnnvvffqwop.us-east-1.rds.amazonaws.com')
+#DB_PASSWORD = os.environ.get('DB_PASSWORD', 'dssoffline')
 
 DB_PORT = os.environ.get('DB_PORT', '3306')
 
