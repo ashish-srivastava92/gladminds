@@ -116,9 +116,7 @@ def get_parts(request):
     parts = PartPricing.objects.filter(active = True)
     parts_list =[]
     for part in parts:
-        print part.part_number
         available_quantity = PartsStock.objects.get(part_number_id = part.id ).available_quantity
-        print available_quantity
         parts_dict = {}
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
