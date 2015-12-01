@@ -369,6 +369,7 @@ INVOICE_SEQUENCE = 001
 INVOICE_SEQUENCE_INCREMENT = 1
 
 PAYMENT_MODES =  (('Cash', '1'),
-               ('Cheque', '2'))
+               ('Cheque', '2'),
+               ('Cash/Cheque','3'),)
 
 
