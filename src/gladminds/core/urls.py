@@ -120,7 +120,7 @@ urlpatterns = patterns('',
                         'gladminds.bajaj.views.apis.get_outstanding'),
     
     url(r'^mc/post_collection/dsr_id/(?P<dsr_id>\d+)$',
-                        'gladminds.bajaj.views.apis.get_collection'),
+                        'gladminds.bajaj.views.apis.uploadcollection'),
     
     url(r'^mc/get_distributor_for_retailer/retailer_id/(?P<retailer_id>\d+)/$',
                         'gladminds.bajaj.views.apis.get_distributor_for_retailer'),
@@ -151,8 +151,8 @@ urlpatterns = patterns('',
     url(r'^cv/get_outstanding/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.core.views.apis.get_outstanding'),
     
-    url(r'^cv/get_collection/dsr_id/(?P<dsr_id>\d+)$',
-                        'gladminds.core.views.apis.get_collection'),
+    #url(r'^cv/get_collection/dsr_id/(?P<dsr_id>\d+)$',
+     #                   'gladminds.core.views.apis.get_collection'),
     
     url(r'^cv/get_distributor_for_retailer/retailer_id/(?P<retailer_id>\d+)/$',
                         'gladminds.core.views.apis.get_distributor_for_retailer'),
