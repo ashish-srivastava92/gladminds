@@ -273,8 +273,8 @@ def get_outstanding(request, dsr_id):
                     if collections:
                         for each_collections in collections:
                             collection = collection + each_collections.collected_amount
-                    outstanding = outstanding - collection
-                    retailer_dict.update({'outstanding':outstanding})
+                    # outstanding = outstanding - collection
+                    # retailer_dict.update({'outstanding':outstanding})
                     retailer_list.append(retailer_dict)
     return Response(retailer_list)
 
