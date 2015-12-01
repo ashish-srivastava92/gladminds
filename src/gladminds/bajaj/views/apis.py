@@ -257,25 +257,23 @@ def get_outstanding(request, dsr_id):
         if invoices:
             for invoice in invoices:
                 retailer_dict = {}
-                outstanding = 0
+                total_amount = 0
                 collection = 0
-                outstanding = outstanding + invoice.invoice_amount
+                total_amount = total_amount + invoice.invoice_amount
                 retailer_dict.update({'retailer_id':retailer.retailer_code})
-                retailer_dict.update({'invoice_id': invoice.id})
+                retailer_dict.update({'invoice_id': invoice.invoice_id})
+                retailer_dict.update({'total_amount': total_amount})
                 retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
                 
                 #get the collections for that invoice
                 collection_objs = Collection.objects.filter(invoice_id = invoice.id)
                 for each in collection_objs:
-                   
                     collections = CollectionDetails.objects.filter(collection_id = each.id)
-                    
                     if collections:
                         for each_collections in collections:
                             collection = collection + each_collections.collected_amount
-                    # outstanding = outstanding - collection
-                    # retailer_dict.update({'outstanding':outstanding})
-                    retailer_list.append(retailer_dict)
+                retailer_dict.update({'collected_amount': collection})
+                retailer_list.append(retailer_dict)
     return Response(retailer_list)
 
 # @api_view(['GET'])
@@ -353,9 +351,8 @@ def uploadcollection(request):
     details table
     '''
     collection_body = json.loads(request.POST['uploadcollection'])
-    collection_body['invoice_id']
     collection = Collection()
-    collection.invoice = Invoices.objects.get(id = collection_body['invoice_id'])
+    collection.invoice = Invoices.objects.get(invoice_id = collection_body['invoice_id'])
     collection.payment_date = collection_body['payment_date']
     collection.dsr = DistributorSalesRep.objects.get(distributor_sales_code = \
                                                       collection_body['dsr_id'])
@@ -376,7 +373,7 @@ def uploadcollection(request):
         collectiondetails.cheque_bank = cheque['cheque_bank']
         collectiondetails.cheque_number = cheque['cheque_number']
         collectiondetails.cheque_amount = cheque['cheque_amount']
-        collectiondetails.img_url = collection_body['upload']
+        collectiondetails.img_url = cheque['cheque_image_url']
         collectiondetails.save()
     
     return Response({'message': 'Retailer Collection is updated successfully', 'status':1})

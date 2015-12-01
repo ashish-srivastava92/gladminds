@@ -979,7 +979,8 @@ class OrderDeliveredHistory(base_models.OrderDeliveredHistory):
 class Invoices(base_models.Invoices):
     retailer = models.ForeignKey(Retailer)
     invoice_date = models.DateTimeField()
-     
+    invoice_id = models.CharField(max_length = 15)
+    
     class Meta(base_models.Invoices.Meta):
         app_label = _APP_NAME
 
