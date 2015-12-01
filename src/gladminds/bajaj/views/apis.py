@@ -361,6 +361,7 @@ def uploadcollection(request):
     # collection.retailer = retailer
     collection.save()
     #put data into collection details table
+    payment_mode = 1
     for mode in constants.PAYMENT_MODES:
         if mode[0][1] == collection_body['payment_mode']:
             payment_mode = mode[0][0]
@@ -369,6 +370,7 @@ def uploadcollection(request):
     for cheque in collection_body['cheque_details']:
         collectiondetails = CollectionDetails()
         collectiondetails.collection = collection
+        collectiondetails.mode = payment_mode
         collectiondetails.collected_amount = collection_body['collected_amount']
         collectiondetails.cheque_bank = cheque['cheque_bank']
         collectiondetails.cheque_number = cheque['cheque_number']
