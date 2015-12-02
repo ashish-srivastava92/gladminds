@@ -16,18 +16,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework_jwt.settings import api_settings
 
-# from gladminds.bajaj.models import DistributorSalesRep, Retailer, Categories, \
-#                             PartPricing, OrderPart
-
 from gladminds.core.models import DistributorSalesRep, Retailer, CvCategories, \
                             OrderPart, DSRWorkAllocation, AlternateParts, Collection, \
                             PartMasterCv,RetailerCollection
-# from gladminds.bajaj.models import Distributor, DistributorSalesRep, Retailer,\
-#             PartMasterCv, CvCategories, OrderPartDetails,OrderPart
-
-
-                            # PartMasterCv,PartPricing
-
 from gladminds.core import constants
 
 # from gladminds.bajaj.models import Distributor, DistributorSalesRep, Retailer, OrderPartDetails,OrderPart
@@ -131,19 +122,12 @@ def place_order(request, dsr_id):
     '''
     parts = json.loads(request.body)
     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-    print "================dsr",dsr.id
     id = dsr.id
     if dsr:
         for order in parts :
-#             try:
                 orderpart = OrderPart(dsr =  dsr)
-#                 orderpart.save(using=settings.BRAND)
-                print "-[[o id============",orderpart.id
-#             except Exception as ex:
-#                 print "ex=============",ex
                 orderpart.dsr = dsr
                 orderpart.order_date = datetime.datetime.now()
-                print settings.BRAND,"bradnndddddddddddddd"
                 orderpart.save(using=settings.BRAND)
                 for item in order['order_items']:
                     part_number = item['part_number']
@@ -340,24 +324,38 @@ def get_outstanding(request, dsr_id):
 @api_view(['POST'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
-def get_collection(request, dsr_id):
+def uploadcollection(request):
     '''
-    This method returns retailer transaction details like paid amount, outstanding, cheque number, etc
-    given the retailer Id
+    This method gets the collection of payment by dsr and puts it into the collection and collection
+    details table
     '''
-    collection_body = json.loads(request.body)
-    retailer_id = collection_body['retailer_id']
-    collected_amount = collection_body['amount']
-    amount_collected_date  =collection_body['amount_collected_date']
-    retailer_detail = Collection.objects.filter(retailer = retailer_id)
+    collection_body = json.loads(request.POST['uploadcollection'])
+    collection_body['invoice_id']
+    collection = Collection()
+    collection.invoice = Invoices.objects.get(id = collection_body['invoice_id'])
+    collection.payment_date = collection_body['payment_date']
+    collection.dsr = DistributorSalesRep.objects.get(distributor_sales_code = \
+                                                      collection_body['dsr_id'])
+    #retailer = Retailer.objects.get(retailer_code = collection_body['retailer_id'])
+    # print retailer
+    # collection.retailer = retailer
+    collection.save()
+    #put data into collection details table
+    for mode in constants.PAYMENT_MODES:
+        if mode[0][1] == collection_body['payment_mode']:
+            payment_mode = mode[0][0]
+        else:
+            continue
+    for cheque in collection_body['cheque_details']:
+        collectiondetails = CollectionDetails()
+        collectiondetails.collection = collection
+        collectiondetails.collected_amount = collection_body['collected_amount']
+        collectiondetails.cheque_bank = cheque['cheque_bank']
+        collectiondetails.cheque_number = cheque['cheque_number']
+        collectiondetails.cheque_amount = cheque['cheque_amount']
+        collectiondetails.img_url = collection_body['upload']
+        collectiondetails.save()
     
-    for outstanding in retailer_detail:
-        invoice_amount_of_retailer = outstanding.invoice_amount
-        oustanding_for_retailer = int(invoice_amount_of_retailer) - int(collected_amount)
-        outstanding.payment_amount = collected_amount
-        outstanding.amount_collected_date = amount_collected_date
-        outstanding.outstanding_amount  = oustanding_for_retailer
-        outstanding.save()
     return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
    
     

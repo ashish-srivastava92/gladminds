@@ -115,5 +115,14 @@ alter table gm_dealer add column regional_office varchar(250);
 ALTER TABLE gm_bomvisualization ADD is_published tinyint(1)  NOT NULL DEFAULT 0;
 ALTER TABLE gm_bomvisualization ADD is_approved tinyint(1)  NOT NULL DEFAULT 0;
 
+------------------------------SFA-----------------------------------------------
+alter table gm_retailer add column district varchar(20);
+alter table gm_retailer add column near_dealer_name varchar(50);
+alter table gm_retailer add column total_sale_bajaj_parts float(10,4);
+alter table gm_retailer add column total_counter_sale float(10,4);
+alter table gm_retailer add column identification_no varchar(30);
+alter table gm_retailer add column mechanics varchar(100);
+----------------------------------------------------------------------------------
+
 
 

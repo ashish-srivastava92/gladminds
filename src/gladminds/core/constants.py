@@ -372,4 +372,6 @@ PAYMENT_MODES =  (('Cash', '1'),
                ('Cheque', '2'),
                ('Cash/Cheque','3'),)
 
+RETAILER_PASSWORD = 'bajaj'
+
 
