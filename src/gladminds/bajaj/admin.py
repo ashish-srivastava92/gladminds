@@ -9,7 +9,7 @@ from django import forms
 from django.utils.html import mark_safe
 
 from gladminds.bajaj import models
-from gladminds.bajaj.models import Distributor, DistributorStaff, DistributorSalesRep, DSRWorkAllocation, \
+from gladminds.bajaj.models import Distributor, DistributorStaff, DistributorSalesRep, \
                         Retailer, UserProfile, District, \
                          SparePartPoint, State, AreaSparesManager, City, DistributorDistrict, OrderPartDetails, OrderDeliveredHistory,\
                           Collection,PartsStock
@@ -1472,11 +1472,7 @@ class OrderPartAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.DISTRIBUTORSALESREP, Roles.RETAILERS]
     exclude = ['so_id', 'po_id', 'do_id']    
     #list_display = ('order_link', 'retailer_name', 'dsr_id',
-<<<<<<< HEAD
-                   #'total_value', 'order_date')
-=======
-     #              'total_value', 'order_date')
->>>>>>> 5f9fca58c93033f996d28c70cbdd2799e24f8dc5
+
 #     list_filter = ['order_date', 'distributor', 'dsr']
     
     class Media:
