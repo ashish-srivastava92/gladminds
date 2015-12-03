@@ -481,6 +481,14 @@ class AreaSparesManager(base_models.AreaSparesManager):
      #   app_label = _APP_NAME
      
 ######################## sfa models #################################
+
+class District(base_models.District):
+    ''' List of districts mapped to states'''
+    state = models.ForeignKey(State, null=True, blank=True)
+        
+#     distibutor_id= 
+    class Meta(base_models.District.Meta):
+        app_label = _APP_NAME
         
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
@@ -500,6 +508,12 @@ class Distributor(base_models.Distributor):
     image_url = models.FileField(upload_to="image",
                                    max_length=200, null=True, blank=True)
     
+    
+#     district = models.ForeignKey(District)
+    district = models.ManyToManyField(District)
+    
+    
+    
 #     is_active = models.BooleanField(default=True)
     
     
@@ -513,7 +527,20 @@ class Distributor(base_models.Distributor):
     
     class Meta(base_models.Distributor.Meta):
         app_label = _APP_NAME
-        
+ 
+
+
+
+
+# class DistributorDistrict(base_models.DistributorDistrict):
+#     distributor = models.ForeignKey(Distributor)
+# #     district = models.ForeignKey(District)
+#     
+#     class Meta(base_models.DistributorDistrict.Meta):
+#         app_label = _APP_NAME
+#         verbose_name_plural = "Distributor District"
+
+       
 class DSRScorecardReport(base_models.DSRScorecardReport):
     ''' details of report '''
     serial_number = models.CharField(max_length=5)
@@ -904,20 +931,6 @@ class ManufacturingData(base_models.ManufacturingData):
 
 ##########################     SFA Models  #########################################3
 
-class District(base_models.District):
-    ''' List of districts mapped to states'''
-    state = models.ForeignKey(State, null=True, blank=True)    
-#     distibutor_id= 
-    class Meta(base_models.District.Meta):
-        app_label = _APP_NAME
-
-
-class DistributorDistrict(base_models.DistributorDistrict):
-    distributor = models.ForeignKey(Distributor)
-    district = models.ForeignKey(District)
-    class Meta(base_models.DistributorDistrict.Meta):
-        app_label = _APP_NAME
-        verbose_name_plural = "Distributor District"
 
 
    
@@ -966,11 +979,15 @@ class OrderPart(base_models.OrderPart):
     fullfill = models.NullBooleanField()
     delivered = models.IntegerField(null=True, blank=True)
     no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
-    accept = models.BooleanField(default = False)
+    order_status = models.IntegerField(null=True, blank=True)
     order_placed_by = models.IntegerField()
     
     class Meta(base_models.OrderPart.Meta):
         app_label = _APP_NAME
+        
+    def __unicode__(self):
+        
+        return self.retailer.retailer_code
 
 
 class OrderPartDetails(base_models.OrderPartDetails):
@@ -978,6 +995,7 @@ class OrderPartDetails(base_models.OrderPartDetails):
     quantity = models.IntegerField(null=True, blank=True)
     active = models.IntegerField(null=True, blank=True, default=1)
     order = models.ForeignKey(OrderPart)
+    part_status = models.IntegerField(null=True, blank=True)
     line_total = models.DecimalField(max_digits = 20, decimal_places=10, null=True, blank=True)
     
     class Meta(base_models.OrderPartDetails.Meta):

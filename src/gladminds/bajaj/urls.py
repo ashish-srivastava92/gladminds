@@ -95,4 +95,13 @@ urlpatterns = patterns('',
     url(r'^admin/retailer/orders/$','gladminds.bajaj.views.views.dsr_orders', name='dsr_orders'),
     url(r'^admin/retailer/approve_retailer/retailer_id/(?P<retailer_id>\d+)/$', 'gladminds.bajaj.views.views.approve_retailer', name='approve_retailer'),
 #     url(r'^admin/bajaj/view_orders/(?P<order_id>\d+)$', 'gladminds.bajaj.views.views.list_orders', name='list_orders'),
+    url(r'^admin/order_details/(?P<order_status>\w+)/(?P<retailer_id>\d+)$','gladminds.bajaj.views.views.order_details', name='order_details'),
+    
+    url(r'^admin/get_parts/(?P<order_id>\d+)/(?P<order_status>\w+)$','gladminds.bajaj.views.views.get_parts', name='get_parts'),
+    url(r'^admin/accept_order/(?P<ret_id>\d+)/(?P<order_id>\d+)/(?P<action>\w+)/$','gladminds.bajaj.views.views.accept_order', name='accept_order'),
+    
+     url(r'^admin/data$','gladminds.bajaj.views.views.cal_data', name='cal_data'),
+#     url(r'^admin/cancel_order/(?P<ret_id>\d+)/(?P<order_id>\d+)/$','gladminds.bajaj.views.views.cancel_order', name='cancel_order'),
+    
+
 )

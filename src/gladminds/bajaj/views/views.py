@@ -45,7 +45,7 @@ from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
 from gladminds.core.auth import otp_handler
 from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor,District,State,OrderPartDetails,\
-PartPricing,OrderDeliveredHistory,DoDetails,PartsStock
+PartPricing,OrderDeliveredHistory,DoDetails,PartsStock,OrderPart,OrderPartDetails,DistributorSalesRep
 from gladminds.bajaj.models import PartMasterCv
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template import loader
@@ -53,6 +53,12 @@ from django.template.context import Context
 from gladminds.core.managers.mail import send_email
 
 from django.contrib import messages
+
+from django.db.models import Sum,Count
+from django.core.urlresolvers import reverse
+
+from gladminds.bajaj.admin import OrderPartAdmin
+
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
@@ -73,46 +79,63 @@ def get_districts(request):
     districts = District.objects.filter(state=state_obj.id).values("name","id")
     print districts
     return HttpResponse(json.dumps(list(districts), cls=DjangoJSONEncoder), content_type="application/json")
-    
-# def list_orders(request,order_id):
-#     orders_obj = OrderPartDetails.objects.select_related("part_number","order").filter(order = order_id)
-#     order_display=[]
-#     orders={}
-#     for each_order in orders_obj:
-#         print each_order.order_id,"pppp"
-#         orders['mrp']= each_order.part_number.mrp
-#         orders['part_number'] = each_order.part_number.part_number
-#         orders['quantity'] = each_order.quantity
-#         print each_order.order_id,"orrrr"
-#         orders['order_id'] = each_order.order_id
-#         order_display.append(orders)
-#         template = 'admin/bajaj/parts_list.html'
-#         return render(request, template,{"data":order_display})
-     
-#     
+
      
 def save_order_history(request):
-    stock =  request.POST.getlist("delivered_stock")
     order_id =  request.POST["order_id"]
-    total_amount = 0    
-    
-    do_obj = DoDetails(order_id = order_id)
-    do_obj.save(using = settings.BRAND)
-    print do_obj.id
-    
-    for each in range(0,int(len(stock))):
-        delivered_stock = request.POST.getlist("delivered_stock")[each]
-        date = request.POST.getlist("delivered_date")[each]
-        part_number = request.POST.getlist("part_number")[each]
-        part_pricing_obj = PartMasterCv.objects.get(part_number = part_number)
-        part_obj = PartsStock.objects.get(part_number = part_pricing_obj.id)
-        part_obj.available_quantity = int(part_obj.available_quantity)-int(delivered_stock)
-        part_obj.save(using = settings.BRAND)
-        ordered_date = datetime.datetime.strptime(date, "%m/%d/%Y") 
-        
-        order_obj = OrderDeliveredHistory(delivered_date = ordered_date,delivered_quantity = delivered_stock,order_id= order_id,part_number_id = part_pricing_obj.id,do_id=do_obj.id )
-        order_obj.save(using = settings.BRAND)
-    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    # cancelled from open orders
+    if 'cancel' in request.POST:
+        part_numbers = request.POST.getlist("part_number")
+        for each in part_numbers:
+            part_obj = PartPricing.objects.get(part_number=each)
+            ord = OrderPartDetails.objects.filter(part_number_id=part_obj.id,order_id=order_id).update(part_status=1)
+            messages.success(request,"Successfully cancelled the parts")
+
+   # submitted from pending orders
+    elif 'submit' in request.POST:
+        stock =  request.POST.getlist("delivered_stock")
+        total_amount = 0    
+        do_obj = DoDetails(order_id = order_id)
+        do_obj.save(using = settings.BRAND)
+        order_obj = OrderPart.objects.filter(id=order_id).update(order_status=3) 
+        print order_obj
+        print "jesus"
+        for each in range(0,int(len(stock))):
+            delivered_stock = request.POST.getlist("delivered_stock")[each]
+            date = request.POST.getlist("delivered_date")[each]
+            part_number = request.POST.getlist("part_number")[each]
+            part_pricing_obj = PartPricing.objects.get(part_number = part_number)
+            part_obj = PartsStock.objects.get(part_number = part_pricing_obj.id)
+            part_obj.available_quantity = int(part_obj.available_quantity)-int(delivered_stock)
+            part_obj.save(using = settings.BRAND)
+            ordered_date = datetime.datetime.strptime(date, "%m/%d/%Y") 
+            
+            order_obj = OrderDeliveredHistory(delivered_date = ordered_date,delivered_quantity = delivered_stock,order_id= order_id,part_number_id = part_pricing_obj.id,do_id=do_obj.id )
+            order_obj.save(using = settings.BRAND)
+            messages.success(request,"Successfully placed the order")
+            order_display = []
+            orders = {}
+            ret_id = OrderPart.objects.get(id=order_id).retailer 
+            order_obj = OrderPart.objects.filter(retailer=ret_id,order_status=3).select_related("retailer","dsr")
+            print order_obj
+            retailer_name = order_obj[0].retailer.retailer_name
+            for each_order in order_obj:
+                orders["retailer_name"] = each_order.retailer.retailer_name
+                orders["dsr_name"] = each_order.dsr
+                orders["order_date"] = each_order.order_date
+                orderdetails_obj = OrderPartDetails.objects.filter(order_id=each_order.id).aggregate(Sum('line_total'))
+                orders["total_value"] = orderdetails_obj["line_total__sum"]
+                orders["order_id"] = each_order.id
+                orders["ret_id"] = each_order.retailer_id
+                order_display.append(orders.copy())  
+            print order_display
+            context={"order_display":order_display,"order_status":"shipped",'app_label':"bajaj",'opts':"bajaj.orderpart","retailer_name":retailer_name}
+            form_url=""
+            template = 'admin/bajaj/orderpart/change_form.html'
+            messages.success(request,"Successfully placed the orders")
+            return render(request,template,context)
+            
+#     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
      
      
 def dsr_orders(request):    
@@ -120,11 +143,167 @@ def dsr_orders(request):
 
 
 def ordered_part_details(request,part_number,order_id):
-    part_obj = PartMasterCv.objects.get(part_number = part_number)
+    part_obj = PartPricing.objects.get(part_number = part_number)
     ordered_part_details = OrderDeliveredHistory.objects.filter(part_number = part_obj.id,order_id = order_id).values("id","order_id","delivered_quantity","part_number_id","delivered_date")
     context={"data":ordered_part_details}
     template = 'admin/bajaj/ordered_part_details.html'
     return render(request,template,{"data":ordered_part_details,"part_number":part_number,"part_description":part_obj.description})
+
+from gladminds.core.admin_helper import GmModelAdmin
+def order_details(request,order_status,retailer_id):
+    print order_status
+    print retailer_id
+    order_display = []
+    orders = {}
+    if order_status == "open":
+        order_obj = OrderPart.objects.filter(retailer=retailer_id,order_status=0).select_related("retailer","dsr")
+    elif order_status == "pending":
+        order_obj = OrderPart.objects.filter(retailer=retailer_id,order_status=1).select_related("retailer","dsr")
+    elif order_status == "shipped":
+        order_obj = OrderPart.objects.filter(retailer=retailer_id,order_status=3).select_related("retailer","dsr")
+    elif order_status == "cancelled":
+        order_obj = OrderPart.objects.filter(retailer=retailer_id,order_status=2).select_related("retailer","dsr")    
+    if len(order_obj) >0:
+        retailer_name = order_obj[0].retailer.retailer_name   
+        for each_order in order_obj:
+            orders["retailer_name"] = each_order.retailer.retailer_name
+            orders["dsr_name"] = each_order.dsr
+            orders["order_date"] = each_order.order_date
+            orderdetails_obj = OrderPartDetails.objects.filter(order_id=each_order.id).aggregate(Sum('line_total'))
+            orders["total_value"] = orderdetails_obj["line_total__sum"]
+            orders["order_id"] = each_order.id
+            orders["ret_id"] = each_order.retailer_id
+            order_display.append(orders.copy())  
+        print order_display    
+    context={"order_display":order_display,'order_status':order_status,'app_label':"bajaj",'opts':"bajaj.orderpart","retailer_name":retailer_name}
+    form_url=""
+    template = 'admin/bajaj/orderpart/change_form.html'
+    return render(request,template,context)
+
+
+def get_parts(request,order_id,order_status):
+        orders_obj = OrderPartDetails.objects.select_related("part_number", "order").filter(order=order_id)
+        length_orders = orders_obj.count() 
+        if length_orders == 0:
+            delivered = 0
+        order_display = []
+        orders = {}
+        ordered_date = OrderPart.objects.get(id=order_id).order_date
+        for each_order in orders_obj:
+            orders['mrp'] = each_order.part_number.mrp
+            orders['part_number'] = each_order.part_number.part_number
+            orders['part_description'] = each_order.part_number.description
+            orders['quantity'] = each_order.quantity
+            orders['order_id'] = each_order.order_id
+            orders['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
+            orders["part_status"] = each_order.part_status
+            
+            available_quantity = PartsStock.objects.filter(part_number = each_order.part_number.id)
+            if available_quantity:
+                available_quantity[0].available_quantity
+                orders['available_quantity'] = available_quantity[0].available_quantity
+            else:
+                orders['available_quantity'] = None
+            order_obj = OrderDeliveredHistory.objects.filter(part_number_id=each_order.part_number_id, order_id=each_order.order_id).aggregate(Sum('delivered_quantity'))
+            try:
+                orders_det = OrderDeliveredHistory.objects.get(part_number_id=each_order.part_number_id, order_id=each_order.order_id)
+    
+                print orders_det.delivered_date
+                orders['delivered_date'] = orders_det.delivered_date.strftime('%Y-%m-%d %H:%M')
+                orders['delivered_quantity'] = orders_det.delivered_quantity
+            except Exception as ex:
+                orders['delivered_date'] =""
+                orders['delivered_quantity']=""
+                
+            if order_obj["delivered_quantity__sum"] != None:
+                orders['pending'] = (each_order.quantity) - int(order_obj["delivered_quantity__sum"])
+            else:
+                orders['pending'] = each_order.quantity
+            order_display.append(orders.copy())
+            print order_display
+        context = { 
+                    "data":order_display,  
+                    "order_id":order_id,
+                    'orders_length': length_orders,
+                    'order_id':order_id,
+                    'delivered':0,
+                    'order_status':order_status, 
+                    "ordered_date":ordered_date          
+                   }
+        template = 'admin/bajaj/orderpart/retailer_order_list.html'  # = Your new template
+        return render(request,template,context)
+#         return super(OrderPartAdmin, self).change_view(request, order_id, form_url, context)
+    
+    
+        
+def accept_order(request,ret_id,order_id,action):
+    print order_id
+    print action
+    if action == "accept":
+        order_obj = OrderPart.objects.filter(id=order_id).update(order_status=1)   
+        order_status="open"
+    else:
+        order_obj = OrderPart.objects.filter(id=order_id).update(order_status=2) 
+        order_status="cancelled"
+    order_display = []
+    orders = {}
+    order_obj = OrderPart.objects.filter(retailer=ret_id,order_status=0).select_related("retailer","dsr")
+    print order_obj
+    retailer_name = order_obj[0].retailer.retailer_name
+    for each_order in order_obj:
+        orders["retailer_name"] = each_order.retailer.retailer_name
+        orders["dsr_name"] = each_order.dsr
+        orders["order_date"] = each_order.order_date
+        orderdetails_obj = OrderPartDetails.objects.filter(order_id=each_order.id).aggregate(Sum('line_total'))
+        orders["total_value"] = orderdetails_obj["line_total__sum"]
+        orders["order_id"] = each_order.id
+        orders["ret_id"] = each_order.retailer_id
+        order_display.append(orders.copy())  
+    print order_display
+    context={"order_display":order_display,"order_status":order_status,'app_label':"bajaj",'opts':"bajaj.orderpart","retailer_name":retailer_name}
+    form_url=""
+    template = 'admin/bajaj/orderpart/change_form.html'
+    return render(request,template,context)
+    
+
+
+def cal_data(request):
+    
+    
+    print "reqqq"
+    order_display=[]
+    dist={}
+    ret={}
+    ret_list=[]
+    import json
+    data =[]
+    from django.http import HttpResponse
+    dist_list=[]
+    dist_obj = DistributorSalesRep.objects.filter(distributor_id=51).select_related("user")
+    print dist_obj
+    for each in dist_obj:
+#         dist["id"] = each.distributor_id
+        dist["id"] = each.distributor_sales_code
+        dist["firstname"] = each.user.user.first_name
+        dist_list.append(dist.copy())
+    data.append(dist_list)
+    print data,"dist_data"
+    ret_obj = Retailer.objects.filter(distributor_id=51).select_related("user")    
+    for each in ret_obj:
+#         dist["id"] = each.distributor_id
+        ret["id"] = each.retailer_code
+        ret["firstname"] = each.user.user.first_name
+        ret["location"] = each.address_line_3
+        ret_list.append(ret.copy())
+    data.append(ret_list)
+    print data,"data"
+    return HttpResponse(json.dumps(data), content_type="application/json")
+#     context={"order_display":order_display}
+#     form_url=""
+#     template = 'admin/bajaj/orderpart/change_form.html'
+#     return render(request,template,context)
+    
+
 
 
 import csv
@@ -134,16 +313,20 @@ def upload_part_pricing(request):
     '''
     #upload the file to the upload_bajaj folder
      
+    print request.user.id,"userr"   
     dist_id = Distributor.objects.get(user__user=request.user)
     part_pricing_list =[]
     msg =""
+    print request.FILES
     flag=0
     full_path = handle_uploaded_file(request.FILES['upload_part_pricing'])
     with open(full_path) as csvfile:
         partreader = csv.DictReader(csvfile)
-        next(partreader)
+#         next(partreader)
         for row_list in partreader:
-            part_pricing_list.append(row_list)            
+            print row_list
+            part_pricing_list.append(row_list)     
+        print part_pricing_list,"aaaaa"       
         for part in part_pricing_list:
             print "part==========",part['Part Number']
             try:

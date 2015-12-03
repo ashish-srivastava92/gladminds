@@ -198,29 +198,47 @@ SUIT_CONFIG = {
          # 'models':(
          #          )},
          
-         
-         
-            {'app': 'bajaj', 'label': 'Parts', 'icon': ' icon-folder-open',
+           {'app': 'bajaj', 'label': 'Parts', 'icon': ' icon-folder-open',
           'models':(
                    
-                     {'model': 'partmastercv',
-                      'label': 'PartMasterCv'},
+                     {'model': 'partpricing',
+                      'label': 'PartPricing'},
                      )
                        
           },
+         
+#             {'app': 'bajaj', 'label': 'Parts', 'icon': ' icon-folder-open',
+#           'models':(
+#                    
+#                      {'model': 'partmastercv',
+#                       'label': 'PartMasterCv'},
+#                      )
+#                        
+#           },
+             
+              {'app': 'bajaj', 'label': 'Scheduling', 'icon': ' icon-folder-open',
+         'models':(
+                  
+                    {'model': 'dsrworkallocation',
+                     'label': 'DSR Scheduling'},
+                 
+       
+)},
+      
           {'app': 'bajaj', 'label': 'Orders', 'icon': ' icon-folder-open',
           'models':(
                    
                      {'model': 'orderpart',
-                      'label': 'DSRs Orders'},
-                          {'model': 'orderpart',
-                      'label': 'Retailers Orders'},
-                     {'model': 'dsrworkallocation',
-                      'label': 'DSR Work Allocation'}
+                      'label': 'Orders'},
+#                           {'model': 'orderpart',
+#                       'label': 'Retailers Orders'},
+#                                                     
+           
+                     
                     )
                     },
-                    
-#               
+#              
+     
           
         {'app': 'bajaj', 'label': 'Collections', 'icon': ' icon-folder-open',
          'models':(
@@ -457,7 +475,8 @@ ALL_APPS = (
     'tastypie_swagger',
     'django_otp',
     'django_otp.plugins.otp_totp',
-    'rest_framework'
+    'rest_framework',
+    'adminplus',
 
     # 'debug_toolbar',
     # Uncomment the next line to enable admin documentation:

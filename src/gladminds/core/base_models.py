@@ -1196,7 +1196,7 @@ class DSRWorkAllocation(BaseModel):
     class Meta:
         abstract = True
         db_table = "gm_dsrworkallocation"
-        verbose_name_plural = "DSR Work Allocation"
+        verbose_name_plural = "Sceduling"
         
 class RetailerCollection(BaseModel):
     '''details of retailer collection'''
