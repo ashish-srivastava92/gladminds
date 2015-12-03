@@ -118,10 +118,15 @@ ALTER TABLE gm_bomvisualization ADD is_approved tinyint(1)  NOT NULL DEFAULT 0;
 ------------------------------SFA-----------------------------------------------
 alter table gm_retailer add column district varchar(20);
 alter table gm_retailer add column near_dealer_name varchar(50);
-alter table gm_retailer add column total_sale_bajaj_parts float(10,4);
+alter table gm_retailer add column total_sale_parts float(10,4);
 alter table gm_retailer add column total_counter_sale float(10,4);
 alter table gm_retailer add column identification_no varchar(30);
-alter table gm_retailer add column mechanics varchar(100);
+alter table gm_retailer add column mechanic_1 varchar(50);
+alter table gm_retailer add column mechanic_2 varchar(50);
+alter table gm_retailer add column shop_size varchar(15);
+alter table gm_retailer add column identity_url varchar(255);
+alter table gm_retailer add column signature_url varchar(255);
+alter table gm_retailer change column image_url image_url varchar(255);
 ----------------------------------------------------------------------------------
 
 

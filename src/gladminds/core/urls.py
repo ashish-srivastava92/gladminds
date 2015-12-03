@@ -133,6 +133,8 @@ urlpatterns = patterns('',
                         'gladminds.bajaj.views.apis.place_order'),
     url(r'^mc/place_order/retailer_id/(?P<retailer_id>\d+)/$',
                         'gladminds.bajaj.views.apis.retailer_place_order'),
+    url(r'^mc/add_retailer/dsr_id/(?P<dsr_id>\d+)/$',
+                        'gladminds.bajaj.views.apis.add_retailer'),
     #end of mc urls
     url(r'^cv/api-token-auth/', 'gladminds.core.views.apis.authentication'),
     url(r'^cv/get_retailers/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.core.views.apis.get_retailers'),

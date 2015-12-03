@@ -18,7 +18,7 @@ from rest_framework_jwt.settings import api_settings
 
 from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
                             PartPricing, OrderPart, Distributor, OrderPartDetails, Invoices, \
-                           DSRWorkAllocation ,Collection,CollectionDetails,PartsStock
+                           Collection,CollectionDetails,PartsStock, UserProfile
 
 from gladminds.core import constants
 
@@ -378,63 +378,140 @@ def uploadcollection(request):
         collectiondetails.save()
     return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
 
+# @api_view(['POST'])
+# # # @authentication_classes((JSONWebTokenAuthentication,))
+# # # @permission_classes((IsAuthenticated,))
+# def add_retailer(request, dsr_id):
+#     ''' this method adds a retailer and his profile from the DSR. Adds data in three tables
+#     user, userprofile and retailer'''
+#     retailer_code = ''
+#     profile = json.loads(request.POST['retailer'])
+#     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+#     # initialize user class
+#     user = User()
+#     user.first_name = profile['first_name']
+#     user.last_name = profile['last_name']
+#     # get the latest retailer code and add sequence increment for the new retailer code,
+#     # if retailer is not there, get the first value in the sequence from the constansts file
+#     try:
+#         retailer = Retailer.objects.filter().order_by("-id")[0]
+#         retailer_code = str(int(retailer.retailer_code) + \
+#                                         constants.RETAILER_SEQUENCE_INCREMENT)
+#         
+#     except:
+#         retailer_code = str(constants.RETAILER_SEQUENCE)
+#     user.username = retailer_code
+#     user.password = constants.RETAILER_PASSWORD
+#     user.date_joined = datetime.datetime.now()
+#     user.is_superuser = False
+#     user.is_staff = False
+#     user.is_active = True
+#     user.save()
+#     # initialize user profile class
+#     user_profile = UserProfile()
+#     user_profile.user = user
+#     user_profile.date_of_birth = profile['date_of_birth']
+#     user_profile.state = profile['state']
+#     user_profile.pincode = profile['pincode']
+#     user_profile.image_url = profile['image_url']
+#     user_profile.save()
+#     # initialize retailer class
+#     retailer = Retailer()
+#     retailer.user = user_profile
+#     retailer.distributor = dsr.distributor
+#     retailer.retailer_code = retailer_code
+#     retailer.retailer_name = profile['shop_name']
+#     retailer.billing_code = profile['billing_code']
+#     retailer.email = profile['email']
+#     retailer.mobile = profile['mobile']
+#     retailer.profile = 'retailer'
+#     retailer.territory = profile['state']
+#     retailer.address_line_2 = profile['shop_name'] + ' ' + profile['shop_number']
+#     retailer.address_line_3 = profile['locality']
+#     retailer.address_line_4 = profile['tehsil_name'] + ' ' + profile['taluka']
+#     retailer.retailer_town = profile['town']
+#     retailer.latitude = profile['latitude']
+#     retailer.longitude = profile['longitude']
+#     retailer.district = profile['district']
+#     retailer.near_dealer_name = profile['near_dealer_name']
+#     retailer.total_counter_sale = profile['counter_sale']
+#     retailer.total_sale_parts = profile['total_sale']
+#     retailer.identification_no = profile['identification_no']
+#     retailer.image_url = profile['shop_photo']
+#     retailer.identity_url = profile['identity_url']
+#     retailer.signature_url = profile['signature_url']
+#     retailer.mechanic_1 = profile['mechanic_name_1']  + ' ' + profile['mechanic_number_1']
+#     retailer.mechanic_2 = profile['mechanic_name_2']  + ' ' + profile['mechanic_number_2']
+#     retailer.save()
+#     return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
+    
+    
 @api_view(['POST'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
-def add_retailer(request):
+def add_retailer(request, dsr_id):
     ''' this method adds a retailer and his profile from the DSR. Adds data in three tables
     user, userprofile and retailer'''
     retailer_code = ''
-    profile = json.loads(request.post['retailer'])
-    # initialize user class
-    user = User()
-    user.first_name = profile['first_name']
-    user.last_name = profile['last_name']
-    try:
-        retailer = Retailer.objects.filter().order_by("-id")[0]
-        retailer_code = str(int(retailer.retailer_code) + \
-                                        constants.RETAILER_SEQUENCE_INCREMENT)
-    except:
-        retailer_code = str(constants.RETAILER_SEQUENCE)
-    user.username = profile['mobile']
-    user.password = constants.RETAILER_PASSWORD
-    user.date_joined = datetime.datetime.now()
-    user.is_superuser = False
-    user.is_staff = False
-    user.is_active = True
-    user.save()
-    # initialize user profile class
-    user_profile = UserProfile()
-    user_profile = user
-    user_profile.date_of_birth = profile['dob']
-    user_profile.state = profile['state']
-    user_profile.pincode = profile['pincode']
-    user_profile.address = profile['address1']
-    user_profile.image_url = profile['image_url']
-    user_profile.save()
-    # initialize retailer class
-    retailer = Retailer()
-    retailer.user = user
-    retailer.retailer_code = retailer_code
-    retailer.retailer_name = profile['shop_name']
-    retailer.billing_code = profile['retailer_billing_code']
-    retailer.email = profile['email']
-    retailer.mobile = profile['mobile']
-    retailer.profile = 'retailer'
-    retailer.address_line_2 = profile['address2']
-    retailer.address_line_3 = profile['address3']
-    retailer.address_line_4 = profile['address4'] + profile['address5']
-    retailer.latitude = profile['latitude']
-    retailer.longitude = profile['longitude']
-    retailer.district = profile['district']
-    retailer.near_dealer_name = profile['dealer_name']
-    retailer.total_counter_sale = profile['counter_sale']
-    retailer.total_sale_bajaj_parts = profile['total_sale']
-    retailer.identification_no = profile['identification_no']
-    retailer.image_url = profile['shop_photo']
-    retailer.mechanics = profile['mechanics']
-    retailer.save()
-    
+    profiles = json.loads(request.POST['retailer'])
+    dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+    for profile in profiles:
+        # initialize user class
+        user = User()
+        user.first_name = profile['first_name']
+        user.last_name = profile['last_name']
+        # get the latest retailer code and add sequence increment for the new retailer code,
+        # if retailer is not there, get the first value in the sequence from the constansts file
+        try:
+            retailer = Retailer.objects.filter().order_by("-id")[0]
+            retailer_code = str(int(retailer.retailer_code) + \
+                                            constants.RETAILER_SEQUENCE_INCREMENT)
+        except:
+            retailer_code = str(constants.RETAILER_SEQUENCE)
+        user.username = retailer_code
+        user.password = constants.RETAILER_PASSWORD
+        user.date_joined = datetime.datetime.now()
+        user.is_superuser = False
+        user.is_staff = False
+        user.is_active = True
+        user.save()
+        # initialize user profile class
+        user_profile = UserProfile()
+        user_profile.user = user
+        user_profile.date_of_birth = profile['date_of_birth']
+        user_profile.state = profile['state']
+        user_profile.pincode = profile['pincode']
+        user_profile.image_url = profile['image_url']
+        user_profile.save()
+        # initialize retailer class
+        retailer = Retailer()
+        retailer.user = user_profile
+        retailer.distributor = dsr.distributor
+        retailer.retailer_code = retailer_code
+        retailer.retailer_name = profile['shop_name']
+        retailer.billing_code = profile['billing_code']
+        retailer.email = profile['email']
+        retailer.mobile = profile['mobile']
+        retailer.profile = 'retailer'
+        retailer.territory = profile['state']
+        retailer.address_line_2 = profile['shop_name'] + ' ' + profile['shop_number']
+        retailer.address_line_3 = profile['locality']
+        retailer.address_line_4 = profile['tehsil_name'] + ' ' + profile['taluka']
+        retailer.retailer_town = profile['town']
+        retailer.latitude = profile['latitude']
+        retailer.longitude = profile['longitude']
+        retailer.district = profile['district']
+        retailer.near_dealer_name = profile['near_dealer_name']
+        retailer.total_counter_sale = profile['counter_sale']
+        retailer.total_sale_parts = profile['total_sale']
+        retailer.identification_no = profile['identification_no']
+        retailer.image_url = profile['shop_photo']
+        retailer.identity_url = profile['identity_url']
+        retailer.signature_url = profile['signature_url']
+        retailer.mechanic_1 = profile['mechanic_name_1']  + ' ' + profile['mechanic_number_1']
+        retailer.mechanic_2 = profile['mechanic_name_2']  + ' ' + profile['mechanic_number_2']
+        retailer.save()
+    return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
     
     
     

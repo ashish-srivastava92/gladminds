@@ -1126,7 +1126,7 @@ class CollectionAdmin(GmModelAdmin):
     dsr.short_description = 'DSR'
     
     def Total_Order_value(self,obj):
-        return "50000"
+        return " "
     
     
 #     def 
@@ -1136,7 +1136,7 @@ class CollectionAdmin(GmModelAdmin):
 #     retailer_contact.admin_order_field = 'retailer'
 
     def Outstanding(self,obj):
-        return "50000"
+        return " "
     
     
     def get_invoice(self, obj):
