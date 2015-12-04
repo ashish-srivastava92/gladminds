@@ -3,11 +3,14 @@ author: araskumar.a
 date: 31-08-2015
 '''
 import json, datetime, time
+from collections import OrderedDict
+from operator import itemgetter
 
 from django.utils import simplejson
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.http import HttpResponse
+from django.db.models import Q
 
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -322,7 +325,6 @@ def get_distributor_for_retailer(request, retailer_id):
     '''
     This method returns all the retailers of the distributor given the dsr id 
     '''
-    
     # distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
     retailers_list = Retailer.objects.filter(retailer_code = retailer_id)
     distributor_list = []
@@ -331,7 +333,7 @@ def get_distributor_for_retailer(request, retailer_id):
         #distributor_dict = {}
         distributor_of_retailer  = Distributor.objects.filter(id =retailer.distributor_id )
         for distributor in distributor_of_retailer:
-            distributor_dict ={
+            distributor_dict = {
                     'distributor_name':distributor.name,
                     'distributor_id':distributor.distributor_id,
                     'distributor_phone_number':distributor.phone_number,
@@ -339,7 +341,6 @@ def get_distributor_for_retailer(request, retailer_id):
                     'distributor_email':distributor.email
                 }
             distributor_list.append(distributor_dict)
-        
     return Response(distributor_list)
 
 @api_view(['POST'])
@@ -378,74 +379,6 @@ def uploadcollection(request):
         collectiondetails.save()
     return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
 
-# @api_view(['POST'])
-# # # @authentication_classes((JSONWebTokenAuthentication,))
-# # # @permission_classes((IsAuthenticated,))
-# def add_retailer(request, dsr_id):
-#     ''' this method adds a retailer and his profile from the DSR. Adds data in three tables
-#     user, userprofile and retailer'''
-#     retailer_code = ''
-#     profile = json.loads(request.POST['retailer'])
-#     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-#     # initialize user class
-#     user = User()
-#     user.first_name = profile['first_name']
-#     user.last_name = profile['last_name']
-#     # get the latest retailer code and add sequence increment for the new retailer code,
-#     # if retailer is not there, get the first value in the sequence from the constansts file
-#     try:
-#         retailer = Retailer.objects.filter().order_by("-id")[0]
-#         retailer_code = str(int(retailer.retailer_code) + \
-#                                         constants.RETAILER_SEQUENCE_INCREMENT)
-#         
-#     except:
-#         retailer_code = str(constants.RETAILER_SEQUENCE)
-#     user.username = retailer_code
-#     user.password = constants.RETAILER_PASSWORD
-#     user.date_joined = datetime.datetime.now()
-#     user.is_superuser = False
-#     user.is_staff = False
-#     user.is_active = True
-#     user.save()
-#     # initialize user profile class
-#     user_profile = UserProfile()
-#     user_profile.user = user
-#     user_profile.date_of_birth = profile['date_of_birth']
-#     user_profile.state = profile['state']
-#     user_profile.pincode = profile['pincode']
-#     user_profile.image_url = profile['image_url']
-#     user_profile.save()
-#     # initialize retailer class
-#     retailer = Retailer()
-#     retailer.user = user_profile
-#     retailer.distributor = dsr.distributor
-#     retailer.retailer_code = retailer_code
-#     retailer.retailer_name = profile['shop_name']
-#     retailer.billing_code = profile['billing_code']
-#     retailer.email = profile['email']
-#     retailer.mobile = profile['mobile']
-#     retailer.profile = 'retailer'
-#     retailer.territory = profile['state']
-#     retailer.address_line_2 = profile['shop_name'] + ' ' + profile['shop_number']
-#     retailer.address_line_3 = profile['locality']
-#     retailer.address_line_4 = profile['tehsil_name'] + ' ' + profile['taluka']
-#     retailer.retailer_town = profile['town']
-#     retailer.latitude = profile['latitude']
-#     retailer.longitude = profile['longitude']
-#     retailer.district = profile['district']
-#     retailer.near_dealer_name = profile['near_dealer_name']
-#     retailer.total_counter_sale = profile['counter_sale']
-#     retailer.total_sale_parts = profile['total_sale']
-#     retailer.identification_no = profile['identification_no']
-#     retailer.image_url = profile['shop_photo']
-#     retailer.identity_url = profile['identity_url']
-#     retailer.signature_url = profile['signature_url']
-#     retailer.mechanic_1 = profile['mechanic_name_1']  + ' ' + profile['mechanic_number_1']
-#     retailer.mechanic_2 = profile['mechanic_name_2']  + ' ' + profile['mechanic_number_2']
-#     retailer.save()
-#     return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
-    
-    
 @api_view(['POST'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
@@ -513,7 +446,93 @@ def add_retailer(request, dsr_id):
         retailer.save()
     return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
     
+@api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def dsr_dashboard_report(request, dsr_id):
+    dsr =  DistributorSalesRep.objects.select_related('distributor').get(distributor_sales_code = dsr_id)
+    distributor = dsr.distributor
+    retailers_list = []
+    retailer_dict = OrderedDict()
     
+    # get the retailer objects for this distributor
+    retailers = Retailer.objects.filter(distributor = distributor)
+    retailer_dict.update({"total_retailers": retailers.count()})
+    
+    # calculation of total sales value
+    total_sales_value = 0
+    for retailer in retailers:
+        orders = OrderPart.objects.filter(retailer = retailer)
+        retailer_sales_value = 0
+        if orders:
+            for order in orders:
+                # get all the order details and sum up the line total
+                order_details = OrderPartDetails.objects.filter(order = order)
+                for order_detail in order_details:
+                    retailer_sales_value = retailer_sales_value + order_detail.line_total
+        # sum up the each retailer sales value to the total
+        total_sales_value = total_sales_value + retailer_sales_value
+    retailer_dict.update({"sales value": total_sales_value})
+    
+    # calculation of collected amount
+    total_collected_amount = 0
+    for retailer in retailers:
+        # get all the invoices for this retailer
+        retailer_collected_amount = 0
+        collections = Collection.objects.filter(retailer = retailer)
+        for collection in collections:    
+            # get all the collection details for this collection
+            collection_details = CollectionDetails.objects.filter(collection = collection)
+            for collection_detail in collection_details:
+                retailer_collected_amount = retailer_collected_amount + collection_detail.collected_amount
+        # sum up the each retailer collected amount to the total
+        total_collected_amount = total_collected_amount + retailer_collected_amount
+    retailer_dict.update({"collections": total_collected_amount})
+    
+    # calculation of zero-billed
+    exist_retailers = []
+    for retailer in retailers:
+        exist_retailers.append(retailer.retailer_code)
+    collected_retailers = []
+    collection_details = CollectionDetails.objects.filter().values('collection__retailer__retailer_code')
+    for collection in collection_details:
+        collected_retailers.append(collection['collection__retailer__retailer_code'])
+    uni = set(collected_retailers)
+    zero_billed_retailers = [x for x in exist_retailers if x not in collected_retailers]
+    retailer_dict.update({"zero billed retailers": zero_billed_retailers})
+    
+    # calculation of new retailers enrolled
+    # find retailer objects created in the running month and year
+    today = datetime.datetime.now()
+    new_retailers = Retailer.objects.filter(Q(created_date__year=today.year),
+                                            Q(created_date__month=today.month))
+    new_retailers_list = []
+    for new_retailer in new_retailers:
+        new_retailers_list.append(new_retailer.retailer_code)
+    retailer_dict.update({"new retailers": new_retailers_list})
+    
+    # calculation of top retailers
+    total_sales_value = 0
+    top_retailers_dict = {}
+    for retailer in retailers:
+        orders = OrderPart.objects.filter(retailer = retailer)
+        retailer_sales_value = 0
+        if orders:
+            for order in orders:
+                # get all the order details and sum up the line total
+                order_details = OrderPartDetails.objects.filter(order = order)
+                for order_detail in order_details:
+                    retailer_sales_value = retailer_sales_value + order_detail.line_total
+                top_retailers_dict[retailer.retailer_code] = retailer_sales_value
+              
+        else:
+            top_retailers_dict[retailer.retailer_code] = 0
+    s = sorted(top_retailers_dict.items(), key=itemgetter(1), reverse=True)
+    retailer_dict.update({"top retailers": s[:10]})
+    
+    
+    retailers_list.append(retailer_dict)
+    return Response(retailers_list)
     
     
 

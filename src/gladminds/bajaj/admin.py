@@ -1301,7 +1301,7 @@ class PartListAdmin(GmModelAdmin):
     Applicable_Model.short_description='Applicable Model'
     
     def moq(self,obj):
-	return obj.moq    
+        return obj.moq    
     moq.short_description='MOQ'
 
     def Price(self, obj):

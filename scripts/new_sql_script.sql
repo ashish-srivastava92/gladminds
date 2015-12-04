@@ -127,6 +127,9 @@ alter table gm_retailer add column shop_size varchar(15);
 alter table gm_retailer add column identity_url varchar(255);
 alter table gm_retailer add column signature_url varchar(255);
 alter table gm_retailer change column image_url image_url varchar(255);
+alter table gm_orderpart_details change column line_total line_total float(10,4);
+-- run the following cmd in the terminal for the month lookup to work with django ORM
+mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root mysql -p
 ----------------------------------------------------------------------------------
 
 

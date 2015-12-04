@@ -898,7 +898,7 @@ class OrderPartDetails(base_models.OrderPartDetails):
     quantity = models.IntegerField(null=True, blank=True)
     active = models.IntegerField(null=True, blank=True, default=1)
     order = models.ForeignKey(OrderPart)
-    line_total = models.DecimalField(max_digits = 20, decimal_places=6, null=True, blank=True)
+    line_total = models.DecimalField(max_digits = 10, decimal_places=4, null=True, blank=True)
     
     class Meta(base_models.OrderPartDetails.Meta):
         app_label = _APP_NAME
