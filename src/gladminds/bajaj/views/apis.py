@@ -267,7 +267,6 @@ def get_outstanding(request, dsr_id):
                 retailer_dict.update({'invoice_id': invoice.invoice_id})
                 retailer_dict.update({'total_amount': total_amount})
                 retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
-                
                 #get the collections for that invoice
                 collection_objs = Collection.objects.filter(invoice_id = invoice.id)
                 for each in collection_objs:
@@ -353,31 +352,42 @@ def uploadcollection(request):
     '''
     collection_body = json.loads(request.POST['uploadcollection'])
     collection = Collection()
-    collection.invoice = Invoices.objects.get(invoice_id = collection_body['invoice_id'])
-    collection.payment_date = collection_body['payment_date']
-    collection.dsr = DistributorSalesRep.objects.get(distributor_sales_code = \
-                                                      collection_body['dsr_id'])
-    retailer = Retailer.objects.get(retailer_code = collection_body['retailer_id'])
-    collection.retailer = retailer
-    collection.save()
-    #put data into collection details table
-    payment_mode = 1
-    for mode in constants.PAYMENT_MODES:
-        if mode[0][1] == collection_body['payment_mode']:
-            payment_mode = mode[0][0]
-        else:
-            continue
-    for cheque in collection_body['cheque_details']:
-        collectiondetails = CollectionDetails()
-        collectiondetails.collection = collection
-        collectiondetails.mode = payment_mode
-        collectiondetails.collected_amount = collection_body['collected_amount']
-        collectiondetails.cheque_bank = cheque['cheque_bank']
-        collectiondetails.cheque_number = cheque['cheque_number']
-        collectiondetails.cheque_amount = cheque['cheque_amount']
-        collectiondetails.img_url = cheque['cheque_image_url']
-        collectiondetails.save()
-    return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
+    # get the total order value of the invoice
+    invoice = Invoices.objects.get(invoice_id = collection_body['invoice_id'])
+    # get the so far collected_amount for that invoice
+    coll_details = CollectionDetails.objects.filter(collection__invoice = invoice)
+    existing_collection = 0
+    for details in coll_details:
+        existing_collection = existing_collection + details.collected_amount
+    if collection_body['collected_amount'] <= invoice.invoice_amount - existing_collection:
+        # enter into teh collection table
+        collection.invoice = Invoices.objects.get(invoice_id = collection_body['invoice_id'])
+        collection.payment_date = collection_body['payment_date']
+        collection.dsr = DistributorSalesRep.objects.get(distributor_sales_code = \
+                                                                        collection_body['dsr_id'])
+        retailer = Retailer.objects.get(retailer_code = collection_body['retailer_id'])
+        collection.retailer = retailer
+        collection.save()
+        #put data into collection details table
+        payment_mode = 1
+        for mode in constants.PAYMENT_MODES:
+            if mode[0][1] == collection_body['payment_mode']:
+                payment_mode = mode[0][0]
+            else:
+                continue
+        for cheque in collection_body['cheque_details']:
+            collectiondetails = CollectionDetails()
+            collectiondetails.collection = collection
+            collectiondetails.mode = payment_mode
+            collectiondetails.collected_amount = collection_body['collected_amount']
+            collectiondetails.cheque_bank = cheque['cheque_bank']
+            collectiondetails.cheque_number = cheque['cheque_number']
+            collectiondetails.cheque_amount = cheque['cheque_amount']
+            collectiondetails.img_url = cheque['cheque_image_url']
+            collectiondetails.save()
+        return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
+    else:
+        return Response({'message': 'Collection is greater than the invoice amount', 'status':0})
 
 @api_view(['POST'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
@@ -530,7 +540,7 @@ def dsr_dashboard_report(request, dsr_id):
     s = sorted(top_retailers_dict.items(), key=itemgetter(1), reverse=True)
     retailer_dict.update({"top retailers": s[:10]})
     
-    
+    # finally add the dictionary to the list which is sent as the response
     retailers_list.append(retailer_dict)
     return Response(retailers_list)
     
