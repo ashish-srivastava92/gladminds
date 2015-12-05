@@ -278,44 +278,35 @@ def get_outstanding(request, dsr_id):
                 retailer_list.append(retailer_dict)
     return Response(retailer_list)
 
-# @api_view(['GET'])
-# # # @authentication_classes((JSONWebTokenAuthentication,))
-# # # @permission_classes((IsAuthenticated,))
-# def get_retailer_outstanding(request, retailer_id):
-#     '''
-#     This method returns the outstanding amount of particular retailer with all the distributor '''
-#     
-#     retailers = Retailer.objects.filter(retailer_code = retailer_id)
-#     # get the distributor list for that retailer
-#     distributors = []
-#     for retailer in retailers:
-#         distributors.append(retailer.distributor)
-#     
-#     #for the particular retailer, get all the invoices and total the invoice amount
-#     
-#         invoices = Invoices.objects.filter(retailer = retailer)
-#         if invoices:
-#             for invoice in invoices:
-#                 retailer_dict = {}
-#                 outstanding = 0
-#                 collection = 0
-#                 outstanding = outstanding + invoice.invoice_amount
-#                 retailer_dict.update({'retailer_id':retailer.retailer_code})
-#                 retailer_dict.update({'invoice_id': invoice.id})
-#                 retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
-#                 # tm = time.strptime(str(invoice.invoice_date.time()), "%H:%M:%S")
-#                 # retailer_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
-#                 #get the collections for that invoice
-#                 collection_objs = Collection.objects.filter(invoice_id = invoice.id)
-#                 for each in collection_objs:
-#                     collections = CollectionDetails.objects.filter(collection_id = each.id)
-#                     if collections:
-#                         for each_collections in collections:
-#                             collection = collection + each_collections.collected_amount
-#                     outstanding = outstanding - collection
-#                     retailer_dict.update({'outstanding':outstanding})
-#                     retailer_list.append(retailer_dict)
-#     return Response(retailer_list)
+@api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def get_retailer_outstanding(request, retailer_id):
+    '''
+    This method returns the outstanding amount of particular retailer
+    '''
+    #for the particular retailer, get all the invoices and total the invoice amount
+    invoices = Invoices.objects.filter(retailer__retailer_code = retailer_id)
+    if invoices:
+        for invoice in invoices:
+            retailer_dict = {}
+            outstanding = 0
+            collection = 0
+            outstanding = outstanding + invoice.invoice_amount
+            retailer_dict.update({'retailer_id':retailer.retailer_code})
+            retailer_dict.update({'invoice_id': invoice.id})
+            retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
+            #get the collections for that invoice
+            collection_objs = Collection.objects.filter(invoice_id = invoice.id)
+            for each in collection_objs:
+                collections = CollectionDetails.objects.filter(collection_id = each.id)
+                if collections:
+                    for each_collections in collections:
+                        collection = collection + each_collections.collected_amount
+                outstanding = outstanding - collection
+                retailer_dict.update({'outstanding':outstanding})
+                retailer_list.append(retailer_dict)
+    return Response(retailer_list)
 
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
@@ -359,6 +350,8 @@ def uploadcollection(request):
     existing_collection = 0
     for details in coll_details:
         existing_collection = existing_collection + details.collected_amount
+    # check the collectedamount from the payload is less than or equal to the existing
+    # collection for that invoice
     if collection_body['collected_amount'] <= invoice.invoice_amount - existing_collection:
         # enter into teh collection table
         collection.invoice = Invoices.objects.get(invoice_id = collection_body['invoice_id'])
