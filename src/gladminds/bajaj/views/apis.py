@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.http import HttpResponse
 from django.db.models import Q
+from django.db.models import Count
 
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -531,7 +532,23 @@ def dsr_dashboard_report(request, dsr_id):
         else:
             top_retailers_dict[retailer.retailer_code] = 0
     s = sorted(top_retailers_dict.items(), key=itemgetter(1), reverse=True)
-    retailer_dict.update({"top retailers": s[:10]})
+    s = s[:10]
+    
+    retailer_dict.update({"top retailers": s})
+    
+    # calculation of billed parts count
+    parts_count = OrderPartDetails.objects.filter().values('part_number').distinct().count()
+    retailer_dict.update({"BilledPartsCount": parts_count})
+    
+    # calculation of top selling part
+    top_selling_part = OrderPartDetails.objects.values('part_number', 'part_number__description').\
+            annotate(ordered_count = Count('part_number')).order_by('-ordered_count')
+    # top selling part quantity and value ordered
+    tsp_qty_value = OrderPartDetails.objects.filter(part_number = \
+                            top_selling_part[0]['part_number']).order_by('-quantity')[0]
+    retailer_dict.update({"top selling part": top_selling_part[0]['part_number__description']})
+    retailer_dict.update({"top selling part - Qty": tsp_qty_value.quantity})
+    retailer_dict.update({"top selling part - value": tsp_qty_value.line_total})
     
     # finally add the dictionary to the list which is sent as the response
     retailers_list.append(retailer_dict)
