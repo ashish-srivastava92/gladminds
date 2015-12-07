@@ -12,6 +12,7 @@ from django.contrib.auth import authenticate
 from django.http import HttpResponse
 from django.db.models import Q
 from django.db.models import Count
+from django.db.models import Max
 
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -461,6 +462,7 @@ def dsr_dashboard_report(request, dsr_id):
     
     # get the retailer objects for this distributor
     retailers = Retailer.objects.filter(distributor = distributor)
+    retailer_dict.update({"report_type":"month/quarterly"})
     retailer_dict.update({"total_retailers": retailers.count()})
     
     # calculation of total sales value
@@ -533,25 +535,86 @@ def dsr_dashboard_report(request, dsr_id):
             top_retailers_dict[retailer.retailer_code] = 0
     s = sorted(top_retailers_dict.items(), key=itemgetter(1), reverse=True)
     s = s[:10]
-    
-    retailer_dict.update({"top retailers": s})
+    top_retailer_name = Retailer.objects.get(retailer_code = s[0][0])
+    top_list = []
+    for each in s:
+        top_dict = {}
+        top_dict['id'] = each[0]
+        top_dict['amount'] = each[1]
+        top_list.append(top_dict)
+    retailer_dict['top_retailer_name'] = top_retailer_name.retailer_name
+    retailer_dict['top_retailers'] = top_list
     
     # calculation of billed parts count
     parts_count = OrderPartDetails.objects.filter().values('part_number').distinct().count()
     retailer_dict.update({"BilledPartsCount": parts_count})
     
-    # calculation of top selling part
-    top_selling_part = OrderPartDetails.objects.values('part_number', 'part_number__description').\
-            annotate(ordered_count = Count('part_number')).order_by('-ordered_count')
-    # top selling part quantity and value ordered
-    tsp_qty_value = OrderPartDetails.objects.filter(part_number = \
-                            top_selling_part[0]['part_number']).order_by('-quantity')[0]
-    retailer_dict.update({"top selling part": top_selling_part[0]['part_number__description']})
-    retailer_dict.update({"top selling part - Qty": tsp_qty_value.quantity})
-    retailer_dict.update({"top selling part - value": tsp_qty_value.line_total})
+    # calculation of top selling part by quantity
+    tsp = OrderPartDetails.objects.filter(order__distributor = distributor). \
+                order_by('-quantity')[0]
+    retailer_dict.update({"top selling part - Qty": tsp.part_number.description})
+    
+    # calculation of top selling part by order value
+    tsp = OrderPartDetails.objects.filter(order__distributor = distributor). \
+                order_by('-line_total')[0]
+    retailer_dict.update({"top selling part - value": tsp.part_number.description})
+    
+    retailers_list.append(retailer_dict)
+    # loop thro each retailer and get sales value, collection, etc ...
+    
+    all_retailers_dict = {}
+    all_retailers = []
+    for retailer in retailers:
+        each_retailer = OrderedDict()
+        each_retailer['retailer_id'] = retailer.retailer_code
+        # calculation of sales value
+        total_sales_value = 0
+        orders = OrderPart.objects.filter(retailer = retailer)
+        retailer_sales_value = 0
+        if orders:
+            for order in orders:
+                # get all the order details and sum up the line total
+                order_details = OrderPartDetails.objects.filter(order = order)
+                for order_detail in order_details:
+                    retailer_sales_value = retailer_sales_value + order_detail.line_total
+            # sum up the each retailer sales value to the total
+            total_sales_value = total_sales_value + retailer_sales_value
+        each_retailer['sales_value'] = total_sales_value
+            
+        total_collected_amount = 0
+        # get all the invoices for this retailer
+        retailer_collected_amount = 0
+        collections = Collection.objects.filter(retailer = retailer)
+        if collections:
+            for collection in collections:    
+            # get all the collection details for this collection
+                collection_details = CollectionDetails.objects.filter(collection = collection)
+                for collection_detail in collection_details:
+                    retailer_collected_amount = retailer_collected_amount + collection_detail.collected_amount
+        # sum up the each retailer collected amount to the total
+            total_collected_amount = total_collected_amount + retailer_collected_amount
+        each_retailer.update({"collections": total_collected_amount})
+        
+        #top selling part by quantity
+        try:
+            tsp = OrderPartDetails.objects.filter(order__retailer = retailer). \
+                    order_by('-quantity')[0]
+            each_retailer.update({"top selling part - Qty": tsp.part_number.description})
+        except:
+            each_retailer.update({"top selling part - Qty": 'NA'})
+    
+        # calculation of top selling part by order value
+        try:
+            tsp = OrderPartDetails.objects.filter(order__retailer = retailer). \
+                        order_by('-line_total')[0]
+            each_retailer.update({"top selling part - value": tsp.part_number.description})
+        except:
+            each_retailer.update({"top selling part - value": 'NA'})
+        
+        all_retailers.append(each_retailer)
+    retailers_list.append(all_retailers)
     
     # finally add the dictionary to the list which is sent as the response
-    retailers_list.append(retailer_dict)
     return Response(retailers_list)
     
     
