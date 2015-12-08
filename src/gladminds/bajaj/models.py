@@ -560,6 +560,10 @@ class Retailer(base_models.Retailer):
     territory = models.CharField(max_length = 15)
     identity_url = models.CharField(max_length = 255)
     signature_url = models.CharField(max_length = 255)
+    target = models.DecimalField(max_digits=10, decimal_places=4, null=True, \
+                                                blank=True)
+    actual = total_sale_parts = models.DecimalField(max_digits=10, decimal_places=4, null=True, \
+                                                blank=True)
     
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
@@ -888,6 +892,7 @@ class OrderPart(base_models.OrderPart):
     delivered = models.IntegerField(null=True, blank=True)
     no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
     accept = models.BooleanField(default = False)
+    order_status = models.IntegerField()
     order_placed_by = models.IntegerField()
     
     class Meta(base_models.OrderPart.Meta):

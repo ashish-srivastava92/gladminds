@@ -646,9 +646,12 @@ def get_orders(request, dsr_id):
         order_dict['order_id'] = order.id
         order_dict['retailer_id'] = order.retailer.retailer_code
         order_dict['order_date'] = order.order_date.date()
+        # check the status of the order and get it from the constants
+        for k,v in constants.ORDER_STATUS.iteritems():
+            if v == order.order_status:
+                order_dict['status'] = k
         amount = 0
         order_detail = OrderPartDetails.objects.filter(order = order)
-        
         if order_detail:
             for each in order_detail:
                 amount = amount + each.line_total
@@ -658,7 +661,7 @@ def get_orders(request, dsr_id):
             order_details_list = []
             for each in order_detail:
                 order_details_dict = OrderedDict()
-                order_details_dict['part_id'] = each.part_number
+                order_details_dict['part_id'] = each.part_number.part_number
                 order_details_dict['part_name'] = each.part_number.description
                 order_details_dict['quantity'] = each.quantity
                 order_details_dict['mrp'] = each.part_number.mrp
