@@ -359,9 +359,13 @@ def uploadcollection(request):
         existing_collection = 0
         for details in coll_details:
             existing_collection = existing_collection + details.collected_amount
+        print invoice.invoice_amount
+        print existing_collection
+        print type(collection_body['collected_amount'])
         # check the collectedamount from the payload is less than or equal to the existing
         # collection for that invoice
-        if collection_body['collected_amount'] <= invoice.invoice_amount - existing_collection:
+        if float(collection_body['collected_amount']) <= invoice.invoice_amount - existing_collection:
+            print 'aras'
             # enter into teh collection table
             collection = Collection()
             collection.invoice = Invoices.objects.get(invoice_id = collection_body['invoice_id'])

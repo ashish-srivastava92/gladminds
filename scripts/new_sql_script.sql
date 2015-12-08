@@ -136,6 +136,7 @@ alter table gm_orderpart add column longitude float(11,6);
 alter table gm_collection add column latitude float(10,6);
 alter table gm_collection add column longitude float(11,6);
 alter table gm_collection_details add column cheque_amount float(10,4);
+alter table gm_collection_details change column collected_amount collected_amount float(10,4);
 
 -- run the following cmd in the terminal for the month lookup to work with django ORM
 mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root mysql -p

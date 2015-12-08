@@ -964,7 +964,7 @@ class CollectionDetails(base_models.CollectionDetails):
     ''' details of spare parts and pricing '''
     collection = models.ForeignKey(Collection, null=True, blank=True)
     mode = models.IntegerField(null=True,blank=True)
-    collected_amount = models.IntegerField(null=True,blank=True)
+    collected_amount = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
     cheque_cleared = models.IntegerField(null=True,blank=True)
     cheque_number = models.CharField(max_length=10)
     cheque_bank = models.CharField(max_length=10)
