@@ -3,6 +3,7 @@ author: araskumar.a
 date: 31-08-2015
 '''
 import json, datetime, time
+from datetime import timedelta
 from collections import OrderedDict
 from operator import itemgetter
 
@@ -494,13 +495,13 @@ def dsr_dashboard_report(request, dsr_id):
     # calculation of total sales value
     total_sales_value = 0
     for retailer in retailers:
-        orders = OrderPart.objects.filter(retailer = retailer)
+        orders = OrderPart.objects.filter(retailer = retailer, \
+                                            created_date__month = today.strftime("%m"))
         retailer_sales_value = 0
         if orders:
             for order in orders:
                 # get all the order details and sum up the line total
-                order_details = OrderPartDetails.objects.filter(order = order, \
-                                            created_date__month = today.strftime("%m"))
+                order_details = OrderPartDetails.objects.filter(order = order)
                 for order_detail in order_details:
                     retailer_sales_value = retailer_sales_value + order_detail.line_total
         # sum up the each retailer sales value to the total
@@ -551,13 +552,13 @@ def dsr_dashboard_report(request, dsr_id):
     total_sales_value = 0
     top_retailers_dict = {}
     for retailer in retailers:
-        orders = OrderPart.objects.filter(retailer = retailer)
+        orders = OrderPart.objects.filter(retailer = retailer, \
+                                            created_date__month = today.strftime("%m"))
         retailer_sales_value = 0
         if orders:
             for order in orders:
                 # get all the order details and sum up the line total
-                order_details = OrderPartDetails.objects.filter(order = order, \
-                                            created_date__month = today.strftime("%m"))
+                order_details = OrderPartDetails.objects.filter(order = order)
                 for order_detail in order_details:
                     retailer_sales_value = retailer_sales_value + order_detail.line_total
                 top_retailers_dict[retailer.retailer_code] = retailer_sales_value
@@ -602,8 +603,8 @@ def dsr_dashboard_report(request, dsr_id):
         retailer_dict.update({"top_selling_part_value": 'NA'})
     
     retailers_list.append(retailer_dict)
-    # loop thro each retailer and get sales value, collection, etc ...
     
+    # loop thro each retailer and get sales value, collection, etc ...
     all_retailers_dict = {}
     all_retailers = []
     for retailer in retailers:
@@ -614,18 +615,18 @@ def dsr_dashboard_report(request, dsr_id):
         if days == 0:
             each_retailer['MTD performance'] = 'NA'
         else:
-            mtd = str((retailer.actual/retailer.target) * 100) + '%'
+            mtd = str((retailer.actual * days/retailer.target) * 100) + '%'
             each_retailer['MTD performance'] = mtd
         
         # calculation of sales value
         total_sales_value = 0
-        orders = OrderPart.objects.filter(retailer = retailer)
+        orders = OrderPart.objects.filter(retailer = retailer, \
+                                                created_date__month = today.strftime("%m"))
         retailer_sales_value = 0
         if orders:
             for order in orders:
                 # get all the order details and sum up the line total
-                order_details = OrderPartDetails.objects.filter(order = order, \
-                                                created_date__month = today.strftime("%m"))
+                order_details = OrderPartDetails.objects.filter(order = order)
                 for order_detail in order_details:
                     retailer_sales_value = retailer_sales_value + order_detail.line_total
             # sum up the each retailer sales value to the total
@@ -635,12 +636,12 @@ def dsr_dashboard_report(request, dsr_id):
         total_collected_amount = 0
         # get all the invoices for this retailer
         retailer_collected_amount = 0
-        collections = Collection.objects.filter(retailer = retailer)
+        collections = Collection.objects.filter(retailer = retailer, \
+                                                created_date__month = today.strftime("%m"))
         if collections:
             for collection in collections:    
             # get all the collection details for this collection
-                collection_details = CollectionDetails.objects.filter(collection = collection, \
-                                                created_date__month = today.strftime("%m"))
+                collection_details = CollectionDetails.objects.filter(collection = collection)
                 for collection_detail in collection_details:
                     retailer_collected_amount = retailer_collected_amount + \
                                             collection_detail.collected_amount
@@ -677,9 +678,231 @@ def dsr_dashboard_report(request, dsr_id):
         all_retailers.append(each_retailer)
         retailers_list.append(each_retailer)
     
+    # X MONTHS OLD REPORT
+    
+    date_str =  str(today.year) + '/' + str(today.strftime('%m')) + '/' + '01'
+    first_date = datetime.datetime.strptime(date_str, '%Y/%m/%d')
+    previous_date = first_date - timedelta(days=constants.DSR_REPORT_MONTHS_DATA * 30) 
+    
+    retailer_dict = OrderedDict()
+    # get the retailer objects for this distributor
+    retailers = Retailer.objects.filter(distributor = distributor, \
+                                        approved = constants.STATUS['APPROVED'])
+    months_data = str(constants.DSR_REPORT_MONTHS_DATA) + ' ' +'months'
+    retailer_dict.update({"report_type": months_data})
+    retailer_dict.update({"total_retailers": retailers.count()})
+    
+    # calculation of MTD
+    achieved_list = []
+    days = int(today.strftime("%e")) - 1
+    if days == 0:
+        retailer_dict.update({"MTD performance": 'NA'})
+    else:
+        for retailer in retailers:
+            achieved = (retailer.actual * days/ retailer.target) * 100
+            achieved_list.append(achieved)
+        total_achieved = 0
+        for each in achieved_list:
+            total_achieved = total_achieved + each
+        mtd = str(total_achieved/ len(retailers)) + '%'
+        retailer_dict.update({"MTD performance": mtd})
+    # calculation of total sales value
+    total_sales_value = 0
+    for retailer in retailers:
+        orders = OrderPart.objects.filter(retailer = retailer, \
+                                created_date__gte = previous_date, \
+                                created_date__lte = first_date)
+        retailer_sales_value = 0
+        if orders:
+            for order in orders:
+                # get all the order details and sum up the line total
+                order_details = OrderPartDetails.objects.filter(order = order)
+                for order_detail in order_details:
+                    retailer_sales_value = retailer_sales_value + order_detail.line_total
+        # sum up the each retailer sales value to the total
+        total_sales_value = total_sales_value + retailer_sales_value
+    retailer_dict.update({"sales_value": total_sales_value})
+    
+    # calculation of collected amount
+    total_collected_amount = 0
+    for retailer in retailers:
+        # get all the invoices for this retailer
+        retailer_collected_amount = 0
+        collections = Collection.objects.filter(retailer = retailer, \
+                                    created_date__gte = previous_date, \
+                                    created_date__lte = first_date)
+        for collection in collections:    
+            # get all the collection details for this collection
+            collection_details = CollectionDetails.objects.filter(collection = collection)
+            for collection_detail in collection_details:
+                retailer_collected_amount = retailer_collected_amount + \
+                                            collection_detail.collected_amount
+        # sum up the each retailer collected amount to the total
+        total_collected_amount = total_collected_amount + retailer_collected_amount
+    retailer_dict.update({"collections": total_collected_amount})
+    
+    # calculation of zero-billed
+    exist_retailers = []
+    for retailer in retailers:
+        exist_retailers.append(retailer.retailer_code)
+    collected_retailers = []
+    collection_details = CollectionDetails.objects.filter(created_date__gte = \
+                previous_date, created_date__lte = first_date).\
+                values('collection__retailer__retailer_code')
+    for collection in collection_details:
+        collected_retailers.append(collection['collection__retailer__retailer_code'])
+    uni = set(collected_retailers)
+    zero_billed_retailers = [x for x in exist_retailers if x not in collected_retailers]
+    retailer_dict.update({"zero billed retailers": zero_billed_retailers})
+    
+    # calculation of new retailers enrolled
+    # find retailer objects created in the running month and year
+    new_retailers = Retailer.objects.filter(Q(created_date__year=today.year),
+                                            Q(created_date__month=today.strftime("%m")),
+                                            approved = constants.STATUS['APPROVED'])
+    new_retailers_list = []
+    for new_retailer in new_retailers:
+        new_retailers_list.append(new_retailer.retailer_code)
+    retailer_dict.update({"new retailers": new_retailers_list})
+    
+    # calculation of top retailers
+    total_sales_value = 0
+    top_retailers_dict = {}
+    for retailer in retailers:
+        orders = OrderPart.objects.filter(retailer = retailer, \
+                        created_date__gte = previous_date, created_date__lte = first_date)
+        retailer_sales_value = 0
+        if orders:
+            for order in orders:
+                # get all the order details and sum up the line total
+                order_details = OrderPartDetails.objects.filter(order = order)
+                for order_detail in order_details:
+                    retailer_sales_value = retailer_sales_value + order_detail.line_total
+                top_retailers_dict[retailer.retailer_code] = retailer_sales_value
+              
+        else:
+            top_retailers_dict[retailer.retailer_code] = 0
+    s = sorted(top_retailers_dict.items(), key=itemgetter(1), reverse=True)
+    s = s[:10]
+    top_retailer_name = Retailer.objects.get(retailer_code = s[0][0])
+    top_list = []
+    for each in s:
+        top_dict = {}
+        top_dict['id'] = each[0]
+        top_dict['amount'] = each[1]
+        top_list.append(top_dict)
+    retailer_dict['top_retailer_name'] = top_retailer_name.retailer_name
+    retailer_dict['top_retailers'] = top_list
+    
+    # calculation of billed parts count
+    parts_count = OrderPartDetails.objects.filter(order__distributor = distributor,
+                    created_date__gte = previous_date, created_date__lte = first_date).\
+                    values('part_number__description').distinct()
+    retailer_dict.update({"BilledPartsCount": len(parts_count)})
+    parts = []
+    # get what are the parts billed and make a list of that
+    for each in parts_count:
+        parts.append(each['part_number__description'])
+    retailer_dict.update({"Billedparts": parts})
+    # calculation of top selling part by quantity
+    try:
+        tsp = OrderPartDetails.objects.filter(order__distributor = distributor, \
+                created_date__gte = previous_date, created_date__lte = first_date).\
+                order_by('-quantity')[0]
+        retailer_dict.update({"top_selling_part_Qty": tsp.part_number.description})
+    except:
+        retailer_dict.update({"top_selling_part_Qty": "NA"})
+    
+    # calculation of top selling part by order value
+    try:
+        tsp = OrderPartDetails.objects.filter(order__distributor = distributor, \
+             created_date__gte = previous_date, created_date__lte = first_date).order_by('-line_total')[0]
+        retailer_dict.update({"top_selling_part_value": tsp.part_number.description})
+    except:
+        retailer_dict.update({"top_selling_part_value": 'NA'})
+    
+    retailers_list.append(retailer_dict)
+    
+    # loop thro each retailer and get sales value, collection, etc ...
+    all_retailers_dict = {}
+    all_retailers = []
+    for retailer in retailers:
+        each_retailer = OrderedDict()
+        each_retailer['report_type'] = months_data
+        each_retailer['retailer_id'] = retailer.retailer_code
+        # calculation of MTD
+        if days == 0:
+            each_retailer['MTD performance'] = 'NA'
+        else:
+            mtd = str((retailer.actual * days/retailer.target) * 100) + '%'
+            each_retailer['MTD performance'] = mtd
+        
+        # calculation of sales value
+        total_sales_value = 0
+        orders = OrderPart.objects.filter(retailer = retailer, \
+                            created_date__gte = previous_date, created_date__lte = first_date)
+        retailer_sales_value = 0
+        if orders:
+            for order in orders:
+                # get all the order details and sum up the line total
+                order_details = OrderPartDetails.objects.filter(order = order)
+                for order_detail in order_details:
+                    retailer_sales_value = retailer_sales_value + order_detail.line_total
+            # sum up the each retailer sales value to the total
+            total_sales_value = total_sales_value + retailer_sales_value
+        each_retailer['sales_value'] = total_sales_value
+            
+        total_collected_amount = 0
+        # get all the invoices for this retailer
+        retailer_collected_amount = 0
+        collections = Collection.objects.filter(retailer = retailer, \
+                                created_date__gte = previous_date, created_date__lte = first_date)
+        if collections:
+            for collection in collections:    
+            # get all the collection details for this collection
+                collection_details = CollectionDetails.objects.filter(collection = collection)
+                for collection_detail in collection_details:
+                    retailer_collected_amount = retailer_collected_amount + \
+                                            collection_detail.collected_amount
+        # sum up the each retailer collected amount to the total
+            total_collected_amount = total_collected_amount + retailer_collected_amount
+        each_retailer.update({"collections": total_collected_amount})
+        
+        #top selling part by quantity
+        try:
+            tsp = OrderPartDetails.objects.filter(order__retailer = retailer, \
+                    created_date__gte = previous_date, created_date__lte = first_date).\
+                    order_by('-quantity')[0]
+            each_retailer.update({"top_selling_part_Qty": tsp.part_number.description})
+        except:
+            each_retailer.update({"top_selling_part_Qty": 'NA'})
+    
+        # calculation of top selling part by order value
+        try:
+            tsp = OrderPartDetails.objects.filter(order__retailer = retailer, \
+                    created_date__gte = previous_date, created_date__lte = first_date).\
+                        order_by('-line_total')[0]
+            each_retailer.update({"top_selling_part_value": tsp.part_number.description})
+        except:
+            each_retailer.update({"top_selling_part_value": 'NA'})
+            
+        #billed parts count
+        parts_count = OrderPartDetails.objects.filter(order__retailer = retailer, \
+                created_date__gte = previous_date, created_date__lte = first_date).\
+                values('part_number__description').distinct()
+        each_retailer.update({"BilledPartsCount": len(parts_count)})
+        parts = []
+        # get what are the parts billed and make a list of that
+        for each in parts_count:
+            parts.append(each['part_number__description'])
+        each_retailer.update({"Billedparts": parts})
+        
+        all_retailers.append(each_retailer)
+        retailers_list.append(each_retailer)
+        
     # finally add the dictionary to the list which is sent as the response
     return Response(retailers_list)
-    
+
 @api_view(['GET'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
