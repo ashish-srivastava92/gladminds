@@ -560,9 +560,9 @@ class Retailer(base_models.Retailer):
     territory = models.CharField(max_length = 15)
     identity_url = models.CharField(max_length = 255)
     signature_url = models.CharField(max_length = 255)
-    target = models.DecimalField(max_digits=10, decimal_places=4, null=True, \
+    target = models.DecimalField(max_digits=20, decimal_places=4, null=True, \
                                                 blank=True)
-    actual = total_sale_parts = models.DecimalField(max_digits=10, decimal_places=4, null=True, \
+    actual = models.DecimalField(max_digits=20, decimal_places=4, null=True, \
                                                 blank=True)
     
     def image_tag(self):

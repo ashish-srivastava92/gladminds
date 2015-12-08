@@ -119,6 +119,8 @@ urlpatterns = patterns('',
     url(r'^mc/get_outstanding/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.bajaj.views.apis.get_outstanding'),
     
+    url(r'^mc/get_retailer_outstanding/retailer_id/(?P<retailer_id>\d+)/$',
+                        'gladminds.bajaj.views.apis.get_retailer_outstanding'),
     url(r'^mc/post_collection/$',
                         'gladminds.bajaj.views.apis.uploadcollection'),
     

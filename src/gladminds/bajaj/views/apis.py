@@ -288,8 +288,10 @@ def get_retailer_outstanding(request, retailer_id):
     '''
     This method returns the outstanding amount of particular retailer
     '''
+    retailer = Retailer.objects.get(retailer_code = retailer_id)
     #for the particular retailer, get all the invoices and total the invoice amount
     invoices = Invoices.objects.filter(retailer__retailer_code = retailer_id)
+    retailer_list = []
     if invoices:
         for invoice in invoices:
             retailer_dict = {}
@@ -306,9 +308,10 @@ def get_retailer_outstanding(request, retailer_id):
                 if collections:
                     for each_collections in collections:
                         collection = collection + each_collections.collected_amount
-                outstanding = outstanding - collection
-                retailer_dict.update({'outstanding':outstanding})
-                retailer_list.append(retailer_dict)
+                    print outstanding
+                    print collection
+            retailer_dict.update({'outstanding':outstanding})
+            retailer_list.append(retailer_dict)
     return Response(retailer_list)
 
 @api_view(['GET'])
@@ -456,6 +459,7 @@ def add_retailer(request, dsr_id):
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
 def dsr_dashboard_report(request, dsr_id):
+    today = datetime.datetime.now()
     dsr =  DistributorSalesRep.objects.select_related('distributor').get(distributor_sales_code = dsr_id)
     distributor = dsr.distributor
     retailers_list = []
@@ -467,6 +471,21 @@ def dsr_dashboard_report(request, dsr_id):
     retailer_dict.update({"report_type":"month"})
     retailer_dict.update({"total_retailers": retailers.count()})
     
+    # calculation of MTD
+    achieved_list = []
+    today = datetime.datetime.now()
+    days = today.day - 1
+    if days == 0:
+        retailer_dict.update({"MTD performance": 'NA'})
+    else:
+        for retailer in retailers:
+            achieved = (retailer.actual * days/ retailer.target) * 100
+            achieved_list.append(achieved)
+        total_achieved = 0
+        for each in achieved_list:
+            total_achieved = total_achieved + each
+        mtd = str(total_achieved/ len(retailers)) + '%'
+        retailer_dict.update({"MTD performance": mtd})
     # calculation of total sales value
     total_sales_value = 0
     for retailer in retailers:
@@ -511,7 +530,6 @@ def dsr_dashboard_report(request, dsr_id):
     
     # calculation of new retailers enrolled
     # find retailer objects created in the running month and year
-    today = datetime.datetime.now()
     new_retailers = Retailer.objects.filter(Q(created_date__year=today.year),
                                             Q(created_date__month=today.month),
                                             approved = constants.STATUS['APPROVED'])
@@ -573,7 +591,15 @@ def dsr_dashboard_report(request, dsr_id):
     all_retailers = []
     for retailer in retailers:
         each_retailer = OrderedDict()
+        each_retailer['report_type'] = 'month'
         each_retailer['retailer_id'] = retailer.retailer_code
+        # calculation of MTD
+        if days == 0:
+            each_retailer['MTD performance'] = 'NA'
+        else:
+            mtd = str((retailer.actual/retailer.target) * 100) + '%'
+            each_retailer['MTD performance'] = mtd
+        
         # calculation of sales value
         total_sales_value = 0
         orders = OrderPart.objects.filter(retailer = retailer)
@@ -614,7 +640,7 @@ def dsr_dashboard_report(request, dsr_id):
         try:
             tsp = OrderPartDetails.objects.filter(order__retailer = retailer). \
                         order_by('-line_total')[0]
-            each_retailer.update({"top_selling part_value": tsp.part_number.description})
+            each_retailer.update({"top_selling_part_value": tsp.part_number.description})
         except:
             each_retailer.update({"top_selling_part_value": 'NA'})
             
@@ -651,11 +677,14 @@ def get_orders(request, dsr_id):
             if v == order.order_status:
                 order_dict['status'] = k
         amount = 0
+        total_line_items = 0
         order_detail = OrderPartDetails.objects.filter(order = order)
         if order_detail:
             for each in order_detail:
+                total_line_items = total_line_items + each.quantity
                 amount = amount + each.line_total
             order_dict['amount'] = amount
+            order_dict['total_quantity'] = total_line_items
             #order_dict['status'] = order.status
             # order details dict
             order_details_list = []
