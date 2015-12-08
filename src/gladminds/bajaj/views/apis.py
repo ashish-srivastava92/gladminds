@@ -485,12 +485,15 @@ def dsr_dashboard_report(request, dsr_id):
     # calculation of MTD
     achieved_list = []
     days = int(today.strftime("%e")) - 1
-    if days == 0 or retailer.actual is None:
+    if days == 0:
         retailer_dict.update({"MTD performance": 'NA'})
     else:
         for retailer in retailers:
-            achieved = (retailer.actual * days/ retailer.target) * 100
-            achieved_list.append(achieved)
+            if retailer.actual is not None:
+                achieved = (retailer.actual * days/ retailer.target) * 100
+                achieved_list.append(achieved)
+            else:
+                achieved = 0
         total_achieved = 0
         for each in achieved_list:
             total_achieved = total_achieved + each
@@ -703,8 +706,11 @@ def dsr_dashboard_report(request, dsr_id):
         retailer_dict.update({"MTD performance": 'NA'})
     else:
         for retailer in retailers:
-            achieved = (retailer.actual * days/ retailer.target) * 100
-            achieved_list.append(achieved)
+            if retailer.actual is not None:
+                achieved = (retailer.actual * days/ retailer.target) * 100
+                achieved_list.append(achieved)
+            else:
+                achieved = 0
         total_achieved = 0
         for each in achieved_list:
             total_achieved = total_achieved + each
