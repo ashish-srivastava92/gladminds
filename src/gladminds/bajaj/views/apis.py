@@ -382,6 +382,7 @@ def uploadcollection(request):
             collectiondetails.collection = collection
             collectiondetails.mode = payment_mode
             collectiondetails.collected_amount = collection_body['collected_amount']
+            collectiondetails.collected_cash = collection_body['collected_cash']
             collectiondetails.cheque_bank = cheque['cheque_bank']
             collectiondetails.cheque_number = cheque['cheque_number']
             collectiondetails.cheque_amount = cheque['cheque_amount']

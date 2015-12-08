@@ -969,6 +969,7 @@ class CollectionDetails(base_models.CollectionDetails):
     cheque_number = models.CharField(max_length=10)
     cheque_bank = models.CharField(max_length=10)
     cheque_amount = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    collected_cash = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
     img_url = models.FileField(upload_to="ddd",max_length=255, null=True, blank=True)
     active = models.BooleanField(default=True)
 
