@@ -477,7 +477,7 @@ def dsr_dashboard_report(request, dsr_id):
     # calculation of MTD
     achieved_list = []
     today = datetime.datetime.now()
-    days = today.day - 1
+    days = int(today.strftime("%e")) - 1
     if days == 0:
         retailer_dict.update({"MTD performance": 'NA'})
     else:
@@ -497,7 +497,8 @@ def dsr_dashboard_report(request, dsr_id):
         if orders:
             for order in orders:
                 # get all the order details and sum up the line total
-                order_details = OrderPartDetails.objects.filter(order = order)
+                order_details = OrderPartDetails.objects.filter(order = order, \
+                                            created_date__month = today.strftime("%m"))
                 for order_detail in order_details:
                     retailer_sales_value = retailer_sales_value + order_detail.line_total
         # sum up the each retailer sales value to the total
@@ -512,9 +513,11 @@ def dsr_dashboard_report(request, dsr_id):
         collections = Collection.objects.filter(retailer = retailer)
         for collection in collections:    
             # get all the collection details for this collection
-            collection_details = CollectionDetails.objects.filter(collection = collection)
+            collection_details = CollectionDetails.objects.filter(collection = collection, \
+                                                    created_date__month = today.strftime("%m"))
             for collection_detail in collection_details:
-                retailer_collected_amount = retailer_collected_amount + collection_detail.collected_amount
+                retailer_collected_amount = retailer_collected_amount + \
+                                            collection_detail.collected_amount
         # sum up the each retailer collected amount to the total
         total_collected_amount = total_collected_amount + retailer_collected_amount
     retailer_dict.update({"collections": total_collected_amount})
@@ -524,7 +527,8 @@ def dsr_dashboard_report(request, dsr_id):
     for retailer in retailers:
         exist_retailers.append(retailer.retailer_code)
     collected_retailers = []
-    collection_details = CollectionDetails.objects.filter().values('collection__retailer__retailer_code')
+    collection_details = CollectionDetails.objects.filter(created_date__month = \
+                        today.strftime("%m")).values('collection__retailer__retailer_code')
     for collection in collection_details:
         collected_retailers.append(collection['collection__retailer__retailer_code'])
     uni = set(collected_retailers)
@@ -534,7 +538,7 @@ def dsr_dashboard_report(request, dsr_id):
     # calculation of new retailers enrolled
     # find retailer objects created in the running month and year
     new_retailers = Retailer.objects.filter(Q(created_date__year=today.year),
-                                            Q(created_date__month=today.month),
+                                            Q(created_date__month=today.strftime("%m")),
                                             approved = constants.STATUS['APPROVED'])
     new_retailers_list = []
     for new_retailer in new_retailers:
@@ -550,7 +554,8 @@ def dsr_dashboard_report(request, dsr_id):
         if orders:
             for order in orders:
                 # get all the order details and sum up the line total
-                order_details = OrderPartDetails.objects.filter(order = order)
+                order_details = OrderPartDetails.objects.filter(order = order, \
+                                            created_date__month = today.strftime("%m"))
                 for order_detail in order_details:
                     retailer_sales_value = retailer_sales_value + order_detail.line_total
                 top_retailers_dict[retailer.retailer_code] = retailer_sales_value
@@ -570,7 +575,8 @@ def dsr_dashboard_report(request, dsr_id):
     retailer_dict['top_retailers'] = top_list
     
     # calculation of billed parts count
-    parts_count = OrderPartDetails.objects.filter().values('part_number__description').distinct()
+    parts_count = OrderPartDetails.objects.filter(order__distributor = distributor,
+    created_date__month = today.strftime("%m")).values('part_number__description').distinct()
     retailer_dict.update({"BilledPartsCount": len(parts_count)})
     parts = []
     # get what are the parts billed and make a list of that
@@ -578,14 +584,20 @@ def dsr_dashboard_report(request, dsr_id):
         parts.append(each['part_number__description'])
     retailer_dict.update({"Billedparts": parts})
     # calculation of top selling part by quantity
-    tsp = OrderPartDetails.objects.filter(order__distributor = distributor). \
-                order_by('-quantity')[0]
-    retailer_dict.update({"top_selling_part_Qty": tsp.part_number.description})
+    try:
+        tsp = OrderPartDetails.objects.filter(order__distributor = distributor, \
+                    created_date__month = today.strftime("%m")).order_by('-quantity')[0]
+        retailer_dict.update({"top_selling_part_Qty": tsp.part_number.description})
+    except:
+        retailer_dict.update({"top_selling_part_Qty": "NA"})
     
     # calculation of top selling part by order value
-    tsp = OrderPartDetails.objects.filter(order__distributor = distributor). \
-                order_by('-line_total')[0]
-    retailer_dict.update({"top_selling_part_value": tsp.part_number.description})
+    try:
+        tsp = OrderPartDetails.objects.filter(order__distributor = distributor, \
+                    created_date__month = today.strftime("%m")).order_by('-line_total')[0]
+        retailer_dict.update({"top_selling_part_value": tsp.part_number.description})
+    except:
+        retailer_dict.update({"top_selling_part_value": 'NA'})
     
     retailers_list.append(retailer_dict)
     # loop thro each retailer and get sales value, collection, etc ...
@@ -610,7 +622,8 @@ def dsr_dashboard_report(request, dsr_id):
         if orders:
             for order in orders:
                 # get all the order details and sum up the line total
-                order_details = OrderPartDetails.objects.filter(order = order)
+                order_details = OrderPartDetails.objects.filter(order = order, \
+                                                created_date__month = today.strftime("%m"))
                 for order_detail in order_details:
                     retailer_sales_value = retailer_sales_value + order_detail.line_total
             # sum up the each retailer sales value to the total
@@ -624,32 +637,34 @@ def dsr_dashboard_report(request, dsr_id):
         if collections:
             for collection in collections:    
             # get all the collection details for this collection
-                collection_details = CollectionDetails.objects.filter(collection = collection)
+                collection_details = CollectionDetails.objects.filter(collection = collection, \
+                                                created_date__month = today.strftime("%m"))
                 for collection_detail in collection_details:
-                    retailer_collected_amount = retailer_collected_amount + collection_detail.collected_amount
+                    retailer_collected_amount = retailer_collected_amount + \
+                                            collection_detail.collected_amount
         # sum up the each retailer collected amount to the total
             total_collected_amount = total_collected_amount + retailer_collected_amount
         each_retailer.update({"collections": total_collected_amount})
         
         #top selling part by quantity
         try:
-            tsp = OrderPartDetails.objects.filter(order__retailer = retailer). \
-                    order_by('-quantity')[0]
+            tsp = OrderPartDetails.objects.filter(order__retailer = retailer, \
+                    created_date__month = today.strftime("%m")).order_by('-quantity')[0]
             each_retailer.update({"top_selling_part_Qty": tsp.part_number.description})
         except:
             each_retailer.update({"top_selling_part_Qty": 'NA'})
     
         # calculation of top selling part by order value
         try:
-            tsp = OrderPartDetails.objects.filter(order__retailer = retailer). \
-                        order_by('-line_total')[0]
+            tsp = OrderPartDetails.objects.filter(order__retailer = retailer, \
+                        created_date__month = today.strftime("%m")).order_by('-line_total')[0]
             each_retailer.update({"top_selling_part_value": tsp.part_number.description})
         except:
             each_retailer.update({"top_selling_part_value": 'NA'})
             
         #billed parts count
-        parts_count = OrderPartDetails.objects.filter(order__retailer = retailer).\
-                        values('part_number__description').distinct()
+        parts_count = OrderPartDetails.objects.filter(order__retailer = retailer, \
+        created_date__month = today.strftime("%m")).values('part_number__description').distinct()
         each_retailer.update({"BilledPartsCount": len(parts_count)})
         parts = []
         # get what are the parts billed and make a list of that
