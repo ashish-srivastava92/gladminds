@@ -349,49 +349,54 @@ def uploadcollection(request):
     This method gets the collection of payment by dsr and puts it into the collection and collection
     details table
     '''
-    collection_body = json.loads(request.POST['uploadcollection'])
-    collection = Collection()
-    # get the total order value of the invoice
-    invoice = Invoices.objects.get(invoice_id = collection_body['invoice_id'])
-    # get the so far collected_amount for that invoice
-    coll_details = CollectionDetails.objects.filter(collection__invoice = invoice)
-    existing_collection = 0
-    for details in coll_details:
-        existing_collection = existing_collection + details.collected_amount
-    # check the collectedamount from the payload is less than or equal to the existing
-    # collection for that invoice
-    if collection_body['collected_amount'] <= invoice.invoice_amount - existing_collection:
-        # enter into teh collection table
-        collection.invoice = Invoices.objects.get(invoice_id = collection_body['invoice_id'])
-        collection.payment_date = collection_body['payment_date']
-        collection.dsr = DistributorSalesRep.objects.get(distributor_sales_code = \
-                                                                        collection_body['dsr_id'])
-        retailer = Retailer.objects.get(retailer_code = collection_body['retailer_id'])
-        collection.retailer = retailer
-        collection.latitude = collection_body['latitude']
-        collection.longitude = collection_body['longitude']
-        collection.save()
-        #put data into collection details table
-        payment_mode = 1
-        for mode in constants.PAYMENT_MODES:
-            if mode[0][1] == collection_body['payment_mode']:
-                payment_mode = mode[0][0]
-            else:
-                continue
-        for cheque in collection_body['cheque_details']:
-            collectiondetails = CollectionDetails()
-            collectiondetails.collection = collection
-            collectiondetails.mode = payment_mode
-            collectiondetails.collected_amount = collection_body['collected_amount']
-            collectiondetails.collected_cash = collection_body['collected_cash']
-            collectiondetails.cheque_bank = cheque['cheque_bank']
-            collectiondetails.cheque_number = cheque['cheque_number']
-            collectiondetails.cheque_amount = cheque['cheque_amount']
-            collectiondetails.img_url = cheque['cheque_image_url']
-            collectiondetails.save()
-        return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
-    else:
-        return Response({'message': 'Collection is greater than the invoice amount', 'status':0})
+    collections_body = json.loads(request.POST['uploadcollection'])
+    message = ''
+    for collection_body in collections_body:
+        # get the total order value of the invoice
+        invoice = Invoices.objects.get(invoice_id = collection_body['invoice_id'])
+        # get the so far collected_amount for that invoice
+        coll_details = CollectionDetails.objects.filter(collection__invoice = invoice)
+        existing_collection = 0
+        for details in coll_details:
+            existing_collection = existing_collection + details.collected_amount
+        # check the collectedamount from the payload is less than or equal to the existing
+        # collection for that invoice
+        if collection_body['collected_amount'] <= invoice.invoice_amount - existing_collection:
+            # enter into teh collection table
+            collection = Collection()
+            collection.invoice = Invoices.objects.get(invoice_id = collection_body['invoice_id'])
+            collection.payment_date = collection_body['payment_date']
+            collection.dsr = DistributorSalesRep.objects.get(distributor_sales_code = \
+                                                                            collection_body['dsr_id'])
+            retailer = Retailer.objects.get(retailer_code = collection_body['retailer_id'])
+            collection.retailer = retailer
+            collection.latitude = collection_body['latitude']
+            collection.longitude = collection_body['longitude']
+            collection.save()
+            #put data into collection details table
+            payment_mode = 1
+            for mode in constants.PAYMENT_MODES:
+                if mode[0][1] == collection_body['payment_mode']:
+                    payment_mode = mode[0][0]
+                else:
+                    continue
+            for cheque in collection_body['cheque_details']:
+                collectiondetails = CollectionDetails()
+                collectiondetails.collection = collection
+                collectiondetails.mode = payment_mode
+                collectiondetails.collected_amount = collection_body['collected_amount']
+                collectiondetails.collected_cash = collection_body['collected_cash']
+                collectiondetails.cheque_bank = cheque['cheque_bank']
+                collectiondetails.cheque_number = cheque['cheque_number']
+                collectiondetails.cheque_amount = cheque['cheque_amount']
+                collectiondetails.img_url = cheque['cheque_image_url']
+                collectiondetails.save()
+            message = message + '\n' + 'status : 1' + ' ' + \
+                      'message : Retailer Collection(s) is updated successfully'
+        else:
+            message = message + '\n' + 'status : 0' + ' ' + \
+                'message : Collection is greater than the invoice amount for the invoice id: ' + collection_body['invoice_id']
+    return Response(message)
 
 @api_view(['POST'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
@@ -479,9 +484,8 @@ def dsr_dashboard_report(request, dsr_id):
     
     # calculation of MTD
     achieved_list = []
-    today = datetime.datetime.now()
     days = int(today.strftime("%e")) - 1
-    if days == 0:
+    if days == 0 or retailer.actual is None:
         retailer_dict.update({"MTD performance": 'NA'})
     else:
         for retailer in retailers:
@@ -612,7 +616,7 @@ def dsr_dashboard_report(request, dsr_id):
         each_retailer['report_type'] = 'month'
         each_retailer['retailer_id'] = retailer.retailer_code
         # calculation of MTD
-        if days == 0:
+        if days == 0 or retailer.actual is None:
             each_retailer['MTD performance'] = 'NA'
         else:
             mtd = str((retailer.actual * days/retailer.target) * 100) + '%'
@@ -695,7 +699,7 @@ def dsr_dashboard_report(request, dsr_id):
     # calculation of MTD
     achieved_list = []
     days = int(today.strftime("%e")) - 1
-    if days == 0:
+    if days == 0 or retailer.actual is None:
         retailer_dict.update({"MTD performance": 'NA'})
     else:
         for retailer in retailers:
@@ -831,7 +835,7 @@ def dsr_dashboard_report(request, dsr_id):
         each_retailer['report_type'] = months_data
         each_retailer['retailer_id'] = retailer.retailer_code
         # calculation of MTD
-        if days == 0:
+        if days == 0 or retailer.actual is None:
             each_retailer['MTD performance'] = 'NA'
         else:
             mtd = str((retailer.actual * days/retailer.target) * 100) + '%'
