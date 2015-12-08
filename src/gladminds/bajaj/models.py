@@ -894,6 +894,8 @@ class OrderPart(base_models.OrderPart):
     accept = models.BooleanField(default = False)
     order_status = models.IntegerField()
     order_placed_by = models.IntegerField()
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=11, decimal_places=6, null=True, blank=True)
     
     class Meta(base_models.OrderPart.Meta):
         app_label = _APP_NAME
@@ -952,7 +954,9 @@ class Collection(base_models.Collection):
     payment_date = models.DateTimeField()
     invoice = models.ForeignKey(Invoices, null=True, blank=True)
     dsr = models.ForeignKey(DistributorSalesRep,null=True, blank=True)
-
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=11, decimal_places=6, null=True, blank=True)
+    
     class Meta(base_models.Collection.Meta):
         app_label = _APP_NAME      
 

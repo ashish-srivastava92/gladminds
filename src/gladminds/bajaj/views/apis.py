@@ -202,6 +202,8 @@ def place_order(request, dsr_id):
             orderpart.retailer = retailer
             orderpart.order_date = order['date']
             orderpart.order_placed_by = order['order_placed_by']
+            orderpart.latitude = order['latitude']
+            orderpart.longitude = order['longitude']
             orderpart.save()
             #push all the items into the orderpart details
             for item in order['order_items']:
@@ -308,8 +310,7 @@ def get_retailer_outstanding(request, retailer_id):
                 if collections:
                     for each_collections in collections:
                         collection = collection + each_collections.collected_amount
-                    print outstanding
-                    print collection
+                    
             retailer_dict.update({'outstanding':outstanding})
             retailer_list.append(retailer_dict)
     return Response(retailer_list)
@@ -366,6 +367,8 @@ def uploadcollection(request):
                                                                         collection_body['dsr_id'])
         retailer = Retailer.objects.get(retailer_code = collection_body['retailer_id'])
         collection.retailer = retailer
+        collection.latitude = collection_body['latitude']
+        collection.longitude = collection_body['longitude']
         collection.save()
         #put data into collection details table
         payment_mode = 1
