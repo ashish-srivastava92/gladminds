@@ -253,7 +253,8 @@ def get_outstanding(request, dsr_id):
     to the dsr '''
     
     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-    retailers = Retailer.objects.filter(distributor = dsr.distributor)
+    retailers = Retailer.objects.filter(distributor = dsr.distributor, \
+                                        approved = constants.STATUS['APPROVED'])
     retailer_list = []
     
     #for a particular retailer, get all the invoices and total the invoice amount
@@ -461,8 +462,9 @@ def dsr_dashboard_report(request, dsr_id):
     retailer_dict = OrderedDict()
     
     # get the retailer objects for this distributor
-    retailers = Retailer.objects.filter(distributor = distributor)
-    retailer_dict.update({"report_type":"month/quarterly"})
+    retailers = Retailer.objects.filter(distributor = distributor, \
+                                        approved = constants.STATUS['APPROVED'])
+    retailer_dict.update({"report_type":"month"})
     retailer_dict.update({"total_retailers": retailers.count()})
     
     # calculation of total sales value
@@ -478,7 +480,7 @@ def dsr_dashboard_report(request, dsr_id):
                     retailer_sales_value = retailer_sales_value + order_detail.line_total
         # sum up the each retailer sales value to the total
         total_sales_value = total_sales_value + retailer_sales_value
-    retailer_dict.update({"sales value": total_sales_value})
+    retailer_dict.update({"sales_value": total_sales_value})
     
     # calculation of collected amount
     total_collected_amount = 0
@@ -511,7 +513,8 @@ def dsr_dashboard_report(request, dsr_id):
     # find retailer objects created in the running month and year
     today = datetime.datetime.now()
     new_retailers = Retailer.objects.filter(Q(created_date__year=today.year),
-                                            Q(created_date__month=today.month))
+                                            Q(created_date__month=today.month),
+                                            approved = constants.STATUS['APPROVED'])
     new_retailers_list = []
     for new_retailer in new_retailers:
         new_retailers_list.append(new_retailer.retailer_code)
@@ -546,18 +549,22 @@ def dsr_dashboard_report(request, dsr_id):
     retailer_dict['top_retailers'] = top_list
     
     # calculation of billed parts count
-    parts_count = OrderPartDetails.objects.filter().values('part_number').distinct().count()
-    retailer_dict.update({"BilledPartsCount": parts_count})
-    
+    parts_count = OrderPartDetails.objects.filter().values('part_number__description').distinct()
+    retailer_dict.update({"BilledPartsCount": len(parts_count)})
+    parts = []
+    # get what are the parts billed and make a list of that
+    for each in parts_count:
+        parts.append(each['part_number__description'])
+    retailer_dict.update({"Billedparts": parts})
     # calculation of top selling part by quantity
     tsp = OrderPartDetails.objects.filter(order__distributor = distributor). \
                 order_by('-quantity')[0]
-    retailer_dict.update({"top selling part - Qty": tsp.part_number.description})
+    retailer_dict.update({"top_selling_part_Qty": tsp.part_number.description})
     
     # calculation of top selling part by order value
     tsp = OrderPartDetails.objects.filter(order__distributor = distributor). \
                 order_by('-line_total')[0]
-    retailer_dict.update({"top selling part - value": tsp.part_number.description})
+    retailer_dict.update({"top_selling_part_value": tsp.part_number.description})
     
     retailers_list.append(retailer_dict)
     # loop thro each retailer and get sales value, collection, etc ...
@@ -599,24 +606,102 @@ def dsr_dashboard_report(request, dsr_id):
         try:
             tsp = OrderPartDetails.objects.filter(order__retailer = retailer). \
                     order_by('-quantity')[0]
-            each_retailer.update({"top selling part - Qty": tsp.part_number.description})
+            each_retailer.update({"top_selling_part_Qty": tsp.part_number.description})
         except:
-            each_retailer.update({"top selling part - Qty": 'NA'})
+            each_retailer.update({"top_selling_part_Qty": 'NA'})
     
         # calculation of top selling part by order value
         try:
             tsp = OrderPartDetails.objects.filter(order__retailer = retailer). \
                         order_by('-line_total')[0]
-            each_retailer.update({"top selling part - value": tsp.part_number.description})
+            each_retailer.update({"top_selling part_value": tsp.part_number.description})
         except:
-            each_retailer.update({"top selling part - value": 'NA'})
+            each_retailer.update({"top_selling_part_value": 'NA'})
+            
+        #billed parts count
+        parts_count = OrderPartDetails.objects.filter(order__retailer = retailer).\
+                        values('part_number__description').distinct()
+        each_retailer.update({"BilledPartsCount": len(parts_count)})
+        parts = []
+        # get what are the parts billed and make a list of that
+        for each in parts_count:
+            parts.append(each['part_number__description'])
+        each_retailer.update({"Billedparts": parts})
         
         all_retailers.append(each_retailer)
-    retailers_list.append(all_retailers)
+        retailers_list.append(each_retailer)
     
     # finally add the dictionary to the list which is sent as the response
     return Response(retailers_list)
     
+@api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def get_orders(request, dsr_id):
+    order_details = OrderPart.objects.filter(dsr__distributor_sales_code = dsr_id)
+    
+    orders_list = []
+    for order in order_details:
+        order_dict = OrderedDict()
+        order_dict['order_id'] = order.id
+        order_dict['retailer_id'] = order.retailer.retailer_code
+        order_dict['order_date'] = order.order_date.date()
+        amount = 0
+        order_detail = OrderPartDetails.objects.filter(order = order)
+        
+        if order_detail:
+            for each in order_detail:
+                amount = amount + each.line_total
+            order_dict['amount'] = amount
+            #order_dict['status'] = order.status
+            # order details dict
+            order_details_list = []
+            for each in order_detail:
+                order_details_dict = OrderedDict()
+                order_details_dict['part_id'] = each.part_number
+                order_details_dict['part_name'] = each.part_number.description
+                order_details_dict['quantity'] = each.quantity
+                order_details_dict['mrp'] = each.part_number.mrp
+                order_details_dict['line_total'] = each.line_total
+                order_details_list.append(order_details_dict)
+            order_dict['order_details'] = order_details_list
+        orders_list.append(order_dict)
+    return Response(orders_list)
+
+@api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def get_retailer_orders(request, retailer_id):
+    order_details = OrderPart.objects.filter(retailer__retailer_code = retailer_id)
+    
+    orders_list = []
+    for order in order_details:
+        order_dict = OrderedDict()
+        order_dict['order_id'] = order.id
+        order_dict['retailer_id'] = order.retailer.retailer_code
+        order_dict['order_date'] = order.order_date.date()
+        order_dict['distributor_id'] = order.distributor.distributor_id
+        amount = 0
+        order_detail = OrderPartDetails.objects.filter(order = order)
+        
+        if order_detail:
+            for each in order_detail:
+                amount = amount + each.line_total
+            order_dict['amount'] = amount
+            #order_dict['status'] = order.status
+            # order details dict
+            order_details_list = []
+            for each in order_detail:
+                order_details_dict = OrderedDict()
+                order_details_dict['part_id'] = each.part_number.part_number
+                order_details_dict['part_name'] = each.part_number.description
+                order_details_dict['quantity'] = each.quantity
+                order_details_dict['mrp'] = each.part_number.mrp
+                order_details_dict['line_total'] = each.line_total
+                order_details_list.append(order_details_dict)
+            order_dict['order_details'] = order_details_list
+        orders_list.append(order_dict)
+    return Response(orders_list)
     
 
 
