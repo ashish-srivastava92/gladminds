@@ -141,7 +141,7 @@ alter table gm_orderpart modify column distributor_id int(11) NULL;
 alter table gm_collection add column latitude float(10,6);
 alter table gm_collection add column longitude float(11,6);
 alter table gm_collection_details add column cheque_amount float(10,4);
-alter table gm_collection_details change column collected_amount collected_amount float(10,4);
+
 alter table gm_orderpart_details add column part_number_id int(11);
 alter table gm_orderpart_details add column quantity int(11);
 alter table gm_orderpart_details add column active int(1) default 1;

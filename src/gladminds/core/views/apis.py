@@ -500,7 +500,10 @@ def dsr_dashboard_report(request, dsr_id):
         total_achieved = 0
         for each in achieved_list:
             total_achieved = total_achieved + each
-        mtd = str(total_achieved/ len(retailers)) + '%'
+        try:
+            mtd = str(total_achieved/ len(retailers)) + '%'
+        except:
+            mtd = 0
         retailer_dict.update({"MTD performance": mtd})
     # calculation of total sales value
     total_sales_value = 0
