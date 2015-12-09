@@ -18,7 +18,7 @@ from rest_framework_jwt.settings import api_settings
 
 from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
                             PartPricing, Distributor,  Invoices, \
-                            Collection,CollectionDetails,PartsStock,DSRWorkAllocation
+                            Collection,CollectionDetails,PartsStock,DSRWorkAllocation,DSRLocationDetails
 from gladminds.core.models import PartMasterCv,OrderPart,OrderPartDetails
 #PartMasterCv                          
                             
@@ -486,9 +486,25 @@ def get_collection(request, dsr_id):
 #             orderpart.save()
 #     return Response({'message': 'Order(s) has been placed successfully', 'status':1})
     
+@api_view(['POST'])   
+def sync_location_details(request, dsr_id):   
+    dsr_location_body = json.loads(request.body)
+    print dsr_location_body
+    print dsr_id
+    try:
+        dsr_location_obj = DSRLocationDetails.objects.get(dsr_id=dsr_id)
+        dsr_location_obj.latitude = dsr_location_body["latitude"]
+        dsr_location_obj.longitude = dsr_location_body["longitude"]
+        dsr_location_obj.last_sync = datetime.datetime.now()
+#         DSRLocationDetails.objects.filter(dsr_id=dsr_id)
+    except:
+#         DSRLocationDetails.objects.filter(dsr_id=dsr_id)
+        
     
-    
-    
+        dsr_location_obj = DSRLocationDetails(dsr_id = dsr_id,latitude=dsr_location_body["latitude"],longitude =dsr_location_body["longitude"],last_sync=datetime.datetime.now())      
+    print dsr_location_obj
+    dsr_location_obj.save()
+    return Response({'message': 'Location Details is updated successfully', 'status':1})
 
 
     

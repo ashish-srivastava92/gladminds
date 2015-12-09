@@ -1196,7 +1196,7 @@ class DSRWorkAllocation(BaseModel):
     class Meta:
         abstract = True
         db_table = "gm_dsrworkallocation"
-        verbose_name_plural = "Sceduling"
+        verbose_name_plural = "Scheduling"
         
 class RetailerCollection(BaseModel):
     '''details of retailer collection'''
@@ -2094,5 +2094,26 @@ class CollectionDetails(BaseModel):
             db_table = "gm_collection_details"
             verbose_name_plural = "Collection Details"
         
-
+class BackOrders(BaseModel):
+        class Meta:
+            abstract = True
+            db_table = "gm_backorder"
+            verbose_name_plural = "Backorder Details"
+    
+class DSRLocationDetails(BaseModel):
+    class Meta:
+         abstract = True
+         db_table = "gm_dsr_locationdetails"
+         verbose_name_plural = "Location Details"
+        
+    
+    
+class OrderTempDeliveredHistory(BaseModel):
+     class Meta:
+        abstract = True
+        db_table = "gm_order_temp_delivered_details"
+        verbose_name_plural = "Order Temp Delivered History"
+    
+    
+    
     

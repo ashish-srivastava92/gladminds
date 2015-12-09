@@ -507,7 +507,8 @@ class Distributor(base_models.Distributor):
     territory = models.CharField(max_length=10, null=True, blank=True)
     image_url = models.FileField(upload_to="image",
                                    max_length=200, null=True, blank=True)
-    
+    tin = models.IntegerField( null=True, blank=True)
+    cst = models.IntegerField( null=True, blank=True)
     
 #     district = models.ForeignKey(District)
     district = models.ManyToManyField(District)
@@ -605,6 +606,7 @@ class Retailer(base_models.Retailer):
     rejected_reason = models.CharField(max_length=300, null=True, blank=True)
     image_url = models.FileField(upload_to="image",
                                    max_length=200, null=True, blank=True)
+    tin = models.IntegerField( null=True, blank=True)
     
     
     def image_tag(self):
@@ -981,17 +983,19 @@ class OrderPart(base_models.OrderPart):
     no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
     order_status = models.IntegerField(null=True, blank=True)
     order_placed_by = models.IntegerField()
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=11, decimal_places=6, null=True, blank=True)
     
     class Meta(base_models.OrderPart.Meta):
         app_label = _APP_NAME
         
-    def __unicode__(self):
-        
-        return self.retailer.retailer_code
+#     def __unicode__(self):
+#         
+#         return self.retailer.retailer_code
 
 
 class OrderPartDetails(base_models.OrderPartDetails):
-    part_number = models.ForeignKey(PartMasterCv)
+    part_number = models.ForeignKey(PartPricing)
     quantity = models.IntegerField(null=True, blank=True)
     active = models.IntegerField(null=True, blank=True, default=1)
     order = models.ForeignKey(OrderPart)
@@ -1003,15 +1007,26 @@ class OrderPartDetails(base_models.OrderPartDetails):
         verbose_name_plural = "Order Part Details"
 
 
+class Invoices(base_models.Invoices):
+    retailer = models.ForeignKey(Retailer)
+    invoice_date = models.DateTimeField()
+     
+    class Meta(base_models.Invoices.Meta):
+        app_label = _APP_NAME
 
 class DoDetails(base_models.DoDetails):
     ''' List of Do Details'''
     
     order = models.ForeignKey(OrderPart)
+    invoice = models.ForeignKey(Invoices)
     
 #     distibutor_id= 
     class Meta(base_models.DoDetails.Meta):
         app_label = _APP_NAME
+
+
+
+
 
 class OrderDeliveredHistory(base_models.OrderDeliveredHistory):
     part_number = models.ForeignKey(PartPricing)
@@ -1025,16 +1040,19 @@ class OrderDeliveredHistory(base_models.OrderDeliveredHistory):
         verbose_name_plural = "Order Delivered History"
 
 
-
-        
-        
-class Invoices(base_models.Invoices):
-    retailer = models.ForeignKey(Retailer)
-    invoice_date = models.DateTimeField()
-     
-    class Meta(base_models.Invoices.Meta):
+class OrderTempDeliveredHistory(base_models.OrderTempDeliveredHistory):
+    part_number = models.ForeignKey(PartPricing)
+    delivered_quantity = models.IntegerField(null=True, blank=True)
+    active = models.IntegerField(null=True, blank=True, default=1)
+    order = models.ForeignKey(OrderPart)
+    delivered_date = models.DateTimeField(null=True, blank=True)
+#     do= models.ForeignKey(DoDetails)
+    class Meta(base_models.OrderTempDeliveredHistory.Meta):
         app_label = _APP_NAME
+        verbose_name_plural = "Order Temp Delivered History"
 
+        
+        
 
 class InvoicesDetails(base_models.InvoicesDetails):
     invoice = models.ForeignKey(Invoices)
@@ -1050,7 +1068,7 @@ class InvoicesDetails(base_models.InvoicesDetails):
 
 class Collection(base_models.Collection):
     ''' details of spare parts and pricing '''
-#     retailer = models.ForeignKey(Retailer, null=True, blank=True)
+    retailer = models.ForeignKey(Retailer, null=True, blank=True)
     payment_date = models.DateTimeField()
     invoice = models.ForeignKey(Invoices, null=True, blank=True)
     dsr = models.ForeignKey(DistributorSalesRep,null=True, blank=True)
@@ -1073,3 +1091,26 @@ class CollectionDetails(base_models.CollectionDetails):
 
     class Meta(base_models.CollectionDetails.Meta):
         app_label = _APP_NAME   
+        
+        
+class BackOrders(base_models.BackOrders):
+    
+    
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    qty = models.IntegerField(null=True,blank=True)
+    datetime = models.DateTimeField()
+    class Meta(base_models.BackOrders.Meta):
+        app_label = _APP_NAME 
+    
+    
+class DSRLocationDetails(base_models.DSRLocationDetails):
+    
+    
+    dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
+    latitude = models.CharField(max_length=255,null=True, blank=True)
+    longitude = models.CharField(max_length=255,null=True, blank=True)
+    last_sync = models.DateTimeField()
+    class Meta(base_models.DSRLocationDetails.Meta):
+        app_label = _APP_NAME 
+    
+    

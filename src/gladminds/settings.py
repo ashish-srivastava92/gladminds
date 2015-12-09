@@ -198,23 +198,27 @@ SUIT_CONFIG = {
          # 'models':(
          #          )},
          
+         
+        {'app': 'bajaj', 'label': 'Back Orders', 'icon': ' icon-folder-open',
+          'models':(
+                   
+                     {'model': 'backorders',
+                      'label': 'Back Orders'},
+                     
+                    )
+                    },
+         
+         
+         
            {'app': 'bajaj', 'label': 'Parts', 'icon': ' icon-folder-open',
           'models':(
                    
-                     {'model': 'partpricing',
-                      'label': 'PartPricing'},
+                     {'model': 'partmastercv',
+                      'label': 'Parts List'},
                      )
                        
           },
-         
-#             {'app': 'bajaj', 'label': 'Parts', 'icon': ' icon-folder-open',
-#           'models':(
-#                    
-#                      {'model': 'partmastercv',
-#                       'label': 'PartMasterCv'},
-#                      )
-#                        
-#           },
+             
              
               {'app': 'bajaj', 'label': 'Scheduling', 'icon': ' icon-folder-open',
          'models':(
@@ -230,10 +234,6 @@ SUIT_CONFIG = {
                    
                      {'model': 'orderpart',
                       'label': 'Orders'},
-#                           {'model': 'orderpart',
-#                       'label': 'Retailers Orders'},
-#                                                     
-           
                      
                     )
                     },
@@ -243,11 +243,22 @@ SUIT_CONFIG = {
         {'app': 'bajaj', 'label': 'Collections', 'icon': ' icon-folder-open',
          'models':(
                   
-                    {'model': 'collectiondetails',
+                    {'model': 'collection',
                      'label': 'Distributor Collection'},
                  
        
 )},
+             
+             
+             {'app': 'bajaj', 'label': 'Location Details', 'icon': ' icon-folder-open',
+         'models':(
+                  
+                    {'model': 'dsrlocationdetails',
+                     'label': 'DSR Location Details'},
+                 
+       
+)},
+             
         
         
         

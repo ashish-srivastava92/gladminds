@@ -1,185 +1,284 @@
-{% extends "base_template.html" %}
+{% extends "admin/change_form.html" %}
 
-{% block style %}
-<link href="/static/css/portal.css" rel="stylesheet">
-
+{% load i18n admin_static admin_modify suit_tags admin_urls %}
+{% load url from future %}
+{% block extrahead %}
+{{block.super}}
+<!-- <link href="/static/css/portal.css" rel="stylesheet"> -->
+<!-- <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script> -->
 
 <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
-<script src="/static/js/1.10.3_jquery-ui.js" type="text/javascript"></script>
 
-    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-  <link rel="stylesheet" type="text/css" href="/static/suit/bootstrap/css/bootstrap.min.css" media="all"/>
-  <script src="/static/suit/bootstrap/js/bootstrap.min.js"></script>
-    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<!-- <link rel="stylesheet" type="text/css" href="/static/suit/bootstrap/css/bootstrap.min.css" media="all"/> -->
+<link rel="stylesheet" type="text/css" href="/static/suit/css/suit.css" media="all">
 
+<!-- <script src="/static/suit/js/jquery-1.8.3.min.js"></script> -->
+<script type="text/javascript">
+	var Suit = {
+		$ : $.noConflict()
+	};
+	if (!$)
+		$ = Suit.$;
+</script>
 
-  <!-- <link rel="stylesheet" type="text/css" href="/static/suit/css/suit.css" media="all"> -->
-  <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+<script src="/static/js/jquery-1.9.1.js"></script>
+<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/2.3.2/css/bootstrap.min.css" media="all"/>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+	$("#orderForm").submit(function(e) {
+		
+		var delivery_stock=$("input[name='delivered_stock']");
+		var datepick=$("input[name='datepick']");var flag=1;
+		
+		for(var i=0;i<delivery_stock.length;i++){
+			
+				
+			if (   ((delivery_stock[i].val()!="")&&(datepick[i].val()==""))||((delivery_stock[i].val()=="")&&(datepick[i].val()!="")) ){
+				flag=0;
+				alert("Both the fields are mandatory.");
+				return false;
+			}
+		
+		}
+		// if(flag==0){
+			// alert("Error");
+			// return false;
+		// }
+// 		
+		
+	    var url = "{% url 'save_order_temp_history' %}"; 
+	    alert($("#orderForm").serialize());
+	    $.ajax({
+	           type: "POST",
+	           url: url,
+	           data: $("#orderForm").serialize(), // serializes the form's elements.
+	           success: function(data)
+	           {
+	               alert(data); 
+	               $("#myModal1").modal("show");
+	               
+	           }
+	         });
+	
+	    e.preventDefault(); // avoid to execute the actual submit of the form.
+	});
+})
+	
+	
+</script>
+
+<!-- <script src="/static/suit/bootstrap/js/bootstrap.min.js"></script> -->
+
+<!-- <script src="/static/js/jquery-1.9.1.js"></script> -->
+<script src="/static/js/jquery-ui.js"></script>
+
+<!-- <link rel="stylesheet" type="text/css" href="/static/suit/css/suit.css" media="all"> -->
+<link rel="stylesheet" href="/static/css/jquery-ui.css" />
 
 <style>
 	.table-data {
-		position : absolute;
+		position: absolute;
 	}
 </style>
-    <script>
-      $(function() {
-  	
-  
-    $( ".datepick" ).datepicker();
-  });
-  </script>
-  <style>
-  	.text-center {
-  		text-align : center;
-  	}
-  </style>
+<script>
+	$(function() {
+
+		$(".datepick").datepicker();
+	}); 
+</script>
+<style>
+	.text-center {
+		text-align: center;
+	}
+
+</style>
 {% endblock %}
-{% block header %}
-      <div class="navbar navbar-style">
-        <div class="navbar-inner">
-           <a class="brand" href="#"><img src="/static/{{METAINFO.logo}}" class='brand-logo logo-size'></a>
-              <ul class="nav pull-right">
-                 <li class="dropdown style-username">
-                 	<a href="#" class="dropdown-toggle" id="userData" value={{user.username}} data-toggle="dropdown">{{user.first_name}}, {{user.username}}<b class="caret"></b></a>
-                    <ul class="dropdown-menu pull-right">
-                       <li><a href="{% url 'admin:password_change' %}">Change Password</a></li>
-                       <li><a href="/admin/logout">Logout</a></li>
-                   </ul>
-                </li>
-             </ul>
-        </div>
-      </div>
-    {% endblock %}
-{% block body  %}
+{% block content %}
 
+<form  method="POST" enctyype="multipart/form-data" id="orderForm">
+	{% for each in order_display %}
 
-<p><b>Order ID:{{order_id}}</b></p>
-<p><b> Ordered Date:{{ordered_date}}</b></p>
+	<h6>Order ID: {{each.order_id}}   Total Value: {{each.total_value}}</h6>
 
- <form action="{% url 'save_order_history' %}" method="POST" enctyype="multipart/form-data">
 	<table class="table table-striped table-bordered table-responsive	" >
-        <thead>
-				<tr>
-					<th> </th>
-				    <th class="text-center">PartNumber</th>
-				    	 <th class="text-center">Available Qty</th>
-					<th class="text-center">Ordered Qty</th>
-					<th class="text-center">MRP</th>
-					<th class="text-center">Line Total</th>
-					{% if order_status == "pending" %}
-				    <th class="text-center">Delivery Qty</th>			
-				    <th class="text-center">Shipped date</th>
-				    {% endif %}
-				    
-				</tr>
-				
-			</thead>
-			
-			
-        <tbody>
-        	
-        	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
-				{% for each in data %}
-	
-		<tr style="background-color:red"> 
+		<thead>
+			<tr>
 
-					<td> <input type="checkbox" class="chk-box" value="" rel="{{each.part_number}}"/></td>
-{% if order_status == "shipped" %}
-					<td class="text-center"><a  data-toggle="modal" data-target="#myModal" href="javascript:void(0)" onclick="loadOrderDetails('{% url 'ordered_part_details' each.part_number order_id %}','{{each.part_number}}','{{each.part_description}}')">{{each.part_number}}</a></td>
-					
-	{% endif %}
-	{% if order_status == "pending" or order_status == "open" %}
-	<td class="text-center">{{each.part_number}}</td>			
-	
-	
-	{% endif %}
-					<td class="text-center">{{each.available_quantity}}</td>
-					<td class="text-center">{{each.quantity}}</td>
-					<td class="text-center">{{each.mrp}}</td>
-					<td class="text-center">{{each.line_total}}</td>
+				<th class="text-center">PartNumber</th>
+				<th class="text-center">Available Qty</th>
+				<th class="text-center">Ordered Qty</th>
+				<th class="text-center">MRP</th>
+				<th class="text-center">Line Total</th>
+				{% if each.order_status == "pending" %}
+				<th class="text-center">Delivered Quantity</th>
+
+				<th class="text-center">Delivery Qty</th>
+				<th class="text-center">Shipped date</th>
+				{% endif %}
+
+			</tr>
+
+		</thead>
+
+		<tbody>
+			<!-- {{each.order_status}} -->
+			{% for each_part in each.parts %}
+
+			{% if each_part.part.part_status == 1 %}
+			<tr class="red">
+				{% else %}
+			<tr>
+				{% endif %}
+	<input type="hidden" id="order_id"  name="order_id" value='{{each.order_id}}' >
+				{% if each.order_status == "shipped" or each.order_status == "pending" %}
+				<td class="text-center"><a data-toggle="modal" data-target="#myModal" href="javascript:void(0)" onclick="loadOrderDetails('{% url 'ordered_part_details' each_part.part_number each.order_id %}','{{each_part.part_number}}','{{each_part.part_description}}')">{{each_part.part_number}}</a> {% if order_status == "pending"  %}
+				<input type="hidden" value="{{each_part.part_number}}"  id="part_number"  name="part_number">
+				{% endif %} </td>
+				{% endif %}
+				{% if each.order_status == "open" or each.order_status == "cancelled" %}
+				<td class="text-center">{{each_part.part_number}}</td>
+
+				{% endif %}
+				<td class="text-center">{{each_part.available_quantity}}</td>
+				<td class="text-center">
+				<input type="hidden" id="ordered_quantity"  name="ordered_quantity" value='{{each_part.quantity}}' >
+				{{each_part.quantity}}</td>
+
+				<td class="text-center">{{each_part.mrp}}</td>
+				<td class="text-center">{{each_part.line_total}}</td>
+				{% if each.order_status == "pending" %}
+				<td class="text-center">
+				<input type="hidden" id="delivered_quantity"  name="delivered_quantity" value='{{each_part.delivered_quantity}}' >
+				{{each_part.delivered_quantity}}</td>
+
+				<td class="text-center">
+				<input type ="text"   autocomplete="off" style="width:50px;text-align:center;" class="delivered-stock delivery_1" name="delivered_stock" />
 		
-					{% if order_status == "pending" %}
-					<td class="text-center"><input type ="text" required="true"  autocomplete="off" style="width:50px;text-align:center;" class="delivered-stock" name="delivered_stock" /></td>
-			
-					<td class="text-center">
-						<input type="text" required="true" autocomplete="off" style="width:100px;text-align:center;" class="datepick" name="delivered_date" />
-						</td>
-	   				 {% endif %}
-				</tr>
-				
-			
-					</tbody>
-				
-					{% endfor %}
-				   <input type="hidden" id="order_id"  name="order_id" value='{{order_id}}' > 
-						<input type="hidden" id="orders_length" value='{{orders_length}}' name="orders_length"  > 
-		</table>
-	
-		{% if order_status == "pending" %}
-		<button type="submit" class="btn btn-primary" name="submit" id="_savesubmit">
+					<input type="hidden" id="order_status" value='{{each.order_status}}' name="order_status"  >
+				</td>
 
-						Submit 
-		</button>
-		{% endif %}
-		{% if order_status == "open" %} 
-		<button type="submit" class="btn btn-primary" name="cancel" id="_cancelsubmit">
+				<td class="text-center">
+				<input type="text"  autocomplete="off" style="width:100px;text-align:center;" class="datepick datepick_1" name="delivered_date" />
+				</td>
+				{% endif %}
+			</tr>
 
-						Cancel 
-		
-			{% endif %}
-		
- </form>
- <script>
+			{% endfor %}
+		</tbody>
 
+	</table>
+
+
+
+	{% endfor %}
+
+	<button type="submit" class="btn btn-primary" name="submit" id="_savesubmit">
+		Generate Invoice
+	</button>
+
+</form>
+
+<script>
 	$(document).ready(function() {
-		$('.chk-box').change(function(e)	{
-			if( $(this).is(":checked") ) {
-					$(e.target).parents('tr').find('input.delivered-stock').attr('disabled', false).focus();
-					$(e.target).parents('tr').find('input.datepick').attr('disabled', false);
-					$(e.target).parents('tr>td').append("<input type='hidden' name='part_number' class='hiddentxt' value='"+$(this).attr("rel")+"'>")
-					// $(e.target).parents('tr>td').append("<input type='hidden' name='part_number_ids' class='hiddentxt' value='"+$(this).attr("rel")+"'>")
+		$('.chk-box').change(function(e) {
+			if ($(this).is(":checked")) {
+				$(e.target).parents('tr').find('input.delivered-stock').attr('disabled', false).focus();
+				$(e.target).parents('tr').find('input.datepick').attr('disabled', false);
+				$(e.target).parents('tr>td').append("<input type='hidden' name='part_number' class='hiddentxt' value='" + $(this).attr("rel") + "'>")
+				// $(e.target).parents('tr>td').append("<input type='hidden' name='part_number_ids' class='hiddentxt' value='"+$(this).attr("rel")+"'>")
+			} else {
+				$(e.target).parents('tr').find('input.delivered-stock').attr('disabled', true);
+				$(e.target).parents('tr').find('input.datepick').attr('disabled', true);
+				$(e.target).parents('tr>td').find(".hiddentxt").remove();
 			}
-			else  {
-					$(e.target).parents('tr').find('input.delivered-stock').attr('disabled', true);
-					$(e.target).parents('tr').find('input.datepick').attr('disabled', true);
-					$(e.target).parents('tr>td').find(".hiddentxt").remove();
-			}
-		});	
+		});
 
 	});
 
-	
-	function loadOrderDetails(url, partNum, partDesc){
-		alert(url);
-		
+	function loadOrderDetails(url, partNum, partDesc) {
+
 		$("#part_numberHead").html(partNum);
 		$("#part_desc").html(partDesc)
-		$("#loadParts").attr("src",url);
+		$("#loadParts").attr("src", url);
 	}
- </script>
- <!-- Modal -->
-<div class="modal hide" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+</script>
+<style>
 
-        <p class="modal-title"><strong>Order ID:</strong> <span>{{original.id}}</span><br/>       
-        <strong>Part Number:</strong> <span id="part_numberHead"></span><br/>
-        <strong>Part Description:</strong> <span id="part_desc"></span></span></p>
-        
+
+</style>
+<div class="modal fade" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Modal Header</h4>
+        </div>
+        <div class="modal-body">
+          
+          
+          <iframe src="http://local.bajaj.gladminds.co:8002/admin/bajaj/orderpart/order_details/pending/4/"></iframe>
+          
+          
+          
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
       </div>
-      <div class="modal-body">
-          <iframe src="" width="100%" id="loadParts" height="380" name= "part_details" frameborder="0" allowtransparency="true"></iframe>  
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
+      
     </div>
-    <!-- /.modal-content -->
   </div>
-  <!-- /.modal-dialog -->
+  
+</div>
+
+
+
+
+
+
+<!-- Modal -->
+<div class="modal hide" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+
+				<p class="modal-title">
+					<strong>Order ID:</strong><span>{{original.id}}</span>
+					<br/>
+					<strong>Part Number:</strong><span id="part_numberHead"></span>
+					<br/>
+					<strong>Part Description:</strong><span id="part_desc"></span></span>
+				</p>
+
+			</div>
+			<div class="modal-body">
+				<iframe src="" width="100%" id="loadParts" height="380" name="part_details" frameborder="0" allowtransparency="true"></iframe>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">
+					Close
+				</button>
+			</div>
+		</div>
+		<!-- /.modal-content -->
+	</div>
+	<!-- /.modal-dialog -->
 </div>
 <!-- /.modal -->
- {% endblock body  %}
+
+<style>
+	tr.red td {
+		background-color: #F5D0A9 !important;
+	}
+</style>
+{% endblock content  %}
 

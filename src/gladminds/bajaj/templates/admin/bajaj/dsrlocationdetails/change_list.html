@@ -1,0 +1,256 @@
+{% extends "admin/base_site.html" %}
+
+{% load i18n admin_static admin_modify suit_tags admin_urls %}
+{% load url from future %}
+{% block extrahead %}
+{{block.super}}
+
+<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<style>
+a[href^="http://maps.google.com/maps"]{display:none !important}
+a[href^="https://maps.google.com/maps"]{display:none !important}
+
+.gmnoprint a, .gmnoprint span, .gm-style-cc {
+    display:none;
+}
+.gmnoprint div {
+    background:none !important;
+}
+.gm-style-mtc{
+    margin-top: 2px;
+    display: block;
+}
+.btn{
+        width: 100%;
+    display: block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.42857143;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+.btn-primary{
+        color: #fff;
+    background-color: #286090;
+    border-color: #204d74;
+}
+.btn-success{
+        color: #fff;
+    background-color: #449d44;
+    border-color: #398439;
+
+}
+.btn-default{
+    color: #333;
+    background-color: #e6e6e6;
+    border-color: #adadad;
+}
+</style>
+
+<script>
+var arr=new Array();var locations=new Array();var uniqueId=1;
+var map;var controlDiv;var maploaded=0;var markers=[];var markerlength=0;var marker="";var option;
+
+var data;
+
+function showHideMarkers(option) 
+{
+        loadMarkers();
+        for (var i = 0; i < markers.length; i++) {
+
+            if( (markers[i].id=="retailers")&&(option=="all") )
+            {   
+
+                markers[i].setIcon("http://maps.google.com/mapfiles/ms/icons/green-dot.png");
+                markers[i].setVisible(true);
+                
+            }
+            if( (markers[i].id=="dsrs")&&(option=="all") )
+            {
+                markers[i].setIcon("http://maps.google.com/mapfiles/ms/icons/blue-dot.png");
+                markers[i].setVisible(true);
+                
+
+            }
+            if( (markers[i].id=="retailers")&&(option=="retailers") )
+            { 
+                markers[i].setIcon("http://maps.google.com/mapfiles/ms/icons/green-dot.png");
+                markers[i].setVisible(true);
+                
+            }
+            if( (markers[i].id=="retailers")&&(option=="dsrs") )
+            {
+                markers[i].setVisible(false);
+            }
+            if( (markers[i].id=="dsrs")&&(option=="retailers") )
+            {
+                markers[i].setVisible(false);
+            }
+            if( (markers[i].id=="dsrs")&&(option=="dsrs") )
+            {   
+                    markers[i].setIcon("http://maps.google.com/mapfiles/ms/icons/blue-dot.png");          
+                    markers[i].setVisible(true);
+                               
+            }
+
+        }
+    }
+
+function allButtons(controlDiv){
+    var controlUIContainer = document.createElement( 'button' ),
+    controlUI = document.createElement( 'div' );
+    controlUIContainer.className = "gm-style-mtc btn btn-default";
+    controlDiv.appendChild( controlUIContainer );
+    controlUI.className = "custom-control";
+    controlUI.title = 'Click to set the map to All';
+    controlUI.innerHTML = 'All ';
+    controlUIContainer.appendChild( controlUI );
+    google.maps.event.addDomListener( controlUIContainer, 'click', function() {
+        showHideMarkers("all");
+        } );
+    var controlUIContainer = document.createElement( 'button' ),
+    controlUI = document.createElement( 'div' );
+    controlUIContainer.className = "gm-style-mtc btn btn-success";
+    controlDiv.appendChild( controlUIContainer );
+    controlUI.className = "custom-control";
+    controlUI.title = 'Click to set the map to Retailers';
+    controlUI.innerHTML = 'Retailers ';
+    controlUIContainer.appendChild( controlUI );
+    google.maps.event.addDomListener( controlUIContainer, 'click', function() {
+        showHideMarkers("retailers");
+        } );
+    var controlUIContainer = document.createElement( 'button' ),
+    controlUI = document.createElement( 'div' );
+    controlUIContainer.className = "gm-style-mtc btn btn-primary";
+    controlDiv.appendChild( controlUIContainer );
+    controlUI.className = "custom-control";
+    controlUI.title = 'Click to set the map to DSRs';
+    controlUI.innerHTML = 'DSRs ';
+    controlUIContainer.appendChild( controlUI );
+    google.maps.event.addDomListener( controlUIContainer, 'click', function() {
+        showHideMarkers("dsrs");
+        } );
+}
+function loadMarkers()
+{
+    var infowindow = new google.maps.InfoWindow();
+    var marker="";
+    for (i = 0; i < locations.length; i++) {
+        marker = new google.maps.Marker({
+        position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+        // icon: locations[i][4],
+        map: map
+        });
+        if (i < data[1].length){
+            marker.id = "retailers";
+        }
+        if (i >= data[1].length){
+            marker.id = "dsrs";
+        }
+        markers.push(marker)
+        google.maps.event.addListener(marker, 'click', (function (marker, i) {
+            return function () {
+                infowindow.setContent(locations[i][0]);
+                infowindow.open(map, marker);
+            }
+        })(marker, i));
+        markerlength=markers.length;
+    }
+}
+function gmap(data)
+{
+    map = new google.maps.Map(document.getElementById('map'),
+   {
+    zoom: 12,
+    disableDefaultUI: true,
+    center: new google.maps.LatLng(data[0].max_lat,data[0].min_long),
+    scrollwheel: false,
+    navigationControl: false,
+    mapTypeControl: false,
+    scaleControl: false,
+    draggable: false,
+    disableDoubleClickZoom: true,
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+    });
+   
+}
+function main1(data,max_lat,min_long,mapcolor,option)
+{ 
+    locations=new Array();
+    var homeControlDiv = document.createElement( 'div' ),
+    HomeControl = function ( controlDiv, map ) 
+    {
+        controlDiv.className = "gmnoprint custom-control-container";
+        $.each(data[1], function(key, val) 
+        {
+            var x = new Array("<table class='gtable'><tr><td align='right'><b>Code: </b></td><td >" + val.ret_code + "</td></tr><tr><td align='right'><b>Name: </b><td>" + val.ret_name + "</td></tr><tr><td align='right'><b>Last Sync: </b></td><td>" + val.last_sync + "</td></tr></table>", val.latitude, val.longitude);
+            locations.push(x);
+        });
+        $.each(data[2], function(key, val) 
+        {
+        
+            var x = new Array("<table class='gtable'><tr><td align='right'><b>Code: </b></td><td >" + val.ret_code + "</td></tr><tr><td align='right'><b>Name: </b><td>" + val.ret_name + "</td></tr><tr><td align='right'><b>Last Sync: </b></td><td>" + val.last_sync + "</td></tr></table>", val.latitude, val.longitude);
+            locations.push(x);
+                                     
+        });      
+        if(maploaded==0){         
+            allButtons(controlDiv);
+            maploaded=1;
+        }        
+   
+    }
+    var homeControl = new HomeControl( homeControlDiv, map );
+    homeControlDiv.index = 1;
+    map.controls[ google.maps.ControlPosition.TOP_RIGHT ] .push( homeControlDiv );
+    var infowindow = new google.maps.InfoWindow();
+    var marker="", i;
+}
+
+
+$(document).ready(function(){
+	wWidth = $( window ).width()-($("#suit-left").width()+$("#suit-center").css("padding"))+"px";
+	wHeight = $(window).height()-($("#header").height()+$("#footer").height()+85)+"px";
+
+	$("#map").css("width",wWidth).css("height",wHeight)
+	
+	
+	$.ajax({
+		url : "{% url 'test' %}",
+		async : "true",
+		success : function(data1) {
+			data = data1;
+			gmap(data);
+			//loadAllUsers(data);
+			main1(data,data[0].max_lat,data[0].min_long,'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',"all");
+			showHideMarkers("all") ;
+		}
+	});
+	
+	
+
+});
+
+
+
+</script>
+
+{% endblock extrahead %}
+
+{% block content %}
+
+<div id="map" style="width: 100%;height: 100%;"></div>
+{% endblock %}

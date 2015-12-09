@@ -938,7 +938,7 @@ class RetailerCollectionAdmin(GmModelAdmin):
 class CollectionAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('retailer',)
-    list_display = ('retailer', 'payment_date','payment_mode','payment_amount','invoice_date','invoice_amount','invoice_number')
+#     list_display = ('retailer', 'payment_date','payment_mode','payment_amount','invoice_date','invoice_amount','invoice_number')
     
 class DSRScorecardReportAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]

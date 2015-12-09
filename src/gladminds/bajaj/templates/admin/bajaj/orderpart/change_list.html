@@ -1,8 +1,8 @@
-{% extends "admin/base_site.html" %}
+{% extends "admin/change_form.html" %}
 {% load i18n admin_static admin_list admin_urls suit_list suit_tags %}
 {% load admintags %}
 {% load url from future %}
-
+{% load admin_urls %}
 
 {% block content %}
 
@@ -27,10 +27,10 @@
         	<tr>
         		
         		<td class="text-center">{{each.ret_name}}</td>
-        			<td class="text-center"><a href="{% url 'order_details' 'open' each.ret_id  %}">{{each.open_orders_len}}</a></td> 
-        		<td class="text-center"><a href="{% url 'order_details' 'pending' each.ret_id %}">{{each.pending_orders_len}}</a></td>        		
-        		<td class="text-center"><a href="{% url 'order_details' 'shipped' each.ret_id %}">{{each.shipped_orders_len}}</a></td>
-        			<td class="text-center"><a href="{% url 'order_details' 'cancelled' each.ret_id %}">{{each.cancelled_orders_len}}</a></td> 
+        			<td class="text-center">{% if each.open_orders_len != 0 %}<a href="{% url 'order_details' 'open' each.ret_id  %}">{{each.open_orders_len}}</a>{% else %}{{each.open_orders_len}}{%endif %}</td> 
+        		<td class="text-center">{% if each.pending_orders_len != 0 %}<a href="{% url 'admin:pending_order_details' 'pending' each.ret_id %}">{{each.pending_orders_len}}</a>{% else %}{{each.pending_orders_len}}{%endif %}</td>        		
+        		<td class="text-center">{% if each.shipped_orders_len != 0 %}<a href="{% url 'shipped_order_details' 'shipped' each.ret_id %}">{{each.shipped_orders_len}}</a>{% else %}{{each.shipped_orders_len}}{%endif %}</td>
+        			<td class="text-center">{% if each.cancelled_orders_len != 0 %}<a href="{% url 'order_details' 'cancelled' each.ret_id %}">{{each.cancelled_orders_len}}</a>{% else %}{{each.cancelled_orders_len}}{%endif %}</td> 
      
         	</tr>
         	   		{% endfor %}
