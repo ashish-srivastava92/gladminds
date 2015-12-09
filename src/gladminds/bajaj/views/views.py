@@ -46,7 +46,7 @@ from gladminds.bajaj.services.coupons import export_feed
 from gladminds.core.auth import otp_handler
 from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor,District,State,OrderPartDetails,\
 PartPricing,OrderDeliveredHistory,DoDetails,PartsStock
-from gladminds.bajaj.models import PartMasterCv
+
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template import loader
 from django.template.context import Context

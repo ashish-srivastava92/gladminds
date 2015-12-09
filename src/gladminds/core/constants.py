@@ -369,6 +369,14 @@ INVOICE_SEQUENCE = 001
 INVOICE_SEQUENCE_INCREMENT = 1
 
 PAYMENT_MODES =  (('Cash', '1'),
-               ('Cheque', '2'))
+               ('Cheque', '2'),
+               ('Cash/Cheque','3'),)
+
+RETAILER_PASSWORD = 'bajaj'
+
+ORDER_STATUS = {'OPEN': 0, 'PENDING': 1, 'CANCELLED': 2, 'SHIPPED':3, 'COMPLETED':4}
+
+#this variable is to set how many month data to be taken into account for APP DSR report
+DSR_REPORT_MONTHS_DATA = 3
 
 
