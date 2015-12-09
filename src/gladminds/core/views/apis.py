@@ -202,6 +202,7 @@ def place_order(request, dsr_id):
             orderpart.order_placed_by = order['order_placed_by']
             orderpart.latitude = order['latitude']
             orderpart.longitude = order['longitude']
+            orderpart.order_status = 0
             orderpart.save()
             #push all the items into the orderpart details
             for item in order['order_items']:
@@ -231,6 +232,7 @@ def retailer_place_order(request, retailer_id):
             orderpart.distributor = Distributor.objects.get(distributor_id = order['distributor_id'])
             orderpart.order_date = order['date']
             orderpart.order_placed_by = order['order_placed_by']
+            orderpart.order_status = 0
             orderpart.save()
             #push all the items into the orderpart details
             for item in order['order_items']:
