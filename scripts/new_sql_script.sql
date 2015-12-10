@@ -150,6 +150,8 @@ alter table gm_orderpart_details add column line_total float(20,4);
 alter table gm_collection add column invoice_id int(11);
 alter table gm_collection add column latitude float(10,6);
 alter table gm_collection add column longitude float(11,6);
+alter table gm_collection add column collected_amount float(20,4);
+alter table gm_collection_details add column collected_cash float(20,4)
 
 
 
