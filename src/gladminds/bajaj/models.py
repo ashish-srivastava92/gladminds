@@ -959,7 +959,7 @@ class PartPricing(base_models.PartPricing):
 
 class PartsStock(base_models.PartsStock):
     ''' details of parts '''
-    part_number = models.ForeignKey(PartPricing)
+    part_number = models.ForeignKey(PartMasterCv)
     available_quantity = models.IntegerField(null=True, blank=True)
     distributor = models.ForeignKey(Distributor, null=True, blank=True)
     active = models.BooleanField(default=True)
@@ -995,7 +995,7 @@ class OrderPart(base_models.OrderPart):
 
 
 class OrderPartDetails(base_models.OrderPartDetails):
-    part_number = models.ForeignKey(PartPricing)
+    part_number = models.ForeignKey(PartMasterCv)
     quantity = models.IntegerField(null=True, blank=True)
     active = models.IntegerField(null=True, blank=True, default=1)
     order = models.ForeignKey(OrderPart)
@@ -1029,7 +1029,7 @@ class DoDetails(base_models.DoDetails):
 
 
 class OrderDeliveredHistory(base_models.OrderDeliveredHistory):
-    part_number = models.ForeignKey(PartPricing)
+    part_number = models.ForeignKey(PartMasterCv)
     delivered_quantity = models.IntegerField(null=True, blank=True)
     active = models.IntegerField(null=True, blank=True, default=1)
     order = models.ForeignKey(OrderPart)
@@ -1041,11 +1041,13 @@ class OrderDeliveredHistory(base_models.OrderDeliveredHistory):
 
 
 class OrderTempDeliveredHistory(base_models.OrderTempDeliveredHistory):
-    part_number = models.ForeignKey(PartPricing)
+    part_number = models.ForeignKey(PartMasterCv)
     delivered_quantity = models.IntegerField(null=True, blank=True)
     active = models.IntegerField(null=True, blank=True, default=1)
     order = models.ForeignKey(OrderPart)
     delivered_date = models.DateTimeField(null=True, blank=True)
+    retailer = models.ForeignKey(Retailer)
+    
 #     do= models.ForeignKey(DoDetails)
     class Meta(base_models.OrderTempDeliveredHistory.Meta):
         app_label = _APP_NAME

@@ -11,6 +11,7 @@
 <link rel="stylesheet" type="text/css" href="/static/suit/bootstrap/css/bootstrap.min.css" media="all"/>
 <link rel="stylesheet" type="text/css" href="/static/suit/css/suit.css" media="all">
 <script src="/static/suit/js/jquery-1.8.3.min.js"></script>
+
 <script type="text/javascript">
 	var Suit = {
 		$ : $.noConflict()
@@ -135,7 +136,7 @@
 	<input type="hidden" id="order_id"  name="order_id" value='{{order_id}}' >
 	<input type="hidden" id="order_status" value='{{order_status}}' name="order_status"  >
 
-
+<div style="text-align: right;display: block">
 	{% if order_status == "open" %}
 	<button type="submit" class="btn btn-primary" name="place_order" id="_place_order_submit">
 		Accept Part
@@ -144,7 +145,7 @@
 		Cancel
 	</button>
 	{% endif %}
-
+</div>
 </form>
 <script>
 	$(document).ready(function() {

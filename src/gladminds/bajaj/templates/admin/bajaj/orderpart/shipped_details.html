@@ -15,28 +15,13 @@
 {% block content %}
 
 
-{% if order_display %}
 <p>
-	{% if order_status == "cancelled" %}
-	<h3>Cancelled Orders</h3>
-	{% endif %}
-	{% if order_status == "shipped" %}
-		<h3>Shipped Orders</h3>
-	{% endif %}
-		{% if order_status == "open" %}
-		<h3>Open Orders</h3>
-	{% endif %}
-		{% if order_status == "pending" %}
-		<h3>Pending Orders</h3>
-	{% endif %}
-	<!-- <h3>DSR Orders</h3> -->
+	<h3>DSR Orders</h3>
 </p>
 <p>
 	Retailer : {{retailer_name}}
-	
-
 </p>
-<form action="{% url 'save_order_history' %}" method="POST" enctyype="multipart/form-data">
+<!-- <form action="{% url 'save_order_history' %}" method="POST" enctyype="multipart/form-data"> -->
 
 
 
@@ -44,45 +29,38 @@
 		<thead>
 
 			<tr>
-				<th class="text-center">Order ID</th>
-				<th class="text-center">DSR Name</th>
-				<th class="text-center">Total Value</th>
-				<th class="text-center">Ordered Date</th>
-				{% if order_status == "open" %}
-
-				<th class="text-center">Actions</th>
-				{% endif %}
+				<!-- <th class="text-center">Order ID</th> -->
+				<th class="text-center">Invoice Number</th>
+				<th class="text-center">Invoice Amount</th>
+				<th class="text-center">Shipped Date</th>
+				
 			</tr>
 
 		</thead>
 
 		<tbody>
 
-			{% for each in order_display %}
+			{% for each in shipped_details %}
 			<tr>
-				<td class="text-center"><a href="{% url 'get_parts' each.order_id order_status retailer_id %}">{{each.order_id}}</a></td>
+				<!-- <td class="text-center"><a href="{% url 'get_parts' each.order_id order_status retailer_id  %}">{{each.order_id}}</a></td> -->
 				<!-- <td class="text-center">{{each.retailer_name}}</td> -->
-				<td class="text-center">{{each.dsr_name}}</td>
+				<td class="text-center"><a href="{% url 'get_orders' each.invoice_id retailer_id  %}">{{each.invoice_no}}</td>
 
-				<td class="text-center">{{each.total_value}}</td>
-				<td class="text-center">{{each.order_date}}</td>
-				{% if order_status == "open" %}
-
-				<td class="text-center"><a  class='btn btn-success' onclick='confirmAccept(this)' data-url="{% url 'accept_order'  each.order_id 'accept'  %}" ordID="{{each.order_id}}" href="javascript:void(0)">Accept</a> &nbsp; <a  class='btn btn-warning' data-toggle='modal' onclick='confirmCancel(this)' data-url="{% url 'accept_order'  each.order_id 'cancel' %}" ordID="{{each.order_id}}" href="javascript:void(0)">Cancel</a> {% endif  %}
+				<td class="text-center">{{each.invoice_amt}}</td>
+				<td class="text-center">{{each.shipped_date}}</td>
+			
+			</tr>	
 		</tbody>
 
-		</tbody></td>
-		</tr>
+
+		
 		{% endfor %}
 
-		</tbody>
-	<input type="hidden" id="retailer_id" value='{{retailer_id}}' name="retailer_id"  >
+
 		<input type="hidden" id="order_id"  name="order_id" value='{{order_id}}' >
 		<input type="hidden" id="orders_length" value='{{order_status}}' name="orders_length"  >
 	</table>
 
-</form>
-{% endif %}
 <script>
 	$(document).ready(function() {
 

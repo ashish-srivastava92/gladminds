@@ -80,7 +80,7 @@
           
 
 {% if show_upload_stock %}
-          {% ifequal cl.opts.verbose_name 'part pricing'  %}
+          {% ifequal cl.opts.verbose_name 'part master cv'  %}
 			 <div style="float:left;clear:right;">
 			 	<form action="{% url 'upload_part_pricing' %}" method="POST" enctype="multipart/form-data" >
 			        <table width>

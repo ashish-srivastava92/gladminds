@@ -4,9 +4,54 @@
 {% load url from future %}
 {% block extrahead %}
 {{block.super}}
+<script src="/static/js/bootbox.min.js"></script>
+
 <!-- <link href="/static/css/portal.css" rel="stylesheet"> -->
 <!-- <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script> -->
+<style>
+	iframe body {
+		margin: 0;
+	}
 
+	body .modal {
+		/* new custom width */
+		width: 1000px;
+		/* must be half of the width, minus scrollbar on the left (30px) */
+		margin-left: -500px;
+	}
+
+	#loading {
+		display: none;
+	}
+	#loading, #loading div.bg {
+		position: fixed;
+		width: 100%;
+		height: 100%;
+		text-align: center;
+		top: 0px;
+		left: 0px;
+		z-index: 500000;
+	}
+
+	#loading div.txt {
+		position: absolute;
+		top: 50%;
+		padding: 23px 0;
+		width: 100%;
+		height: 12px;
+		font-size: 12px;
+		z-index: 500001;
+		background: url(/static/img/loading.gif) no-repeat 50%;
+		margin-top: -46px;
+	}
+
+	#loading div.bg {
+		background: #fff;
+		opacity: 0.7;
+		filter: alpha(opacity=70); /* For IE8 and earlier */
+	}
+
+</style>
 <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
 
 <!-- <link rel="stylesheet" type="text/css" href="/static/suit/bootstrap/css/bootstrap.min.css" media="all"/> -->
@@ -26,48 +71,108 @@
 <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 
 <script type="text/javascript">
+	function showLoading() {
+		$("#loading").show();
+	}
 
-$(document).ready(function(){
-	$("#orderForm").submit(function(e) {
-		
-		var delivery_stock=$("input[name='delivered_stock']");
-		var datepick=$("input[name='datepick']");var flag=1;
-		
-		for(var i=0;i<delivery_stock.length;i++){
-			
-				
-			if (   ((delivery_stock[i].val()!="")&&(datepick[i].val()==""))||((delivery_stock[i].val()=="")&&(datepick[i].val()!="")) ){
-				flag=0;
-				alert("Both the fields are mandatory.");
-				return false;
+	function hideLoading() {
+		$("#loading").hide();
+	}
+
+
+	$(document).ready(function() {
+
+		$('#myModal1').on('hidden.bs.modal', function() {
+			showLoading();
+			$.ajax({
+				url : "{% url 'clear_order_temp' %}",
+				// url : "http://local.bajaj.gladminds.co:8001/admin/bajaj/dsrworkallocation/",
+				type : "post",
+
+				data : {
+
+					'retailer_id' : '{{retailer_id}}',
+
+				},
+				success : function(data) {
+
+					hideLoading();
+					location.reload();
+					//alert(data);
+				}
+			});
+
+		});
+
+		$("#orderForm").submit(function(e) {
+
+			var delivery_stock = $("input[name='delivered_stock']");
+			var datepick = $("input[name='delivered_date']");
+			var flag = 1;
+
+			for (var i = 0; i < delivery_stock.length; i++) {
+
+				if (($(delivery_stock[i]).val() != "" && $(datepick[i]).val() == "") || ($(delivery_stock[i]).val() == "" && $(datepick[i]).val() != "")) {
+					flag = 0;
+					alert("Kindly enter correct data.");
+					$(delivery_stock[i]).focus();
+
+					return false;
+				}
+
 			}
-		
-		}
-		// if(flag==0){
+			// if(flag==0){
 			// alert("Error");
 			// return false;
-		// }
-// 		
-		
-	    var url = "{% url 'save_order_temp_history' %}"; 
-	    alert($("#orderForm").serialize());
-	    $.ajax({
-	           type: "POST",
-	           url: url,
-	           data: $("#orderForm").serialize(), // serializes the form's elements.
-	           success: function(data)
-	           {
-	               alert(data); 
-	               $("#myModal1").modal("show");
-	               
-	           }
-	         });
-	
-	    e.preventDefault(); // avoid to execute the actual submit of the form.
+			// }
+			//
+
+			var url = "{% url 'save_order_temp_history' %}";
+			$.ajax({
+				type : "POST",
+				url : url,
+				data : $("#orderForm").serialize(), // serializes the form's elements.
+				success : function(data) {
+					// alert(data[0]);
+					$("#myModal1").modal("show");
+					rescale();
+					var $iframe = $('#invFrame');
+					$iframe.ready(function() {
+						trBodyObj = $iframe.contents().find("body").find("#partsBody");
+						$(trBodyObj).html("")
+						$.each(data, function(i) {
+							index = parseInt(i) + 1;
+							trObj = "<tr><td class='centeralign'>" + index + "</td><td>" + data[i].part_number + "</td><td>" + data[i].part_description + "</td><td class='rightalign'>" + data[i].mrp + "</td><td>" + data[i].qty + "</td><td class='rightalign'>" + data[i].rate + "</td><td class='rightalign'>" + data[i].disc + "</td><td class='rightalign'>" + data[i].tax + "</td><td class='lastth' id='lasttd'>" + data[i].amount + "</td></tr>";
+							$(trBodyObj).append(trObj);
+						});
+					});
+
+				}
+			});
+
+			e.preventDefault();
+			// avoid to execute the actual submit of the form.
+		});
 	});
-})
-	
-	
+
+	function rescale() {
+		var size = {
+			width : $(window).width(),
+			height : $(window).height()
+		}
+		/*CALCULATE SIZE*/
+		var offset = 100;
+		var offsetBody = 150;
+		$("#invFrame").css("height", size.height - offset)
+
+		$('#myModal1').css('height', size.height - offset);
+		$('.modal-body').css('height', size.height);
+		$('#myModal1').css('top', 10);
+	}
+
+
+	$(window).bind("resize", rescale);
+
 </script>
 
 <!-- <script src="/static/suit/bootstrap/js/bootstrap.min.js"></script> -->
@@ -85,7 +190,6 @@ $(document).ready(function(){
 </style>
 <script>
 	$(function() {
-
 		$(".datepick").datepicker();
 	}); 
 </script>
@@ -93,11 +197,18 @@ $(document).ready(function(){
 	.text-center {
 		text-align: center;
 	}
-
+	#myModal1 .modal-body {
+		padding: 1px;
+	}
 </style>
 {% endblock %}
 {% block content %}
 
+<div id="loading">
+	<div class="txt"></div>
+	<div class="bg"></div>
+</div>
+{{order_display}}
 <form  method="POST" enctyype="multipart/form-data" id="orderForm">
 	{% for each in order_display %}
 
@@ -132,7 +243,8 @@ $(document).ready(function(){
 				{% else %}
 			<tr>
 				{% endif %}
-	<input type="hidden" id="order_id"  name="order_id" value='{{each.order_id}}' >
+				<input type="hidden" id="order_id"  name="order_id" value='{{each.order_id}}' >
+
 				{% if each.order_status == "shipped" or each.order_status == "pending" %}
 				<td class="text-center"><a data-toggle="modal" data-target="#myModal" href="javascript:void(0)" onclick="loadOrderDetails('{% url 'ordered_part_details' each_part.part_number each.order_id %}','{{each_part.part_number}}','{{each_part.part_description}}')">{{each_part.part_number}}</a> {% if order_status == "pending"  %}
 				<input type="hidden" value="{{each_part.part_number}}"  id="part_number"  name="part_number">
@@ -156,8 +268,7 @@ $(document).ready(function(){
 
 				<td class="text-center">
 				<input type ="text"   autocomplete="off" style="width:50px;text-align:center;" class="delivered-stock delivery_1" name="delivered_stock" />
-		
-					<input type="hidden" id="order_status" value='{{each.order_status}}' name="order_status"  >
+				<input type="hidden" id="order_status" value='{{each.order_status}}' name="order_status"  >
 				</td>
 
 				<td class="text-center">
@@ -170,15 +281,14 @@ $(document).ready(function(){
 		</tbody>
 
 	</table>
-
-
-
 	{% endfor %}
 
-	<button type="submit" class="btn btn-primary" name="submit" id="_savesubmit">
-		Generate Invoice
-	</button>
-
+	<input type="hidden" id="retailer_id"  name="retailer_id" value='{{retailer_id}}' >
+	<div style="text-align: right;display: block">
+		<button type="submit" class="btn btn-primary" name="submit" id="_savesubmit">
+			Preview Invoice
+		</button>
+	</div>
 </form>
 
 <script>
@@ -204,76 +314,57 @@ $(document).ready(function(){
 		$("#part_desc").html(partDesc)
 		$("#loadParts").attr("src", url);
 	}
+
+	function generateInvoice() {
+		showLoading();
+		$.ajax({
+			url : "{% url 'save_order_history' %}",
+			type : "post",
+			data : $("#orderForm").serialize(), // serializes the form's elements.
+			success : function(data) {
+				hideLoading();
+				bootbox.alert("Invoice Generated Successfully!",function(){
+					//location.reload();
+					hideLoading();
+					$("#myModal1").modal("hide");
+				});
+				//alert(data);
+			}
+		});
+	}
 </script>
 <style>
-
-
 </style>
-<div class="modal fade" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-    
-      <!-- Modal content-->
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title">Modal Header</h4>
-        </div>
-        <div class="modal-body">
-          
-          
-          <iframe src="http://local.bajaj.gladminds.co:8002/admin/bajaj/orderpart/order_details/pending/4/"></iframe>
-          
-          
-          
-          
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        </div>
-      </div>
-      
-    </div>
-  </div>
-  
-</div>
-
-
-
-
-
-
-<!-- Modal -->
-<div class="modal hide" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal hide" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
+
+		<!-- Modal content-->
 		<div class="modal-content">
 			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+				<button type="button" class="close" data-dismiss="modal">
 					&times;
 				</button>
-
-				<p class="modal-title">
-					<strong>Order ID:</strong><span>{{original.id}}</span>
-					<br/>
-					<strong>Part Number:</strong><span id="part_numberHead"></span>
-					<br/>
-					<strong>Part Description:</strong><span id="part_desc"></span></span>
-				</p>
-
+				<h4 class="modal-title">Invoice Preview</h4>
 			</div>
 			<div class="modal-body">
-				<iframe src="" width="100%" id="loadParts" height="380" name="part_details" frameborder="0" allowtransparency="true"></iframe>
+
+				<iframe src="{% url 'invoice'  %}" width="100%" frameborder="0" id="invFrame"></iframe>
+
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">
 					Close
 				</button>
+				<button type="button" class="btn btn-primary" onclick="generateInvoice()">
+					Generate Invoice
+				</button>
 			</div>
 		</div>
-		<!-- /.modal-content -->
+
 	</div>
-	<!-- /.modal-dialog -->
 </div>
-<!-- /.modal -->
+
+</div>
 
 <style>
 	tr.red td {
