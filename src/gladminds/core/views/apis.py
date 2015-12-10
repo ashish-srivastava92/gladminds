@@ -157,13 +157,14 @@ def get_schedule(request, dsr_id, date):
     '''
     schedule_date = split_date(date)
     finaldate = datetime.datetime.strptime(date, '%Y-%m-%d')
-    dsr = DistributorSalesRep.objects.get(distributor_sales_code = '500001')
+    
     # schedules = DSRWorkAllocation.objects.filter(date__startswith = \
     #                 datetime.date(int(schedule_date[2]),int(schedule_date[1]), \
     #                               int(schedule_date[0])), dsr__distributor_sales_code=dsr_id)
     schedules = DSRWorkAllocation.objects.filter(date__year=finaldate.year,
                                                  date__month=finaldate.strftime("%m"),
-                                                 date__day=finaldate.strftime("%e"))
+                                                 date__day=finaldate.strftime("%e"),
+                                                 dsr__distributor_sales_code = dsr_id)
     
     if schedules:                   
         schedules_list = []

@@ -836,8 +836,8 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = DSRWorkAllocationForm
     #search_fields = ('dsr', 'date')
-    list_display = ('dsr', 'allocated_date', 'retailer')
-    list_filter = ['date', 'retailer', 'dsr',]
+    #list_display = ('dsr', 'allocated_date', 'retailer')
+    #list_filter = ['date', 'retailer', 'dsr',]
     
     def allocated_date(self, obj):
         return obj.date

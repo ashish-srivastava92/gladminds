@@ -96,7 +96,7 @@ api_v1.register(service_circular.ServiceCircularResource())
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import admin
-admin.autodiscover()
+#admin.autodiscover()
 
 api_v1.register(SMSResources())
 
