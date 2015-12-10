@@ -606,6 +606,28 @@ class Retailer(base_models.Retailer):
     rejected_reason = models.CharField(max_length=300, null=True, blank=True)
     image_url = models.FileField(upload_to="image",
                                    max_length=200, null=True, blank=True)
+    district = models.CharField(max_length = 20)
+    near_dealer_name = models.CharField(max_length = 50)
+    total_counter_sale = models.DecimalField(max_digits=10, decimal_places=4, null=True, \
+                                                blank=True)
+    total_sale_parts = models.DecimalField(max_digits=10, decimal_places=4, null=True, \
+                                                blank=True)
+    identification_no = models.CharField(max_length = 30)
+    mechanic_1 = models.CharField(max_length = 50)
+    mechanic_2 = models.CharField(max_length = 50)
+    shop_size = models.CharField(max_length = 15)
+    territory = models.CharField(max_length = 15)
+    identity_url = models.CharField(max_length = 255)
+    signature_url = models.CharField(max_length = 255)
+    target = models.DecimalField(max_digits=20, decimal_places=4, null=True, \
+                                                blank=True)
+    actual = models.DecimalField(max_digits=20, decimal_places=4, null=True, \
+                                                blank=True)
+    
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
+    image_tag.short_description = 'User Image'
+    image_tag.allow_tags = True
     tin = models.IntegerField( null=True, blank=True)
     
     
@@ -1113,6 +1135,24 @@ class DSRLocationDetails(base_models.DSRLocationDetails):
     longitude = models.CharField(max_length=255,null=True, blank=True)
     last_sync = models.DateTimeField()
     class Meta(base_models.DSRLocationDetails.Meta):
-        app_label = _APP_NAME 
+        app_label = _APP_NAME
+        
+class PartMasterCv(base_models.PartMasterCv):
+    ''' details of spare parts and pricing '''
+    part_number = models.CharField(max_length=255, null=True, blank=True)
+    products = models.CharField(max_length=255, null=True, blank=True)
+    remarks = models.CharField(max_length=255, null=True, blank=True)
+    mrp = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    subcategory = models.ForeignKey(SubCategories, null=True, blank=True)
+    category = models.ForeignKey(CvCategories)
+  
+    available_quantity = models.IntegerField()
+    current_month_should = models.IntegerField()
+    active = models.BooleanField(default=True)
+    moq = models.IntegerField( null=True, blank=True)
+    
+    class Meta(base_models.PartMasterCv.Meta):
+        app_label = _APP_NAME
     
     
