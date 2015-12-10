@@ -156,22 +156,30 @@ def get_schedule(request, dsr_id, date):
     This method gets the schedule(the retailers he has to visit) for today, given the dsr id
     '''
     schedule_date = split_date(date)
-    dsr = DistributorSalesRep.objects.filter(distributor_sales_code = dsr_id)
-    schedules = DSRWorkAllocation.objects.filter(date__startswith = \
-                    datetime.date(int(schedule_date[2]),int(schedule_date[1]),int(schedule_date[0])), dsr=dsr)
-                       
-    schedules_list = []
-    for schedule in schedules:
-        schedule_dict = {}
-        schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
-        schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
-        tm = time.strptime(str(schedule.date.time()), "%H:%M:%S")
-        schedule_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
-        schedule_dict.update({"retailer_address":schedule.retailer.user.address})
-        schedule_dict.update({"latitude":schedule.retailer.latitude})
-        schedule_dict.update({"longitude":schedule.retailer.longitude})
-        schedules_list.append(schedule_dict)
-    return Response(schedules_list)
+    finaldate = datetime.datetime.strptime(date, '%Y-%m-%d')
+    dsr = DistributorSalesRep.objects.get(distributor_sales_code = '500001')
+    # schedules = DSRWorkAllocation.objects.filter(date__startswith = \
+    #                 datetime.date(int(schedule_date[2]),int(schedule_date[1]), \
+    #                               int(schedule_date[0])), dsr__distributor_sales_code=dsr_id)
+    schedules = DSRWorkAllocation.objects.filter(date__year=finaldate.year,
+                                                 date__month=finaldate.strftime("%m"),
+                                                 date__day=finaldate.strftime("%e"))
+    
+    if schedules:                   
+        schedules_list = []
+        for schedule in schedules:
+            schedule_dict = {}
+            schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
+            schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
+            tm = time.strptime(str(schedule.date.time()), "%H:%M:%S")
+            schedule_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
+            schedule_dict.update({"retailer_address":schedule.retailer.user.address})
+            schedule_dict.update({"latitude":schedule.retailer.latitude})
+            schedule_dict.update({"longitude":schedule.retailer.longitude})
+            schedules_list.append(schedule_dict)
+        return Response(schedules_list)
+    else:
+        return Response({'status':0, 'message':'There are no schedules for the given date'})
 
 
 def split_date(date):
