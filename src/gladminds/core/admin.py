@@ -455,44 +455,44 @@ class KitAdmin(GmModelAdmin):
     
 class PartMasterCvAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('part_number', 'description', )
-    list_display = ('part_no', 'thisdescription', 'thiscategory', 'thismodel','price',
-                    'quantityavailable', 'orderpending')
-    
-    def part_no(self, obj):
-        return obj.part_number
-    part_no.short_description = 'Parts #'
-    part_no.admin_order_field = 'part_number'
-    
-    def thisdescription(self,obj):
-        return obj.description
-    thisdescription.short_description = 'Part Description'
-    
-    def thismodel(self,obj):
-        return obj.part_model
-    thismodel.short_description = 'Applicable Model'
-    
-    def thiscategory(self,obj):
-        return obj.category.name
-    thiscategory.short_description = 'Category'
-    
-    def price(self,obj):
-        return obj.mrp
-    price.short_description = 'Price'
-    
-    def quantityavailable(self,obj):
-        if obj.available is None:
-            return ''
-        else:
-            return obj.available
-    quantityavailable.short_description = 'Available Qut.'
-    
-    def orderpending(self, obj):
-        if obj.pending is None:
-            return ''
-        else:
-            return obj.pending
-    orderpending.short_description = 'Pending order Qut.'
+    # search_fields = ('part_number', 'description', )
+    # list_display = ('part_no', 'thisdescription', 'thiscategory', 'thismodel','price',
+    #                 'quantityavailable', 'orderpending')
+    # 
+    # def part_no(self, obj):
+    #     return obj.part_number
+    # part_no.short_description = 'Parts #'
+    # part_no.admin_order_field = 'part_number'
+    # 
+    # def thisdescription(self,obj):
+    #     return obj.description
+    # thisdescription.short_description = 'Part Description'
+    # 
+    # def thismodel(self,obj):
+    #     return obj.part_model
+    # thismodel.short_description = 'Applicable Model'
+    # 
+    # def thiscategory(self,obj):
+    #     return obj.category.name
+    # thiscategory.short_description = 'Category'
+    # 
+    # def price(self,obj):
+    #     return obj.mrp
+    # price.short_description = 'Price'
+    # 
+    # def quantityavailable(self,obj):
+    #     if obj.available is None:
+    #         return ''
+    #     else:
+    #         return obj.available
+    # quantityavailable.short_description = 'Available Qut.'
+    # 
+    # def orderpending(self, obj):
+    #     if obj.pending is None:
+    #         return ''
+    #     else:
+    #         return obj.pending
+    # orderpending.short_description = 'Pending order Qut.'
     
 class DistributorForm(forms.ModelForm):
     
@@ -836,8 +836,8 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = DSRWorkAllocationForm
     #search_fields = ('dsr', 'date')
-    list_display = ('dsr', 'allocated_date', 'retailer')
-    list_filter = ['date', 'retailer', 'dsr',]
+    #list_display = ('dsr', 'allocated_date', 'retailer')
+    #list_filter = ['date', 'retailer', 'dsr',]
     
     def allocated_date(self, obj):
         return obj.date
@@ -938,7 +938,6 @@ class RetailerCollectionAdmin(GmModelAdmin):
 class CollectionAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('retailer',)
-#     list_display = ('retailer', 'payment_date','payment_mode','payment_amount','invoice_date','invoice_amount','invoice_number')
     
 class DSRScorecardReportAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -1089,7 +1088,7 @@ class PartnerAdmin(GmModelAdmin):
 
 class AccumulationRequestAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.LOYALTYADMINS, Roles.LOYALTYSUPERADMINS]
-    search_fields = ('member__mechanic_id', 'upcs__unique_part_code')
+    search_fields = ('member__mechanic_id','member__permanent_id','upcs__unique_part_code')
     list_display = ( 'get_members_mechanic_id',  'get_mechanic_name', 'get_mechanic_district',
                      'get_asm', 'get_upcs', 'points',
                      'total_points', 'created_date')
@@ -1313,7 +1312,7 @@ class WelcomeKitAdmin(GmModelAdmin):
     list_filter = ('status',)
     form = WelcomeKitCommentForm
     inlines = (CommentThreadInline,)
-    search_fields = ('member__phone_number', 'partner__partner_id', 'transaction_id')
+    search_fields = ('member__phone_number','member__mechanic_id', 'partner__partner_id', 'transaction_id')
     list_display = ('get_members_mechanic_id',  'get_mechanic_name',
                      'delivery_address', 'get_mechanic_pincode',
                      'get_mechanic_district', 'get_mechanic_state',

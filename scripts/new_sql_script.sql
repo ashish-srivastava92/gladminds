@@ -115,5 +115,41 @@ alter table gm_dealer add column regional_office varchar(250);
 ALTER TABLE gm_bomvisualization ADD is_published tinyint(1)  NOT NULL DEFAULT 0;
 ALTER TABLE gm_bomvisualization ADD is_approved tinyint(1)  NOT NULL DEFAULT 0;
 
+----------------------------------SFA--------------------------------------
+alter table gm_retailer add column district varchar(20);
+alter table gm_retailer add column near_dealer_name varchar(50);
+alter table gm_retailer add column total_sale_parts float(10,4);
+alter table gm_retailer add column total_counter_sale float(10,4);
+alter table gm_retailer add column identification_no varchar(30);
+alter table gm_retailer add column mechanic_1 varchar(50);
+alter table gm_retailer add column mechanic_2 varchar(50);
+alter table gm_retailer add column shop_size varchar(15);
+alter table gm_retailer add column identity_url varchar(255);
+alter table gm_retailer add column signature_url varchar(255);
+alter table gm_retailer add column image_url varchar(255);
+alter table gm_orderpart_details change column line_total line_total float(10,4);
+alter table gm_retailer add column actual float(20,4);
+alter table gm_retailer add column target float(20,4);
+alter table gm_orderpart add column order_status int(1);
+alter table gm_orderpart add column latitude float(10,6);
+alter table gm_orderpart add column longitude float(11,6);
+alter table gm_orderpart add column so_id int(11);
+alter table gm_orderpart add column po_id int(11);
+alter table gm_orderpart add column do_id int(11);
+alter table gm_orderpart modify column part_id int(11) NULL;
+alter table gm_orderpart modify column distributor_id int(11) NULL;
+alter table gm_collection add column latitude float(10,6);
+alter table gm_collection add column longitude float(11,6);
+alter table gm_collection_details add column cheque_amount float(10,4);
+
+alter table gm_orderpart_details add column part_number_id int(11);
+alter table gm_orderpart_details add column quantity int(11);
+alter table gm_orderpart_details add column active int(1) default 1;
+alter table gm_orderpart_details add column order_id int(11);
+alter table gm_orderpart_details add column line_total float(20,4);
+alter table gm_collection add column invoice_id int(11);
+alter table gm_collection add column latitude float(10,6);
+alter table gm_collection add column longitude float(11,6);
+
 
 

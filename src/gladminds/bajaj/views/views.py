@@ -47,6 +47,7 @@ from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Dist
 PartPricing, OrderDeliveredHistory, DoDetails, PartsStock, OrderPart, OrderPartDetails, DistributorSalesRep, DSRWorkAllocation, \
 BackOrders, DSRLocationDetails, OrderTempDeliveredHistory, Collection, CollectionDetails, DoDetails
 from gladminds.bajaj.models import PartMasterCv
+
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template import loader
 from django.template.context import Context
