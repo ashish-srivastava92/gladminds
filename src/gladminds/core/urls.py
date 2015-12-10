@@ -142,8 +142,8 @@ urlpatterns = patterns('',
                         'gladminds.bajaj.views.apis.retailer_place_order'),
 
     
-    url(r'^mc/sync_location_details/dsr_id/(?P<dsr_id>\d+)/$',
-                        'gladminds.bajaj.views.apis.sync_location_details'),
+    # url(r'^mc/sync_location_details/dsr_id/(?P<dsr_id>\d+)/$',
+    #                     'gladminds.bajaj.views.apis.sync_location_details'),
     
 
     
