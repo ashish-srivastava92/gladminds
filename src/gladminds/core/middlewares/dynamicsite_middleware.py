@@ -50,8 +50,8 @@ class DynamicSitesMiddleware(object):
             BRAND.value = 'daimler'
     #Note its a hack for bajaj
         if BRAND.value == '52' or BRAND.value == '54':
-            BRAND.value = 'bajajcv'
-        BRAND.value = 'bajajcv'
+            BRAND.value = 'bajaj'
+        BRAND.value = 'bajaj'
 
     
       #   if BRAND.value == '192' :#or BRAND.value == '192':
