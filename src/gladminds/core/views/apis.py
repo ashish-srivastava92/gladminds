@@ -33,8 +33,10 @@ def authentication(request):
     a token as response
     '''
     #load the json input of username and password as json
-    load = json.loads(request.body)
-    user = authenticate(username = load.get("username"), password = load.get("password"))
+    #load = json.loads(request.body)
+    load = request.data
+    
+    user = authenticate(username = load["username"], password = load["password"])
     
     #user = authenticate(username = request.POST["username"], password = request.POST["password"])
     if user:
