@@ -35,10 +35,8 @@ def authentication(request):
     #load the json input of username and password as json
     #load = json.loads(request.body)
     load = request.data
-    
     user = authenticate(username = load["username"], password = load["password"])
     
-    #user = authenticate(username = request.POST["username"], password = request.POST["password"])
     if user:
         if user.is_active:
             #the user is active.He should be a dsr or retailer 
@@ -223,7 +221,6 @@ def place_order(request, dsr_id):
                 orderpart_details.quantity = int(item['qty'])
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
-                print orderpart_details.line_total
                 orderpart_details.save()
     return Response({'message': 'Order updated successfully', 'status':1})
 
@@ -262,8 +259,8 @@ def retailer_place_order(request, retailer_id):
 # # @permission_classes((IsAuthenticated,))
 def get_outstanding(request, dsr_id):
     '''
-    This method returns the outstanding amount of all the retailers under the distributor pertaining
-    to the dsr '''
+    This method returns the outstanding amount of all the retailers under the distributor
+    pertaining to the dsr '''
     
     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
     retailers = Retailer.objects.filter(distributor = dsr.distributor, \
@@ -291,6 +288,9 @@ def get_outstanding(request, dsr_id):
                     collection = collection + each.collected_amount
                 retailer_dict.update({'collected_amount': collection})
                 retailer_list.append(retailer_dict)
+        else:
+            retailer_dict.update({'message': 'There are no invoices /outstanding for this dsr'})
+            retailer_list.append(retailer_dict)
     return Response(retailer_list)
 
 @api_view(['GET'])
@@ -438,7 +438,7 @@ def add_retailer(request, dsr_id):
         except:
             retailer_code = str(constants.RETAILER_SEQUENCE)
         user.username = retailer_code
-        user.password = constants.RETAILER_PASSWORD
+        user.set_password(constants.RETAILER_PASSWORD)
         user.date_joined = datetime.datetime.now()
         user.is_superuser = False
         user.is_staff = False
@@ -479,6 +479,7 @@ def add_retailer(request, dsr_id):
         retailer.signature_url = profile['signature_url']
         retailer.mechanic_1 = profile['mechanic_name_1']  + ' ' + profile['mechanic_number_1']
         retailer.mechanic_2 = profile['mechanic_name_2']  + ' ' + profile['mechanic_number_2']
+        retailer.approved = constants.STATUS['WAITING_FOR_APPROVAL']
         retailer.save()
     return Response({'message': 'New retailer(s) added successfully', 'status':1})
     
