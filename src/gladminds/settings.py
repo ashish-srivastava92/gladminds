@@ -199,39 +199,66 @@ SUIT_CONFIG = {
          #          )},
          
          
-         
-            {'app': 'bajaj', 'label': 'Parts', 'icon': ' icon-folder-open',
+        {'app': 'bajaj', 'label': 'Back Orders', 'icon': ' icon-folder-open',
           'models':(
                    
-                     {'model': 'partmastercv',
-                      'label': 'PartMasterCv'},
-                      {'model': 'partpricing',
+                     {'model': 'backorders',
+                      'label': 'Back Orders'},
+                     
+                    )
+                    },
+         
+         
+         
+           {'app': 'bajaj', 'label': 'Parts', 'icon': ' icon-folder-open',
+          'models':(
+                   
+                     {'model': 'partpricing',
                       'label': 'Parts List'},
                      )
                        
           },
+             
+             
+              {'app': 'bajaj', 'label': 'Scheduling', 'icon': ' icon-folder-open',
+         'models':(
+                  
+                    {'model': 'dsrworkallocation',
+                     'label': 'DSR Scheduling'},
+                 
+       
+)},
+      
           {'app': 'bajaj', 'label': 'Orders', 'icon': ' icon-folder-open',
           'models':(
                    
                      {'model': 'orderpart',
-                      'label': 'DSRs Orders'},
-                          {'model': 'orderpart',
-                      'label': 'Retailers Orders'},
-                     {'model': 'dsrworkallocation',
-                      'label': 'DSR Work Allocation'}
+                      'label': 'Orders'},
+                     
                     )
                     },
-                    
-#               
+#              
+     
           
         {'app': 'bajaj', 'label': 'Collections', 'icon': ' icon-folder-open',
          'models':(
                   
-                    {'model': 'collectiondetails',
+                    {'model': 'collection',
                      'label': 'Distributor Collection'},
                  
        
 )},
+             
+             
+             {'app': 'bajaj', 'label': 'Location Details', 'icon': ' icon-folder-open',
+         'models':(
+                  
+                    {'model': 'dsrlocationdetails',
+                     'label': 'DSR Location Details'},
+                 
+       
+)},
+             
         
         
         
@@ -262,14 +289,20 @@ DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
 
 # # for server
 
+
 # DB_USER = os.environ.get('DB_USER', 'gladminds')
 # DB_HOST = os.environ.get('DB_HOST', 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com')
 # DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladmindsqa1')
 
+# DB_USER = os.environ.get('DB_USER', 'dssoffline')
+# DB_HOST = os.environ.get('DB_HOST', 'dssoffline.chnnvvffqwop.us-east-1.rds.amazonaws.com') 
+# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'dssoffline')
+
+
 # for bajaj MC
-# DB_USER = os.environ.get('DB_USER', 'aftersell')
-# DB_HOST = os.environ.get('DB_HOST', 'aftersell-api.chnnvvffqwop.us-east-1.rds.amazonaws.com')
-# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
+#DB_USER = os.environ.get('DB_USER', 'aftersell')
+#DB_HOST = os.environ.get('DB_HOST', 'aftersell-api.chnnvvffqwop.us-east-1.rds.amazonaws.com')
+#DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
 
 # for bajaj CV
 #DB_USER = os.environ.get('DB_USER', 'dssoffline')
@@ -471,7 +504,8 @@ ALL_APPS = (
     'tastypie_swagger',
     'django_otp',
     'django_otp.plugins.otp_totp',
-    'rest_framework'
+    'rest_framework',
+#     'adminplus',
 
     # 'debug_toolbar',
     # Uncomment the next line to enable admin documentation:

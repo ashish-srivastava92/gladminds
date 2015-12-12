@@ -469,6 +469,14 @@ class AreaSparesManager(base_models.AreaSparesManager):
         app_label = _APP_NAME
 
 ######################## sfa models #################################
+
+class District(base_models.District):
+    ''' List of districts mapped to states'''
+    state = models.ForeignKey(State, null=True, blank=True)
+        
+#     distibutor_id= 
+    class Meta(base_models.District.Meta):
+        app_label = _APP_NAME
         
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
@@ -488,6 +496,22 @@ class Distributor(base_models.Distributor):
     image_url = models.FileField(upload_to="image",
                                    max_length=200, null=True, blank=True)
 
+
+    tin = models.IntegerField( null=True, blank=True)
+    cst = models.IntegerField( null=True, blank=True)
+    
+#     district = models.ForeignKey(District)
+    district = models.ManyToManyField(District)
+    
+    
+    
+#     is_active = models.BooleanField(default=True)
+    
+    
+#     image_url=   
+
+
+
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
     image_tag.short_description = 'User Image'
@@ -495,7 +519,20 @@ class Distributor(base_models.Distributor):
     
     class Meta(base_models.Distributor.Meta):
         app_label = _APP_NAME
-        
+ 
+
+
+
+
+# class DistributorDistrict(base_models.DistributorDistrict):
+#     distributor = models.ForeignKey(Distributor)
+# #     district = models.ForeignKey(District)
+#     
+#     class Meta(base_models.DistributorDistrict.Meta):
+#         app_label = _APP_NAME
+#         verbose_name_plural = "Distributor District"
+
+       
 class DSRScorecardReport(base_models.DSRScorecardReport):
     ''' details of report '''
     serial_number = models.CharField(max_length=5)
@@ -546,7 +583,11 @@ class Retailer(base_models.Retailer):
     language = models.CharField(max_length=10, null=True, blank=True)
     rejected_reason = models.CharField(max_length=300, null=True, blank=True)
     image_url = models.FileField(upload_to="image",
+
                                    max_length=255, null=True, blank=True)
+
+
+
     district = models.CharField(max_length = 20)
     near_dealer_name = models.CharField(max_length = 50)
     total_counter_sale = models.DecimalField(max_digits=10, decimal_places=4, null=True, \
@@ -564,6 +605,16 @@ class Retailer(base_models.Retailer):
                                                 blank=True)
     actual = models.DecimalField(max_digits=20, decimal_places=4, null=True, \
                                                 blank=True)
+
+    tin = models.IntegerField(null=True,blank=True)
+    
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
+    image_tag.short_description = 'User Image'
+    image_tag.allow_tags = True
+    
+    
+
     
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
@@ -576,6 +627,24 @@ class Retailer(base_models.Retailer):
     def __unicode__(self):
         return self.retailer_code 
     
+
+
+    
+class DSRWorkAllocation(base_models.DSRWorkAllocation):
+    '''details of DSR work allocation'''
+    distributor = models.ForeignKey(Distributor)
+    dsr = models.ForeignKey(DistributorSalesRep)
+    retailer = models.ForeignKey(Retailer)
+    date = models.DateTimeField(null = True, blank=True)
+    
+    class Meta(base_models.DSRWorkAllocation.Meta):
+        app_label = _APP_NAME
+#     def __unicode__(self):
+#         return self.distributor
+
+
+
+
 class PartModels(base_models.PartModels):
     '''details of part models'''
     model_name = models.CharField(max_length=255)
@@ -627,6 +696,39 @@ class SubCategories(base_models.SubCategories):
          
     def __unicode__(self):
         return self.name
+ 
+ 
+class CvCategories(base_models.CvCategories):
+    ''' details of alternate parts and pricing '''
+    name = models.CharField(max_length = 255)
+    usps = models.TextField(null=True,blank=True)
+    importance = models.TextField(null=True,blank=True)
+    image_url = models.CharField(max_length = 255, null=True,blank=True)
+    active = models.BooleanField(default = True)
+    
+    class Meta(base_models.CvCategories.Meta):
+        app_label = _APP_NAME
+        
+
+class PartMasterCv(base_models.PartMasterCv):
+    ''' details of spare parts and pricing '''
+    bajaj_id = models.IntegerField()
+    part_number = models.CharField(max_length = 255)
+    description = models.TextField()
+    part_model = models.TextField()
+    valid_from = models.DateField()
+    part_models = models.CharField(max_length = 255)
+    category = models.ForeignKey(CvCategories)
+    mrp = models.CharField(max_length = 255)
+    active = models.BooleanField(default = True)
+    available = models.CharField(max_length=25)
+    pending = models.CharField(max_length=25)
+    
+    class Meta(base_models.PartMasterCv.Meta):
+        app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.description
      
 # parts model 
 # class Parts(base_models.Parts):
@@ -829,20 +931,6 @@ class ManufacturingData(base_models.ManufacturingData):
 
 ##########################     SFA Models  #########################################3
 
-class District(base_models.District):
-    ''' List of districts mapped to states'''
-    state = models.ForeignKey(State, null=True, blank=True)    
-#     distibutor_id= 
-    class Meta(base_models.District.Meta):
-        app_label = _APP_NAME
-
-
-class DistributorDistrict(base_models.DistributorDistrict):
-    distributor = models.ForeignKey(Distributor)
-    district = models.ForeignKey(District)
-    class Meta(base_models.DistributorDistrict.Meta):
-        app_label = _APP_NAME
-        verbose_name_plural = "Distributor District"
 
 
    
@@ -869,7 +957,7 @@ class PartPricing(base_models.PartPricing):
 
 class PartsStock(base_models.PartsStock):
     ''' details of parts '''
-    part_number = models.ForeignKey(PartPricing)
+    part_number = models.ForeignKey(PartMasterCv)
     available_quantity = models.IntegerField(null=True, blank=True)
     distributor = models.ForeignKey(Distributor, null=True, blank=True)
     active = models.BooleanField(default=True)
@@ -891,37 +979,64 @@ class OrderPart(base_models.OrderPart):
     fullfill = models.NullBooleanField()
     delivered = models.IntegerField(null=True, blank=True)
     no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
+<<<<<<< HEAD
     accept = models.BooleanField(default = False)
     order_status = models.IntegerField()
+=======
+    order_status = models.IntegerField(null=True, blank=True)
+>>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
     order_placed_by = models.IntegerField()
     latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=11, decimal_places=6, null=True, blank=True)
     
     class Meta(base_models.OrderPart.Meta):
         app_label = _APP_NAME
+        
+#     def __unicode__(self):
+#         
+#         return self.retailer.retailer_code
 
 class OrderPartDetails(base_models.OrderPartDetails):
-    part_number = models.ForeignKey(PartPricing)
+    part_number = models.ForeignKey(PartMasterCv)
     quantity = models.IntegerField(null=True, blank=True)
     active = models.IntegerField(null=True, blank=True, default=1)
     order = models.ForeignKey(OrderPart)
+<<<<<<< HEAD
     line_total = models.DecimalField(max_digits = 10, decimal_places=4, null=True, blank=True)
+=======
+    part_status = models.IntegerField(null=True, blank=True)
+    line_total = models.DecimalField(max_digits = 20, decimal_places=10, null=True, blank=True)
+>>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
     
     class Meta(base_models.OrderPartDetails.Meta):
         app_label = _APP_NAME
         verbose_name_plural = "Order Part Details"
 
+
+
+class Invoices(base_models.Invoices):
+    retailer = models.ForeignKey(Retailer)
+    invoice_date = models.DateTimeField()
+     
+    class Meta(base_models.Invoices.Meta):
+        app_label = _APP_NAME
+
 class DoDetails(base_models.DoDetails):
     ''' List of Do Details'''
     
     order = models.ForeignKey(OrderPart)
+    invoice = models.ForeignKey(Invoices)
     
 #     distibutor_id= 
     class Meta(base_models.DoDetails.Meta):
         app_label = _APP_NAME
 
+
+
+
+
 class OrderDeliveredHistory(base_models.OrderDeliveredHistory):
-    part_number = models.ForeignKey(PartPricing)
+    part_number = models.ForeignKey(PartMasterCv)
     delivered_quantity = models.IntegerField(null=True, blank=True)
     active = models.IntegerField(null=True, blank=True, default=1)
     order = models.ForeignKey(OrderPart)
@@ -930,6 +1045,7 @@ class OrderDeliveredHistory(base_models.OrderDeliveredHistory):
     class Meta(base_models.OrderDeliveredHistory.Meta):
         app_label = _APP_NAME
         verbose_name_plural = "Order Delivered History"
+
         
 class Invoices(base_models.Invoices):
     retailer = models.ForeignKey(Retailer)
@@ -937,8 +1053,24 @@ class Invoices(base_models.Invoices):
     invoice_id = models.CharField(max_length = 15)
     
     class Meta(base_models.Invoices.Meta):
-        app_label = _APP_NAME
 
+
+
+class OrderTempDeliveredHistory(base_models.OrderTempDeliveredHistory):
+    part_number = models.ForeignKey(PartMasterCv)
+    delivered_quantity = models.IntegerField(null=True, blank=True)
+    active = models.IntegerField(null=True, blank=True, default=1)
+    order = models.ForeignKey(OrderPart)
+    delivered_date = models.DateTimeField(null=True, blank=True)
+    retailer = models.ForeignKey(Retailer)
+    
+#     do= models.ForeignKey(DoDetails)
+    class Meta(base_models.OrderTempDeliveredHistory.Meta):
+        app_label = _APP_NAME
+        verbose_name_plural = "Order Temp Delivered History"
+
+        
+        
 
 class InvoicesDetails(base_models.InvoicesDetails):
     invoice = models.ForeignKey(Invoices)
@@ -975,3 +1107,44 @@ class CollectionDetails(base_models.CollectionDetails):
 
     class Meta(base_models.CollectionDetails.Meta):
         app_label = _APP_NAME   
+        
+        
+class BackOrders(base_models.BackOrders):
+    
+    
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    qty = models.IntegerField(null=True,blank=True)
+    datetime = models.DateTimeField()
+    class Meta(base_models.BackOrders.Meta):
+        app_label = _APP_NAME 
+    
+    
+class DSRLocationDetails(base_models.DSRLocationDetails):
+    
+    
+    dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
+    latitude = models.CharField(max_length=255,null=True, blank=True)
+    longitude = models.CharField(max_length=255,null=True, blank=True)
+    last_sync = models.DateTimeField()
+    class Meta(base_models.DSRLocationDetails.Meta):
+        app_label = _APP_NAME
+        
+class PartMasterCv(base_models.PartMasterCv):
+    ''' details of spare parts and pricing '''
+    part_number = models.CharField(max_length=255, null=True, blank=True)
+    products = models.CharField(max_length=255, null=True, blank=True)
+    remarks = models.CharField(max_length=255, null=True, blank=True)
+    mrp = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    subcategory = models.ForeignKey(SubCategories, null=True, blank=True)
+    category = models.ForeignKey(CvCategories)
+  
+    available_quantity = models.IntegerField()
+    current_month_should = models.IntegerField()
+    active = models.BooleanField(default=True)
+    moq = models.IntegerField( null=True, blank=True)
+    
+    class Meta(base_models.PartMasterCv.Meta):
+        app_label = _APP_NAME
+    
+    

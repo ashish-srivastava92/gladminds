@@ -5,6 +5,7 @@
 <div class="left-nav" id="left-nav">
   <ul>
     {% block menu_home %}
+    
       {% url 'admin:index' as index_url %}
       <li{% if index_url == request.path %} class="active"{% endif %}>
         <a href="{{ index_url }}"><i class="icon-home"></i>{% trans 'Home' %}
@@ -62,13 +63,16 @@
 	       <li{{ model.is_active|yesno:' class=active,' }}>
 	           <a href="/coupon/report/asc" target="_blank">ASC Report</a>
 	           <a href="/coupon/report/dealer" target="_blank">Dealer Report</a>
-	            <a href="#" target="_blank"> DSRs Scorecard Report</a>
+	            <a href="#" target="_blank"> DSRcccs Scorecard Report</a>
 	           <a href="#" target="_blank">Retailers Scorecard Report</a>
 	           <a href="#" target="_blank">PJP Report</a>
 			   <a href="#" target="_blank">Distributor Scorecard Report</a>
 	       </li>
 	     </ul>
      </li>
+     
+     
+    
      {%else %}
       {% if 'Orders' in app.label and  app.models and request.user.username != "bajaj" %}
      <li {{ model.is_active|yesno:' class=active,' }}><a><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>Reports

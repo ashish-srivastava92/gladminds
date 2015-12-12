@@ -455,44 +455,44 @@ class KitAdmin(GmModelAdmin):
     
 class PartMasterCvAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('part_number', 'description', )
-    list_display = ('part_no', 'thisdescription', 'thiscategory', 'thismodel','price',
-                    'quantityavailable', 'orderpending')
-    
-    def part_no(self, obj):
-        return obj.part_number
-    part_no.short_description = 'Parts #'
-    part_no.admin_order_field = 'part_number'
-    
-    def thisdescription(self,obj):
-        return obj.description
-    thisdescription.short_description = 'Part Description'
-    
-    def thismodel(self,obj):
-        return obj.part_model
-    thismodel.short_description = 'Applicable Model'
-    
-    def thiscategory(self,obj):
-        return obj.category.name
-    thiscategory.short_description = 'Category'
-    
-    def price(self,obj):
-        return obj.mrp
-    price.short_description = 'Price'
-    
-    def quantityavailable(self,obj):
-        if obj.available is None:
-            return ''
-        else:
-            return obj.available
-    quantityavailable.short_description = 'Available Qut.'
-    
-    def orderpending(self, obj):
-        if obj.pending is None:
-            return ''
-        else:
-            return obj.pending
-    orderpending.short_description = 'Pending order Qut.'
+    # search_fields = ('part_number', 'description', )
+    # list_display = ('part_no', 'thisdescription', 'thiscategory', 'thismodel','price',
+    #                 'quantityavailable', 'orderpending')
+    # 
+    # def part_no(self, obj):
+    #     return obj.part_number
+    # part_no.short_description = 'Parts #'
+    # part_no.admin_order_field = 'part_number'
+    # 
+    # def thisdescription(self,obj):
+    #     return obj.description
+    # thisdescription.short_description = 'Part Description'
+    # 
+    # def thismodel(self,obj):
+    #     return obj.part_model
+    # thismodel.short_description = 'Applicable Model'
+    # 
+    # def thiscategory(self,obj):
+    #     return obj.category.name
+    # thiscategory.short_description = 'Category'
+    # 
+    # def price(self,obj):
+    #     return obj.mrp
+    # price.short_description = 'Price'
+    # 
+    # def quantityavailable(self,obj):
+    #     if obj.available is None:
+    #         return ''
+    #     else:
+    #         return obj.available
+    # quantityavailable.short_description = 'Available Qut.'
+    # 
+    # def orderpending(self, obj):
+    #     if obj.pending is None:
+    #         return ''
+    #     else:
+    #         return obj.pending
+    # orderpending.short_description = 'Pending order Qut.'
     
 class DistributorForm(forms.ModelForm):
     
@@ -836,8 +836,8 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = DSRWorkAllocationForm
     #search_fields = ('dsr', 'date')
-    list_display = ('dsr', 'allocated_date', 'retailer')
-    list_filter = ['date', 'retailer', 'dsr',]
+    #list_display = ('dsr', 'allocated_date', 'retailer')
+    #list_filter = ['date', 'retailer', 'dsr',]
     
     def allocated_date(self, obj):
         return obj.date
@@ -878,7 +878,7 @@ class OrderPartAdmin(GmModelAdmin):
     # list_display = ('order_id', 'retailer', 'dsr_id', 'part_id', 'part_name', 'price', 'quantity',
     #                 'line_total', 'accept', 'order_date')
     list_display = ('order_link', 'retailer', 'dsr_id',
-                   'total_amount', 'accept', 'order_date')
+                'accept', 'order_date')
     list_filter = ['order_date', 'distributor', 'dsr']
     
     def order_link(self, obj):
@@ -938,7 +938,6 @@ class RetailerCollectionAdmin(GmModelAdmin):
 class CollectionAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('retailer',)
-    list_display = ('retailer', 'payment_date','payment_mode','payment_amount','invoice_date','invoice_amount','invoice_number')
     
 class DSRScorecardReportAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]

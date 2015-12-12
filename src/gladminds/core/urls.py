@@ -96,7 +96,12 @@ api_v1.register(service_circular.ServiceCircularResource())
 
 from django.contrib.auth.decorators import login_required
 from django.contrib import admin
-admin.autodiscover()
+
+# from adminplus.sites import AdminSitePlus
+# 
+# admin.site = AdminSitePlus()
+# 
+# admin.autodiscover()
 
 api_v1.register(SMSResources())
 
@@ -111,18 +116,26 @@ urlpatterns = patterns('',
     url(r'^mc/get_retailer_profile/retailer_id/(?P<retailer_id>\d+)/$',
                                                 'gladminds.bajaj.views.apis.get_retailer_profile'),
     
-    url(r'^mc/order/$', 'gladminds.core.views.apis.retailer_order'),
+    # url(r'^mc/order/$', 'gladminds.core.views.apis.retailer_order'),
     
 #     url(r'^mc/day_close_order/dsr_id/(?P<dsr_id>\d+)/$',
 #                         'gladminds.bajaj.views.apis.day_close_order'),
     
     url(r'^mc/get_outstanding/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.bajaj.views.apis.get_outstanding'),
+<<<<<<< HEAD
     
     url(r'^mc/get_retailer_outstanding/retailer_id/(?P<retailer_id>\d+)/$',
                         'gladminds.bajaj.views.apis.get_retailer_outstanding'),
     url(r'^mc/post_collection/$',
                         'gladminds.bajaj.views.apis.uploadcollection'),
+=======
+        
+    # url(r'^mc/get_retailer_outstanding/retailer_id/(?P<retailer_id>\d+)/$',
+    #                     'gladminds.bajaj.views.apis.get_retailer_outstanding'),
+    # url(r'^mc/post_collection/$',
+    #                     'gladminds.bajaj.views.apis.uploadcollection'),
+>>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
     
     url(r'^mc/get_distributor_for_retailer/retailer_id/(?P<retailer_id>\d+)/$',
                         'gladminds.bajaj.views.apis.get_distributor_for_retailer'),
@@ -135,6 +148,7 @@ urlpatterns = patterns('',
                         'gladminds.bajaj.views.apis.place_order'),
     url(r'^mc/place_order/retailer_id/(?P<retailer_id>\d+)/$',
                         'gladminds.bajaj.views.apis.retailer_place_order'),
+<<<<<<< HEAD
     url(r'^mc/add_retailer/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.bajaj.views.apis.add_retailer'),
     url(r'^mc/dsr_dashboard_report/dsr_id/(?P<dsr_id>\d+)/$',
@@ -143,26 +157,49 @@ urlpatterns = patterns('',
                         'gladminds.bajaj.views.apis.get_orders'),
     url(r'^mc/get_retailer_orders/retailer_id/(?P<retailer_id>\d+)/$',
                         'gladminds.bajaj.views.apis.get_retailer_orders'),
+=======
+
+    
+    # url(r'^mc/sync_location_details/dsr_id/(?P<dsr_id>\d+)/$',
+    #                     'gladminds.bajaj.views.apis.sync_location_details'),
+    
+
+    
+    
     #end of mc urls
+    
+
+    # url(r'^mc/add_retailer/dsr_id/(?P<dsr_id>\d+)/$',
+    #                     'gladminds.bajaj.views.apis.add_retailer'),
+    # url(r'^mc/dsr_dashboard_report/dsr_id/(?P<dsr_id>\d+)/$',
+    #                     'gladminds.bajaj.views.apis.dsr_dashboard_report'),
+    # url(r'^mc/get_orders/dsr_id/(?P<dsr_id>\d+)/$',
+    #                     'gladminds.bajaj.views.apis.get_orders'),
+    # url(r'^mc/get_retailer_orders/retailer_id/(?P<retailer_id>\d+)/$',
+    #                     'gladminds.bajaj.views.apis.get_retailer_orders'),
+>>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
+    #end of mc urls
+    url(r'^cv/get_parts/', 'gladminds.core.views.apis.get_parts'),
+
     url(r'^cv/api-token-auth/', 'gladminds.core.views.apis.authentication'),
     url(r'^cv/get_retailers/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.core.views.apis.get_retailers'),
     url(r'^cv/get_retailer_profile/retailer_id/(?P<retailer_id>\d+)/$',
                                                 'gladminds.core.views.apis.get_retailer_profile'),
     
-    url(r'^cv/get_parts/', 'gladminds.core.views.apis.get_parts'),
-    
-    url(r'^cv/place_order/dsr_id/(?P<dsr_id>\d+)$', 'gladminds.core.views.apis.place_order'),
-    
-    url(r'^cv/order/$', 'gladminds.core.views.apis.retailer_order'),
-    
-    url(r'^cv/day_close_order/dsr_id/(?P<dsr_id>\d+)/$',
-                        'gladminds.core.views.apis.day_close_order'),
+    # url(r'^cv/order/$', 'gladminds.core.views.apis.retailer_order'),
     
     url(r'^cv/get_outstanding/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.core.views.apis.get_outstanding'),
     
+<<<<<<< HEAD
     #url(r'^cv/get_collection/dsr_id/(?P<dsr_id>\d+)$',
      #                   'gladminds.core.views.apis.get_collection'),
+=======
+    url(r'^cv/get_retailer_outstanding/retailer_id/(?P<retailer_id>\d+)/$',
+                        'gladminds.core.views.apis.get_retailer_outstanding'),
+    url(r'^cv/post_collection/$',
+                        'gladminds.core.views.apis.uploadcollection'),
+>>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
     
     url(r'^cv/get_distributor_for_retailer/retailer_id/(?P<retailer_id>\d+)/$',
                         'gladminds.core.views.apis.get_distributor_for_retailer'),
@@ -170,16 +207,31 @@ urlpatterns = patterns('',
     url(r'^cv/get_outstanding/dsr_id/(?P<retailer_id>\d+)/$',
                         'gladminds.core.views.apis.get_outstanding'),
     url(r'^cv/get_schedule/dsr_id/(?P<dsr_id>\d+)/date/(?P<date>[-\d]+)/$',
-                        'gladminds.core.views.apis.get_schedule'),
-    url(r'^cv/place_order/dsr_id/(?P<dsr_id>\d+)$',
+                       'gladminds.core.views.apis.get_schedule'),
+    url(r'^cv/place_order/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.core.views.apis.place_order'),
+<<<<<<< HEAD
 #     url(r'^cv/place_order/dsr_id/(?P<dsr_id>\d+)$', 'gladminds.core.views.apis.place_order'
     
     # Reports url
     url(r'^distributorscorecard/$',
                         'gladminds.bajaj.views.distributorscorecard', name = 'distributorscorecard'),
     # reports url ends here
+=======
+    url(r'^cv/place_order/retailer_id/(?P<retailer_id>\d+)/$',
+                        'gladminds.core.views.apis.retailer_place_order'),
+    url(r'^cv/add_retailer/dsr_id/(?P<dsr_id>\d+)/$',
+                        'gladminds.core.views.apis.add_retailer'),
+    url(r'^cv/dsr_dashboard_report/dsr_id/(?P<dsr_id>\d+)/$',
+                        'gladminds.core.views.apis.dsr_dashboard_report'),
+    url(r'^cv/get_orders/dsr_id/(?P<dsr_id>\d+)/$',
+                        'gladminds.core.views.apis.get_orders'),
+    url(r'^cv/get_retailer_orders/retailer_id/(?P<retailer_id>\d+)/$',
+                        'gladminds.core.views.apis.get_retailer_orders'),
+
+>>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
     #api urls end here
+    
     url(r'', include(api_v1.urls)),
     url(r'^$', 'gladminds.core.views.home'),
     url(r'^admin/', include(brand_admin.urls)),

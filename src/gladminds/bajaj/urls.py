@@ -3,6 +3,8 @@ from gladminds.bajaj.admin import brand_admin
 from gladminds.core import urls as core_urls
 from gladminds.core.urls import api_v1
 
+from django.views.generic import TemplateView
+
 urlpatterns = patterns('',
     #api urls
     # url(r'^mc/api-token-auth/', 'gladminds.bajaj.views.apis.authentication'),
@@ -88,11 +90,49 @@ urlpatterns = patterns('',
     url(r'^get_districts/$', 'gladminds.bajaj.views.views.get_districts', name='get_districts'),
     url(r'^save_order_history/$', 'gladminds.bajaj.views.views.save_order_history', name='save_order_history'),
     
+    
+    url(r'^accept_parts/$', 'gladminds.bajaj.views.views.accept_cancel_order', name='accept_cancel_order'),
+            
+    
+    url(r'^save_order_details/$', 'gladminds.bajaj.views.views.save_order_temp_history', name='save_order_temp_history'),
+    
+#     save_order_temp_history
+    
     url(r'^ordered_part_details/(?P<part_number>\w+)/(?P<order_id>\w+)/$', 'gladminds.bajaj.views.views.ordered_part_details', name='ordered_part_details'),
+    
+    url(r'^order_details/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$', 'gladminds.bajaj.views.views.order_details',name='order_details'),
+    
+     url(r'^order_shipped_details/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$', 'gladminds.bajaj.views.views.shipped_order_details',name='shipped_order_details'),
+    
+    
     
     url(r'^admin/upload-part-sfa/$', 'gladminds.bajaj.views.upload_part_pricing',name="upload_part_pricing"),
     
     url(r'^admin/retailer/orders/$','gladminds.bajaj.views.views.dsr_orders', name='dsr_orders'),
     url(r'^admin/retailer/approve_retailer/retailer_id/(?P<retailer_id>\d+)/$', 'gladminds.bajaj.views.views.approve_retailer', name='approve_retailer'),
 #     url(r'^admin/bajaj/view_orders/(?P<order_id>\d+)$', 'gladminds.bajaj.views.views.list_orders', name='list_orders'),
+
+    
+    url(r'^admin/get_parts/(?P<order_id>\d+)/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$','gladminds.bajaj.views.views.get_parts', name='get_parts'),
+    url(r'^admin/accept_order/(?P<order_id>\d+)/(?P<action>\w+)/$','gladminds.bajaj.views.views.accept_order', name='accept_order'),
+    
+    url(r'^admin/data$','gladminds.bajaj.views.views.cal_data', name='cal_data'),
+    url(r'^admin/schedule_dsr','gladminds.bajaj.views.views.schedule_dsr', name='schedule_dsr'),
+    url(r'^admin/test','gladminds.bajaj.views.views.test', name='test'),
+    
+    url(r'^admin/get_collection_details/(?P<ret_id>\d+)/$','gladminds.bajaj.views.views.get_collection_details', name='get_collection_details'),
+     url(r'^admin/invoice_details(?P<ret_id>\d+)/(?P<invoice_id>\d+)/','gladminds.bajaj.views.views.get_orders', name='get_orders'),
+
+
+    url(r'^invoice/', TemplateView.as_view(template_name="invoice.html"),
+                   name='invoice'),
+                       
+    url(r'^admin/delete_temp_details','gladminds.bajaj.views.views.clear_order_temp', name='clear_order_temp'),
+                       
+                       
+                
+    
+#     url(r'^admin/cancel_order/(?P<ret_id>\d+)/(?P<order_id>\d+)/$','gladminds.bajaj.views.views.cancel_order', name='cancel_order'),
+    
+
 )
