@@ -454,6 +454,7 @@ class NSMAdmin(GmModelAdmin):
 #                     'user_email','username', 'email', 'first_name', 'last_name', 'is_staff')
 #     list_display = ()
 #     list_select_related = True
+#     exclude=['user',]
     
     def user_email(self,obj):
         return "hello"
@@ -1290,39 +1291,64 @@ class PartListAdmin(GmModelAdmin):
     
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.DISTRIBUTORSALESREP, Roles.RETAILERS]
     search_fields = ('part_number', 'description')
-#     list_display = ('part_no', 'Part_Description', 'Category',
-#                     'Price', 'Available', 'Pending',
-#                     'Current', 'active')
+    list_display = ('part_no', 'Part_Description', 'Category',
+                    'Price', 'Available', 'active'
+                   )
     exclude = ['subcategory',] 
+    
     def part_no(self, obj):
-#         print obj.part_number
         return obj.part_number
-    part_no.short_description = 'Parts #'
-    part_no.admin_order_field = 'part_number'
+    part_no.short_description='Parts #'
+    part_no.admin_order_field='part_number'
     
     def Part_Description(self, obj):
-#         print "objjjjj"
-        return obj.part_model
-    Part_Description.short_description = 'Part Description'
+        return obj.description
+    Part_Description.short_description='Part Description'
+    
     
     def Category(self, obj):
-#         return None
-#         return obj.part_model
-#         if obj.category.name:
-            return obj.description
-#         else:
-#             return None
-    Category.short_description = 'Category'
+        return obj.category.category_name
+    Category.short_description='Category'
     
-    def Applicable_Model(self, obj):
-        return obj.part_models
-        
-#         return obj.subcategory.part_model.name
-    Applicable_Model.short_description='Applicable Model'
+
     
     def Price(self, obj):
         return obj.mrp
-    Price.short_description = 'MRP'
+    Price.short_description='Price'
+    
+    
+    
+    
+    
+#     def part_no(self, obj):
+# #         print obj.part_number
+#         return obj.part_number
+#     part_no.short_description = 'Parts #'
+#     part_no.admin_order_field = 'part_number'
+#     
+#     def Part_Description(self, obj):
+# #         print "objjjjj"
+#         return obj.part_model
+#     Part_Description.short_description = 'Part Description'
+#     
+#     def Category(self, obj):
+# #         return None
+# #         return obj.part_model
+# #         if obj.category.name:
+#             return obj.description
+# #         else:
+# #             return None
+#     Category.short_description = 'Category'
+#     
+#     def Applicable_Model(self, obj):
+#         return obj.part_models
+#         
+# #         return obj.subcategory.part_model.name
+#     Applicable_Model.short_description='Applicable Model'
+#     
+#     def Price(self, obj):
+#         return obj.mrp
+#     Price.short_description = 'MRP'
     
     
 #     
@@ -1375,12 +1401,12 @@ class PartListAdmin(GmModelAdmin):
     def changelist_view(self, request, extra_context={}):
         if request.user.is_superuser or request.user.groups.filter(name=Roles.SFAADMIN).exists():
 
-            self. list_display = ('part_no', 'Part_Description','Applicable_Model', 'Category',
+            self. list_display = ('part_no', 'Part_Description','Category',
                     'Price', 'active')
             
             
         else:
-            self.list_display = ('part_no', 'Part_Description', 'Applicable_Model','Category',
+            self.list_display = ('part_no', 'Part_Description','Category',
                     'Price', 'Available')
                     
         if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
@@ -2492,7 +2518,7 @@ def get_admin_site_custom(brand):
     # brand_admin.register(get_model("SubCategories", brand), SubCategoriesAdmin)
 #     brand_admin.register(get_model("PartMasterCv", brand), PartListAdmin)
     brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
-    brand_admin.register(get_model("PartMasterCv", brand), PartListAdmin)
+    brand_admin.register(get_model("PartPricing", brand), PartListAdmin)
     brand_admin.register(get_model("NationalSparesManager", brand), NSMAdmin)
     brand_admin.register(get_model("AreaSparesManager", brand), ASMAdmin)
     brand_admin.register(get_model("NationalSalesManager", brand), NationalSalesManagerAdmin)

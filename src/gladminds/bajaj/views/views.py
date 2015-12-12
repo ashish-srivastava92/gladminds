@@ -46,7 +46,7 @@ from gladminds.core.auth import otp_handler
 from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor, District, State, OrderPartDetails, \
 PartPricing, OrderDeliveredHistory, DoDetails, PartsStock, OrderPart, OrderPartDetails, DistributorSalesRep, DSRWorkAllocation, \
 BackOrders, DSRLocationDetails, OrderTempDeliveredHistory, Collection, CollectionDetails, DoDetails
-from gladminds.bajaj.models import PartMasterCv
+
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template import loader
@@ -94,13 +94,13 @@ def accept_cancel_order(request):
         part_numbers = request.POST.getlist("part_number")
         
         for each in part_numbers:
-            part_obj = PartMasterCv.objects.get(part_number=each)
+            part_obj = PartPricing.objects.get(part_number=each)
             ord = OrderPartDetails.objects.filter(part_number_id=part_obj.id, order_id=order_id).update(part_status=1)
             messages.success(request, "Successfully cancelled the part " + each + " from the order ID " + order_id)
     elif "place_order" in request.POST:
         part_numbers = request.POST.getlist("part_number")
         for each in part_numbers:
-            part_obj = PartMasterCv.objects.get(part_number=each)
+            part_obj = PartPricing.objects.get(part_number=each)
             ord = OrderPartDetails.objects.filter(part_number_id=part_obj.id, order_id=order_id).update(part_status=0)
             messages.success(request, "Successfully accepted the part " + each + " from the order ID " + order_id)
     order_status = "open"
@@ -193,7 +193,7 @@ def save_order_history(request):
         part_number = request.POST.getlist("part_number")[each]
         delivered_qty = request.POST.getlist("delivered_quantity")[each]
         if delivered_stock != "":
-            part_pricing_obj = PartMasterCv.objects.get(part_number=part_number)
+            part_pricing_obj = PartPricing.objects.get(part_number=part_number)
             part_obj = PartsStock.objects.get(part_number=part_pricing_obj.id)
             total_delivered_stock = int(delivered_qty) + int(delivered_stock)
             if int(delivered_stock) > int(part_obj.available_quantity) or (total_delivered_stock > int(request.POST.get("ordered_quantity"))):
@@ -292,7 +292,7 @@ def save_order_temp_history(request):
          if delivered_stock != "":
          
          
-             part_pricing_obj = PartMasterCv.objects.get(part_number=part_number)
+             part_pricing_obj = PartPricing.objects.get(part_number=part_number)
              part_obj = PartsStock.objects.get(part_number=part_pricing_obj.id)
              total_delivered_stock = int(delivered_qty) + int(delivered_stock)
              if int(delivered_stock) > int(part_obj.available_quantity) or (total_delivered_stock > int(request.POST.get("ordered_quantity"))):
@@ -362,7 +362,7 @@ def dsr_orders(request):
 
 
 def ordered_part_details(request, part_number, order_id):
-    part_obj = PartMasterCv.objects.get(part_number=part_number)
+    part_obj = PartPricing.objects.get(part_number=part_number)
     ordered_part_details = OrderDeliveredHistory.objects.filter(part_number=part_obj.id, order_id=order_id).values("do_id", "order_id", "delivered_quantity", "part_number_id", "delivered_date")
     context = {"data":ordered_part_details}
     template = 'admin/bajaj/ordered_part_details.html'
@@ -676,6 +676,7 @@ def test(request):
     dsr_locations = []
     dsr_location_dict = {}
     for each in dsr_location_objs:
+        print each.dsr
         dsr_location_dict["latitude"] = each.latitude
         dsr_location_dict["longitude"] = each.longitude
 #         dsr_location_dict["last_sync"] = each.last_sync
@@ -705,7 +706,7 @@ def upload_part_pricing(request):
             part_pricing_list.append(row_list)            
         for part in part_pricing_list:
             try:
-                part_pricing_object = PartMasterCv.objects.get(part_number=part['Part Number'])
+                part_pricing_object = PartPricing.objects.get(part_number=part['Part Number'])
                 try:
                     part_stock_object = PartsStock.objects.filter(part_number_id=part_pricing_object.id, distributor_id=dist_id).update(available_quantity=part['Available Quantity'])
 #                     part_stock_object.available_quantity = part['Available Quantity']
