@@ -564,6 +564,7 @@ class Retailer(base_models.Retailer):
                                                 blank=True)
     actual = models.DecimalField(max_digits=20, decimal_places=4, null=True, \
                                                 blank=True)
+    tin = models.IntegerField( null=True, blank=True)
     
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
@@ -855,7 +856,6 @@ class PartPricing(base_models.PartPricing):
     description = models.CharField(max_length=255, null=True, blank=True)
     subcategory = models.ForeignKey(SubCategories)
     category = models.ForeignKey(Categories)
-  #  applicable_model = models.CharField(max_length=255, null=True, blank=True)
     current_month_should = models.IntegerField()
     active = models.BooleanField(default=True)
     moq = models.IntegerField( null=True, blank=True)
@@ -865,8 +865,6 @@ class PartPricing(base_models.PartPricing):
     def __unicode__(self):
         return self.description
     
-
-
 class PartsStock(base_models.PartsStock):
     ''' details of parts '''
     part_number = models.ForeignKey(PartPricing)
@@ -875,7 +873,6 @@ class PartsStock(base_models.PartsStock):
     active = models.BooleanField(default=True)
     class Meta(base_models.PartsStock.Meta):
         app_label = _APP_NAME
-
 
 
 class OrderPart(base_models.OrderPart):
@@ -911,6 +908,18 @@ class OrderPartDetails(base_models.OrderPartDetails):
         app_label = _APP_NAME
         verbose_name_plural = "Order Part Details"
 
+<<<<<<< Updated upstream
+=======
+
+class Invoices(base_models.Invoices):
+    retailer = models.ForeignKey(Retailer)
+    invoice_date = models.DateTimeField()
+    invoice_id = models.CharField(max_length = 25)
+     
+    class Meta(base_models.Invoices.Meta):
+        app_label = _APP_NAME
+
+>>>>>>> Stashed changes
 class DoDetails(base_models.DoDetails):
     ''' List of Do Details'''
     
@@ -956,15 +965,22 @@ class Collection(base_models.Collection):
     dsr = models.ForeignKey(DistributorSalesRep,null=True, blank=True)
     latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=11, decimal_places=6, null=True, blank=True)
+<<<<<<< Updated upstream
+=======
+    collected_amount = models.DecimalField(max_digits=20, decimal_places=4, null=True, blank=True)
+>>>>>>> Stashed changes
     
     class Meta(base_models.Collection.Meta):
-        app_label = _APP_NAME      
-
+        app_label = _APP_NAME
+        
 class CollectionDetails(base_models.CollectionDetails):
     ''' details of spare parts and pricing '''
     collection = models.ForeignKey(Collection, null=True, blank=True)
     mode = models.IntegerField(null=True,blank=True)
+<<<<<<< Updated upstream
     collected_amount = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+=======
+>>>>>>> Stashed changes
     cheque_cleared = models.IntegerField(null=True,blank=True)
     cheque_number = models.CharField(max_length=10)
     cheque_bank = models.CharField(max_length=10)
@@ -974,4 +990,49 @@ class CollectionDetails(base_models.CollectionDetails):
     active = models.BooleanField(default=True)
 
     class Meta(base_models.CollectionDetails.Meta):
+<<<<<<< Updated upstream
         app_label = _APP_NAME   
+=======
+        app_label = _APP_NAME  
+        
+        
+class BackOrders(base_models.BackOrders):
+    
+    
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    qty = models.IntegerField(null=True,blank=True)
+    datetime = models.DateTimeField()
+    class Meta(base_models.BackOrders.Meta):
+        app_label = _APP_NAME 
+    
+    
+class DSRLocationDetails(base_models.DSRLocationDetails):
+    
+    
+    dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
+    latitude = models.CharField(max_length=255,null=True, blank=True)
+    longitude = models.CharField(max_length=255,null=True, blank=True)
+    last_sync = models.DateTimeField()
+    class Meta(base_models.DSRLocationDetails.Meta):
+        app_label = _APP_NAME
+        
+class PartMasterCv(base_models.PartMasterCv):
+    ''' details of spare parts and pricing '''
+    part_number = models.CharField(max_length=255, null=True, blank=True)
+    products = models.CharField(max_length=255, null=True, blank=True)
+    remarks = models.CharField(max_length=255, null=True, blank=True)
+    mrp = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    subcategory = models.ForeignKey(SubCategories, null=True, blank=True)
+    category = models.ForeignKey(CvCategories)
+  
+    available_quantity = models.IntegerField()
+    current_month_should = models.IntegerField()
+    active = models.BooleanField(default=True)
+    moq = models.IntegerField( null=True, blank=True)
+    
+    class Meta(base_models.PartMasterCv.Meta):
+        app_label = _APP_NAME
+    
+    
+>>>>>>> Stashed changes

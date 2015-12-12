@@ -151,12 +151,13 @@ def get_parts(request):
     parts = PartMasterCv.objects.filter(active = True)
     parts_list =[]
     for part in parts:
+        available_quantity = PartsStock.objects.get(part_number = part)
         parts_dict = {}
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
-        # parts_dict.update({"part_model":part.part_model})
-        # parts_dict.update({"part_category":part.category.name})
-        # parts_dict.update({"part_subcategory":part.part_models})
+        parts_dict.update({"part_category":part.category.name})
+        parts_dict.update({"part_available_quantity":available_quantity.available_quantity})
+        parts_dict.update({"part_products":part.products})
         parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
     return Response(parts_list)

@@ -586,16 +586,25 @@ class PartMasterCv(base_models.PartMasterCv):
     valid_from = models.DateField()
     part_models = models.CharField(max_length = 255)
     category = models.ForeignKey(CvCategories)
+<<<<<<< Updated upstream
     mrp = models.CharField(max_length = 255)
     active = models.BooleanField(default = True)
     available = models.CharField(max_length=25)
     pending = models.CharField(max_length=25)
+=======
+  
+    available_quantity = models.IntegerField()
+    current_month_should = models.IntegerField()
+    active = models.BooleanField(default=True)
+    moq = models.IntegerField( null=True, blank=True)
+>>>>>>> Stashed changes
     
     class Meta(base_models.PartMasterCv.Meta):
         app_label = _APP_NAME
         
     def __unicode__(self):
         return self.description
+<<<<<<< Updated upstream
     
 class Collection(base_models.Collection):
     ''' details of spare parts and pricing '''
@@ -613,6 +622,17 @@ class Collection(base_models.Collection):
     
     class Meta(base_models.Collection.Meta):
         app_label = _APP_NAME      
+=======
+
+class PartsStock(base_models.PartsStock):
+    ''' details of parts '''
+    part_number = models.ForeignKey(PartMasterCv)
+    available_quantity = models.IntegerField(null=True, blank=True)
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    active = models.BooleanField(default=True)
+    class Meta(base_models.PartsStock.Meta):
+        app_label = _APP_NAME
+>>>>>>> Stashed changes
 
 class OrderPart(base_models.OrderPart):
     ''' details of ordering spare parts by dsr or retailer'''

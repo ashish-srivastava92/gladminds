@@ -2065,7 +2065,7 @@ class DoDetails(BaseModel):
       
       
 class Invoices(BaseModel):
-   invoice_amount = models.DecimalField(max_digits = 10, decimal_places=6, null=True, blank=True)
+   invoice_amount = models.DecimalField(max_digits = 20, decimal_places=4, null=True, blank=True)
    
    class Meta:
         abstract = True
