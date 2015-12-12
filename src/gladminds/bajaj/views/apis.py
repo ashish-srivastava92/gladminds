@@ -429,7 +429,7 @@ def add_retailer(request, dsr_id):
         except:
             retailer_code = str(constants.RETAILER_SEQUENCE)
         user.username = retailer_code
-        user.password = constants.RETAILER_PASSWORD
+        user.set_password(constants.RETAILER_PASSWORD)
         user.date_joined = datetime.datetime.now()
         user.is_superuser = False
         user.is_staff = False
@@ -470,6 +470,7 @@ def add_retailer(request, dsr_id):
         retailer.signature_url = profile['signature_url']
         retailer.mechanic_1 = profile['mechanic_name_1']  + ' ' + profile['mechanic_number_1']
         retailer.mechanic_2 = profile['mechanic_name_2']  + ' ' + profile['mechanic_number_2']
+        retailer.approved = constants.STATUS['WAITING_FOR_APPROVAL']
         retailer.save()
     return Response({'message': 'New retailer(s) added successfully', 'status':1})
     
