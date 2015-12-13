@@ -3,6 +3,7 @@ author: araskumar.a
 date: 31-08-2015
 '''
 import json, datetime, time, decimal
+
 from datetime import timedelta
 from collections import OrderedDict
 from operator import itemgetter
@@ -23,18 +24,14 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework_jwt.settings import api_settings
 
 from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
-<<<<<<< HEAD
-                            PartPricing, OrderPart, Distributor, OrderPartDetails, Invoices, \
-                           Collection,CollectionDetails,PartsStock, UserProfile
-=======
-                            PartPricing, Distributor,  Invoices, \
-                            Collection,CollectionDetails,PartsStock,DSRWorkAllocation,DSRLocationDetails
+PartPricing, Distributor,  Invoices, \
+Collection,CollectionDetails,PartsStock,DSRWorkAllocation, \
+DSRLocationDetails, UserProfile
 from gladminds.bajaj.models import PartMasterCv,OrderPart,OrderPartDetails
 #PartMasterCv                          
                             
 # from gladminds.core.models import DistributorSalesRep, Retailer,PartModels, CvCategories, \
 #                              OrderPart, DSRWorkAllocation, AlternateParts
->>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
 
 from gladminds.core import constants
 
@@ -45,8 +42,8 @@ def authentication(request):
     a token as response
     '''
     #load the json input of username and password as json
-    load = json.loads(request.body)
-    user = authenticate(username = load.get("username"), password = load.get("password"))
+    load = request.data
+    user = authenticate(username = data["username"], password = data["password"])
     
     #user = authenticate(username = request.POST["username"], password = request.POST["password"])
     if user:
@@ -129,11 +126,7 @@ def get_parts(request):
     '''
     This method returns all the spare parts details
     '''
-<<<<<<< HEAD
     parts = PartPricing.objects.filter(active = True)
-=======
-    parts = PartMasterCv.objects.filter(active = True)
->>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
     parts_list =[]
     for part in parts:
         available_quantity = PartsStock.objects.get(part_number = part)
@@ -377,6 +370,7 @@ def uploadcollection(request):
     details table
     '''
     collections_body = json.loads(request.POST['uploadcollection'])
+
     response_list = []
     for collection_body in collections_body:
         message_dict = {}
@@ -413,6 +407,7 @@ def uploadcollection(request):
                     continue
             for cheque in collection_body['cheque_details']:
                 collectiondetails = CollectionDetails()
+
                 collectiondetails.collected_cash = collection_body['collected_cash']
                 collectiondetails.collection = collection
                 collectiondetails.mode = payment_mode
@@ -435,72 +430,7 @@ def uploadcollection(request):
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
 def add_retailer(request, dsr_id):
-<<<<<<< HEAD
-    
-    
-    ''' this method adds a retailer and his profile from the DSR. Adds data in three tables
-    user, userprofile and retailer'''
-    retailer_code = ''
-    profiles = json.loads(request.POST['retailer'])
-    dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-    for profile in profiles:
-        user = User()
-        user.first_name = profile['first_name']
-        user.last_name = profile['last_name']
-        # get the latest retailer code and add sequence increment for the new retailer code,
-        # if retailer is not there, get the first value in the sequence from the constansts file
-        try:
-            retailer = Retailer.objects.filter().order_by("-id")[0]
-            retailer_code = str(int(retailer.retailer_code) + \
-                                            constants.RETAILER_SEQUENCE_INCREMENT)
-        except:
-            retailer_code = str(constants.RETAILER_SEQUENCE)
-        user.username = retailer_code
-        user.password = constants.RETAILER_PASSWORD
-        user.date_joined = datetime.datetime.now()
-        user.is_superuser = False
-        user.is_staff = False
-        user.is_active = True
-        user.save()
-        # initialize user profile class
-        user_profile = UserProfile()
-        user_profile.user = user
-        user_profile.date_of_birth = profile['date_of_birth']
-        user_profile.state = profile['state']
-        user_profile.pincode = profile['pincode']
-        user_profile.image_url = profile['image_url']
-        user_profile.save()
-        # initialize retailer class
-        retailer = Retailer()
-        retailer.user = user_profile
-        retailer.distributor = dsr.distributor
-        retailer.retailer_code = retailer_code
-        retailer.retailer_name = profile['shop_name']
-        retailer.billing_code = profile['billing_code']
-        retailer.email = profile['email']
-        retailer.mobile = profile['mobile']
-        retailer.profile = 'retailer'
-        retailer.territory = profile['state']
-        retailer.address_line_2 = profile['shop_name'] + ' ' + profile['shop_number']
-        retailer.address_line_3 = profile['locality']
-        retailer.address_line_4 = profile['tehsil_name'] + ' ' + profile['taluka']
-        retailer.retailer_town = profile['town']
-        retailer.latitude = profile['latitude']
-        retailer.longitude = profile['longitude']
-        retailer.district = profile['district']
-        retailer.near_dealer_name = profile['near_dealer_name']
-        retailer.total_counter_sale = profile['counter_sale']
-        retailer.total_sale_parts = profile['total_sale']
-        retailer.identification_no = profile['identification_no']
-        retailer.image_url = profile['shop_photo']
-        retailer.identity_url = profile['identity_url']
-        retailer.signature_url = profile['signature_url']
-        retailer.mechanic_1 = profile['mechanic_name_1']  + ' ' + profile['mechanic_number_1']
-        retailer.mechanic_2 = profile['mechanic_name_2']  + ' ' + profile['mechanic_number_2']
-        retailer.save()
-    return Response({'message': 'New retailer(s) added successfully', 'status':1})
-    
-=======
+
     ''' this method adds a retailer and his profile from the DSR. Adds data in three tables
     user, userprofile and retailer'''
     retailer_code = ''
@@ -560,11 +490,9 @@ def add_retailer(request, dsr_id):
         retailer.signature_url = profile['signature_url']
         retailer.mechanic_1 = profile['mechanic_name_1']  + ' ' + profile['mechanic_number_1']
         retailer.mechanic_2 = profile['mechanic_name_2']  + ' ' + profile['mechanic_number_2']
-        retailer.approved = constants.STATUS['WAITING_FOR_APPROVAL']
         retailer.save()
     return Response({'message': 'New retailer(s) added successfully', 'status':1})
     
->>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
 @api_view(['GET'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
@@ -574,7 +502,6 @@ def dsr_dashboard_report(request, dsr_id):
     distributor = dsr.distributor
     retailers_list = []
     retailer_dict = OrderedDict()
-<<<<<<< HEAD
     
     # get the retailer objects for this distributor
     retailers = Retailer.objects.filter(distributor = distributor, \
@@ -1082,10 +1009,16 @@ def get_retailer_orders(request, retailer_id):
         orders_list.append(order_dict)
     return Response(orders_list)
     
+@api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def dsr_dashboard_report(request, dsr_id):
+    today = datetime.datetime.now()
+    dsr =  DistributorSalesRep.objects.select_related('distributor').get(distributor_sales_code = dsr_id)
+    distributor = dsr.distributor
+    retailers_list = []
+    retailer_dict = OrderedDict()
 
-
-=======
->>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
     
     # get the retailer objects for this distributor
     retailers = Retailer.objects.filter(distributor = distributor, \

@@ -20,16 +20,16 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework_jwt.settings import api_settings
 
-<<<<<<< HEAD
-from gladminds.core.models import DistributorSalesRep, Retailer, CvCategories, \
-                            OrderPart, DSRWorkAllocation, AlternateParts, Collection, \
-                            PartMasterCv,RetailerCollection
-=======
+
+# from gladminds.core.models import DistributorSalesRep, Retailer, CvCategories, \
+#                             OrderPart, DSRWorkAllocation, AlternateParts, Collection, \
+#                             PartMasterCv,RetailerCollection
+
 from gladminds.core.models import Distributor, DistributorSalesRep, Retailer, CvCategories, \
             OrderPart, OrderPartDetails,DSRWorkAllocation, AlternateParts, Collection, \
             CollectionDetails,PartMasterCv,RetailerCollection,PartsStock, Invoices, \
             UserProfile
->>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
+
 from gladminds.core import constants
 
 @api_view(['POST'])
@@ -116,7 +116,6 @@ def get_retailer_profile(request, retailer_id):
         return Response(retailer_dict)
 
 
-<<<<<<< HEAD
 from django.conf import settings
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
@@ -146,9 +145,6 @@ def place_order(request, dsr_id):
                 return Response({'message': 'Order updated successfully', 'status':1})
         
 
-
-=======
->>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
@@ -164,11 +160,8 @@ def get_parts(request):
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
         parts_dict.update({"part_category":part.category.name})
-<<<<<<< HEAD
-        parts_dict.update({"part_available_quantity":part.available_quantity})
-=======
         parts_dict.update({"part_available_quantity":available_quantity.available_quantity})
->>>>>>> b6b6f891a6c51df9de5963cf0b0414212113ae06
+
         parts_dict.update({"part_products":part.products})
         parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
@@ -303,7 +296,6 @@ def retailer_place_order(request, retailer_id):
 # # @permission_classes((IsAuthenticated,))
 def get_outstanding(request, dsr_id):
     '''
-<<<<<<< HEAD
     This method returns retailer transaction details like paid amount, outstanding, cheque number, etc
     given the retailer Id
     '''
@@ -362,41 +354,38 @@ def uploadcollection(request):
     
     return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
    
-=======
-    This method returns the outstanding amount of all the retailers under the distributor
-    pertaining to the dsr '''
->>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
+
     
-    dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-    retailers = Retailer.objects.filter(distributor = dsr.distributor, \
-                                        approved = constants.STATUS['APPROVED'])
-    retailer_list = []
-    #for a particular retailer, get all the invoices and total the invoice amount
-    for retailer in retailers:
-        invoices = Invoices.objects.filter(retailer = retailer)
-        if invoices:
-            for invoice in invoices:
-                retailer_dict = {}
-                total_amount = 0
-                collection = 0
-                total_amount = total_amount + invoice.invoice_amount
-                retailer_dict.update({'retailer_id':retailer.retailer_code})
-                retailer_dict.update({'invoice_id': invoice.invoice_id})
-                retailer_dict.update({'total_amount': total_amount})
-                retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
-                #get the collections for that invoice
-                collection_objs = Collection.objects.filter(invoice_id = invoice.id)
-                for each in collection_objs:
-                    # collections = CollectionDetails.objects.filter(collection_id = each.id)
-                    # if collections:
-                    #     for each_collections in collections:
-                    collection = collection + each.collected_amount
-                retailer_dict.update({'collected_amount': collection})
-                retailer_list.append(retailer_dict)
-        else:
-            retailer_dict.update({'message': 'There are no invoices /outstanding for this dsr'})
-            retailer_list.append(retailer_dict)
-    return Response(retailer_list)
+    # dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+    # retailers = Retailer.objects.filter(distributor = dsr.distributor, \
+    #                                     approved = constants.STATUS['APPROVED'])
+    # retailer_list = []
+    # #for a particular retailer, get all the invoices and total the invoice amount
+    # for retailer in retailers:
+    #     invoices = Invoices.objects.filter(retailer = retailer)
+    #     if invoices:
+    #         for invoice in invoices:
+    #             retailer_dict = {}
+    #             total_amount = 0
+    #             collection = 0
+    #             total_amount = total_amount + invoice.invoice_amount
+    #             retailer_dict.update({'retailer_id':retailer.retailer_code})
+    #             retailer_dict.update({'invoice_id': invoice.invoice_id})
+    #             retailer_dict.update({'total_amount': total_amount})
+    #             retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
+    #             #get the collections for that invoice
+    #             collection_objs = Collection.objects.filter(invoice_id = invoice.id)
+    #             for each in collection_objs:
+    #                 # collections = CollectionDetails.objects.filter(collection_id = each.id)
+    #                 # if collections:
+    #                 #     for each_collections in collections:
+    #                 collection = collection + each.collected_amount
+    #             retailer_dict.update({'collected_amount': collection})
+    #             retailer_list.append(retailer_dict)
+    #     else:
+    #         retailer_dict.update({'message': 'There are no invoices /outstanding for this dsr'})
+    #         retailer_list.append(retailer_dict)
+    # return Response(retailer_list)
 
 @api_view(['GET'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
@@ -654,19 +643,19 @@ def dsr_dashboard_report(request, dsr_id):
         total_collected_amount = total_collected_amount + retailer_collected_amount
     retailer_dict.update({"collections": total_collected_amount})
     
-<<<<<<< HEAD
+
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
 def add_retailer(request, ):
     # get the retailer details from the api payload
-    retailer_profile = json.loads(request.body)
+    #retailer_profile = json.loads(request.body)
     
     
     return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
 
 
-=======
+
     # calculation of zero-billed
     exist_retailers = []
     for retailer in retailers:
@@ -1120,14 +1109,3 @@ def get_retailer_orders(request, retailer_id):
             order_dict['order_details'] = order_details_list
         orders_list.append(order_dict)
     return Response(orders_list)
-   
->>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
-    
-    
-    
-
-
-    
-
-    
-

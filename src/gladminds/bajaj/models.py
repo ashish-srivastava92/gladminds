@@ -1156,3 +1156,4 @@ class PartMasterCv(base_models.PartMasterCv):
         app_label = _APP_NAME
     
     
+

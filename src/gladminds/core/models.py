@@ -613,36 +613,19 @@ class PartMasterCv(base_models.PartMasterCv):
     description = models.CharField(max_length=255, null=True, blank=True)
     subcategory = models.ForeignKey(SubCategories, null=True, blank=True)
     category = models.ForeignKey(CvCategories)
-<<<<<<< HEAD
-  #  applicable_model = models.CharField(max_length=255, null=True, blank=True)
-=======
-<<<<<<< Updated upstream
     mrp = models.CharField(max_length = 255)
     active = models.BooleanField(default = True)
     available = models.CharField(max_length=25)
     pending = models.CharField(max_length=25)
-=======
-  
->>>>>>> b6b6f891a6c51df9de5963cf0b0414212113ae06
-    available_quantity = models.IntegerField()
     current_month_should = models.IntegerField()
-    active = models.BooleanField(default=True)
     moq = models.IntegerField( null=True, blank=True)
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
->>>>>>> b6b6f891a6c51df9de5963cf0b0414212113ae06
     
     class Meta(base_models.PartMasterCv.Meta):
         app_label = _APP_NAME
         
     def __unicode__(self):
         return self.description
-<<<<<<< HEAD
- 
 
-=======
-<<<<<<< Updated upstream
     
 class Collection(base_models.Collection):
     ''' details of spare parts and pricing '''
@@ -660,8 +643,7 @@ class Collection(base_models.Collection):
     
     class Meta(base_models.Collection.Meta):
         app_label = _APP_NAME      
-=======
->>>>>>> b6b6f891a6c51df9de5963cf0b0414212113ae06
+
 
 class PartsStock(base_models.PartsStock):
     ''' details of parts '''
@@ -669,12 +651,10 @@ class PartsStock(base_models.PartsStock):
     available_quantity = models.IntegerField(null=True, blank=True)
     distributor = models.ForeignKey(Distributor, null=True, blank=True)
     active = models.BooleanField(default=True)
+    
     class Meta(base_models.PartsStock.Meta):
         app_label = _APP_NAME
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
->>>>>>> b6b6f891a6c51df9de5963cf0b0414212113ae06
+
 
 class OrderPart(base_models.OrderPart):
     ''' details of orders placed by retailer '''
