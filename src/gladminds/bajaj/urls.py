@@ -4,7 +4,6 @@ from gladminds.core import urls as core_urls
 from gladminds.core.urls import api_v1
 
 from django.views.generic import TemplateView
-
 urlpatterns = patterns('',
     #api urls
     # url(r'^mc/api-token-auth/', 'gladminds.bajaj.views.apis.authentication'),
