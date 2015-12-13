@@ -25,7 +25,7 @@ class UserProfile(base_models.UserProfile):
     
     class Meta(base_models.UserProfile.Meta):
         app_label = _APP_NAME
-        verbose_name_plural = "Users"
+        verbose_name_plural = "Brand Users"
 
 class ZonalServiceManager(base_models.ZonalServiceManager):
     '''details of Zonal Service Manager'''
@@ -468,6 +468,18 @@ class AreaSparesManager(base_models.AreaSparesManager):
     class Meta(base_models.AreaSparesManager.Meta):
         app_label = _APP_NAME
 
+#class Distributor(base_models.Distributor):
+ #   '''details of Distributor'''
+  #  user = models.ForeignKey(UserProfile)
+   # territory = models.CharField(max_length=15)
+    #mobile = models.CharField(max_length=15)
+    #profile = models.CharField(max_length=15)
+    #language = models.CharField(max_length=10, null=True, blank=True)
+    #territory = models.CharField(max_length=10, null=True, blank=True)    
+    
+    #class Meta(base_models.Distributor.Meta):
+     #   app_label = _APP_NAME
+     
 ######################## sfa models #################################
 
 class District(base_models.District):
@@ -495,8 +507,6 @@ class Distributor(base_models.Distributor):
     territory = models.CharField(max_length=10, null=True, blank=True)
     image_url = models.FileField(upload_to="image",
                                    max_length=200, null=True, blank=True)
-
-
     tin = models.IntegerField( null=True, blank=True)
     cst = models.IntegerField( null=True, blank=True)
     
@@ -509,7 +519,6 @@ class Distributor(base_models.Distributor):
     
     
 #     image_url=   
-
 
 
     def image_tag(self):
@@ -546,6 +555,14 @@ class DSRScorecardReport(base_models.DSRScorecardReport):
     class Meta(base_models.DSRScorecardReport.Meta):
         app_label = _APP_NAME
 
+
+
+
+
+        
+
+
+
 class DistributorStaff(base_models.DistributorStaff):
     '''details of Distributor'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
@@ -566,6 +583,11 @@ class DistributorSalesRep(base_models.DistributorSalesRep):
         return self.distributor_sales_code + ' ' + self.user.user.first_name + \
                                 ' ' + self.user.user.last_name
 
+
+
+
+
+
 class Retailer(base_models.Retailer):
     '''details of retailer'''
     user = models.ForeignKey(UserProfile)
@@ -583,11 +605,7 @@ class Retailer(base_models.Retailer):
     language = models.CharField(max_length=10, null=True, blank=True)
     rejected_reason = models.CharField(max_length=300, null=True, blank=True)
     image_url = models.FileField(upload_to="image",
-
-                                   max_length=255, null=True, blank=True)
-
-
-
+                                   max_length=200, null=True, blank=True)
     district = models.CharField(max_length = 20)
     near_dealer_name = models.CharField(max_length = 50)
     total_counter_sale = models.DecimalField(max_digits=10, decimal_places=4, null=True, \
@@ -605,21 +623,19 @@ class Retailer(base_models.Retailer):
                                                 blank=True)
     actual = models.DecimalField(max_digits=20, decimal_places=4, null=True, \
                                                 blank=True)
-
-    tin = models.IntegerField(null=True,blank=True)
+    
+    def image_tag(self):
+        return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
+    image_tag.short_description = 'User Image'
+    image_tag.allow_tags = True
+    tin = models.IntegerField( null=True, blank=True)
+    
     
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
     image_tag.short_description = 'User Image'
     image_tag.allow_tags = True
     
-    
-
-    
-    def image_tag(self):
-        return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
-    image_tag.short_description = 'User Image'
-    image_tag.allow_tags = True
     
     class Meta(base_models.Retailer.Meta):
         app_label = _APP_NAME
@@ -627,8 +643,6 @@ class Retailer(base_models.Retailer):
     def __unicode__(self):
         return self.retailer_code 
     
-
-
     
 class DSRWorkAllocation(base_models.DSRWorkAllocation):
     '''details of DSR work allocation'''
@@ -641,7 +655,6 @@ class DSRWorkAllocation(base_models.DSRWorkAllocation):
         app_label = _APP_NAME
 #     def __unicode__(self):
 #         return self.distributor
-
 
 
 
@@ -660,8 +673,11 @@ class PartModels(base_models.PartModels):
 class Categories(base_models.Categories):
     ''' details of model categories '''
     category_name = models.CharField(max_length=255)
+    
     image_url = models.CharField(max_length=255, null=True, blank=True)
+    
     model = models.ForeignKey(PartModels)
+
     active = models.BooleanField(default=True)
     
     class Meta(base_models.Categories.Meta):
@@ -690,7 +706,8 @@ class SubCategories(base_models.SubCategories):
     part_model = models.ForeignKey(PartModel)
     category = models.ForeignKey(Categories)
     active = models.BooleanField(default = True)
-    
+#     active = models.BooleanField(default=True)
+
     class Meta(base_models.SubCategories.Meta):
         app_label = _APP_NAME
          
@@ -769,6 +786,13 @@ class SparePartMasterData(base_models.SparePartMasterData):
 
     class Meta(base_models.SparePartMasterData.Meta):
         app_label = _APP_NAME
+
+
+
+
+
+
+
 
 class SparePartUPC(base_models.SparePartUPC):
     '''details of Spare Part UPC'''
@@ -979,12 +1003,7 @@ class OrderPart(base_models.OrderPart):
     fullfill = models.NullBooleanField()
     delivered = models.IntegerField(null=True, blank=True)
     no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
-<<<<<<< HEAD
-    accept = models.BooleanField(default = False)
-    order_status = models.IntegerField()
-=======
     order_status = models.IntegerField(null=True, blank=True)
->>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
     order_placed_by = models.IntegerField()
     latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=11, decimal_places=6, null=True, blank=True)
@@ -996,22 +1015,18 @@ class OrderPart(base_models.OrderPart):
 #         
 #         return self.retailer.retailer_code
 
+
 class OrderPartDetails(base_models.OrderPartDetails):
     part_number = models.ForeignKey(PartMasterCv)
     quantity = models.IntegerField(null=True, blank=True)
     active = models.IntegerField(null=True, blank=True, default=1)
     order = models.ForeignKey(OrderPart)
-<<<<<<< HEAD
-    line_total = models.DecimalField(max_digits = 10, decimal_places=4, null=True, blank=True)
-=======
     part_status = models.IntegerField(null=True, blank=True)
     line_total = models.DecimalField(max_digits = 20, decimal_places=10, null=True, blank=True)
->>>>>>> d987d5ba078a5570f7246fa8a50deb99575df259
     
     class Meta(base_models.OrderPartDetails.Meta):
         app_label = _APP_NAME
         verbose_name_plural = "Order Part Details"
-
 
 
 class Invoices(base_models.Invoices):
@@ -1046,15 +1061,6 @@ class OrderDeliveredHistory(base_models.OrderDeliveredHistory):
         app_label = _APP_NAME
         verbose_name_plural = "Order Delivered History"
 
-        
-class Invoices(base_models.Invoices):
-    retailer = models.ForeignKey(Retailer)
-    invoice_date = models.DateTimeField()
-    invoice_id = models.CharField(max_length = 15)
-    
-    class Meta(base_models.Invoices.Meta):
-
-
 
 class OrderTempDeliveredHistory(base_models.OrderTempDeliveredHistory):
     part_number = models.ForeignKey(PartMasterCv)
@@ -1077,8 +1083,12 @@ class InvoicesDetails(base_models.InvoicesDetails):
     do = models.ForeignKey(DoDetails)
     invoice_date = models.DateTimeField()
 
+     
     class Meta(base_models.InvoicesDetails.Meta):
         app_label = _APP_NAME
+
+
+
 
 class Collection(base_models.Collection):
     ''' details of spare parts and pricing '''
@@ -1086,24 +1096,22 @@ class Collection(base_models.Collection):
     payment_date = models.DateTimeField()
     invoice = models.ForeignKey(Invoices, null=True, blank=True)
     dsr = models.ForeignKey(DistributorSalesRep,null=True, blank=True)
-    latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=11, decimal_places=6, null=True, blank=True)
-    
+
     class Meta(base_models.Collection.Meta):
         app_label = _APP_NAME      
 
 class CollectionDetails(base_models.CollectionDetails):
     ''' details of spare parts and pricing '''
+#     retailer = models.ForeignKey(Retailer, null=True, blank=True)
     collection = models.ForeignKey(Collection, null=True, blank=True)
     mode = models.IntegerField(null=True,blank=True)
-    collected_amount = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    collected_amount = models.IntegerField(null=True,blank=True)
     cheque_cleared = models.IntegerField(null=True,blank=True)
     cheque_number = models.CharField(max_length=10)
     cheque_bank = models.CharField(max_length=10)
-    cheque_amount = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
-    collected_cash = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
     img_url = models.FileField(upload_to="ddd",max_length=255, null=True, blank=True)
     active = models.BooleanField(default=True)
+#     dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
 
     class Meta(base_models.CollectionDetails.Meta):
         app_label = _APP_NAME   

@@ -272,6 +272,7 @@ MANAGERS = ADMINS
 DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
 
 # for localhost
+<<<<<<< Updated upstream
 
 # DB_USER = os.environ.get('DB_USER', 'root')
 # DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
@@ -282,6 +283,7 @@ DB_HOST = os.environ.get('DB_HOST', 'aftersell-api.chnnvvffqwop.us-east-1.rds.am
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
 
 # for server
+
 
 #DB_USER = os.environ.get('DB_USER', 'root')
 #DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
@@ -294,6 +296,7 @@ DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
 # DB_HOST = os.environ.get('DB_HOST', 'gladminds-qa-2.chnnvvffqwop.us-east-1.rds.amazonaws.com')
 # DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladmindsqa1')
 
+
 # DB_USER = os.environ.get('DB_USER', 'dssoffline')
 # DB_HOST = os.environ.get('DB_HOST', 'dssoffline.chnnvvffqwop.us-east-1.rds.amazonaws.com') 
 # DB_PASSWORD = os.environ.get('DB_PASSWORD', 'dssoffline')
@@ -303,6 +306,17 @@ DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
 #DB_USER = os.environ.get('DB_USER', 'aftersell')
 #DB_HOST = os.environ.get('DB_HOST', 'aftersell-api.chnnvvffqwop.us-east-1.rds.amazonaws.com')
 #DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
+
+#DB_USER = os.environ.get('DB_USER', 'dssoffline')
+#DB_HOST = os.environ.get('DB_HOST', 'dssoffline.chnnvvffqwop.us-east-1.rds.amazonaws.com') 
+#DB_PASSWORD = os.environ.get('DB_PASSWORD', 'dssoffline')
+
+
+# for bajaj MC
+DB_USER = os.environ.get('DB_USER', 'aftersell')
+DB_HOST = os.environ.get('DB_HOST', 'aftersell-api.chnnvvffqwop.us-east-1.rds.amazonaws.com')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
+>>>>>>> b6b6f891a6c51df9de5963cf0b0414212113ae06
 
 # for bajaj CV
 #DB_USER = os.environ.get('DB_USER', 'dssoffline')
@@ -504,8 +518,17 @@ ALL_APPS = (
     'tastypie_swagger',
     'django_otp',
     'django_otp.plugins.otp_totp',
+<<<<<<< HEAD
     'rest_framework',
 #     'adminplus',
+=======
+<<<<<<< Updated upstream
+    'rest_framework'
+=======
+    'rest_framework',
+    #'adminplus',
+>>>>>>> Stashed changes
+>>>>>>> b6b6f891a6c51df9de5963cf0b0414212113ae06
 
     # 'debug_toolbar',
     # Uncomment the next line to enable admin documentation:
