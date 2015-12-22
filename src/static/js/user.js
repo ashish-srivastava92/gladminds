@@ -19,16 +19,16 @@
           });               
         });
         
-            $('#id_states').change(function() {
+            $('#id_state').change(function() {
           $.ajax({
             type: 'GET',
             url: "/get_districts/",
-            data: {'selected_state': $('#id_states').val()},
+            data: {'selected_state': $('#id_state').val()},
             success: function(data, _status) {
-            	
-            	$('#id_districts').find("option").remove().end();
+            
+            	$('#id_district').find("option").remove().end();
             	$.each(data, function (index, item) {
-                 $('#id_districts').append($('<option></option>').val(item.id).html(item.name));
+                 $('#id_district').append($('<option></option>').val(item.id).html(item.name));
              });
               // $('#id_districts').val(data.first_name);
               // $('#id_last_name').val(data.last_name);             
@@ -47,9 +47,11 @@
 
 
 
+
   $(function() {
-  	
   
+  if($( "#datepicker" ).length)
     $( "#datepicker" ).datepicker();
   });
+
 

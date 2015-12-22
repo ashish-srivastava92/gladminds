@@ -1,5 +1,108 @@
 {% extends "admin/change_form.html" %}
 
+{% block extrahead %}{{ block.super }}
+{{ block.super }}
+{% if not add %}
+{% ifequal opts.verbose_name 'distributor' %}
+<script src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<script>
+var arr=new Array();var locations=new Array();var uniqueId=1;
+var map;var controlDiv;var maploaded=0;var markers=[];var markerlength=0;var marker="";var option;
+
+var data;
+
+	function gmap(data) {
+		map = new google.maps.Map(document.getElementById('map'), {
+			zoom : 12,
+			disableDefaultUI : true,
+			center : new google.maps.LatLng(data[0].max_lat, data[0].min_long),
+			scrollwheel : true,
+			navigationControl : true,
+			mapTypeControl : false,
+			scaleControl : true,
+			draggable : true,
+			disableDoubleClickZoom : true,
+			mapTypeId : google.maps.MapTypeId.ROADMAP
+		});
+		debugger;
+		var contentString = '<div id="content"><h4>Name: '+data[1][0].dist_name+'</h4><span>ID: '+data[1][0].distributor_id+'</span></div>';
+
+  var infowindow = new google.maps.InfoWindow({
+    content: contentString
+  });
+		 marker = new google.maps.Marker({
+	        position: new google.maps.LatLng(data[1][0].latitude,data[1][0].longitude),
+	        map: map
+	        
+        });
+        marker.addListener('click', function() {
+		    infowindow.open(map, marker);
+		  });
+		  
+        
+
+	}
+
+	// function main1(data, max_lat, min_long, mapcolor, option) {
+// 		
+        // marker = new google.maps.Marker({
+	        // position: new google.maps.LatLng(data[1].latitude,data[1].longitude),
+	        // map: map
+        // });
+//   
+//   
+	// }
+
+
+	$(document).ready(function() {
+
+		wWidth = $(window).width() - ($("#suit-left").width() + $("#suit-center").css("padding")) + "px";
+		wHeight = $(window).height() - ($("#header").height() + $("#footer").height() + 85) + "px";
+
+		$("#map").css("width", wWidth).css("height", wHeight);
+
+		$.ajax({
+			url : "{% url 'get_distributor_location' obj %}",
+			async : "true",
+			success : function(data1) {
+
+				data = data1;
+				gmap(data);
+				//loadAllUsers(data);
+				// main1(data, data[0].max_lat, data[0].min_long, 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png', "all");
+				// showHideMarkers("all");
+			}
+		});
+
+	}); 
+</script>
+{% endifequal %}
+{% endif %}
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+	a[href^="http://maps.google.com/maps"] {
+		display: none !important
+	}
+	a[href^="https://maps.google.com/maps"] {
+		display: none !important
+	}
+
+	.gmnoprint a, .gmnoprint span, .gm-style-cc {
+		display: none;
+	}
+	.gmnoprint div {
+		background: none !important;
+	}
+	.gm-style-mtc {
+		margin-top: 2px;
+		display: block;
+	}
+</style>
+
+{% endblock %}
 {% block content %}
 
 {{block.super}}
@@ -15,6 +118,9 @@
 		Retailer Count:{{retailer_count}}
 	</p>
 </div>
+
+<div id="map" style="width: 100%;height: 100%;"></div>
+
 {% endifequal %}
 
 {% ifequal opts.verbose_name 'orderpart' %}
@@ -35,3 +141,4 @@
 {% endifequal %}
 
 {% endblock %}
+

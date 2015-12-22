@@ -5,9 +5,8 @@
 {% block extrahead %}
 {{block.super}}
 
-<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.js"></script>
-<script type="text/javascript"
-src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+<script src="/static/js/moment-with-locales.js"></script>
+<script type="text/javascript" src="/static/js/jquery.min.js"></script>
 <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
 <link rel="stylesheet" type="text/css" media="screen"
 href="http://tarruda.github.com/bootstrap-datetimepicker/assets/css/bootstrap-datetimepicker.min.css">
@@ -18,7 +17,7 @@ src="http://tarruda.github.com/bootstrap-datetimepicker/assets/js/bootstrap-date
 
 <link rel="stylesheet" type="text/css" href="/static/css/fullcalendar.print.css" media="all"/>
 <link rel="stylesheet" type="text/css" href="/static/css/fullcalendar.css" media="all"/>
-<script type="text/javascript" src="/static/js//portal/fullcalendar.js"></script>
+<script type="text/javascript" src="/static/js/portal/fullcalendar.js"></script>
 <script type="text/javascript" src="/static/js/portal/fullcalendar.min.js"></script>
 
 <style>
@@ -31,6 +30,7 @@ src="http://tarruda.github.com/bootstrap-datetimepicker/assets/js/bootstrap-date
 	var events1 = new Array();
 	var text = "<br><br><div class='btn btn-primary' id='all' onclick=leftmenu1()>All</div>";
 	var start,
+	    user,
 	    dsr_code,
 	    retailer_name,
 	    location1;
@@ -66,7 +66,6 @@ src="http://tarruda.github.com/bootstrap-datetimepicker/assets/js/bootstrap-date
 
 			url : "{% url 'cal_data' %}",
 			success : function(data) {
-				// alert(data[2].length);
 				if (data[2].length != 0) {
 					var time,
 					    retailer,
@@ -74,6 +73,8 @@ src="http://tarruda.github.com/bootstrap-datetimepicker/assets/js/bootstrap-date
 					    dist_code,
 					    firstname,
 					    location;
+					user = data[3][0].user;
+					// alert(user);
 					for (var i = 0; i < data[2].length; i++) {
 						//alert(data[2][i].scheduled_time);
 						if (time == "") {
@@ -151,9 +152,8 @@ src="http://tarruda.github.com/bootstrap-datetimepicker/assets/js/bootstrap-date
 				var m = date.getMonth();
 				var y = date.getFullYear();
 				var eventsArray = new Array();
-				
+
 				addCalendar(events1);
-				
 
 				// for (var i = 0 ; i < data.length; i++) {
 
@@ -225,8 +225,8 @@ src="http://tarruda.github.com/bootstrap-datetimepicker/assets/js/bootstrap-date
 		addCalendar(events1);
 
 	}
-	
-	function addCalendar(events1){
+
+	function addCalendar(events1) {
 		$('#calendars').fullCalendar({
 			header : {
 				left : 'prev,next today',
@@ -243,7 +243,9 @@ src="http://tarruda.github.com/bootstrap-datetimepicker/assets/js/bootstrap-date
 
 			select : function(start, end) {
 
-				$("#myModal").modal("show");
+				if (user == "distributor") {
+					$("#myModal").modal("show");
+				}
 				$('#datetimepicker1').datetimepicker({
 					format : 'dd/MM/yyyy hh:mm:ss',
 				});
@@ -272,7 +274,7 @@ src="http://tarruda.github.com/bootstrap-datetimepicker/assets/js/bootstrap-date
 			}
 
 		}
-		// alert(events1);
+	//	alert(events1);
 		addCalendar(events1);
 
 	}

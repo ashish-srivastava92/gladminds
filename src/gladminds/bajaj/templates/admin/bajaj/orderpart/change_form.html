@@ -1,13 +1,14 @@
 {% extends "admin/change_form.html" %}
-
-{% load i18n admin_static admin_modify suit_tags admin_urls %}
+{% load i18n admin_static admin_list admin_urls suit_list suit_tags %}
+{% load admintags %}
 {% load url from future %}
-
+{% load admin_urls %}
 {% block extrahead %}{{ block.super }}
 
 <script src="/static/js/bootbox.min.js"></script>
 
 {% endblock %}
+
 
 
 
@@ -48,10 +49,10 @@
 				<th class="text-center">DSR Name</th>
 				<th class="text-center">Total Value</th>
 				<th class="text-center">Ordered Date</th>
-				{% if order_status == "open" %}
+			
 
-				<th class="text-center">Actions</th>
-				{% endif %}
+			
+				
 			</tr>
 
 		</thead>
@@ -66,15 +67,9 @@
 
 				<td class="text-center">{{each.total_value}}</td>
 				<td class="text-center">{{each.order_date}}</td>
-				{% if order_status == "open" %}
-
-				<td class="text-center"><a  class='btn btn-success' onclick='confirmAccept(this)' data-url="{% url 'accept_order'  each.order_id 'accept'  %}" ordID="{{each.order_id}}" href="javascript:void(0)">Accept</a> &nbsp; <a  class='btn btn-warning' data-toggle='modal' onclick='confirmCancel(this)' data-url="{% url 'accept_order'  each.order_id 'cancel' %}" ordID="{{each.order_id}}" href="javascript:void(0)">Cancel</a> {% endif  %}
-		</tbody>
-
-		</tbody></td>
-		</tr>
-		{% endfor %}
-
+		
+</tr>
+{% endfor %}
 		</tbody>
 	<input type="hidden" id="retailer_id" value='{{retailer_id}}' name="retailer_id"  >
 		<input type="hidden" id="order_id"  name="order_id" value='{{order_id}}' >

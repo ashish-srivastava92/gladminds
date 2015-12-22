@@ -2050,7 +2050,19 @@ class District(BaseModel):
         return self.name
     
     
+class PartIndexPlates(BaseModel):
     
+    class Meta:
+        abstract = True
+        db_table = "gm_partindex_plates"
+        verbose_name_plural = "PartIndex_Plates"
+        
+class PartIndexDetails(BaseModel):
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_partindex_details"
+        verbose_name_plural = "PartIndex_Details"
     
     
     
@@ -2114,6 +2126,19 @@ class OrderTempDeliveredHistory(BaseModel):
         db_table = "gm_order_temp_delivered_details"
         verbose_name_plural = "Order Temp Delivered History"
     
+ 
+
+class PartsRackLocation(BaseModel):   
+    class Meta:
+        abstract = True
+        db_table = "gm_part_rack_location"
+        verbose_name_plural = "Parts Rack Location"
     
+    
+class OrderTempDetails(BaseModel):   
+    class Meta:
+        abstract = True
+        db_table = "gm_order_temp_details"
+        verbose_name_plural = "Order Temp Details"   
     
     

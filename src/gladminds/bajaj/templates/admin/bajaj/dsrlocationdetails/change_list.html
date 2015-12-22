@@ -1,4 +1,4 @@
-{% extends "admin/base_site.html" %}
+{% extends "admin/change_form.html" %}
 
 {% load i18n admin_static admin_modify suit_tags admin_urls %}
 {% load url from future %}
@@ -70,6 +70,7 @@ var data;
 function showHideMarkers(option) 
 {
         loadMarkers();
+        if(data[2]!=undefined) {  
         for (var i = 0; i < markers.length; i++) {
 
             if( (markers[i].id=="retailers")&&(option=="all") )
@@ -107,6 +108,18 @@ function showHideMarkers(option)
                                
             }
 
+        }
+        }
+        if(data[2]==undefined) {  
+            for (var i = 0; i < markers.length; i++) {
+                if( (markers[i].id=="distributor")&&(option=="all") )
+            {   
+
+                markers[i].setIcon("http://maps.google.com/mapfiles/ms/icons/green-dot.png");
+                markers[i].setVisible(true);
+                
+            }
+            }
         }
     }
 
@@ -149,45 +162,71 @@ function loadMarkers()
 {
     var infowindow = new google.maps.InfoWindow();
     var marker="";
-    for (i = 0; i < locations.length; i++) {
-        marker = new google.maps.Marker({
-        position: new google.maps.LatLng(locations[i][1], locations[i][2]),
-        // icon: locations[i][4],
-        map: map
-        });
-        if (i < data[1].length){
-            marker.id = "retailers";
-        }
-        if (i >= data[1].length){
-            marker.id = "dsrs";
-        }
-        markers.push(marker)
-        google.maps.event.addListener(marker, 'click', (function (marker, i) {
-            return function () {
-                infowindow.setContent(locations[i][0]);
-                infowindow.open(map, marker);
+    if(data[2]!=undefined) {  
+        for (i = 0; i < locations.length; i++) {
+            marker = new google.maps.Marker({
+            position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+            // icon: locations[i][4],
+            map: map
+            });
+            if (i < data[1].length){
+                marker.id = "retailers";
             }
-        })(marker, i));
-        markerlength=markers.length;
+            if (i >= data[1].length){
+                marker.id = "dsrs";
+            }
+            markers.push(marker)
+            google.maps.event.addListener(marker, 'click', (function (marker, i) {
+                return function () {
+                    infowindow.setContent(locations[i][0]);
+                    infowindow.open(map, marker);
+                }
+            })(marker, i));
+            markerlength=markers.length;
+        }
     }
+    if(data[2]==undefined) { 
+        for (i = 0; i < locations.length; i++) {
+         marker = new google.maps.Marker({
+            position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+            // icon: locations[i][4],
+            map: map
+            });
+            if (i < data[1].length){
+                marker.id = "distributor";
+            }
+            
+            markers.push(marker)
+            google.maps.event.addListener(marker, 'click', (function (marker, i) {
+                return function () {
+                    infowindow.setContent(locations[i][0]);
+                    infowindow.open(map, marker);
+                }
+            })(marker, i));
+            markerlength=markers.length;
+        }
+
+    } 
 }
 function gmap(data)
 {
-    map = new google.maps.Map(document.getElementById('map'),
+       map = new google.maps.Map(document.getElementById('map'),
    {
-    zoom: 12,
-    disableDefaultUI: true,
-    center: new google.maps.LatLng(data[0].max_lat,data[0].min_long),
-    scrollwheel: false,
-    navigationControl: false,
-    mapTypeControl: false,
-    scaleControl: false,
-    draggable: false,
-    disableDoubleClickZoom: true,
-    mapTypeId: google.maps.MapTypeId.ROADMAP
+        zoom: 12,
+        disableDefaultUI: true,
+        center: new google.maps.LatLng(data[0].max_lat,data[0].min_long),
+        scrollwheel: true,
+        navigationControl: true,
+        mapTypeControl: true,
+        scaleControl: true,
+        draggable: true,
+        disableDoubleClickZoom: true,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
     });
+    
    
 }
+
 function main1(data,max_lat,min_long,mapcolor,option)
 { 
     locations=new Array();
@@ -195,52 +234,166 @@ function main1(data,max_lat,min_long,mapcolor,option)
     HomeControl = function ( controlDiv, map ) 
     {
         controlDiv.className = "gmnoprint custom-control-container";
+        if(data[2]!=undefined)
+        { 
         $.each(data[1], function(key, val) 
         {
-            var x = new Array("<table class='gtable'><tr><td align='right'><b>Code: </b></td><td >" + val.ret_code + "</td></tr><tr><td align='right'><b>Name: </b><td>" + val.ret_name + "</td></tr><tr><td align='right'><b>Last Sync: </b></td><td>" + val.last_sync + "</td></tr></table>", val.latitude, val.longitude);
+                        
+            if(val.last_sync!=undefined){
+                console.log(val.last_sync);
+            var  x = new Array("<table class='gtable'><tr><td align='right'><b>Code: </b></td><td >" + val.ret_code + "</td></tr><tr><td align='right'><b>Name: </b><td>" + val.ret_name + "</td></tr><tr><td align='right'><b>Last Sync: </b></td><td>" + val.last_sync + "</td></tr></table>", val.latitude, val.longitude);
+            }
+            if(val.last_sync==undefined){
+               var x=new Array("<table class='gtable'><tr><td align='right'><b>Code: </b></td><td >" + val.ret_code + "</td></tr><tr><td align='right'><b>Name: </b><td>" + val.ret_name + "</td></tr></table>", val.latitude, val.longitude);
+            }
             locations.push(x);
         });
+
         $.each(data[2], function(key, val) 
         {
-        
-            var x = new Array("<table class='gtable'><tr><td align='right'><b>Code: </b></td><td >" + val.ret_code + "</td></tr><tr><td align='right'><b>Name: </b><td>" + val.ret_name + "</td></tr><tr><td align='right'><b>Last Sync: </b></td><td>" + val.last_sync + "</td></tr></table>", val.latitude, val.longitude);
+            if(val.last_sync!=undefined){
+                console.log(val.last_sync);
+            var x = new Array("<table class='gtable'><tr><td align='right'><b>Code: </b></td><td >" + val.dsr_code + "</td></tr><tr><td align='right'><b>Name: </b><td>" + val.dsr_name + "</td></tr><tr><td align='right'><b>Last Sync: </b></td><td>" + val.last_sync + "</td></tr></table>", val.latitude, val.longitude);
+            }
+            if(val.last_sync==undefined){
+              var  x=new Array("<table class='gtable'><tr><td align='right'><b>Code: </b></td><td >" + val.dsr_code + "</td></tr><tr><td align='right'><b>Name: </b><td>" + val.dsr_name + "</td></tr></table>", val.latitude, val.longitude);
+            }
             locations.push(x);
-                                     
-        });      
+        });
+
         if(maploaded==0){         
             allButtons(controlDiv);
             maploaded=1;
-        }        
-   
+        }
+    }
+    if(data[2]==undefined)
+        { 
+            $.each(data[1], function(key, val) 
+            {
+                            
+                
+                var  x = new Array("<table class='gtable'><tr><td align='right'><b>Name: </b></td><td >" + val.distributor_name + "</td></tr></table>", val.latitude, val.longitude);
+                
+                locations.push(x);
+            });
+        }
+
     }
     var homeControl = new HomeControl( homeControlDiv, map );
     homeControlDiv.index = 1;
     map.controls[ google.maps.ControlPosition.TOP_RIGHT ] .push( homeControlDiv );
     var infowindow = new google.maps.InfoWindow();
     var marker="", i;
+    
+    // map.setCenter(new GLatLng(lat, lon));
+    
 }
 
 
 $(document).ready(function(){
-	wWidth = $( window ).width()-($("#suit-left").width()+$("#suit-center").css("padding"))+"px";
-	wHeight = $(window).height()-($("#header").height()+$("#footer").height()+85)+"px";
+    wWidth = $( window ).width()-($("#suit-left").width()+$("#suit-center").css("padding"))+"px";
+    wHeight = $(window).height()-($("#header").height()+$("#footer").height()+85)+"px";
+    $("#map").css("width",wWidth).css("height",wHeight);
+    $("#distributorList").on('change',function(){
+        var distributor= $('#distributorList').val();
+        
+        if(distributor==0){ 
+           $.ajax({
+                    url : "{% url 'get_dist_retailers' %}",
+                    async : "true",
+                    success : function(data1) {
+                        debugger;
+                        
+                        data=data1;
+                        gmap(data);
+                       // alert(data[0].max_lat+","+data[0].min_long);
+                        main1(data,data[0].max_lat,data[0].min_long,'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',"all");
+                        showHideMarkers("all") ;
+                    }
+                });
+              $('.custom-control-container').css("display","none");
+            // alert( map.center);
+        }
+        if(distributor!=0){
+        $('.custom-control-container').html("");
+        maploaded=0; 
+            $("#map").css("display","block");
+            $('.custom-control-container').css("display","block");
+            $.ajax({
+                url : "{% url 'get_dsr_retailers'  %}",
+                async : "true",
+                method:"GET",
+                data:{"distributor":distributor},
+                success : function(data1) {
+                  
+                    for($i=0;$i<data1[2].length;$i++)
+                    { 
+                    // alert(data1[2][$i].dsr_id);
+                    $('<option/>').val(data1[2][$i].dsr_id).html(data1[2][$i].dsr_name).appendTo('#dsrList');
+                    }
+                    data=data1;
+                    gmap(data);
+                    // var panPoint = new google.maps.LatLng(data[0].max_lat,data[0].min_long);
+                    // map.panTo(panPoint);
+                    // alert("max_lat"+data[0].max_lat+"min_long"+data[0].min_long);
+                    main1(data,data[0].max_lat,data[0].min_long,'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',"all");
+                    showHideMarkers("all") ;
+                }
+            });
+        }
+   });
+    $.ajax({
+        url : "{% url 'map_view' %}",
+        async : "true",
+        success : function(data1) 
+        {
+            var LatLng;
+            $('<option/>').val("0").html("Select Distributor").appendTo('#distributorList');
+            $('<option/>').val("0").html("Select DSR").appendTo('#dsrList');
+            data2=data1;
 
-	$("#map").css("width",wWidth).css("height",wHeight)
-	
-	
-	$.ajax({
-		url : "{% url 'test' %}",
-		async : "true",
-		success : function(data1) {
-			data = data1;
-			gmap(data);
-			//loadAllUsers(data);
-			main1(data,data[0].max_lat,data[0].min_long,'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',"all");
-			showHideMarkers("all") ;
-		}
-	});
-	
-	
+            
+
+            if(data1[0][0].user=="others"){ 
+                $('#headerPart').css('display','inline');
+                $.ajax({
+                    url : "{% url 'get_dist_retailers' %}",
+                    async : "true",
+                    success : function(data1) {
+                        debugger;
+                        
+                        data=data1;
+                        gmap(data);
+                        alert(data[0].max_lat+","+data[0].min_long);
+                        main1(data,data[0].max_lat,data[0].min_long,'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',"all");
+                        showHideMarkers("all") ;
+                    }
+                });
+                for($i=0;$i<data1[1].length;$i++){ 
+                    var distributor_id=data1[1][$i].distributor_id;var distributor_name=data1[1][$i].distributor_name;
+                    $('<option/>').val(distributor_id).html(distributor_name).appendTo('#distributorList');
+                }    
+            }   
+            if(data1[0][0].user=="distributors"){ 
+                $.ajax({
+                    url : "{% url 'map_view1' %}",
+                    async : "true",
+                    success : function(data1) {
+                        debugger;
+                        $('#headerPart').css('display','none');
+                        data=data1;
+                        gmap(data);
+                        main1(data,data[0].max_lat,data[0].min_long,'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',"all");
+                        showHideMarkers("all") ;
+                    }
+                });
+                
+            }
+            
+        }
+    });
+    
+    
 
 });
 
@@ -251,6 +404,6 @@ $(document).ready(function(){
 {% endblock extrahead %}
 
 {% block content %}
-
+<div id="headerPart" style="display:none;"><select id="distributorList"></select>&nbsp;</div>
 <div id="map" style="width: 100%;height: 100%;"></div>
 {% endblock %}

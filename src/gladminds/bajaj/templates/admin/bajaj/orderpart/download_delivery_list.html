@@ -1,0 +1,22 @@
+<table class="table table-striped table-bordered report-table" border="1">
+	<tr>
+		<td><strong>Part Number</strong></td>
+		<td><strong>Part Description</strong></td>
+		<td><strong>Ordered Quantity</strong></td>
+		<td><strong>Delivered Quantity</strong></td>
+		<td><strong>mrp</strong></td>
+	<td><strong>Line Total</strong></td>
+
+	</tr>
+		{% for record in data %}
+	<tr>
+		<td>{{record.part_number|default_if_none:""}}</td>
+		<td>{{record.part_description|default_if_none:""}}</td>
+		<td>{{record.ordered_quantity|default_if_none:""}}</td>
+		<td>{{record.allocated|default_if_none:""}}</td>
+		<td>{{record.mrp|default_if_none:""}}</td>
+		 <td>{{record.line_total|default_if_none:""}}</td>
+		
+	</tr>
+	{% endfor %}
+</table>

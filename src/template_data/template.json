@@ -705,5 +705,45 @@
       "template": "Dear {customer_name}, your registered mobile number has been changed to {new_number}. If you notice any discrepancy please contact {phone_number}",
       "description": "Send this message when owner phone number is updated"
     }
-  }
+  },
+
+ {
+    "model": "gladminds.messagetemplate",
+    "pk": 78,
+    "fields": {
+      "template_key": "SEND_RETAILER_APPROVED",
+      "template": "Dear {retailer_name}, Congratulations!!! Your Registration is approved.",
+      "description": "Send this message when owner phone number is updated"
+    }
+  },
+    {
+    "model": "gladminds.messagetemplate",
+    "pk": 78,
+    "fields": {
+      "template_key": "SEND_RETAILER_REGISTRATION",
+      "template": "Dear {retailer_name}, Congratulations!!! Your have been registered. Your username: {username} and password :{password}.",
+      "description": "Send this message when owner phone number is updated"
+    }
+  },
+      {
+    "model": "gladminds.messagetemplate",
+    "pk": 78,
+    "fields": {
+      "template_key": "SEND_RETAILER_ON_ORDER_PLACEMENT",
+      "template": "Thank you {retailer_name}, Your order {order_id} is placed successfully."
+      "description": "Send this message when owner phone number is updated"
+    }
+  },
+   {
+    "model": "gladminds.messagetemplate",
+    "pk": 78,
+    "fields": {
+      "template_key": "SEND_RETAILER_ON_COLLECTION",
+      "template": "Thankyou {retailer_name}, We have received your payment. Payment subject to realisation. Thankyou."
+      "description": "Send this message when owner phone number is updated"
+    }
+  },
+  
+
+
 ]

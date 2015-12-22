@@ -3,20 +3,43 @@
 {% load admintags %}
 {% load url from future %}
 {% load admin_urls %}
+<!-- {% block extrahead %}
+{{block.super}}
+<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+<script src="https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.10/js/dataTables.bootstrap.min.js"></script>
 
+
+
+
+<!-- <link rel="stylesheet" type="text/css" href="/static/suit/css/suit.css" media="all"> -->
+<!-- <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.10/css/dataTables.bootstrap.min.css" /> -->
+<!-- {% endblock %} --> 
 {% block content %}
 
 <table class="table table-striped table-bordered table-responsive	" >
         <thead>
 				<tr>
-				    <th class="text-center">Retailer Name</th>
-				    <!-- <th class="text-center">DSR Name</th> -->
-				     <th class="text-center">Open Orders</th>
-				      <th class="text-center">Pending Orders</th>
-				      <th class="text-center">Shipped Orders</th>
-				         <th class="text-center">Cancelled Orders</th>
-				       <!-- <th class="text-center"></th> -->
-				    <!-- <th class="text-center">Ordered Date</th> -->
+				    <th class="text-center" rowspan="2">Retailer Name<br>(Mobile)</th>
+				    <!-- <th class="text-center">DSR Name(Mobile)</th> -->
+				    <th class="text-center" rowspan="2">Outstanding<br>(in INR)</th>
+				    <th class="text-right" colspan="4">
+				    	<select>
+				    		
+				    	</select>
+				    	
+				    </th>
+				   </tr>
+				   <tr>
+				     <th class="text-center" >Open Orders</th>
+				      <th class="text-center">Allocated Orders</th>
+				      <th class="text-center" >Shipped Orders</th>
+				    
+				         
+				      
 				</tr>
 				
 			</thead>
@@ -26,11 +49,14 @@
         	{% for each in order_details %}
         	<tr>
         		
-        		<td class="text-center">{{each.ret_name}}</td>
+        		<td class="text-center">{{each.ret_name}}<br>({{each.ret_mobile}})</td>
+        		<!-- <td class="text-center">{{each.dsr_name}}</td> -->
+        		<td class="text-center">{{each.outstanding}}</td>
+        		
         			<td class="text-center">{% if each.open_orders_len != 0 %}<a href="{% url 'order_details' 'open' each.ret_id  %}">{{each.open_orders_len}}</a>{% else %}{{each.open_orders_len}}{%endif %}</td> 
-        		<td class="text-center">{% if each.pending_orders_len != 0 %}<a href="{% url 'admin:pending_order_details' 'pending' each.ret_id %}">{{each.pending_orders_len}}</a>{% else %}{{each.pending_orders_len}}{%endif %}</td>        		
+        		<td class="text-center">{% if each.pending_orders_len != 0 %}<a href="{% url 'pending_order_details' 'allocated' each.ret_id %}">{{each.pending_orders_len}}</a>{% else %}{{each.pending_orders_len}}{%endif %}</td>        		
         		<td class="text-center">{% if each.shipped_orders_len != 0 %}<a href="{% url 'shipped_order_details' 'shipped' each.ret_id %}">{{each.shipped_orders_len}}</a>{% else %}{{each.shipped_orders_len}}{%endif %}</td>
-        			<td class="text-center">{% if each.cancelled_orders_len != 0 %}<a href="{% url 'order_details' 'cancelled' each.ret_id %}">{{each.cancelled_orders_len}}</a>{% else %}{{each.cancelled_orders_len}}{%endif %}</td> 
+        		
      
         	</tr>
         	   		{% endfor %}
