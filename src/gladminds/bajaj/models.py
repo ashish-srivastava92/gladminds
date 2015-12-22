@@ -729,7 +729,25 @@ class CvCategories(base_models.CvCategories):
         app_label = _APP_NAME
         
 
-
+class PartMasterCv(base_models.PartMasterCv):
+    ''' details of spare parts and pricing '''
+    bajaj_id = models.IntegerField()
+    part_number = models.CharField(max_length = 255)
+    description = models.TextField()
+    part_model = models.TextField()
+    valid_from = models.DateField()
+    part_models = models.CharField(max_length = 255)
+    category = models.ForeignKey(CvCategories)
+    mrp = models.CharField(max_length = 255)
+    active = models.BooleanField(default = True)
+    available = models.CharField(max_length=25)
+    pending = models.CharField(max_length=25)
+    
+    class Meta(base_models.PartMasterCv.Meta):
+        app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.description
      
 # parts model 
 # class Parts(base_models.Parts):
@@ -955,6 +973,7 @@ class PartPricing(base_models.PartPricing):
     current_month_should = models.IntegerField()
     active = models.BooleanField(default=True)
     moq = models.IntegerField( null=True, blank=True)
+    
     class Meta(base_models.PartPricing.Meta):
         app_label = _APP_NAME
         
@@ -1000,7 +1019,17 @@ class OrderPart(base_models.OrderPart):
 #         return self.retailer.retailer_code
 
 
-
+class OrderPartDetails(base_models.OrderPartDetails):
+    part_number = models.ForeignKey(PartMasterCv)
+    quantity = models.IntegerField(null=True, blank=True)
+    active = models.IntegerField(null=True, blank=True, default=1)
+    order = models.ForeignKey(OrderPart)
+    part_status = models.IntegerField(null=True, blank=True)
+    line_total = models.DecimalField(max_digits = 20, decimal_places=10, null=True, blank=True)
+    
+    class Meta(base_models.OrderPartDetails.Meta):
+        app_label = _APP_NAME
+        verbose_name_plural = "Order Part Details"
 
 
 class Invoices(base_models.Invoices):
