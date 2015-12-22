@@ -2121,10 +2121,24 @@ class DSRLocationDetails(BaseModel):
     
     
 class OrderTempDeliveredHistory(BaseModel):
-     class Meta:
+    class Meta:
         abstract = True
         db_table = "gm_order_temp_delivered_details"
         verbose_name_plural = "Order Temp Delivered History"
+        
+class PartIndexPlates(BaseModel):
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_partindex_plates"
+        verbose_name_plural = "PartIndex_Plates"
+        
+class PartIndexDetails(BaseModel):
+    
+    class Meta:
+        abstract = True
+        db_table = "gm_partindex_details"
+        verbose_name_plural = "PartIndex_Details"
     
  
 
