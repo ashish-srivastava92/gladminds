@@ -129,7 +129,7 @@ def get_parts(request):
         parts_dict = {}
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
-        parts_dict.update({"part_category":part.category.category_name})
+        parts_dict.update({"part_category":part.subcategory.name})
         try:
             available_quantity = PartsStock.objects.get(part_number = part)
         except:
@@ -1055,7 +1055,11 @@ def get_retailer_orders(request, retailer_id):
         order_dict['order_id'] = order.id
         order_dict['retailer_id'] = order.retailer.retailer_code
         order_dict['order_date'] = order.order_date.date()
-       # order_dict['distributor_id'] = order.distributor.distributor_id
+       	order_dict['distributor_id'] = order.distributor.distributor_id
+	for k,v in constants.ORDER_STATUS.iteritems():
+            if v == order.order_status:
+                order_dict['status'] = k
+
         amount = 0
         order_detail = OrderPartDetails.objects.filter(order = order)
         

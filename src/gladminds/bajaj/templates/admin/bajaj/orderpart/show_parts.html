@@ -95,7 +95,7 @@
 
 <div class="row-fluid">
 	<div class="span6">
-		<b>Order ID:</b> {{order_id}}
+		<b>Order Number:</b> {{order_number}}
 	</div>
 	<div class="span6" style="text-align: right">
 		<b> Ordered Date:</b> {{ordered_date}}
@@ -123,7 +123,6 @@
 				<th class="text-center">MRP</th>
 				<th class="text-center">Line Total</th>
 
-				<th class="text-center">Delivered Quantity</th>
 
 				<th class="text-center">Allocated Qty</th>
 
@@ -153,15 +152,13 @@
 				<input type="hidden" id="ordered_quantity"  name="ordered_quantity" value='{{each.quantity}}' >
 				{{each.quantity}}</td>
 
+				<input type="hidden" id="delivered_quantity"  name="delivered_quantity" value='{{each.delivered_quantity}}' >
+
 				<td class="text-center">{{each.mrp}}</td>
 				<td class="text-center">{{each.line_total}}</td>
 
-				<td class="text-center">
 			
-				<input type="hidden" id="delivered_quantity"  name="delivered_quantity" value='{{each.delivered_quantity}}' >
-				{{each.delivered_quantity}} 
 				
-				</td>
 
 				<td class="text-center">
 							
@@ -188,6 +185,9 @@
 		<button type="submit" class="btn btn-primary" name="place_order" id="_place_order_submit">
 			Allocate
 		</button>
+                <button type="button" class="btn btn-default" onclick="javascript:downloadOrderList();">
+                    Download Order List
+                </button>
 
 	</div>
 </form>
@@ -214,6 +214,12 @@
 		$("#part_desc").html(partDesc)
 		$("#loadParts").attr("src", url);
 	}
+        function downloadOrderList(){
+            url = "{% url 'download_order_parts' order_id order_status retailer_id %}"
+            location.href= url;
+        }
+
+
 </script>
 <!-- Modal -->
 <div class="modal hide" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

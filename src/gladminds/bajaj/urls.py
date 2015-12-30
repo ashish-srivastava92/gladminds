@@ -118,6 +118,10 @@ urlpatterns = patterns('',
 
     
     url(r'^admin/get_parts/(?P<order_id>\d+)/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$','gladminds.bajaj.views.views.get_parts', name='get_parts'),
+    url(r'^download_order_parts/(?P<order_id>\d+)/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$','gladminds.bajaj.views.views.download_order_parts', name='download_order_parts'),
+
+
+
     url(r'^admin/accept_order/(?P<order_id>\d+)/(?P<action>\w+)/$','gladminds.bajaj.views.views.accept_order', name='accept_order'),
     
     url(r'^admin/data$','gladminds.bajaj.views.views.cal_data', name='cal_data'),
@@ -136,7 +140,14 @@ urlpatterns = patterns('',
 
 #     url(r'^invoice/', TemplateView.as_view(template_name="invoice.html"),
 #                    name='invoice'),
-                       
+
+    url(r'^download_picklist/(?P<retailer_id>\d+)/', 'gladminds.bajaj.views.views.download_picklist',
+                   name='download_picklist'),
+    url(r'^download_sample_stock_csv/', 'gladminds.bajaj.views.views.download_sample_stock_list_csv',
+                   name='download_sample_stock_csv'),
+    url(r'^download_sample_rack_location_csv/', 'gladminds.bajaj.views.views.download_sample_rack_location_list_csv',
+                   name='download_sample_rack_location_csv'),
+
     url(r'^get_picklist/', 'gladminds.bajaj.views.views.get_picklist',
                    name='invoice'),
                        

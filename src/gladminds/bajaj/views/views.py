@@ -232,7 +232,37 @@ def get_picklist(request):
     picklist_details_obj = OrderTempDetails.objects.filter(retailer_id=retailer_id).select_related("part_number", "order")
     picklist_details = []
     dist_obj = Distributor.objects.get(user=request.user)
+    retailer_name = Retailer.objects.get(id=retailer_id).retailer_name
     picklist_details_dict = {}
+    picklist_details_dict["name"] = dist_obj.name
+    picklist_details_dict["retailer_name"] = retailer_name
+    picklist_details_dict["address_line_1"] = dist_obj.user.address + "," + dist_obj.address_line_2
+    picklist_details_dict["address_line_2"] = dist_obj.address_line_3 + "," + dist_obj.address_line_4
+    for each_picklist_row in picklist_details_obj:
+         picklist_details_dict["part_number"] = each_picklist_row.part_number.part_number
+         picklist_details_dict["part_description"] = each_picklist_row.part_number.description
+         picklist_details_dict["allocated"] = each_picklist_row.qty
+	 picklist_details_dict["order_id"] = each_picklist_row.order.order_number
+         try:
+             location = PartsRackLocation.objects.get(part_number_id=each_picklist_row.part_number.id)
+             picklist_details_dict["location"] = location.rack_location
+         except Exception as ex:
+             picklist_details_dict["location"] = "NA"
+         picklist_details_dict["mrp"] = each_picklist_row.part_number.mrp          
+         if picklist_details_dict["mrp"] == "#N/A":
+           picklist_details_dict["mrp"] = 0
+	 if picklist_details_dict["allocated"] != 0:
+             picklist_details.append(picklist_details_dict.copy())
+    context = {"picklist_details":picklist_details, "retailer_name":retailer_name}
+    template = 'admin/bajaj/orderpart/invoice.html'  # = Your new template
+    return render(request, template, context)
+
+def download_picklist(request, retailer_id):
+    picklist_details_obj = OrderTempDetails.objects.filter(retailer_id=retailer_id).select_related("part_number", "order")
+    picklist_details = []
+    dist_obj = Distributor.objects.get(user=request.user)
+    picklist_details_dict = {}
+    retailer_name = Retailer.objects.get(id=retailer_id).retailer_name
     picklist_details_dict["name"] = dist_obj.name
     picklist_details_dict["address_line_1"] = dist_obj.user.address + "," + dist_obj.address_line_2
     picklist_details_dict["address_line_2"] = dist_obj.address_line_3 + "," + dist_obj.address_line_4
@@ -240,6 +270,7 @@ def get_picklist(request):
          picklist_details_dict["part_number"] = each_picklist_row.part_number.part_number
          picklist_details_dict["part_description"] = each_picklist_row.part_number.description
          picklist_details_dict["allocated"] = each_picklist_row.qty
+	 picklist_details_dict["order_number"] = each_picklist_row.order.order_number
          try:
              location = PartsRackLocation.objects.get(part_number_id=each_picklist_row.part_number.id)
              picklist_details_dict["location"] = location.rack_location
@@ -249,11 +280,30 @@ def get_picklist(request):
          if picklist_details_dict["mrp"] == "#N/A":
            picklist_details_dict["mrp"] = 0
          picklist_details.append(picklist_details_dict.copy())
-    context = {"picklist_details":picklist_details}
-    template = 'admin/bajaj/orderpart/invoice.html'  # = Your new template
-    return render(request, template, context)
+    response = HttpResponse(content_type='text/excel')
+    response['Content-Disposition'] = 'attachment; filename="PickList.xls"'
+    c = Context({
+        'data': picklist_details,
+	'retailer_name': retailer_name
+    })
+    template = loader.get_template('admin/bajaj/orderpart/download_picklist.html')
+    response.write(template.render(c))
+    return response
 
-    
+def download_sample_stock_list_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="SampleStockFile.csv"'
+    writer = csv.writer(response, dialect=csv.excel)
+    writer.writerow(['Part Number', 'Available Quantity'])
+    return response
+
+def download_sample_rack_location_list_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="SampleRackLocationFile.csv"'
+    writer = csv.writer(response, dialect=csv.excel)
+    writer.writerow(['Part Number', 'Rack Location'])
+    return response
+ 
 def save_order_history(request):
     '''
      accepts the order and allocates qty to the parts and moves the order to allocated order 
@@ -483,9 +533,10 @@ def download_delivery_list(request):
         picklist_details_dict["mrp"] = each_picklist_row.part_number.mrp          
         if picklist_details_dict["mrp"] == "#N/A":
            picklist_details_dict["mrp"] = 0
-        picklist_details_dict["mrp"] = float(picklist_details_dict["mrp"]) * int(picklist_details_dict["allocated"])
+        picklist_details_dict["mrp"] = float(picklist_details_dict["mrp"])
         picklist_details_dict["ordered_quantity"] = each_picklist_row.ordered_quantity
         picklist_details_dict["line_total"] = each_picklist_row.line_total
+	picklist_details_dict["order_number"] = each_picklist_row.order.order_number
         
         picklist_details.append(picklist_details_dict.copy())
     print picklist_details,"pickkk"
@@ -515,6 +566,8 @@ def download_delivery_list(request):
 def pending_order_details(request, order_status, retailer_id):
         opts = OrderPart._meta
         distributor_id = request.user.id
+	print "comesi n here"
+	print request.user.id
         dist_id = Distributor.objects.get(user=request.user).id
         order_display = []
         orders = {}
@@ -533,6 +586,7 @@ def pending_order_details(request, order_status, retailer_id):
             for each in order_obj:
                 parts_list = []
                 order_id = each.id
+		print order_id, "this is order id"
                 orders_details_obj = OrderPartDetails.objects.select_related("part_number", "order").filter(order=order_id, part_status=0)
                 for each_order in orders_details_obj:
                     parts_dict = {}
@@ -540,7 +594,7 @@ def pending_order_details(request, order_status, retailer_id):
                     parts_dict['part_number'] = each_order.part_number.part_number
                     parts_dict['part_description'] = each_order.part_number.description
                     parts_dict['quantity'] = each_order.quantity
-                    orders['order_id'] = each_order.id
+                    orders['order_id'] = order_id
                     if each_order.part_number.mrp == "#N/A":
                         each_order.part_number.mrp = 0
                     parts_dict['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
@@ -568,6 +622,7 @@ def pending_order_details(request, order_status, retailer_id):
 
 #                         parts_dict['available_quantity'] = available_quantity[0].available_quantity
 #                     else:
+		    parts_dict["allocated_delivered_difference"] = parts_dict['quantity'] - total_qty_delivered
                     parts_dict['available_quantity'] = available_qty_after_blocking
                     order_delivered_obj = OrderDeliveredHistory.objects.filter(part_number_id=each_order.part_number_id, order_id=each_order.order_id).aggregate(Sum('delivered_quantity'))                  
 
@@ -753,6 +808,7 @@ def order_details(request, order_status, retailer_id):
             orderdetails_obj = OrderPartDetails.objects.filter(order_id=each_order.id).aggregate(Sum('line_total'))
             orders["total_value"] = orderdetails_obj["line_total__sum"]
             orders["order_id"] = each_order.id
+	    orders["order_number"] = each_order.order_number
             orders["ret_id"] = each_order.retailer_id
             order_display.append(orders.copy())
     context = {
@@ -826,7 +882,9 @@ def get_parts(request, order_id, order_status, retailer_id):
             
         order_display = []
         orders = {}
-        ordered_date = OrderPart.objects.get(id=order_id).order_date
+	order_part_obj = OrderPart.objects.get(id=order_id)
+	order_number = order_part_obj.order_number
+        ordered_date = order_part_obj.order_date
         
         orderdetails_obj = OrderPartDetails.objects.filter(order_id=order_id).aggregate(Sum('line_total'))
         orders["total_value"] = orderdetails_obj["line_total__sum"]
@@ -841,7 +899,6 @@ def get_parts(request, order_id, order_status, retailer_id):
                 orders['part_description'] = each_order.part_number.description
                 orders['quantity'] = each_order.quantity
                 orders['order_id'] = each_order.order_id
-            
                 if each_order.part_number.mrp == "#N/A":
                     each_order.part_number.mrp = 0
                 orders['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
@@ -881,13 +938,95 @@ def get_parts(request, order_id, order_status, retailer_id):
                 'app_label':opts.app_label,
                 'opts':opts,
                 "retailer_id":retailer_id,
+		"order_number":order_number,
                 "order_total_value":orders["total_value"]     
                }
         template = 'admin/bajaj/orderpart/show_parts.html'  
         return render(request, template, context)
 
-    
-    
+def download_order_parts(request, order_id, order_status, retailer_id):
+    # FIXME: Send the data from UI rather than fetching from the table
+        dist_id = Distributor.objects.get(user=request.user.id).id
+        opts = OrderPart._meta
+        if order_status == "open":
+            orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id, order_status=0)
+#             orders_obj = OrderPartDetails.objects.select_related("part_number", "order").filter(order=order_id)
+        elif order_status == "allocated":
+
+
+            orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id, order_status=1)
+        elif order_status == "shipped":
+             orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id, order_status=3)
+
+#             orders_obj = OrderPartDetails.objects.select_related("part_number", "order").filter(order=order_id,part_status=0,retailer = ret_id)
+        elif order_status == "cancelled":
+            orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id, order_status=2)
+#             orders_obj = OrderPartDetails.objects.select_related("part_number", "order").filter(order=order_id,part_status=1,retailer = ret_id)    
+
+        order_display = []
+        orders = {}
+        order_part_obj = OrderPart.objects.get(id=order_id)
+        order_number = order_part_obj.order_number
+        ordered_date = order_part_obj.order_date
+
+        orderdetails_obj = OrderPartDetails.objects.filter(order_id=order_id).aggregate(Sum('line_total'))
+        orders["total_value"] = orderdetails_obj["line_total__sum"]
+        for each in orders_obj:
+            orderparts_obj = OrderPartDetails.objects.select_related("part_number", "order").filter(order_id=each.id)
+            print orderparts_obj,"obj"
+            for each_order in orderparts_obj:
+                print each_order.part_number,"part"
+                orders['mrp'] = each_order.part_number.mrp
+                orders['part_number'] = each_order.part_number.part_number
+                orders['part_description'] = each_order.part_number.description
+                orders['quantity'] = each_order.quantity
+                orders['order_id'] = each_order.order_id
+                if each_order.part_number.mrp == "#N/A":
+                    each_order.part_number.mrp = 0
+                orders['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
+                orders["part_status"] = each_order.part_status
+
+                available_quantity = PartsStock.objects.filter(part_number=each_order.part_number.id,distributor_id = dist_id)
+                if available_quantity:
+                    available_quantity[0].available_quantity
+                    orders['available_quantity'] = available_quantity[0].available_quantity
+                else:
+                    orders['available_quantity'] = 0
+                order_delivered_obj = OrderDeliveredHistory.objects.filter(part_number_id=each_order.part_number_id, order_id=each_order.order_id).aggregate(Sum('delivered_quantity'))
+#                 date = OrderDeliveredHistory.objects.get(part_number_id=each_order.part_number_id, order_id=each_order.order_id).delivered_date
+#                 orders["shipped_date"] = date
+#                 print date,"dateeee"
+                print order_delivered_obj,"del"
+                if order_delivered_obj["delivered_quantity__sum"] != None:
+                    orders["delivered_quantity"] = int(order_delivered_obj["delivered_quantity__sum"])
+                    orders['pending'] = (each_order.quantity) - int(order_delivered_obj["delivered_quantity__sum"])
+                    orders["allocated_qty"] = orders['quantity']  - orders["delivered_quantity"]
+                else:
+                    orders["delivered_quantity"] = 0
+                    if orders['available_quantity'] < orders['quantity'] :
+                        orders["allocated_qty"] = orders['available_quantity']
+
+#                     orders['pending'] = each_order.quantity
+                    else:
+                        orders["allocated_qty"] = int(orders['quantity'])
+                order_display.append(orders.copy())
+        context = {
+                "order_display":order_display,
+                "order_id":order_id,
+                'order_status':order_status,
+                "ordered_date":ordered_date,
+                'app_label':opts.app_label,
+                'opts':opts,
+                "retailer_id":retailer_id,
+                "order_number":order_number,
+                "order_total_value":orders["total_value"]
+               }
+        response = HttpResponse(content_type='text/excel')
+        response['Content-Disposition'] = 'attachment; filename="Orderparts.xls"'
+        c = Context(context)
+        template = loader.get_template('admin/bajaj/orderpart/download_order_parts.html')
+        response.write(template.render(c))
+        return response
         
 def accept_order(request, order_id, action):
     opts = OrderPart._meta
@@ -1366,12 +1505,15 @@ def upload_rack_location(request):
         for each_row in partreader:
 
             try:
+		print "in try======================================================"
                 part_rack_location_obj = PartsRackLocation.objects.get(part_number__part_number=each_row['Part Number'], distributor__user=request.user.id)
+		print part_rack_location_obj.part_number.part_number
                 part_rack_location_obj.rack_location = each_row['Rack Location']
                 part_rack_location_obj.save(using=settings.BRAND)
 
             except Exception as ex:
                  try:
+		     print "=========================in exception =================================="
                      part_pricing_object = PartPricing.objects.get(part_number=each_row['Part Number'])
                      part_rack_obj = PartsRackLocation(part_number_id=part_pricing_object.id, rack_location=each_row['Rack Location'], distributor=dist_id)
                      part_rack_obj.save(using=settings.BRAND)

@@ -128,16 +128,32 @@
 				var delivery_stock = $("input[name='delivered_stock']");
 				//alert(delivery_stock);
 				var datepick = $("input[name='delivered_date']");
+
+				var delivered_quantity = $("input[name='delivered_quantity']");
+				var delivered_stock = $("input[name='delivered_stock']");
+				var ordered_quantity = $("input[name='ordered_quantity']");
+
 				var flag = 1;
 	
 				for (var i = 0; i < delivery_stock.length; i++) {
 	
-					if (($(delivery_stock[i]).val() != "" && $(datepick[i]).val() == "") || ($(delivery_stock[i]).val() == "" && $(datepick[i]).val() != "")) {
+					if (($(delivery_stock[i]).val() != "" && $(datepick[i]).val() == "") || ($(delivery_stock[i]).val() == "" && $(datepick[i]).val() != "") || ($(delivery_stock[i]).val() < 0)) {
 						flag = 0;
 						alert("Kindly enter correct data.");
 						$(delivery_stock[i]).focus();
 	
 						return false;
+					}
+					//debugger;
+					if(parseInt($(ordered_quantity[i]).val())<(parseInt($(delivered_quantity[i]).val())+parseInt($(delivered_stock[i]).val()))){
+						
+					actObj = $(delivered_stock[i]);
+					alert("Total Delivery Quantity Exceeds Ordered Quantity")
+  					$(delivered_stock[i]).select();
+                                               
+
+					//$(delivered_stock[i]).select();
+					return false;
 					}
 	
 				}
@@ -175,14 +191,18 @@
 	});
 
 	function check(frmObj){
-		frame = $("#MainPopupIframe");
-		
-		frame.bind('load', callback);
 
-		$('#MainPopupIframe').attr('src', $(frmObj).attr("action"));  
+		if($("#btnDeliveryList").css('display') !== 'none') {
+  
+			frame = $("#MainPopupIframe");
 		
-		return true;
-    
+			frame.bind('load', callback);
+
+			$('#MainPopupIframe').attr('src', $(frmObj).attr("action"));  
+		
+			return true;
+		}    
+		return false;
 	}
 
 	function callback(){
@@ -302,12 +322,9 @@ Order Date : {{each.order_date}}
 				{% else %}
 			<tr>
 				{% endif %}
-				<input type="hidden" id="order_id"  name="order_id" value='{{each.order_id}}' >
 
 				{% if each.order_status == "shipped" or each.order_status == "allocated" %}
-				<td class="text-center"><a data-toggle="modal" data-target="#myModal" href="javascript:void(0)" onclick="loadOrderDetails('{% url 'ordered_part_details' each_part.part_number each.order_id %}','{{each_part.part_number}}','{{each_part.part_description}}')">{{each_part.part_number}}</a> {% if order_status == "allocated"  %}
-					<input type="hidden" value="{{each_part.part_number}}"  id="part_number"  name="part_number">
-				{% endif %} 
+				<td class="text-center"><a data-toggle="modal" data-target="#myModal" href="javascript:void(0)" onclick="loadOrderDetails('{% url 'ordered_part_details' each_part.part_number each.order_id %}','{{each_part.part_number}}','{{each_part.part_description}}')">{{each_part.part_number}}</a> 
 				</td>
 				{% endif %}
 				{% if each.order_status == "open" or each.order_status == "cancelled" %}
@@ -316,14 +333,12 @@ Order Date : {{each.order_date}}
 				{% endif %}
 				<td class="text-center">{{each_part.available_quantity}}</td>
 				<td class="text-center">
-				<input type="hidden" id="ordered_quantity"  name="ordered_quantity" value='{{each_part.quantity}}' >
 				{{each_part.quantity}}</td>
 
 				<td class="text-center">{{each_part.mrp}}</td>
 				<td class="text-center">{{each_part.line_total}}</td>
 		
 				<td class="text-center">
-				<input type="hidden" id="delivered_quantity"  name="delivered_quantity" value='{{each_part.allocated_quantity}}' >
 				{{each_part.delivered_quantity}}</td>
 
 
@@ -331,13 +346,28 @@ Order Date : {{each.order_date}}
 
 				<td class="text-center">
 				
-					{% if each_part.ordered_quantity >= each_part.delivered_quantity %}
-					Part Shipped
+					{% if each_part.quantity <= each_part.delivered_quantity %}
+					Delivery Initiated
 					{% else %}
-					<input tabindex="1" type ="text" oninvalid="setCustomValidity('Delivered Quantity to be lesser than Ordered Quantity')" max='{{each_part.quantity}}' autocomplete="off" style="width:50px;text-align:center;" class="delivered-stock delivery_1" value='{{each_part.allocated_quantity}}' name="delivered_stock" />
+					{% if each_part.available_quantity != 0 %}
+
+ 					{% if order_status == "allocated"  %}
+                                            <input type="hidden" value="{{each_part.part_number}}"  id="part_number"  name="part_number">
+                                	{% endif %}
+					<input type="hidden" id="ordered_quantity"  name="ordered_quantity" value='{{each_part.quantity}}' >
+					<input type="hidden" id="order_id"  name="order_id" value='{{each.order_id}}' >
+					<input type="hidden" id="delivered_quantity"  name="delivered_quantity" value='{{each_part.delivered_quantity}}' >
+
+
+					<input tabindex="1" type ="text" oninvalid="setCustomValidity('Delivered Quantity to be lesser than Ordered Quantity')" max='{{each_part.quantity}}' autocomplete="off" style="width:50px;text-align:center;" class="delivered-stock delivery_1"
+ 					value='{{each_part.allocated_quantity}}'
+					 name="delivered_stock" />
 					<input type="hidden" id="order_status" value='{{each.order_status}}' name="order_status"/>
 					
 					<input type="hidden" id="order_date" value='{{each.order_date}}' name="order_date"/>
+					{% else %}
+					Stock Not Available
+					{% endif %}
 				{% endif %}
 		
 					
@@ -356,7 +386,7 @@ Order Date : {{each.order_date}}
 			Preview Pick list
 		</button>
 
-		<button type="submit" tabindex="2" class="btn btn-primary" style="display:none;" id="btnDeliveryList">
+		<button type="submit" tabindex="2" class="btn btn-primary" id="btnDeliveryList" style="display:None">
 			Download Delivery List
 		</button>
 	</div>
@@ -383,6 +413,11 @@ Order Date : {{each.order_date}}
 		$("#part_numberHead").html(partNum);
 		$("#part_desc").html(partDesc)
 		$("#loadParts").attr("src", url);
+	}
+	
+	function downloadPickList(){
+	    url = "{% url 'download_picklist' retailer_id %}"
+	    location.href= url;
 	}
 
 	function generatePicklist() {
@@ -419,12 +454,14 @@ Order Date : {{each.order_date}}
 					<iframe width="100%" frameborder="0" id="invFrame" name="invFrame"></iframe>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">
-						Close
-					</button>
 					<button type="button" class="btn btn-default" onclick="javascript:window.frames['invFrame'].print();">
 						Print
 					</button>
+                                        <button type="button" class="btn btn-default" onclick="javascript:downloadPickList();">
+                                                Download Pick List
+                                        </button>
+
+
 				</div>
 			</div>
 		</div>

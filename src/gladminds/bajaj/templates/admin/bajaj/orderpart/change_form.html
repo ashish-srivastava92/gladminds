@@ -45,7 +45,7 @@
 		<thead>
 
 			<tr>
-				<th class="text-center">Order ID</th>
+				<th class="text-center">Order Number</th>
 				<th class="text-center">DSR Name</th>
 				<th class="text-center">Total Value</th>
 				<th class="text-center">Ordered Date</th>
@@ -61,7 +61,7 @@
 
 			{% for each in order_display %}
 			<tr>
-				<td class="text-center"><a href="{% url 'get_parts' each.order_id order_status retailer_id %}">{{each.order_id}}</a></td>
+				<td class="text-center"><a href="{% url 'get_parts' each.order_id order_status retailer_id %}">{{each.order_number}}</a></td>
 				<!-- <td class="text-center">{{each.retailer_name}}</td> -->
 				<td class="text-center">{{each.dsr_name}}</td>
 

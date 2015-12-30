@@ -23,7 +23,8 @@
 <table class="table table-striped table-bordered table-responsive	" >
         <thead>
 				<tr>
-				    <th class="text-center" rowspan="2">Retailer Name<br>(Mobile)</th>
+				    <th class="text-center" rowspan="2">Retailer Name</th>
+				    <th class="text-center" rowspan="2">Mobile Number</th>
 				    <!-- <th class="text-center">DSR Name(Mobile)</th> -->
 				    <th class="text-center" rowspan="2">Outstanding<br>(in INR)</th>
 				    <th class="text-right" colspan="4">
@@ -49,7 +50,8 @@
         	{% for each in order_details %}
         	<tr>
         		
-        		<td class="text-center">{{each.ret_name}}<br>({{each.ret_mobile}})</td>
+        		<td class="text-center">{{each.ret_name}}</td>
+			<td class="text-center">{{each.ret_mobile}}</td>
         		<!-- <td class="text-center">{{each.dsr_name}}</td> -->
         		<td class="text-center">{{each.outstanding}}</td>
         		

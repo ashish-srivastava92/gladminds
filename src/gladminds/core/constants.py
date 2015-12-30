@@ -374,7 +374,7 @@ PAYMENT_MODES =  (('Cash', '1'),
 
 RETAILER_PASSWORD = 'bajaj'
 
-ORDER_STATUS = {'OPEN': 0, 'PENDING': 1, 'CANCELLED': 2, 'SHIPPED':3, 'COMPLETED':4}
+ORDER_STATUS = {'OPEN': 0, 'ALLOCATED': 1, 'SHIPPED': 2, 'DLCREATE': 3}
 
 #this variable is to set how many month data to be taken into account for APP DSR report
 DSR_REPORT_MONTHS_DATA = 3

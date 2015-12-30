@@ -2,6 +2,7 @@
 {% load i18n admin_static admin_list admin_urls suit_list suit_tags %}
 {% load admintags %}
 {% load url from future %}
+{% load admin_urls %}
 
 
 {% block extrastyle %}
@@ -37,6 +38,9 @@
 
         });
       })(django.jQuery);
+
+
+i
     </script>
   {% endif %}{% endif %}
   
@@ -98,7 +102,13 @@
 				        <tr> 
 				        	<td>
 								<input type="file" name="upload_part_pricing" required="true"> 
-							</td>
+							
+        	                                <button type="button" class="btn btn-default" onclick="javascript:downloadSampleStockCsvList();">
+                                                Download Sample CSV 
+	                                        </button>
+ 
+                                                        </td>
+
 				        	<td> 
 				        		<input class="btn btn-info" id="uploadExcel" type="submit" value="Upload Stock Availability"> 
 				        	</td>
@@ -122,8 +132,12 @@
 			        <table width>
 				        <tr> 
 				        	<td>
-								<input type="file" name="upload_rack_location" required="true"> 
-							</td>
+							<input type="file" name="upload_rack_location" required="true"> 
+						
+						<button type="button" class="btn btn-default" onclick="javascript:downloadSampleRackLocationList();">
+                                                Download Sample CSV
+                                                </button>
+						</td>
 				        	<td> 
 				        		<input class="btn btn-info" id="uploadExcel" type="submit" value="Upload Rack Location"> 
 				        	</td>
@@ -253,6 +267,17 @@ var Msg = document.getElementById("popup");
 		  		Msg.innerHTML = popup_reject_reason;
 		  		document.getElementById("popup").style.visibility = "visible";
 			}
+    function downloadSampleStockCsvList(){
+            url = "{% url 'download_sample_stock_csv' %}"
+            location.href= url;
+        }
+    function downloadSampleRackLocationList(){
+            url = "{% url 'download_sample_rack_location_csv' %}"
+            location.href= url;
+        }
+
+
+
 		  </script>
 	
 		    
