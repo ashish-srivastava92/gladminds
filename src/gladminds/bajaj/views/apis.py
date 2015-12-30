@@ -81,7 +81,8 @@ def get_retailers(request, dsr_id):
     '''
     
     distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-    retailers = Retailer.objects.filter(distributor = distributor.distributor)
+    retailers = Retailer.objects.filter(distributor = distributor.distributor, \
+                                approved = constants.STATUS['APPROVED'] )
     retailer_list = []
     
     for retailer in retailers:
@@ -101,7 +102,8 @@ def get_retailers(request, dsr_id):
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
 def get_retailer_profile(request, retailer_id):
-    retailer = Retailer.objects.filter(retailer_code = retailer_id)
+    retailer = Retailer.objects.filter(retailer_code = retailer_id, \
+                                is_active = True)
     if not retailer:
         return Response('The given retailer id is invalid or your login may be inactive. Please \
                                     contact your distributor')
@@ -126,6 +128,7 @@ def get_parts(request):
     parts = PartPricing.objects.filter(active = True)
     parts_list =[]
     for part in parts:
+        available_quantity = PartsStock.objects.get(part_number_id = part.id ).available_quantity
         parts_dict = {}
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
@@ -561,6 +564,7 @@ def add_retailer(request, dsr_id):
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
 def dsr_dashboard_report(request, dsr_id):
+    today = datetime.datetime.now()
     dsr =  DistributorSalesRep.objects.select_related('distributor').get(distributor_sales_code = dsr_id)
     distributor = dsr.distributor
     retailers_list = []
