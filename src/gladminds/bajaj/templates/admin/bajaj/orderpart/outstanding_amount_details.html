@@ -30,24 +30,22 @@
 
 			<tr>
 				<!-- <th class="text-center">Order ID</th> -->
-				<th class="text-center">Invoice Number</th>
 				<th class="text-center">Invoice Amount</th>
-				<th class="text-center">Shipped Date</th>
-				
+				<th class="text-center">Less than 30 days</th>
+				<th class="text-center">Between 30 days 60 days</th>
+				<th class="text-center">Between 60 days 90 days</th>
 			</tr>
 
 		</thead>
 
 		<tbody>
 
-			{% for each in shipped_details %}
+			{% for each in invoice_list %}
 			<tr>
-				<!-- <td class="text-center"><a href="{% url 'get_parts' each.order_id order_status retailer_id  %}">{{each.order_id}}</a></td> -->
-				<!-- <td class="text-center">{{each.retailer_name}}</td> -->
-				<td class="text-center"><a href="{% url 'get_orders' each.invoice_no retailer_id  %}">{{each.invoice_no}}</td>
-
-				<td class="text-center">{{each.invoice_amt}}</td>
-				<td class="text-center">{{each.shipped_date}}</td>
+				<td class="text-center">{{each.invoice_amount}}</td>
+				<td class="text-center">{{each.now_30_days}}</td>
+				<td class="text-center">{{each.30_60_days}}</td>
+				<td class="text-center">{{each.60_90_days}}</td>
 			
 			</tr>	
 		</tbody>
@@ -131,3 +129,4 @@
 </div>
 <!-- /.modal -->
 {% endblock content %}
+

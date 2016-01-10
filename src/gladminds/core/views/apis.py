@@ -185,39 +185,73 @@ def get_alternateparts(request):
         parts_list.append(parts_dict)
     return Response(parts_list)
 
+@api_view(['POST'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def pjp_schedule(request):
+    '''
+    This method gets the schedule of the DSR from the payload/signature, and puts
+    it into the database
+    '''
+    schedules= json.loads(request.body)
+    pjp_creation_date = schedules['pjp_creation_date']#FIXME: Ignoring the creation date
+    dsr = DistributorSalesRep.objects.get(distributor_sales_code = schedules['dsr_id'])
+    dsr_work_allocations = DSRWorkAllocation.objects.filter(dsr__distributor_sales_code = schedules['dsr_id'], is_active = True)
+    for dsrwa in dsr_work_allocations:
+        dsrwa.is_active = False
+	dsrwa.save()
+    for location_details in schedules['pjp_location_details']:
+        dsrworkallocation = DSRWorkAllocation()
+        dsrworkallocation.dsr = dsr
+        dsrworkallocation.distributor = dsr.distributor
+        dsrworkallocation.date = datetime.datetime.now()#schedules.get('pjp_creation_date')
+        dsrworkallocation.locality_id = location_details['locality_id']
+        dsrworkallocation.is_active = True
+        dsrworkallocation.pjp_day = location_details['pjp_day']
+        dsrworkallocation.save()
+    return Response({'status':1, 'message':'DSR schedule has been submitted'})
+
 @api_view(['GET'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
-def get_schedule(request, dsr_id, date):
+def get_schedule(request, dsr_id):
     '''
-    This method gets the schedule(the retailers he has to visit) for today, given the dsr id
+    This method gets the latest week-schedule(the retailers he has to visit) given the dsr id
     '''
-    schedule_date = split_date(date)
-    finaldate = datetime.datetime.strptime(date, '%Y-%m-%d')
+    #schedule_date = split_date(date)
+    #finaldate = datetime.datetime.strptime(date, '%Y-%m-%d')
     
     # schedules = DSRWorkAllocation.objects.filter(date__startswith = \
     #                 datetime.date(int(schedule_date[2]),int(schedule_date[1]), \
     #                               int(schedule_date[0])), dsr__distributor_sales_code=dsr_id)
-    schedules = DSRWorkAllocation.objects.filter(date__year=finaldate.year,
-                                                 date__month=finaldate.strftime("%m"),
-                                                 date__day=finaldate.strftime("%e"),
-                                                 dsr__distributor_sales_code = dsr_id)
-    
+    #schedules = DSRWorkAllocation.objects.filter(date__year=finaldate.year,
+    #                                             date__month=finaldate.strftime("%m"),
+    #                                             date__day=finaldate.strftime("%e"),
+    #                                             dsr__distributor_sales_code = dsr_id)
+    schedules = DSRWorkAllocation.objects.filter(dsr__distributor_sales_code = dsr_id, is_active = True)#__isnull = True)
+ 
     if schedules:                   
         schedules_list = []
         for schedule in schedules:
             schedule_dict = {}
-            schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
-            schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
-            tm = time.strptime(str(schedule.date.time()), "%H:%M:%S")
-            schedule_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
-            schedule_dict.update({"retailer_address":schedule.retailer.user.address})
-            schedule_dict.update({"latitude":schedule.retailer.latitude})
-            schedule_dict.update({"longitude":schedule.retailer.longitude})
+	    schedule_dict['locality_id'] = schedule.locality_id
+	    try:
+	        if schedule.locality:
+	    	    schedule_dict['locality_name'] = schedule.locality.name
+	    except:
+	        schedule_dict['locality_name'] = 'Locality missing'
+	    schedule_dict['pjp_day'] = schedule.pjp_day
+            #schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
+            #schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
+            #tm = time.strptime(str(schedule.date.time()), "%H:%M:%S")
+            #schedule_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
+            #schedule_dict.update({"retailer_address":schedule.retailer.user.address})
+            #schedule_dict.update({"latitude":schedule.retailer.latitude})
+            #schedule_dict.update({"longitude":schedule.retailer.longitude})
             schedules_list.append(schedule_dict)
         return Response(schedules_list)
     else:
-        return Response({'status':0, 'message':'There are no schedules for the given date'})
+        return Response({'status':0, 'message':'There are no schedules for the DSR'})
 
 
 def split_date(date):

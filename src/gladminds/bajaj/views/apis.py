@@ -3,7 +3,7 @@ import json, datetime, time
 from datetime import timedelta
 from collections import OrderedDict
 from operator import itemgetter
-
+from django.db import transaction
 from django.utils import simplejson
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.db.models import Q
 from django.db.models import Count
 from django.db.models import Max
-
+import decimal
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_jwt.views import obtain_jwt_token
@@ -21,9 +21,13 @@ from rest_framework_jwt.settings import api_settings
 
 from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
                             PartPricing, Distributor,  Invoices, \
-                            Collection,CollectionDetails,PartsStock,DSRWorkAllocation,DSRLocationDetails
+                            Collection,CollectionDetails,PartsStock,DSRWorkAllocation,DSRLocationDetails, \
+			    NationalSparesManager,AreaSparesManager
 from gladminds.bajaj.models import PartMasterCv,OrderPart,OrderPartDetails, \
-                        PartIndexDetails, PartIndexPlates
+                        PartIndexDetails, PartIndexPlates, FocusedPart
+from gladminds.core.auth_helper import Roles
+
+
 #PartMasterCv                          
                             
 # from gladminds.core.models import DistributorSalesRep, Retailer,PartModels, CvCategories, \
@@ -91,7 +95,16 @@ def get_retailers(request, dsr_id):
         retailer_dict.update({"retailer_mobile":retailer.mobile})
         retailer_dict.update({"retailer_email":retailer.email})
         retailer_dict.update({"retailer_address":retailer.user.address})
-        retailer_dict.update({"locality":retailer.address_line_4})
+	retailer_dict.update({"locality":retailer.address_line_4})
+	if retailer.locality:
+            retailer_dict["locality"] = retailer.locality.name
+            retailer_dict.update({"city":retailer.locality.city.city})
+            retailer_dict.update({"state":retailer.locality.city.state.state_name})
+            retailer_dict.update({"locality_id":retailer.locality_id})
+	else:
+            retailer_dict.update({"city":''})
+            retailer_dict.update({"state":''})
+            retailer_dict.update({"locality_id":''})
         retailer_dict.update({"latitude":retailer.latitude})
         retailer_dict.update({"longitude":retailer.longitude})
         retailer_list.append(retailer_dict)
@@ -115,6 +128,32 @@ def get_retailer_profile(request, retailer_id):
         retailer_dict.update({"longitude":retailer.longitude})
         return Response(retailer_dict)
 
+@api_view(['GET'])
+# @authentication_classes((JSONWebTokenAuthentication,))
+# @permission_classes((IsAuthenticated,))
+def get_stock(request,dsr_id):
+    '''
+    This method returns all the stock details
+    '''
+    #get the disributor id
+    try:
+        distributor_obj = DistributorSalesRep.objects.get(distributor_sales_code=dsr_id).distributor
+    except:
+       return Response([{"error":"Distributor not present"}])
+    #get the parts with the distributor
+    stocks = PartsStock.objects.filter(distributor=distributor_obj)
+    stock_list =[]
+    for part in stocks:
+        parts_dict = {}
+	try:
+            parts_dict["part_number"]=part.part_number.part_number
+            parts_dict["part_available_quantity"]=part.available_quantity
+            parts_dict["mrp"]=part.part_number.mrp
+	    stock_list.append(parts_dict)
+	except:
+	    # FIXME: Remove try except from here and confirm if exceptions are due to curropt data
+	    pass
+    return Response(stock_list)
 
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
@@ -130,6 +169,8 @@ def get_parts(request):
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
         parts_dict.update({"part_category":part.subcategory.name})
+	associated_categories = part.associated_parts.all()
+	parts_dict.update({"associated_categories_str": [i.part_number for i in associated_categories]})
         try:
             available_quantity = PartsStock.objects.get(part_number = part)
         except:
@@ -142,6 +183,54 @@ def get_parts(request):
         parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
     return Response(parts_list)
+
+
+@api_view(['GET'])
+# @authentication_classes((JSONWebTokenAuthentication,))
+# @permission_classes((IsAuthenticated,))
+def get_focused_parts(request):
+    '''
+    Returns all the focused parts along with locality
+    '''
+    retailer_code = request.GET.get('retailer_code')
+    dsr_code = request.GET.get('dsr_code')
+    if retailer_code:
+	locality = Retailer.objects.get(retailer_code=retailer_code).locality
+	all_focused_parts = FocusedPart.objects.filter(locality=locality)
+    elif dsr_code:
+	retailer_objs = Retailer.objects.filter(dsr__distributor_sales_code=dsr_code)
+	localities = [i.locality for i in retailer_objs]
+	all_focused_parts = FocusedPart.objects.filter(locality__in=localities)
+    else:
+    	all_focused_parts = FocusedPart.objects.all()
+
+    all_focused_parts = FocusedPart.objects.all()
+    parts_list = []
+    for focused_part in all_focused_parts:
+        parts_dict = {}
+        parts_dict.update({"part_name":focused_part.part.description})
+        parts_dict.update({"part_number":focused_part.part.part_number})
+        parts_dict.update({"part_category":focused_part.part.subcategory.name})
+        associated_categories = focused_part.part.associated_parts.all()
+        parts_dict.update({"associated_categories_str": [i.part_number for i in associated_categories]})
+        try:
+            available_quantity = PartsStock.objects.get(part_number = focused_part.part)
+        except:
+            available_quantity = 'NA'
+        if available_quantity == 'NA':
+            parts_dict.update({"part_available_quantity":'NA'})
+        else:
+            parts_dict.update({"part_available_quantity":available_quantity.available_quantity})
+        parts_dict.update({"part_products":focused_part.part.products})
+        parts_dict.update({"mrp":focused_part.part.mrp})
+	parts_dict.update({"locality_id": focused_part.locality_id})
+	parts_dict.update({"city": focused_part.locality.city.city})
+        parts_dict.update({"state": focused_part.locality.city.state.state_name})
+	parts_dict.update({"locality": focused_part.locality.name})
+        parts_list.append(parts_dict)
+    return Response(parts_list)	
+
+
 
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
@@ -160,6 +249,7 @@ def get_parts_catalog(request):
         parts_dict.update({"part_number":part.part_number})
         parts_dict.update({"part_model":part.plate.model.model_name})
         parts_dict.update({"part_plate":part.plate.plate_name})
+	parts_dict.update({"plate_id":part.plate_id})
         parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
     return Response(parts_list)
@@ -185,7 +275,7 @@ def get_alternateparts(request):
 @api_view(['GET'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
-def get_schedule(request, dsr_id, date):
+def get_schedule(request, dsr_id):
     '''
     This method gets the schedule(the retailers he has to visit) for today, given the dsr id
     '''
@@ -218,6 +308,7 @@ def split_date(date):
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
+@transaction.commit_manually
 def place_order(request, dsr_id):
     '''
     This method gets the orders placed by the dsr on behalf of the retailer and puts
@@ -244,21 +335,35 @@ def place_order(request, dsr_id):
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
                 try:
-                    orderpart_details.part_number = PartPricing.objects.\
-                                                get(part_number = item['part_number'])
+                    if item['part_type'] == 1:
+                        '''Get the part details from Catalog Table'''
+                        orderpart_details.part_number_catalog = PartIndexDetails.objects.\
+                                                 get(part_number=item['part_number'], plate_id=item.get("plate_id"))
+                    elif item['part_type'] == 2:
+                        '''Get the part detailes from PartPricing Table'''
+                        orderpart_details.part_number = PartPricing.objects.\
+                                                 get(part_number=item['part_number'])
                 except:
-                    orderpart_details.part_number_catalog = PartIndexDetails.objects.\
-                                                get(part_number = item['part_number'])
+		    try:
+			orderpart_details.part_number_catalog = PartIndexDetails.objects.\
+                                                 get(part_number=item['part_number'])
+		    except:
+                        orderpart_details.part_number = PartPricing.objects.\
+                                                 get(part_number=item['part_number'])
+
+                    #return Response({'error': 'Part '+ item['part_number'] +' not found'})
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
                 orderpart_details.save()
+	    transaction.commit()
             send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
     return Response({'message': 'Order updated successfully', 'status':1})
 
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
+@transaction.commit_manually
 def retailer_place_order(request, retailer_id):
     '''
     This method gets the orders placed by the retailer and puts
@@ -277,16 +382,31 @@ def retailer_place_order(request, retailer_id):
             #push all the items into the orderpart details
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
-                try:
-                    orderpart_details.part_number = PartPricing.objects.\
-                                                get(part_number = item['part_number'])
+		try:
+                    if item['part_type'] == 1:
+                        '''Get the part details from Catalog Table'''
+                        orderpart_details.part_number_catalog = PartIndexDetails.objects.\
+                                                 get(part_number = item['part_number'], plate_id=item.get('plate_id'))
+                    elif item['part_type'] == 2:
+                        '''Get the part detailes from PartPricing Table'''
+                        orderpart_details.part_number = PartPricing.objects.\
+                                                 get(part_number = item['part_number'])
                 except:
-                    orderpart_details.part_number_catalog = PartIndexDetails.objects.\
-                                                get(part_number = item['part_number'])
+                    #return Response({'error': 'Part '+ item['part_number'] +' not found'})
+                    try:
+                        orderpart_details.part_number_catalog = PartIndexDetails.objects.\
+                                                 get(part_number=item['part_number'])
+                    except:
+                        orderpart_details.part_number = PartPricing.objects.\
+                                                 get(part_number=item['part_number'])
+
+
+
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
                 orderpart_details.save()
+	    transaction.commit()
             send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
     return Response({'message': 'Order updated successfully', 'status':1})
 
@@ -312,12 +432,13 @@ def get_outstanding(request, dsr_id):
                 retailer_dict = {}
                 total_amount = 0
                 collection = 0
-                total_amount = total_amount + invoice.invoice_amount
+                total_amount = total_amount + (invoice.invoice_amount - invoice.paid_amount)
                 retailer_dict.update({'retailer_id':retailer.retailer_code})
                 retailer_dict.update({'invoice_id': invoice.invoice_id})
                 retailer_dict.update({'total_amount': total_amount})
                 retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
                 #get the collections for that invoice
+		diff = today.date() - invoice.invoice_date.date()
                 collection_objs = Collection.objects.filter(invoice_id = invoice.id)
                 for each in collection_objs:
                     collections = CollectionDetails.objects.filter(collection_id = each.id)
@@ -325,6 +446,7 @@ def get_outstanding(request, dsr_id):
                         for each_collections in collections:
                             collection = collection + each_collections.collected_amount
                 retailer_dict.update({'collected_amount': collection})
+		retailer_dict.update({'period': diff.days})
                 retailer_list.append(retailer_dict)
     return Response(retailer_list)
 
@@ -348,7 +470,7 @@ def get_dsr_outstanding(request, dsr_id):
                 retailer_dict = {}
                 total_amount = 0
                 collection = 0
-                total_amount = total_amount + invoice.invoice_amount
+                total_amount = total_amount + (invoice.invoice_amount - invoice.paid_amount)
                 retailer_dict.update({'retailer_id':retailer.retailer_code})
                 retailer_dict.update({'invoice_id': invoice.invoice_id})
                 retailer_dict.update({'total_amount': total_amount})
@@ -388,7 +510,7 @@ def get_retailer_outstanding(request, retailer_id):
             retailer_dict = {}
             outstanding = 0
             collection = 0
-            outstanding = outstanding + invoice.invoice_amount
+            outstanding = outstanding + (invoice.invoice_amount - invoice.paid_amount)
             retailer_dict.update({'retailer_id':retailer.retailer_code})
             retailer_dict.update({'invoice_id': invoice.id})
             retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
@@ -432,6 +554,7 @@ def get_distributor_for_retailer(request, retailer_id):
 @api_view(['POST'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
+@transaction.commit_manually
 def uploadcollection(request):
     '''
     This method gets the collection of payment by dsr and puts it into the collection and collection
@@ -451,7 +574,7 @@ def uploadcollection(request):
         # check the collectedamount from the payload is less than or equal to the existing
         # collection for that invoice
         if (collection_body['collected_amount']) <= \
-            invoice.invoice_amount - decimal.Decimal(existing_collection):
+            decimal.Decimal(invoice.invoice_amount) - decimal.Decimal(existing_collection):
             # enter into teh collection table
             collection = Collection()
             collection.invoice = Invoices.objects.get(invoice_id = collection_body['invoice_id'])
@@ -486,6 +609,11 @@ def uploadcollection(request):
         else:
             message = message + '\n' + 'status : 0' + ' ' + \
                 'message : Collection is greater than the invoice amount for the invoice id: ' + collection_body['invoice_id']
+    try:
+    	transaction.commit()
+	message = {'status': 1, 'message': 'Collection update successfully'}
+    except:
+	message = {'status': 0, 'message': 'Collection update failed'}
     send_msg_to_retailer_on_collection(request,retailer.id)
     return Response(message)
 
@@ -1129,3 +1257,265 @@ def send_msg_to_retailer_on_collection(request,retailer_id):
     sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
     send_job_to_queue(send_loyalty_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
+
+def get_retailer_dict(retailer):
+	retailer_dict={}
+	last_order_date = OrderPart.objects.filter(retailer=retailer).order_by('-order_date')
+	retailer_dict['firstname'] = retailer.user.user.first_name
+	retailer_dict['lastname'] = retailer.user.user.last_name
+	retailer_dict['shopname'] = retailer.retailer_name
+	if retailer.latitude and retailer.longitude:
+	    retailer_dict['latitude'] = str(retailer.latitude)
+	    retailer_dict['longitude'] = str(retailer.longitude)
+	else:
+	    return None
+        #for the particular retailer, get all the invoices and total the invoice amount
+        invoices = Invoices.objects.filter(retailer__retailer_code = retailer.id)
+        if invoices:
+            for invoice in invoices:
+                retailer_dict = {}
+                outstanding = 0
+                collection = 0
+                outstanding = outstanding + invoice.invoice_amount
+                #get the collections for that invoice
+                collection_objs = Collection.objects.filter(invoice_id = invoice.id)
+                for each in collection_objs:
+                    collections = CollectionDetails.objects.filter(collection_id = each.id)
+                    if collections:
+                        for each_collections in collections:
+                            collection = collection + each_collections.collected_amount
+	    retailer_dict['outstanding'] = outstanding
+	else:
+	    retailer_dict['outstanding'] = 0
+	if last_order_date:
+	    retailer_dict['lastorderdate'] = last_order_date[0].order_date
+	retailer_dict['contact'] = retailer.mobile
+	dsr_work_allocation = DSRWorkAllocation.objects.filter(retailer=retailer).order_by('-date')
+	##FIXME: Add for all days
+	if dsr_work_allocation:
+            retailer_dict['day'] = dsr_work_allocation[0].pjp_day
+	else:
+	    retailer_dict['day'] = 0 
+	return retailer_dict
+
+def get_retailer_unassigned_dict(retailer):
+     retailer_unassigned_dict={}
+     retailer_unassigned_dict['firstname'] = retailer.user.user.first_name
+     retailer_unassigned_dict['lastname'] = retailer.user.user.last_name
+     retailer_unassigned_dict['shopname'] = retailer.retailer_name
+     if retailer.latitude and retailer.longitude:
+	     retailer_unassigned_dict['latitude'] = str(retailer.latitude)
+	     retailer_unassigned_dict['longitude'] = str(retailer.longitude)
+     else:
+	     #FIXME: check if object is collected
+             return None
+     retailer_unassigned_dict['outstanding'] = retailer.retailer_name
+     retailer_unassigned_dict['nsm_id'] = retailer.distributor.asm.nsm.nsm_id
+     retailer_unassigned_dict['dsr_id'] = retailer.dsr_id
+     retailer_unassigned_dict['contact'] = retailer.mobile
+     dsr_work_allocation = DSRWorkAllocation.objects.filter(retailer=retailer)
+     if dsr_work_allocation:
+	#pass
+	retailer_unassigned_dict['day'] = dsr_work_allocation[0].pjp_day
+     return retailer_unassigned_dict
+
+@api_view(['GET'])
+def get_associated_nsms(request):	
+    nsms = NationalSparesManager.objects.all()
+    response_dict = {}
+    response_dict['role_id'] = 1
+    response_dict['role_name'] = "SFAAdmins"
+    response_dict['users'] = []
+    response_dict['retailers'] = []
+    for nsm in nsms:
+        nsm_dict = {}
+        nsm_dict['userid'] = nsm.nsm_id
+        nsm_dict['firstname'] = nsm.user.user.first_name
+        nsm_dict['lastname'] = nsm.user.user.last_name
+        nsm_dict['retailers'] = []
+	retailers = Retailer.objects.filter(distributor__asm__nsm__nsm_id=nsm.nsm_id).exclude(dsr_id__isnull=True)
+	retailers_unassigned = Retailer.objects.filter(dsr_id__isnull=True,distributor__asm__nsm__nsm_id=nsm.nsm_id)
+	##FIXME:move the for loops in side the function and update the dict
+	for retailer in retailers:
+            retailer_dict = get_retailer_dict(retailer)
+	    if retailer_dict != None:
+	        nsm_dict['retailers'].append(retailer_dict)
+        for retailer in retailers_unassigned:
+		retailer_unassigned_dict = get_retailer_unassigned_dict(retailer)
+	        if retailer_unassigned_dict != None:
+                    response_dict['retailers'].append(retailer_unassigned_dict)
+	response_dict['users'].append(nsm_dict)
+    return Response(response_dict)
+
+
+@api_view(['GET'])
+def get_associated_asms(request,nsm_id=None):
+    if nsm_id == None:
+        nsm_id=request.GET.__getitem__('nsm_id')
+    asms = AreaSparesManager.objects.filter(nsm__nsm_id=nsm_id)
+    response_dict = {}
+    response_dict['role_id'] = 1
+    response_dict['role_name'] = "NationalSparesManager"
+    response_dict['users'] = []
+    response_dict['retailers'] = []
+    for asm in asms:
+        asm_dict = {}
+        asm_dict['userid'] = asm.asm_id
+        asm_dict['firstname'] = asm.user.user.first_name
+        asm_dict['lastname'] = asm.user.user.last_name
+        asm_dict['retailers'] = []
+	retailers = Retailer.objects.filter(distributor__asm__asm_id=asm.asm_id).exclude(dsr_id__isnull=True)
+	retailers_unassigned = Retailer.objects.filter(dsr_id__isnull=True,distributor__asm__asm_id=asm.asm_id)
+	for retailer in retailers:
+             retailer_dict=get_retailer_dict(retailer)
+	     if retailer_dict != None:
+	         asm_dict['retailers'].append(retailer_dict)
+        for retailer in retailers_unassigned:
+             retailer_unassigned_dict=get_retailer_unassigned_dict(retailer)
+             if retailer_unassigned_dict != None:
+		response_dict['retailers'].append(retailer_unassigned_dict)
+	response_dict['users'].append(asm_dict)
+    return Response(response_dict)
+
+
+@api_view(['GET'])
+def get_associated_distributors(request,asm_id=None):
+    if asm_id == None:
+        asm_id = request.GET.__getitem__('asm_id')
+    distributors = Distributor.objects.filter(asm__asm_id=asm_id)
+    response_dict = {}
+    response_dict['role_id'] = 1
+    response_dict['role_name'] = "AreaSparesManager"
+    response_dict['users'] = []
+    response_dict['retailers'] = []
+    for distributor in distributors:
+        distributor_dict = {}
+        distributor_dict['userid'] = distributor.distributor_id
+        distributor_dict['firstname'] = distributor.user.user.first_name
+        distributor_dict['lastname'] = distributor.user.user.last_name
+        distributor_dict['retailers'] = []
+	retailers = Retailer.objects.filter(distributor__distributor_id=distributor.distributor_id).exclude(dsr_id__isnull=True)
+	retailers_unassigned = Retailer.objects.filter(dsr_id__isnull=True,distributor__distributor_id=distributor.distributor_id)
+	for retailer in retailers:
+             retailer_dict=get_retailer_dict(retailer)
+             if retailer_dict != None:
+		distributor_dict['retailers'].append(retailer_dict)
+        for retailer in retailers_unassigned:
+             retailer_unassigned_dict=get_retailer_unassigned_dict(retailer)
+             if retailer_unassigned_dict != None:
+		response_dict['retailers'].append(retailer_unassigned_dict)
+	response_dict['users'].append(distributor_dict)
+    return Response(response_dict)
+
+
+@api_view(['GET'])
+def get_associated_dsrs(request,distributor_id=None):
+    if distributor_id == None:
+        distributor_id = request.GET.__getitem__('distributor_id') #Handle the multivaluedictkey error
+    dsrs = DistributorSalesRep.objects.filter(distributor__distributor_id=distributor_id)
+    response_dict = {}
+    response_dict['role_id'] = 1
+    response_dict['role_name'] = "Distributor"
+    response_dict['users'] = []
+    response_dict['retailers'] = []
+    for dsr in dsrs:
+        dsr_dict = {}
+        dsr_dict['userid'] = dsr.distributor_sales_code
+        dsr_dict['firstname'] = dsr.user.user.first_name
+        dsr_dict['lastname'] = dsr.user.user.last_name
+        dsr_dict['retailers'] = []
+	retailers = Retailer.objects.filter(dsr_id=dsr.id)#.exclude(dsr_id__isnull=True)
+	for retailer in retailers:
+             retailer_dict=get_retailer_dict(retailer)
+             if retailer_dict != None:
+		dsr_dict['retailers'].append(retailer_dict)
+        response_dict['users'].append(dsr_dict)
+    #Only distributor_id has to be checked for unassigned here
+    retailers_unassigned = Retailer.objects.filter(dsr_id__isnull=True,distributor__distributor_id=distributor_id)
+    for retailer in retailers_unassigned:
+             retailer_unassigned_dict=get_retailer_unassigned_dict(retailer)
+             if retailer_unassigned_dict != None:
+		response_dict['retailers'].append(retailer_unassigned_dict)
+    return Response(response_dict)
+
+@api_view(['GET'])
+def get_retailers_actual(request):
+    dsr_id = request.GET.__getitem__('dsr_id')
+    date = request.GET.__getitem__('date')
+    retailers = Retailer.objects.filter(dsr_id=dsr_id)#.count()
+    response_dict = {}
+    response_dict['date'] = date #FIXME: Confirm the field
+    response_dict['users'] = []
+    for retailer in retailers:
+        last_order_date = OrderPart.objects.filter(retailer=retailer).order_by('-order_date')
+	retailer_dict = {}
+	retailer_dict['userid'] = retailer.id #FIXME: Could be retailer_id
+        retailer_dict['firstname'] = retailer.user.user.first_name
+        retailer_dict['lastname'] = retailer.user.user.last_name
+	if retailer.latitude and retailer.longitude:
+	    retailer_dict['latitude'] = str(retailer.latitude)
+	    retailer_dict['longitude'] = str(retailer.longitude)
+	else:
+	    #Do not send the retailers if the retailer's gps-coordinates is not available
+	    continue
+	retailer_dict['data1'] = []
+	###Get the retailer name 
+        invoices = Invoices.objects.filter(retailer__retailer_code = retailer.id)
+        if invoices:
+            for invoice in invoices:
+                retailer_dict = {}
+                outstanding = 0
+                collection = 0
+                outstanding = outstanding + invoice.invoice_amount
+                #get the collections for that invoice
+                collection_objs = Collection.objects.filter(invoice_id = invoice.id)
+                for each in collection_objs:
+                    collections = CollectionDetails.objects.filter(collection_id = each.id)
+                    if collections:
+                        for each_collections in collections:
+                            collection = collection + each_collections.collected_amount
+		collection_dict={}
+		collection_dict['type1'] = "collection"
+		collection_dict['amount'] = collection
+		collection_dict['accepttime'] = ""
+		retailer_dict['data1'].append(collection_dict)
+	    retailer_dict['outstanding'] = outstanding
+	else:
+	    retailer_dict['outstanding'] = 0
+	if last_order_date:
+	    retailer_dict['lastorderdate'] = last_order_date[0].order_date
+        retailer_dict['contact'] = retailer.mobile
+        dsr_work_allocation = DSRWorkAllocation.objects.filter(retailer=retailer).order_by('-date')
+	##FIXME: Add for all days
+	if dsr_work_allocation:
+	    retailer_dict['day'] = dsr_work_allocation[0].pjp_day
+	else:
+	    retailer_dict['day'] = 0
+    	response_dict['retailers'].append(retailer_dict)
+    return Response(response_dict)
+
+
+@api_view(['GET'])
+def get_users(request):
+# FIXME: Return false other than all the known user roles
+# FIXME: Move this method to a more generic location, may be auth_helper
+    print request.user.groups.all()
+    if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+	try:
+	    distributor_id = Distributor.objects.get(user_id=request.user.id).distributor_id
+	    return get_associated_dsrs(request, distributor_id)
+	except:
+	    return Response({'error':'Distributor object error'})
+    if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+	asm_id = AreaSparesManager.objects.get(user_id=request.user.id).asm_id
+        return get_associated_distributors(request, asm_id)
+    if request.user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
+	nsm_id = NationalSparesManager.objects.get(user_id=request.user.id).nsm_id
+    	return get_associated_asms(request,nsm_id)
+    if request.user.groups.filter(name=Roles.SFAADMIN).exists():
+        return get_associated_nsms(request)
+    else:
+	##FIXME: Added this to test with 
+	return get_associated_nsms(request)
+    return Response({'error':'error'}) 
+

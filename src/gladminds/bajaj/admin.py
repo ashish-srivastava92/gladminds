@@ -16,7 +16,7 @@ from gladminds.bajaj.models import Distributor, DistributorStaff, DistributorSal
                         Retailer, UserProfile, District, \
                          SparePartPoint, State, AreaSparesManager, City, OrderPartDetails, OrderDeliveredHistory, \
                           Collection, PartsStock, OrderPart, NationalSparesManager, DSRLocationDetails, CollectionDetails,\
-                          Invoices,DoDetails
+                          Invoices,DoDetails, PermanentJourneyPlan, PartIndexDetails
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
@@ -1317,11 +1317,40 @@ class CategoriesAdmin(GmModelAdmin):
     
 #  self. list_display = ('part_no', 'Part_Description','Applicable_Model', 'Category',
 #                     'Price', 'active')
-    
-class PartListAdmin(GmModelAdmin):
+
+class FocusedPartAdmin(GmModelAdmin):
+    pass
+
+from django.contrib.admin.filters import SimpleListFilter
+
+class NullFilterSpec(SimpleListFilter):
+    title = u''
+
+    parameter_name = u''
+
+    def lookups(self, request, model_admin):
+        return (
+            ('1', 'Parts with Associated Parts',),
+        )
+
+    def queryset(self, request, queryset):
+        kwargs = {
+        '%s'%self.parameter_name : None,
+        }
+        if self.value() == '1':
+            return queryset.exclude(**kwargs)
+        return queryset
+
+class StartNullFilterSpec(NullFilterSpec):
+    title = u'Associated Parts'
+    parameter_name = u'associated_parts'
+
+
+ 
+class PartCategoryAdmin(GmModelAdmin):
     class Media:
         js = ['js/uploadExcel.js']
-    list_filter = ('subcategory', 'products')    
+    list_filter = ('subcategory', 'products',StartNullFilterSpec )    
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.DISTRIBUTORSALESREP, Roles.RETAILERS]
     search_fields = ('part_number', 'description')
     list_display = ('part_no', 'Part_Description', 'Applicable_Model', 'Category',
@@ -1329,11 +1358,11 @@ class PartListAdmin(GmModelAdmin):
                    )
     exclude = ['category', ] 
 
-    def suit_row_attributes(self, obj):
-	class_map = {}
-        css_class = class_map.get(str(obj.category))
-        if css_class:
-            return {'class': css_class}
+    #def suit_row_attributes(self, obj):
+	#class_map = {}
+        #css_class = class_map.get(str(obj.category))
+        #if css_class:
+        #    return {'class': css_class}
 
     
     def part_no(self, obj):
@@ -1448,7 +1477,7 @@ class PartListAdmin(GmModelAdmin):
     
     def get_form(self, request, obj=None, **kwargs):
 #         self.exclude = ("price)
-        form = super(PartListAdmin, self).get_form(request, obj, **kwargs)
+        form = super(PartCategoryAdmin, self).get_form(request, obj, **kwargs)
         return form
     
     
@@ -1467,7 +1496,7 @@ class PartListAdmin(GmModelAdmin):
                     
         if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
             extra_context["show_upload_stock"] = True
-        return super(PartListAdmin, self).changelist_view(request, extra_context=extra_context)
+        return super(PartCategoryAdmin, self).changelist_view(request, extra_context=extra_context)
 
 # 
 # class PartsRackLocationForm(forms.ModelForm):
@@ -1628,13 +1657,51 @@ class DSRWorkAllocationForm(forms.ModelForm):
 #         if not retailer_objects:
 #             retailer_objects = Retailer.objects.all()
 #         self.fields['retailer'].queryset = retailer_objects
-            
-            
 
-    
+class PJPForm(forms.ModelForm):
+    class Meta:
+        model = get_model('PermanentJourneyPlan')
+
+class PJPAdmin(GmModelAdmin):
+
+    def changelist_view(self, request, extra_context={}):
+
+        opts = PermanentJourneyPlan._meta
+        context = {"opts":opts, "app_label":opts.app_label}
+        template = 'admin/bajaj/dsrworkallocation/change_list.html'
+        form_url = ''
+        return super(PJPAdmin, self).changelist_view(request, context)
+
+    def queryset(self, request):
+        qs = super(PJPAdmin, self).queryset(request)
+        # get workallocation objects for the logged in distributor
+#         if Distributor.objects.filter(user__user=request.user).exists():
+#             DSRWorkAllocation_objects = DSRWorkAllocation.objects.filter(distributor__user=\
+#                                                                          request.user)
+#         else:
+#         qs = DSRWorkAllocation.objects.all()
+        return qs
+
+    def get_form(self, request, obj=None, **kwargs):
+        ModelForm = super(PJPAdmin, self).get_form(request, obj, **kwargs)
+        class ModelFormMetaClass(ModelForm):
+            def __new__(cls, *args, **kwargs):
+                kwargs['request'] = request
+                return ModelForm(*args, **kwargs)
+        return ModelFormMetaClass
+
+    def save_model(self, request, obj, form, change):
+
+
+#         obj.distributor = Distributor.objects.get(user__user=request.user)
+        super(PJPAdmin, self).save_model(request, obj, form, change)
+
+
+
+            
 class DSRWorkAllocationAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    form = DSRWorkAllocationForm
+    #form = DSRWorkAllocationForm
     search_fields = ('dsr', 'date')
     list_display = ('allocated_date', 'dsr_id', 'dist_id')
     
@@ -1656,7 +1723,7 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
 
         opts = DSRWorkAllocation._meta
         context = {"opts":opts, "app_label":opts.app_label}
-        template = 'admin/bajaj/dsrworkallocation/change_list.html'  
+        #template = 'admin/bajaj/dsrworkallocat/change_list.html'  
         form_url = ''
         return super(DSRWorkAllocationAdmin, self).changelist_view(request, context)
     
@@ -2212,16 +2279,21 @@ class SparePartline(TabularInline):
 
 class ProductCatalogAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    list_filter = ('is_active',)
-    search_fields = ('partner__partner_id', 'product_id',
-                    'brand', 'model', 'category',
-                    'sub_category')
+    list_filter = ('plate__plate_name', 'plate__model__model_name')
+    #search_fields = ('partner__partner_id', 'product_id',
+     #               'brand', 'model', 'category',
+      #              'sub_category')
+    list_display = ('get_model', 'get_plate', 'part_number', 'description', 'mrp')
 
-    list_display = ('partner', 'product_id', 'points', 'price',
-                    'description', 'variation',
-                    'brand', 'model', 'category',
-                    'sub_category')
-    readonly_fields = ('image_tag',)
+    def get_model(self, obj):
+        return obj.plate.model.model_name
+    get_model.short_description = "Models"
+    get_model.admin_order_field = 'model'
+
+    def get_plate(self, obj):
+        return obj.plate.plate_name
+    get_plate.short_description = "Plates"
+    get_plate.admin_order_field = 'plate_name'
 
 class PartnerAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -2589,7 +2661,6 @@ class ContainerIndentAdmin(GmModelAdmin):
             return {'class': css_class}
 
 
-
 class ContainerLRAdmin(GmModelAdmin):
     search_fields = ('zib_indent_num__indent_num',)
     list_display = ('lr_number', 'zib_indent_num',
@@ -2628,7 +2699,7 @@ def get_admin_site_custom(brand):
 #     brand_admin.register(get_model("BackOrders", brand), BackOrdersAdmin)
     brand_admin.register(get_model("DistributorSalesRep", brand), DistributorSalesRepAdmin)  
     brand_admin.register(get_model("DSRWorkAllocation", brand), DSRWorkAllocationAdmin)
-    
+    brand_admin.register(get_model("PermanentJourneyPlan", brand), PJPAdmin) 
     brand_admin.register(get_model("DSRLocationDetails", brand), DSRLocationDetailsAdmin)
     brand_admin.register(get_model("PartsRackLocation", brand), PartsRackLocationAdmin)
     brand_admin.register(get_model("Retailer", brand), RetailerAdmin)
@@ -2637,7 +2708,8 @@ def get_admin_site_custom(brand):
     # brand_admin.register(get_model("SubCategories", brand), SubCategoriesAdmin)
 #     brand_admin.register(get_model("PartMasterCv", brand), PartListAdmin)
     brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
-    brand_admin.register(get_model("PartPricing", brand), PartListAdmin)
+    brand_admin.register(get_model("PartPricing", brand), PartCategoryAdmin)
+    brand_admin.register(get_model("FocusedPart", brand), FocusedPartAdmin)
     brand_admin.register(get_model("NationalSparesManager", brand), NSMAdmin)
     brand_admin.register(get_model("AreaSparesManager", brand), ASMAdmin)
     brand_admin.register(get_model("NationalSalesManager", brand), NationalSalesManagerAdmin)
@@ -2657,7 +2729,6 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("ASCTempRegistration", brand), ASCTempRegistrationAdmin)
     brand_admin.register(get_model("SATempRegistration", brand), SATempRegistrationAdmin)
     brand_admin.register(get_model("CustomerTempRegistration", brand), CustomerTempRegistrationAdmin)
-        
     brand_admin.register(get_model("SMSLog", brand), SMSLogAdmin)
     brand_admin.register(get_model("EmailLog", brand), EmailLogAdmin)
     brand_admin.register(get_model("DataFeedLog", brand), FeedLogAdmin)
@@ -2679,6 +2750,7 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("Supervisor", brand), SupervisorAdmin)
     brand_admin.register(get_model("ContainerIndent", brand), ContainerIndentAdmin)
     brand_admin.register(get_model("ContainerLR", brand), ContainerLRAdmin)
+    brand_admin.register(get_model("PartIndexDetails", brand), ProductCatalogAdmin)
     # Disable the delete action throughout the admin site
     brand_admin.disable_action('delete_selected')
    

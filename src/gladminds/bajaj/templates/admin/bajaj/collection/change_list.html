@@ -12,6 +12,7 @@
 <link rel="stylesheet" type="text/css" href="/static/suit/css/suit.css" media="all">
 
 <script type="text/javascript">
+$(document).on("click",".modal-backdrop",function(){ $('.close').click(); });
 	var Suit = {
 		$ : $.noConflict()
 	};
@@ -95,26 +96,36 @@ body .modal {
 				
 
 				var output = [];
-				output.push("<table><thead><tr><th>Sl.no</th><th>Collected Amount</th><th>Collected Date</th><th>Collected By</th><th>Mode</th><th>ImageURL</th></thead><tbody>");
+				output.push("<table><thead><tr><th>Invoice.No</th><th>Collected Amount</th><th>Collected Date</th><th>Collected By</th><th>Mode</th><tbody>");var ahref;
 				$.each(data, function(k, v) {
 					
 					output.push("<tr><td align='center'>");
-					output.push(k+1);
+					output.push(v.invoice_no);
 					output.push("</td><td align='right'>");
 					output.push(v.collected_amount);
-					output.push("</td><td>");
+					output.push("</td><td align='center'>");
 					output.push(v.payment_date);
-					output.push("</td><td>");
+					output.push("</td><td align='center'>");
 					output.push(v.collected_by);
-					output.push("</td><td>");
+					output.push("</td><td align='center'>");
+					if(v.mode=="Cheque"){
+					ahref=v.cheque_img_url;
+                                        if(ahref!="")
+					output.push("<a id='chequehref' target='_blank' href='"+ahref+"'>");
+					output.push(v.mode);output.push("-");output.push(v.cheque_number);
+                                        if(ahref!="")                                        
+					 output.push("</a>");
+					}
+					else
 					output.push(v.mode);
-					output.push("</td><td>");
-					output.push("&nbsp;");
-					output.push("</td></tr>");
+					//output.push("</td><td align='center'>");
+					//output.push(v.status);
+					output.push("</tr>");
 				});
 				output.push("</tbody></table>");
 				$("#modalBody").html(output.join(""));
-				$("#modalBody").find("table").dataTable();
+                                $("#modalBody").find("table").dataTable();
+				//$("#chequehref").attr("href",ahref);
 				
 				
 				$("#myModal .modal-title span").html("").html($(obj).attr("retName"))
@@ -136,6 +147,29 @@ body .modal {
 </script>
 {% endblock extrahead %}
 {% block content %}
+<div class="span6">
+                                <form action="{% url 'upload_collection_details' %}" method="POST" enctype="multipart/form-data" >
+                                <table width>
+                                        <tr>
+                                                <td>
+                                                                <input type="file" name="upload_collection_details" required="true">
+
+                                                <button type="button" class="btn btn-default" onclick="javascript:downloadSampleCollectionCsv();">
+                                                Download Sample CSV
+                                                </button>
+
+                                                        </td>
+
+                                                <td>
+                                                        <input class="btn btn-info" id="uploadExcel" type="submit" value="Upload Final Retailer Collection">
+                                                </td>
+                                        </tr>
+                                </table>
+                            </form>
+                        </div>
+
+
+
 <table class="table table-striped table-bordered table-responsive	" >
         <thead>
 				<tr>
@@ -203,5 +237,11 @@ body .modal {
 </div>
 <!-- /.modal -->
 
+    <script type="text/javascript">
+        function downloadSampleCollectionCsv(){
+            url = "{% url 'download_sample_Collection_upload_csv' %}"
+            location.href= url;
+        }
+    </script>
 
 {% endblock %}

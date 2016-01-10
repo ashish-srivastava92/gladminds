@@ -42,7 +42,7 @@ urlpatterns = patterns('',
     #end of api urls
     
     url(r'^bulk_upload_retailer/$', 'gladminds.bajaj.views.views.bulk_upload_retailer', name='bulk_upload_retailer'),
-    
+    url(r'^mc/get_stock/(?P<dsr_id>\d+)/$', 'gladminds.bajaj.views.apis.get_stock'),    
     url(r'^sms/','gladminds.bajaj.services.feed_views.send_sms', name='send_sms'),
     url(r'^admin/', include(brand_admin.urls)),
     url(r'', include(api_v1.urls)),
@@ -89,10 +89,8 @@ urlpatterns = patterns('',
     url(r'^get_districts/$', 'gladminds.bajaj.views.views.get_districts', name='get_districts'),
     url(r'^save_order_history/$', 'gladminds.bajaj.views.views.save_order_history', name='save_order_history'),
     
-    
-  
-            
-    
+    #url(r'^get_associated_users/$', 'gladminds.bajaj.views.apis.get_users', name='getusers'),
+
     url(r'^save_order_details/$', 'gladminds.bajaj.views.views.save_order_temp_history', name='save_order_temp_history'),
     
 
@@ -105,9 +103,9 @@ urlpatterns = patterns('',
     
     
   url(r'^admin/upload-part-sfa/$', 'gladminds.bajaj.views.upload_part_pricing',name="upload_part_pricing"),
-    
+    url(r'^upload_order_invoice/$', 'gladminds.bajaj.views.upload_order_invoice',name="upload_order_invoice"),
     url(r'^admin/upload-rack-location/$', 'gladminds.bajaj.views.upload_rack_location',name="upload_rack_location"),
-    
+    url(r'^upload_collection_details/$', 'gladminds.bajaj.views.upload_collection_details',name="upload_collection_details"),
     url(r'^admin/upload-invoices/$', 'gladminds.bajaj.views.upload_invoices',name="upload_invoices"),
     
     
@@ -131,10 +129,10 @@ urlpatterns = patterns('',
     url(r'^admin/get_distributor_map','gladminds.bajaj.views.views.map_view1', name='map_view1'),
     
     url(r'^admin/get_collection_details/(?P<ret_id>\d+)/$','gladminds.bajaj.views.views.get_collection_details', name='get_collection_details'),
-    url(r'^admin/invoice_details(?P<ret_id>\d+)/(?P<invoice_id>\d+)/','gladminds.bajaj.views.views.get_orders', name='get_orders'),
+    url(r'^admin/invoice_details/(?P<ret_id>\d+)/(?P<invoice_id>\d+)/','gladminds.bajaj.views.views.get_invoice_details', name='get_orders'),
      url(r'^admin/get_dsr_retailers','gladminds.bajaj.views.views.get_dsr_retailers', name='get_dsr_retailers'),    
      url(r'^admin/get_dist_retailers','gladminds.bajaj.views.views.get_dist_retailers', name='get_dist_retailers'), 
-
+    url(r'^admin/get_outstanding_details/(?P<retailer_id>\d+)/$','gladminds.bajaj.views.views.get_outstanding_details', name='get_outstanding_details'),
 
 
 
@@ -147,10 +145,13 @@ urlpatterns = patterns('',
                    name='download_sample_stock_csv'),
     url(r'^download_sample_rack_location_csv/', 'gladminds.bajaj.views.views.download_sample_rack_location_list_csv',
                    name='download_sample_rack_location_csv'),
-
+    url(r'^download_sample_order_invoice_csv/', 'gladminds.bajaj.views.views.download_sample_order_invoice_csv',
+                   name='download_sample_order_invoice_csv'),
     url(r'^get_picklist/', 'gladminds.bajaj.views.views.get_picklist',
                    name='invoice'),
-                       
+    url(r'^download_sample_Collection_upload_csv/', 'gladminds.bajaj.views.views.download_sample_Collection_upload_csv',
+                   name='download_sample_Collection_upload_csv'),
+
     url(r'^download_delivery_list/', 'gladminds.bajaj.views.views.download_delivery_list', name='download_delivery_list'),
                        
     
@@ -161,5 +162,6 @@ urlpatterns = patterns('',
               
     url(r'^order_allocated_details/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$','gladminds.bajaj.views.views.pending_order_details' , name='pending_order_details'),
     url(r'^save_order/$','gladminds.bajaj.views.views.generate_picklist_save_order' , name='generate_picklist_save_order'),
+    url(r'^mc/get_focused_parts/', 'gladminds.bajaj.views.apis.get_focused_parts'),
 
 )

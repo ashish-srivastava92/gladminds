@@ -214,6 +214,7 @@ class ProductData(base_models.ProductData):
 #     class Meta:
 #         proxy = True
 
+
 class CouponData(base_models.CouponData):
     product = models.ForeignKey(ProductData, null=False, editable=False)
     service_advisor = models.ForeignKey(ServiceAdvisor, null=True, blank=True)
@@ -451,6 +452,13 @@ class City(base_models.City):
     class Meta(base_models.City.Meta):
         app_label = _APP_NAME
 
+class Locality(base_models.Locality):
+    ''' List of cities mapped to states'''
+    city = models.ForeignKey(City, null=True, blank=True)
+
+    class Meta(base_models.Locality.Meta):
+        app_label = _APP_NAME
+
 class NationalSparesManager(base_models.NationalSparesManager):
     '''details of National Spares Manager'''
     user = models.ForeignKey(UserProfile)
@@ -595,6 +603,7 @@ class Retailer(base_models.Retailer):
     user = models.ForeignKey(UserProfile)
     billing_code = models.CharField(max_length=15)
     distributor = models.ForeignKey(Distributor)
+    dsr = models.ForeignKey(DistributorSalesRep,null=True,blank=True)
     approved = models.PositiveSmallIntegerField(default=constants.STATUS['WAITING_FOR_APPROVAL'])
     email = models.EmailField(max_length=50, null=True, blank=True)
     mobile = models.CharField(max_length=15)
@@ -609,6 +618,7 @@ class Retailer(base_models.Retailer):
     image_url = models.FileField(upload_to="image",
                                    max_length=200, null=True, blank=True)
     district = models.CharField(max_length = 20)
+    locality = models.ForeignKey(Locality, null=True, blank=True)
     near_dealer_name = models.CharField(max_length = 50)
     total_counter_sale = models.DecimalField(max_digits=10, decimal_places=4, null=True, \
                                                 blank=True)
@@ -652,7 +662,8 @@ class DSRWorkAllocation(base_models.DSRWorkAllocation):
     dsr = models.ForeignKey(DistributorSalesRep)
     retailer = models.ForeignKey(Retailer)
     date = models.DateTimeField(null = True, blank=True)
-    
+    pjp_day = models.CharField(max_length = 10, null = True, blank = True) 
+
     class Meta(base_models.DSRWorkAllocation.Meta):
         app_label = _APP_NAME
 #     def __unicode__(self):
@@ -954,12 +965,26 @@ class PartPricing(base_models.PartPricing):
   #  applicable_model = models.CharField(max_length=255, null=True, blank=True)
     current_month_should = models.IntegerField()
     active = models.BooleanField(default=True)
-    moq = models.IntegerField( null=True, blank=True)
+    moq = models.IntegerField(null=True, blank=True)
+    associated_parts = models.ManyToManyField("self", blank=True, null=True)
     class Meta(base_models.PartPricing.Meta):
         app_label = _APP_NAME
         
     def __unicode__(self):
         return self.part_number     
+
+
+class FocusedPart(base_models.FocusedPart):
+    '''Focused parts during a duration'''
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    part = models.ForeignKey(PartPricing)
+    # Remove null=True once data is corrected
+    locality = models.ForeignKey(Locality, null=True, blank=True)
+    class Meta(base_models.FocusedPart.Meta):
+	app_label = _APP_NAME
+    def __unicode__(self):
+        return self.part.part_number + "-" + self.locality.name
 
 
 class PartsStock(base_models.PartsStock):
@@ -972,10 +997,8 @@ class PartsStock(base_models.PartsStock):
         app_label = _APP_NAME
 
 
-
 class OrderPart(base_models.OrderPart):
     ''' details of orders placed by retailer '''
-
     order_date =models.DateTimeField(auto_now_add=True)
     order_number = models.CharField(max_length=15, null=True, blank=True)
     retailer = models.ForeignKey(Retailer)
@@ -991,7 +1014,7 @@ class OrderPart(base_models.OrderPart):
     order_placed_by = models.IntegerField()
     latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=11, decimal_places=6, null=True, blank=True)
-    
+
     class Meta(base_models.OrderPart.Meta):
         app_label = _APP_NAME
         
@@ -1007,7 +1030,8 @@ class Invoices(base_models.Invoices):
     retailer = models.ForeignKey(Retailer)
     invoice_date = models.DateTimeField()
     invoice_id = models.CharField(max_length=15)
- 
+    paid_amount = models.DecimalField(max_digits = 20, decimal_places=4, null=True, blank=True) 
+
     class Meta(base_models.Invoices.Meta):
         app_label = _APP_NAME
 
@@ -1030,7 +1054,11 @@ class OrderDeliveredHistory(base_models.OrderDeliveredHistory):
     active = models.IntegerField(null=True, blank=True, default=1)
     order = models.ForeignKey(OrderPart)
     delivered_date = models.DateTimeField(null=True, blank=True)
-    do= models.ForeignKey(DoDetails)
+    do = models.ForeignKey(DoDetails)
+    vat = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    service_tax = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    other_taxes = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    discount = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     class Meta(base_models.OrderDeliveredHistory.Meta):
         app_label = _APP_NAME
         verbose_name_plural = "Order Delivered History"
@@ -1154,6 +1182,9 @@ class PartIndexDetails(base_models.PartIndexDetails):
     class Meta(base_models.PartIndexDetails.Meta):
         app_label = _APP_NAME
 
+    def __unicode__(self):
+        return self.part_number + ' ' + self.description 
+
 
         
 class PartsRackLocation(base_models.PartsRackLocation):
@@ -1171,7 +1202,7 @@ class OrderTempDetails(base_models.OrderTempDetails):
     retailer = models.ForeignKey(Retailer, null=True, blank=True)
     distributor = models.ForeignKey(Distributor, null=True, blank=True)
     ordered_quantity = models.IntegerField(null=True, blank=True)
-
+    do = models.ForeignKey(DoDetails)
     mrp = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
     line_total = models.DecimalField(max_digits = 20, decimal_places=10, null=True, blank=True)
     class Meta(base_models.OrderTempDetails.Meta):
@@ -1192,3 +1223,9 @@ class OrderPartDetails(base_models.OrderPartDetails):
         app_label = _APP_NAME
         verbose_name_plural = "Order Part Details"
 
+class PermanentJourneyPlan(base_models.PermanentJourneyPlan):
+    pass
+
+    class Meta(base_models.PermanentJourneyPlan.Meta):
+        app_label = _APP_NAME
+        verbose_name_plural = "Permanent Journey Plan"

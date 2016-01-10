@@ -124,13 +124,14 @@ urlpatterns = patterns('',
     url(r'^mc/get_distributor_for_retailer/retailer_id/(?P<retailer_id>\d+)/$',
                         'gladminds.bajaj.views.apis.get_distributor_for_retailer'),
     
-    url(r'^mc/get_schedule/dsr_id/(?P<dsr_id>\d+)/date/(?P<date>[-\d]+)/$',
-                       'gladminds.bajaj.views.apis.get_schedule'),
+    #url(r'^mc/get_schedule/dsr_id/(?P<dsr_id>\d+)/date/(?P<date>[-\d]+)/$',
+    #                   'gladminds.bajaj.views.apis.get_schedule'),
+    url(r'^mc/get_schedule/dsr_id/(?P<dsr_id>\d+)/$',
+                       'gladminds.core.views.apis.get_schedule'),
     url(r'^mc/place_order/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.bajaj.views.apis.place_order'),
     url(r'^mc/retailer_place_order/retailer_id/(?P<retailer_id>\d+)/$',
                         'gladminds.bajaj.views.apis.retailer_place_order'),
-    
     url(r'^mc/add_retailer/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.bajaj.views.apis.add_retailer'),
     url(r'^mc/dsr_dashboard_report/dsr_id/(?P<dsr_id>\d+)/$',
@@ -252,5 +253,13 @@ urlpatterns = patterns('',
     url(r'^accumulation-download/(?P<choice>[a-zA-Z0-9]+)$', loyalty.download_accumulation_detail, name='download_accumulation_detail'),
     url(r'^loyalty/(?P<report_choice>[a-zA-Z]+)/$', 'gladminds.core.views.get_loyalty_reports'),
     url(r'^powerrewards/$', 'gladminds.core.views.get_loyalty_login'),
+    url(r'^mc/pjp_schedule/$', 'gladminds.core.views.apis.pjp_schedule'),
+    ## Pjp Map API
+    url(r'^getasms/$', 'gladminds.bajaj.views.apis.get_associated_asms', name='getasms'),
+    url(r'^getdistributors/$', 'gladminds.bajaj.views.apis.get_associated_distributors', name='getdistributors'),
+    url(r'^getdsrs/$', 'gladminds.bajaj.views.apis.get_associated_dsrs', name='getdsrs'),
+    url(r'^getretailers_acutal/$', 'gladminds.bajaj.views.apis.get_retailers_actual', name='getretailers_actual'),
+    url(r'^getusers/$', 'gladminds.bajaj.views.apis.get_users', name='getusers'),
+ 
 )
 
