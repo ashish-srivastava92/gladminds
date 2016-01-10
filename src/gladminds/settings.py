@@ -108,14 +108,6 @@ SUIT_CONFIG = {
                      'label': 'Distributor Sales Rep'},
                      {'model': 'retailer',
                      'label': 'Retailer'},
-                    
-                    
-                    
-                    
-                    
-   
-                    
-                    
                     )},
         {'app': 'bajaj', 'label': 'Products', 'icon': ' icon-folder-open',
          'models':({'model': 'brandproductcategory',
@@ -214,12 +206,15 @@ SUIT_CONFIG = {
           'models':(
                    
                      {'model': 'partpricing',
-                      'label': 'Parts List'},
-   
-                         {'model': 'partsracklocation',
+                      'label': 'Parts Category'},
+                     {'model': 'focusedpart',
+                      'label': 'Focused Parts'},
+                     {'model': 'partsracklocation',
                     'label': 'Parts Rack Location'},
+		     {'model': 'partindexdetails',
+                    'label': 'Product Catalogue'},
                      )
-                       
+               
           },
              
              
@@ -241,6 +236,14 @@ SUIT_CONFIG = {
                     )
                     },
 #              
+          {'app': 'bajaj', 'label': 'PJP Schedule', 'icon': ' icon-folder-open',
+          'models':(
+
+                     {'model': 'permanentjourneyplan',
+                      'label': 'PJP Schedule'},
+
+                    )
+                    },
      
           
         {'app': 'bajaj', 'label': 'Collections', 'icon': ' icon-folder-open',

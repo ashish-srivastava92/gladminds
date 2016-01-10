@@ -1,6 +1,10 @@
 <table class="table table-striped table-bordered report-table" border="1">
+	<tr><td>Retailer Name - {{retailer_name}}</td></tr>
+	<tr><td>Retailer Code - {{retailer_code}}</td></tr>
 	<tr>
 		<td><strong>Order Number</strong></td>
+		<td><strong>Delivery Order Id</strong></td>
+		<td><strong>Order Date</strong></td>
 		<td><strong>Part Number</strong></td>
 		<td><strong>Part Description</strong></td>
 		<td><strong>Ordered Quantity</strong></td>
@@ -12,6 +16,8 @@
 		{% for record in data %}
 	<tr>
 		<td>{{record.order_number|default_if_none:""}}</td>
+		<td>{{record.do_id|default_if_none:""}}</td>
+		<td>{{record.order_date|default_if_none:""}}</td>
 		<td>{{record.part_number|default_if_none:""}}</td>
 		<td>{{record.part_description|default_if_none:""}}</td>
 		<td>{{record.ordered_quantity|default_if_none:""}}</td>

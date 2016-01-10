@@ -538,6 +538,13 @@ class RetailerCollection(base_models.RetailerCollection):
     
     class Meta(base_models.RetailerCollection.Meta):
         app_label = _APP_NAME
+ 
+class Locality(base_models.Locality):
+    '''details of Locality'''
+    city_id = models.IntegerField(null=True,blank = True)
+
+    class Meta(base_models.Locality.Meta):
+        app_label = _APP_NAME
 
 class DSRWorkAllocation(base_models.DSRWorkAllocation):
     '''details of DSR work allocation'''
@@ -545,10 +552,14 @@ class DSRWorkAllocation(base_models.DSRWorkAllocation):
     dsr = models.ForeignKey(DistributorSalesRep)
     retailer = models.ForeignKey(Retailer)
     date = models.DateTimeField(null = True, blank=True)
-    
+    locality = models.ForeignKey(Locality)   
+    #FIXME: Change field to BooleanField
+    is_active = models.NullBooleanField()
+    pjp_day = models.CharField(max_length = 10, null = True, blank = True) 
+ 
     class Meta(base_models.DSRWorkAllocation.Meta):
         app_label = _APP_NAME
-        
+       
 class DSRScorecardReport(base_models.DSRScorecardReport):
     '''details of DSRScorecardReport'''
     serial_number = models.DecimalField(max_digits = 6, decimal_places=3)

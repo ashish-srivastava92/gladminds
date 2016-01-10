@@ -20,6 +20,26 @@
 <!-- {% endblock %} --> 
 {% block content %}
 
+                        <div class="span6">
+                                <form action="{% url 'upload_order_invoice' %}" method="POST" enctype="multipart/form-data" >
+                                <table width>
+                                        <tr>
+                                                <td>
+                                                                <input type="file" name="upload_order_invoice" required="true">
+
+                                                <button type="button" class="btn btn-default" onclick="javascript:downloadSampleOrderInvoiceCsv();">
+                                                Download Sample CSV
+                                                </button>
+
+                                                        </td>
+
+                                                <td>
+                                                        <input class="btn btn-info" id="uploadExcel" type="submit" value="Upload Order Invoice">
+                                                </td>
+                                        </tr>
+                                </table>
+                            </form>
+                        </div>
 <table class="table table-striped table-bordered table-responsive	" >
         <thead>
 				<tr>
@@ -52,8 +72,8 @@
         		
         		<td class="text-center">{{each.ret_name}}</td>
 			<td class="text-center">{{each.ret_mobile}}</td>
-        		<!-- <td class="text-center">{{each.dsr_name}}</td> -->
-        		<td class="text-center">{{each.outstanding}}</td>
+        		<!--<td class="text-center">{% if each.open_orders_len != '0' %}<a href="{% url 'get_outstanding_details' each.ret_id  %}{{each.outstanding}}"</a>{% else %}{{each.outstanding}}{%endif %}</td>-->
+			<td class="text-center"><a href="{% url 'get_outstanding_details' each.ret_id  %}">{{each.outstanding}}</td>
         		
         			<td class="text-center">{% if each.open_orders_len != 0 %}<a href="{% url 'order_details' 'open' each.ret_id  %}">{{each.open_orders_len}}</a>{% else %}{{each.open_orders_len}}{%endif %}</td> 
         		<td class="text-center">{% if each.pending_orders_len != 0 %}<a href="{% url 'pending_order_details' 'allocated' each.ret_id %}">{{each.pending_orders_len}}</a>{% else %}{{each.pending_orders_len}}{%endif %}</td>        		
@@ -71,5 +91,13 @@
 					<input type="hidden" id="order_id"  name="order_id" value='{{order_id}}' >
 						<input type="hidden" id="orders_length" value='{{orders_length}}' name="orders_length"  >
 		</table>
+
+    <script type="text/javascript">
+        function downloadSampleOrderInvoiceCsv(){
+            url = "{% url 'download_sample_order_invoice_csv' %}"
+            location.href= url;
+        }
+    </script>
+
 
 {% endblock %}

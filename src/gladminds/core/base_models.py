@@ -1197,7 +1197,7 @@ class DSRWorkAllocation(BaseModel):
         abstract = True
         db_table = "gm_dsrworkallocation"
         verbose_name_plural = "Scheduling"
-        
+
 class RetailerCollection(BaseModel):
     '''details of retailer collection'''
     
@@ -1260,7 +1260,16 @@ class PartPricing(BaseModel):
     class Meta:
         abstract = True
         db_table = "gm_partpricing"
-        verbose_name_plural = "Parts List"
+        verbose_name_plural = "Parts Category"
+
+class FocusedPart(BaseModel):
+    ''' Focused part for brand in certain period '''
+
+    class Meta:
+	abstract = True
+	db_table = "gm_focusedpart"
+	verbose_name_plural = "Focused Part"
+
         
 class CvCategories(BaseModel):
     ''' details of cv categories'''
@@ -1678,6 +1687,20 @@ class City(BaseModel):
 
     def __unicode__(self):
         return self.city
+
+
+class Locality(BaseModel):
+    '''Localities under a city'''
+    name = models.CharField(max_length=50)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_locality"
+        verbose_name_plural = "Locality"
+
+    def __unicode__(self):
+        return self.name
+
 
 ############################### EPC MODELS ###################################################
 
@@ -2153,6 +2176,10 @@ class OrderTempDetails(BaseModel):
     class Meta:
         abstract = True
         db_table = "gm_order_temp_details"
-        verbose_name_plural = "Order Temp Details"   
-    
-    
+        verbose_name_plural = "Order Temp Details"
+
+class PermanentJourneyPlan(BaseModel):
+    class Meta:
+        abstract = True
+        db_table = "gm_permanent_journey_plan"
+        verbose_name_plural = "Order Temp Details"

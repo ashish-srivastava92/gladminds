@@ -1,0 +1,21 @@
+<table class="table table-striped table-bordered report-table" border="1">
+	<tr><td>Retailer Name - {{retailer_name}}</td></tr>
+        <tr>
+                <td><strong>Order Number</strong></td>
+                <td><strong>Part Number</strong></td>
+                <td><strong>Part Description</strong></td>
+                <td><strong>Allocated Quantity</strong></td>
+                <td><strong>MRP</strong></td>
+
+        </tr>
+                {% for record in data %}
+        <tr>
+                <td>{{record.order_number|default_if_none:""}}</td>
+                <td>{{record.part_number|default_if_none:""}}</td>
+                <td>{{record.part_description|default_if_none:""}}</td>
+                <td>{{record.allocated|default_if_none:""}}</td>
+                <td>{{record.mrp|default_if_none:""}}</td>
+        </tr>
+        {% endfor %}
+</table>
+
