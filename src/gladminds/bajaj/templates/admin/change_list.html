@@ -9,12 +9,14 @@
   {# <link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}" />#}
   <link rel="stylesheet" type="text/css" href="/static/libs/datepicker/css/jquery-ui.css" />
   <link rel="stylesheet" type="text/css" href="/static/css/wait-modal.css" /> 
+  
   {% if cl.formset %}
     {#    <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />#}
   {% endif %}
   {% if cl.formset or action_form %}
     {% url 'admin:jsi18n' as jsi18nurl %}
     <script type="text/javascript" src="{{ jsi18nurl|default:'../../jsi18n/' }}"></script>
+
   {% endif %}
   {{ media.css }}
   {% if not actions_on_top and not actions_on_bottom %}
@@ -31,6 +33,8 @@
       (function ($) {
         $(document).ready(function ($) {
           $("tr input.action-select").actions();
+          	
+
         });
       })(django.jQuery);
     </script>
@@ -95,10 +99,33 @@
 			        </table>
 			    </form>
 			</div>
+		{% endifequal %}
 		
-	  {% endifequal %}
-{% endif %}
-
+		{% endif %}
+		
+	
+{% if show_upload_rack_location %}
+          {% ifequal cl.opts.verbose_name 'parts rack location'  %}
+			 <div style="float:left;clear:right;">
+			 	<form action="{% url 'upload_rack_location' %}" method="POST" enctype="multipart/form-data" >
+			        <table width>
+				        <tr> 
+				        	<td>
+								<input type="file" name="upload_rack_location" required="true"> 
+							</td>
+				        	<td> 
+				        		<input class="btn btn-info" id="uploadExcel" type="submit" value="Upload Rack Location"> 
+				        	</td>
+				        </tr>
+			        </table>
+			    </form>
+			</div>
+		{% endifequal %}
+		{% endif %}
+	
+	
+			
+		
           {% ifequal cl.opts.verbose_name "mechanic" %}
           {%include "admin/download_option.html" %}
           <div class="object-tools">

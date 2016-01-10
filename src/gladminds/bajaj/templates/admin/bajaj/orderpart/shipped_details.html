@@ -39,12 +39,12 @@
 		</thead>
 
 		<tbody>
-
 			{% for each in shipped_details %}
 			<tr>
+			<td class="text-center">{{each.invoice_no}}</td>
 				<!-- <td class="text-center"><a href="{% url 'get_parts' each.order_id order_status retailer_id  %}">{{each.order_id}}</a></td> -->
 				<!-- <td class="text-center">{{each.retailer_name}}</td> -->
-				<td class="text-center"><a href="{% url 'get_orders' each.invoice_id retailer_id  %}">{{each.invoice_no}}</td>
+				
 
 				<td class="text-center">{{each.invoice_amt}}</td>
 				<td class="text-center">{{each.shipped_date}}</td>

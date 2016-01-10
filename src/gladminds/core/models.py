@@ -539,15 +539,26 @@ class RetailerCollection(base_models.RetailerCollection):
     class Meta(base_models.RetailerCollection.Meta):
         app_label = _APP_NAME
 
+
 class DSRWorkAllocation(base_models.DSRWorkAllocation):
     '''details of DSR work allocation'''
     distributor = models.ForeignKey(Distributor)
     dsr = models.ForeignKey(DistributorSalesRep)
-    retailer = models.ForeignKey(Retailer)
+    retailer = models.ForeignKey(Retailer,null = True, blank=True)
     date = models.DateTimeField(null = True, blank=True)
+    pjp_created_date = models.DateTimeField(null = True, blank=True)
+    locality = models.CharField(max_length = 30, null = True, blank=True)
+    pjp_day = models.CharField(max_length = 10, null = True, blank=True)
     
     class Meta(base_models.DSRWorkAllocation.Meta):
-        app_label = _APP_NAME
+        app_label = _APP_NAME   
+    
+    
+    
+   
+    
+  
+        
         
 class DSRScorecardReport(base_models.DSRScorecardReport):
     '''details of DSRScorecardReport'''
@@ -659,16 +670,16 @@ class OrderPart(base_models.OrderPart):
         app_label = _APP_NAME
         
 
-class OrderPartDetails(base_models.OrderPartDetails):
-    part_number = models.ForeignKey(PartMasterCv)
-    quantity = models.IntegerField(null=True, blank=True)
-    active = models.IntegerField(null=True, blank=True, default=1)
-    order = models.ForeignKey(OrderPart)
-    line_total = models.DecimalField(max_digits = 20, decimal_places=4, null=True, blank=True)
+
+
     
-    class Meta(base_models.OrderPartDetails.Meta):
-        app_label = _APP_NAME
-        verbose_name_plural = "Order Part Details"
+    
+
+    
+    
+   
+        
+        
 
 
 
@@ -939,3 +950,33 @@ class ManufacturingData(base_models.ManufacturingData):
     class Meta(base_models.ManufacturingData.Meta):
         app_label = _APP_NAME
 
+class PartIndexPlates(base_models.PartIndexPlates):
+    ''' details of part index '''
+    plate_name = models.CharField(max_length = 255)
+    model = models.ForeignKey(PartModels)
+    active = models.BooleanField(default = 1)
+    
+    class Meta(base_models.PartIndexPlates.Meta):
+        app_label = _APP_NAME
+    
+class PartIndexDetails(base_models.PartIndexDetails):
+    plate = models.ForeignKey(PartIndexPlates)
+    part_number = models.CharField(max_length=255, null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    quantity = models.IntegerField(null=True, blank=True)
+    mrp = models.CharField(max_length=8, null=True, blank=True)
+    
+    class Meta(base_models.PartIndexDetails.Meta):
+        app_label = _APP_NAME
+
+class OrderPartDetails(base_models.OrderPartDetails):
+    part_number = models.ForeignKey(PartMasterCv)
+    part_number_catalog = models.ForeignKey(PartIndexDetails, null=True, blank=True)
+    quantity = models.IntegerField(null=True, blank=True)
+    active = models.IntegerField(null=True, blank=True, default=1)
+    order = models.ForeignKey(OrderPart)
+    line_total = models.DecimalField(max_digits = 20, decimal_places=4, null=True, blank=True)
+
+    class Meta(base_models.OrderPartDetails.Meta):
+        app_label = _APP_NAME
+        verbose_name_plural = "Order Part Details"

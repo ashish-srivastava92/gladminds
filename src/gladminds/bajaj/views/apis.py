@@ -2,7 +2,7 @@
 author: araskumar.a
 date: 31-08-2015
 '''
-import json, datetime, time
+import json, datetime, time, decimal
 from datetime import timedelta
 from collections import OrderedDict
 from operator import itemgetter
@@ -11,9 +11,7 @@ from django.utils import simplejson
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.http import HttpResponse
-from django.db.models import Q
-from django.db.models import Count
-from django.db.models import Max
+from django.db.models import Q, Count, Max
 
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -22,16 +20,13 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework_jwt.settings import api_settings
 
-from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
-                            PartPricing, Distributor,  Invoices, \
-                            Collection,CollectionDetails,PartsStock,DSRWorkAllocation,DSRLocationDetails
-from gladminds.bajaj.models import PartMasterCv,OrderPart,OrderPartDetails
-#PartMasterCv                          
-                            
-# from gladminds.core.models import DistributorSalesRep, Retailer,PartModels, CvCategories, \
-#                              OrderPart, DSRWorkAllocation, AlternateParts
-
+from gladminds.bajaj.models import Distributor, DistributorSalesRep, Retailer, CvCategories, \
+            OrderPart, OrderPartDetails,DSRWorkAllocation, Collection, \
+            CollectionDetails,PartMasterCv,PartsStock, Invoices, \
+            UserProfile
 from gladminds.core import constants
+
+today = datetime.datetime.now()
 
 @api_view(['POST'])
 def authentication(request):
@@ -40,10 +35,10 @@ def authentication(request):
     a token as response
     '''
     #load the json input of username and password as json
-    load = json.loads(request.body)
-    user = authenticate(username = load.get("username"), password = load.get("password"))
+    #load = json.loads(request.body)
+    load = request.data
+    user = authenticate(username = load["username"], password = load["password"])
     
-    #user = authenticate(username = request.POST["username"], password = request.POST["password"])
     if user:
         if user.is_active:
             #the user is active.He should be a dsr or retailer 
@@ -94,6 +89,10 @@ def get_retailers(request, dsr_id):
         retailer_dict.update({"retailer_address":retailer.user.address})
         retailer_dict.update({"latitude":retailer.latitude})
         retailer_dict.update({"longitude":retailer.longitude})
+        retailer_dict.update({"locality": retailer.retailer_town})
+        if retailer.address_line_3 is not None:
+            retailer_dict.update({"locality":retailer.address_line_3 + \
+                              ' ' + retailer.retailer_town})
         retailer_list.append(retailer_dict)
     return Response(retailer_list)
 
@@ -127,13 +126,19 @@ def get_parts(request):
     parts = PartMasterCv.objects.filter(active = True)
     parts_list =[]
     for part in parts:
-        available_quantity = PartsStock.objects.get(part_number_id = part.id ).available_quantity
         parts_dict = {}
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
-        parts_dict.update({"part_sub_category":part.subcategory.name})
+        parts_dict.update({"part_category":part.category.name})
+        try:
+            available_quantity = PartsStock.objects.get(part_number = part)
+        except:
+            available_quantity = 'NA'
+        if available_quantity == 'NA':
+            parts_dict.update({"part_available_quantity":'NA'})
+        else:
+            parts_dict.update({"part_available_quantity":available_quantity.available_quantity})
         parts_dict.update({"part_products":part.products})
-        parts_dict.update({"part_available_quantity":available_quantity})
         parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
     return Response(parts_list)
@@ -164,22 +169,31 @@ def get_schedule(request, dsr_id, date):
     This method gets the schedule(the retailers he has to visit) for today, given the dsr id
     '''
     schedule_date = split_date(date)
-    dsr = DistributorSalesRep.objects.filter(distributor_sales_code = dsr_id)
-    schedules = DSRWorkAllocation.objects.filter(date__startswith = \
-                    datetime.date(int(schedule_date[2]),int(schedule_date[1]),int(schedule_date[0])), dsr=dsr)
-                       
-    schedules_list = []
-    for schedule in schedules:
-        schedule_dict = {}
-        schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
-        schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
-        tm = time.strptime(str(schedule.date.time()), "%H:%M:%S")
-        schedule_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
-        schedule_dict.update({"retailer_address":schedule.retailer.user.address})
-        schedule_dict.update({"latitude":schedule.retailer.latitude})
-        schedule_dict.update({"longitude":schedule.retailer.longitude})
-        schedules_list.append(schedule_dict)
-    return Response(schedules_list)
+    finaldate = datetime.datetime.strptime(date, '%Y-%m-%d')
+    
+    # schedules = DSRWorkAllocation.objects.filter(date__startswith = \
+    #                 datetime.date(int(schedule_date[2]),int(schedule_date[1]), \
+    #                               int(schedule_date[0])), dsr__distributor_sales_code=dsr_id)
+    schedules = DSRWorkAllocation.objects.filter(date__year=finaldate.year,
+                                                 date__month=finaldate.strftime("%m"),
+                                                 date__day=finaldate.strftime("%e"),
+                                                 dsr__distributor_sales_code = dsr_id)
+    
+    if schedules:                   
+        schedules_list = []
+        for schedule in schedules:
+            schedule_dict = {}
+            schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
+            schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
+            tm = time.strptime(str(schedule.date.time()), "%H:%M:%S")
+            schedule_dict.update({"Time" : time.strftime("%I:%M %p", tm)})
+            schedule_dict.update({"retailer_address":schedule.retailer.user.address})
+            schedule_dict.update({"latitude":schedule.retailer.latitude})
+            schedule_dict.update({"longitude":schedule.retailer.longitude})
+            schedules_list.append(schedule_dict)
+        return Response(schedules_list)
+    else:
+        return Response({'status':0, 'message':'There are no schedules for the given date'})
 
 
 def split_date(date):
@@ -197,8 +211,8 @@ def place_order(request, dsr_id):
     This method gets the orders placed by the dsr on behalf of the retailer and puts
     it in the database
     '''
-    parts = json.loads(request.body)
     
+    parts = json.loads(request.body)
     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
     if dsr:
         for order in parts :
@@ -210,16 +224,16 @@ def place_order(request, dsr_id):
             orderpart.order_placed_by = order['order_placed_by']
             orderpart.latitude = order['latitude']
             orderpart.longitude = order['longitude']
+            orderpart.order_status = 0
             orderpart.save()
             #push all the items into the orderpart details
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
                 orderpart_details.part_number = PartMasterCv.objects.\
                                                 get(part_number = item['part_number'])
-                orderpart_details.quantity = item['qty']
+                orderpart_details.quantity = int(item['qty'])
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
-                print orderpart_details.line_total
                 orderpart_details.save()
     return Response({'message': 'Order updated successfully', 'status':1})
 
@@ -239,6 +253,7 @@ def retailer_place_order(request, retailer_id):
             orderpart.distributor = Distributor.objects.get(distributor_id = order['distributor_id'])
             orderpart.order_date = order['date']
             orderpart.order_placed_by = order['order_placed_by']
+            orderpart.order_status = 0
             orderpart.save()
             #push all the items into the orderpart details
             for item in order['order_items']:
@@ -257,14 +272,13 @@ def retailer_place_order(request, retailer_id):
 # # @permission_classes((IsAuthenticated,))
 def get_outstanding(request, dsr_id):
     '''
-    This method returns the outstanding amount of all the retailers under the distributor pertaining
-    to the dsr '''
+    This method returns the outstanding amount of all the retailers under the distributor
+    pertaining to the dsr '''
     
     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
     retailers = Retailer.objects.filter(distributor = dsr.distributor, \
                                         approved = constants.STATUS['APPROVED'])
     retailer_list = []
-    
     #for a particular retailer, get all the invoices and total the invoice amount
     for retailer in retailers:
         invoices = Invoices.objects.filter(retailer = retailer)
@@ -281,12 +295,60 @@ def get_outstanding(request, dsr_id):
                 #get the collections for that invoice
                 collection_objs = Collection.objects.filter(invoice_id = invoice.id)
                 for each in collection_objs:
-                    collections = CollectionDetails.objects.filter(collection_id = each.id)
-                    if collections:
-                        for each_collections in collections:
-                            collection = collection + each_collections.collected_amount
+                    # collections = CollectionDetails.objects.filter(collection_id = each.id)
+                    # if collections:
+                    #     for each_collections in collections:
+                    collection = collection + each.collected_amount
                 retailer_dict.update({'collected_amount': collection})
                 retailer_list.append(retailer_dict)
+        # else:
+        #     retailer_dict = {}
+        #     retailer_dict.update({'message': 'There are no invoices /outstanding for this dsr'})
+        #     retailer_list.append(retailer_dict)
+    return Response(retailer_list)
+
+@api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def get_dsr_outstanding(request, dsr_id):
+    '''
+    This method returns the outstanding amount of all the retailers under the distributor
+    pertaining to the dsr '''
+    
+    dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+    retailers = Retailer.objects.filter(distributor = dsr.distributor, \
+                                        approved = constants.STATUS['APPROVED'])
+    retailer_list = []
+    #for a particular retailer, get all the invoices and total the invoice amount
+    for retailer in retailers:
+        invoices = Invoices.objects.filter(retailer = retailer)
+        if invoices:
+            for invoice in invoices:
+                retailer_dict = {}
+                total_amount = 0
+                collection = 0
+                total_amount = total_amount + invoice.invoice_amount
+                retailer_dict.update({'retailer_id':retailer.retailer_code})
+                retailer_dict.update({'invoice_id': invoice.invoice_id})
+                retailer_dict.update({'total_amount': total_amount})
+                retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
+                diff = today.date() - invoice.invoice_date.date()
+                #get the collections for that invoice
+                collection_objs = Collection.objects.filter(invoice_id = invoice.id)
+                for each in collection_objs:
+                    # collections = CollectionDetails.objects.filter(collection_id = each.id)
+                    # if collections:
+                    #     for each_collections in collections:
+                    collection = collection + each.collected_amount
+                retailer_dict.update({'collected_amount': collection})
+                retailer_dict.update({'period': diff.days})
+                retailer_list.append(retailer_dict)
+        # else:
+        #     retailer_dict = {}
+        #     retailer_dict.update({'retailer_id':retailer.retailer_code})
+        #     retailer_dict.update({'message': 'There are no invoices /outstanding \
+        #                           for this retailer'})
+        #     retailer_list.append(retailer_dict)
     return Response(retailer_list)
 
 @api_view(['GET'])
@@ -306,17 +368,21 @@ def get_retailer_outstanding(request, retailer_id):
             outstanding = 0
             collection = 0
             outstanding = outstanding + invoice.invoice_amount
-            retailer_dict.update({'retailer_id':retailer.retailer_code})
-            retailer_dict.update({'invoice_id': invoice.id})
+            #retailer_dict.update({'retailer_id':retailer.retailer_code})
+            retailer_dict.update({'distributor_id': retailer.distributor.distributor_id})
+            retailer_dict.update({'invoice_id': invoice.invoice_id})
             retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
+            amount = Collection.objects.filter(invoice = invoice)
+            
+            total = 0
+            for each in amount:
+                total = total + each.collected_amount
+            
+            retailer_dict.update({'collected_amount': total})
             #get the collections for that invoice
             collection_objs = Collection.objects.filter(invoice_id = invoice.id)
             for each in collection_objs:
-                collections = CollectionDetails.objects.filter(collection_id = each.id)
-                if collections:
-                    for each_collections in collections:
-                        collection = collection + each_collections.collected_amount
-                    
+                collection = collection + each.collected_amount
             retailer_dict.update({'outstanding':outstanding})
             retailer_list.append(retailer_dict)
     return Response(retailer_list)
@@ -355,22 +421,20 @@ def uploadcollection(request):
     details table
     '''
     collections_body = json.loads(request.POST['uploadcollection'])
-    message = ''
+    response_list = []
     for collection_body in collections_body:
+        message_dict = {}
         # get the total order value of the invoice
         invoice = Invoices.objects.get(invoice_id = collection_body['invoice_id'])
         # get the so far collected_amount for that invoice
-        coll_details = CollectionDetails.objects.filter(collection__invoice = invoice)
+        coll = Collection.objects.filter(invoice = invoice)
         existing_collection = 0
-        for details in coll_details:
-            existing_collection = existing_collection + details.collected_amount
-        print invoice.invoice_amount
-        print existing_collection
-        print type(collection_body['collected_amount'])
+        for each in coll:
+            existing_collection = existing_collection + each.collected_amount
         # check the collectedamount from the payload is less than or equal to the existing
         # collection for that invoice
-        if float(collection_body['collected_amount']) <= invoice.invoice_amount - existing_collection:
-            print 'aras'
+        if (collection_body['collected_amount']) <= \
+            invoice.invoice_amount - decimal.Decimal(existing_collection):
             # enter into teh collection table
             collection = Collection()
             collection.invoice = Invoices.objects.get(invoice_id = collection_body['invoice_id'])
@@ -381,31 +445,35 @@ def uploadcollection(request):
             collection.retailer = retailer
             collection.latitude = collection_body['latitude']
             collection.longitude = collection_body['longitude']
+            collection.collected_amount = collection_body['collected_amount']
             collection.save()
+            
             #put data into collection details table
-            payment_mode = 1
-            for mode in constants.PAYMENT_MODES:
-                if mode[0][1] == collection_body['payment_mode']:
-                    payment_mode = mode[0][0]
-                else:
-                    continue
+            # payment_mode = 1
+            # for mode in constants.PAYMENT_MODES:
+            #     if mode[0][1] == collection_body['payment_mode']:
+            #         payment_mode = mode[0][0]
+            #     else:
+            #         continue
             for cheque in collection_body['cheque_details']:
                 collectiondetails = CollectionDetails()
-                collectiondetails.collection = collection
-                collectiondetails.mode = payment_mode
-                collectiondetails.collected_amount = collection_body['collected_amount']
                 collectiondetails.collected_cash = collection_body['collected_cash']
+                collectiondetails.collection = collection
+                collectiondetails.mode = collection_body['payment_mode']
                 collectiondetails.cheque_bank = cheque['cheque_bank']
                 collectiondetails.cheque_number = cheque['cheque_number']
                 collectiondetails.cheque_amount = cheque['cheque_amount']
                 collectiondetails.img_url = cheque['cheque_image_url']
                 collectiondetails.save()
-            message = message + '\n' + 'status : 1' + ' ' + \
-                      'message : Retailer Collection(s) is updated successfully'
+            message_dict['invoice_id'] = collection_body['invoice_id']
+            message_dict['status'] = '1'
+            message_dict['message'] = 'Retailer Collection(s) is updated successfully'
         else:
-            message = message + '\n' + 'status : 0' + ' ' + \
-                'message : Collection is greater than the invoice amount for the invoice id: ' + collection_body['invoice_id']
-    return Response(message)
+            message_dict['invoice_id'] = collection_body['invoice_id']
+            message_dict['status'] = '0'
+            message_dict['message'] = 'Collection is greater than the invoice amount'
+        response_list.append(message_dict)
+    return Response(response_list)
 
 @api_view(['POST'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
@@ -429,10 +497,10 @@ def add_retailer(request, dsr_id):
         except:
             retailer_code = str(constants.RETAILER_SEQUENCE)
         user.username = retailer_code
-        user.password = constants.RETAILER_PASSWORD
+        user.set_password(constants.RETAILER_PASSWORD)
         user.date_joined = datetime.datetime.now()
         user.is_superuser = False
-        user.is_staff = False
+        user.is_staff = True
         user.is_active = True
         user.save()
         # initialize user profile class
@@ -470,6 +538,7 @@ def add_retailer(request, dsr_id):
         retailer.signature_url = profile['signature_url']
         retailer.mechanic_1 = profile['mechanic_name_1']  + ' ' + profile['mechanic_number_1']
         retailer.mechanic_2 = profile['mechanic_name_2']  + ' ' + profile['mechanic_number_2']
+        retailer.approved = constants.STATUS['WAITING_FOR_APPROVAL']
         retailer.save()
     return Response({'message': 'New retailer(s) added successfully', 'status':1})
     
@@ -477,7 +546,6 @@ def add_retailer(request, dsr_id):
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
 def dsr_dashboard_report(request, dsr_id):
-    today = datetime.datetime.now()
     dsr =  DistributorSalesRep.objects.select_related('distributor').get(distributor_sales_code = dsr_id)
     distributor = dsr.distributor
     retailers_list = []
@@ -504,7 +572,10 @@ def dsr_dashboard_report(request, dsr_id):
         total_achieved = 0
         for each in achieved_list:
             total_achieved = total_achieved + each
-        mtd = str(total_achieved/ len(retailers)) + '%'
+        try:
+            mtd = str(total_achieved/ len(retailers)) + '%'
+        except:
+            mtd = 0
         retailer_dict.update({"MTD performance": mtd})
     # calculation of total sales value
     total_sales_value = 0
@@ -530,11 +601,8 @@ def dsr_dashboard_report(request, dsr_id):
         collections = Collection.objects.filter(retailer = retailer)
         for collection in collections:    
             # get all the collection details for this collection
-            collection_details = CollectionDetails.objects.filter(collection = collection, \
-                                                    created_date__month = today.strftime("%m"))
-            for collection_detail in collection_details:
-                retailer_collected_amount = retailer_collected_amount + \
-                                            collection_detail.collected_amount
+            retailer_collected_amount = retailer_collected_amount + \
+                                            collection.collected_amount
         # sum up the each retailer collected amount to the total
         total_collected_amount = total_collected_amount + retailer_collected_amount
     retailer_dict.update({"collections": total_collected_amount})
@@ -655,10 +723,8 @@ def dsr_dashboard_report(request, dsr_id):
         if collections:
             for collection in collections:    
             # get all the collection details for this collection
-                collection_details = CollectionDetails.objects.filter(collection = collection)
-                for collection_detail in collection_details:
-                    retailer_collected_amount = retailer_collected_amount + \
-                                            collection_detail.collected_amount
+                retailer_collected_amount = retailer_collected_amount + \
+                                            collection.collected_amount
         # sum up the each retailer collected amount to the total
             total_collected_amount = total_collected_amount + retailer_collected_amount
         each_retailer.update({"collections": total_collected_amount})
@@ -750,10 +816,8 @@ def dsr_dashboard_report(request, dsr_id):
                                     created_date__lte = first_date)
         for collection in collections:    
             # get all the collection details for this collection
-            collection_details = CollectionDetails.objects.filter(collection = collection)
-            for collection_detail in collection_details:
-                retailer_collected_amount = retailer_collected_amount + \
-                                            collection_detail.collected_amount
+            retailer_collected_amount = retailer_collected_amount + \
+                                            collection.collected_amount
         # sum up the each retailer collected amount to the total
         total_collected_amount = total_collected_amount + retailer_collected_amount
     retailer_dict.update({"collections": total_collected_amount})
@@ -877,10 +941,8 @@ def dsr_dashboard_report(request, dsr_id):
         if collections:
             for collection in collections:    
             # get all the collection details for this collection
-                collection_details = CollectionDetails.objects.filter(collection = collection)
-                for collection_detail in collection_details:
-                    retailer_collected_amount = retailer_collected_amount + \
-                                            collection_detail.collected_amount
+                retailer_collected_amount = retailer_collected_amount + \
+                                            collection.collected_amount
         # sum up the each retailer collected amount to the total
             total_collected_amount = total_collected_amount + retailer_collected_amount
         each_retailer.update({"collections": total_collected_amount})
@@ -945,7 +1007,7 @@ def get_orders(request, dsr_id):
                 amount = amount + each.line_total
             order_dict['amount'] = amount
             order_dict['total_quantity'] = total_line_items
-            #order_dict['status'] = order.status
+            #order_dict['status'] = order.order_status
             # order details dict
             order_details_list = []
             for each in order_detail:
@@ -972,6 +1034,10 @@ def get_retailer_orders(request, retailer_id):
         order_dict['order_id'] = order.id
         order_dict['retailer_id'] = order.retailer.retailer_code
         order_dict['order_date'] = order.order_date.date()
+        # check the status of the order and get it from the constants
+        for k,v in constants.ORDER_STATUS.iteritems():
+            if v == order.order_status:
+                order_dict['status'] = k
         order_dict['distributor_id'] = order.distributor.distributor_id
         amount = 0
         order_detail = OrderPartDetails.objects.filter(order = order)
@@ -980,7 +1046,7 @@ def get_retailer_orders(request, retailer_id):
             for each in order_detail:
                 amount = amount + each.line_total
             order_dict['amount'] = amount
-            #order_dict['status'] = order.status
+            #order_dict['status'] = order.order_status
             # order details dict
             order_details_list = []
             for each in order_detail:
@@ -994,3 +1060,13 @@ def get_retailer_orders(request, retailer_id):
             order_dict['order_details'] = order_details_list
         orders_list.append(order_dict)
     return Response(orders_list)
+   
+    
+    
+    
+
+
+    
+
+    
+

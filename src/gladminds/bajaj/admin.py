@@ -14,8 +14,9 @@ from django.contrib.auth.forms import (UserCreationForm, UserChangeForm,
 from gladminds.bajaj import models
 from gladminds.bajaj.models import Distributor, DistributorStaff, DistributorSalesRep, DSRWorkAllocation, \
                         Retailer, UserProfile, District, \
-                         SparePartPoint, State, AreaSparesManager, City, OrderPartDetails, OrderDeliveredHistory,\
-                          Collection,PartsStock,OrderPart,NationalSparesManager,DSRLocationDetails,CollectionDetails
+                         SparePartPoint, State, AreaSparesManager, City, OrderPartDetails, OrderDeliveredHistory, \
+                          Collection, PartsStock, OrderPart, NationalSparesManager, DSRLocationDetails, CollectionDetails,\
+                          Invoices,DoDetails
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
@@ -33,7 +34,7 @@ from django.shortcuts import render
 from django.conf.urls import patterns, url, include
 from django.shortcuts import render_to_response
 from django.template import RequestContext, loader
-from django.db.models import Sum,Count
+from django.db.models import Sum, Count
 from django.contrib import messages
 
 
@@ -450,15 +451,34 @@ class NSMAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     add_form = UserCreationForm
     search_fields = ('nsm_id', 'name', 'phone_number')
-    list_display = ('nsm_id', 'name', 'email', 'phone_number', 'get_territory')
+    list_display = ('nsm', 'names', 'emailid', 'phone', 'get_territory')
 #                     'user_email','username', 'email', 'first_name', 'last_name', 'is_staff')
-#     list_display = ()
-#     list_select_related = True
+
+        
+    def nsm(self, obj):
+       
+        return obj.nsm_id
+    nsm.short_description = 'NSM ID'
     
-    def user_email(self,obj):
-        return "hello"
+    
+    def emailid(self, obj):
+        return obj.email
+    emailid.short_description = 'Email ID'
+      
+    def phone(self, obj):
+        if obj.phone_number:
+            if obj.phone_number[0:3] == "+91":
+                obj.phone_number = obj.phone_number[3:]
+            else:
+                obj.phone_number
+            return obj.phone_number
+        return "NA"
+    phone.short_description = 'Mobile No'
    
-    
+    def names(self, obj):
+        print obj.user.user.first_name
+        return obj.user.user.first_name + ' ' + obj.user.user.last_name
+    names.short_description = 'Name'
 
     def get_territory(self, obj):
         territories = obj.territory.all()
@@ -479,14 +499,37 @@ class NSMAdmin(GmModelAdmin):
 
 
 
- 
-
 class ASMAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('asm_id', 'nsm__name',
                      'phone_number', 'state')
-    list_display = ('asm_id', 'name', 'email',
-                     'phone_number', 'get_state', 'nsm')
+    list_display = ('asm', 'names', 'emailid',
+                     'phone', 'get_state', 'nsm')
+    
+    
+    def asm(self, obj):
+        return obj.asm_id
+    asm.short_description = 'ASM ID'
+    
+    
+    def phone(self, obj):
+        if obj.phone_number:
+            if obj.phone_number[0:3] == "+91":
+                obj.phone_number = obj.phone_number[3:]
+            else:
+                obj.phone_number
+            return obj.phone_number
+        return "NA"
+    phone.short_description = 'Mobile No'
+    
+    
+    def emailid(self, obj):
+        return obj.email
+    emailid.short_description = 'Email ID'
+        
+    def names(self, obj):
+        return obj.user.user.first_name + ' ' + obj.user.user.last_name
+    names.short_description = 'Name'
     
     def get_state(self, obj):
         states = obj.state.all()
@@ -522,50 +565,6 @@ class NationalSalesManagerAdmin(GmModelAdmin):
         super(NationalSalesManagerAdmin, self).save_model(request, obj, form, change)
      
 
-    
-
-# '''Admin View for loyalty'''
-# class NSMAdmin(GmModelAdmin):
-#     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-#     search_fields = ('nsm_id', 'name', 'phone_number')
-#     list_display = ('nsm_id', 'name', 'email', 'phone_number','get_territory')
-# 
-#     def get_territory(self, obj):
-#         territories = obj.territory.all()
-#         if territories:
-#             return ' | '.join([str(territory.territory) for territory in territories])
-#         else:
-#             return None
-# 
-#     get_territory.short_description = 'Territory'
-# 
-#     def get_form(self, request, obj=None, **kwargs):
-#         self.exclude = ('nsm_id',)
-#         form = super(NSMAdmin, self).get_form(request, obj, **kwargs)
-#         return form
-# 
-#     def save_model(self, request, obj, form, change):
-#         obj.phone_number = utils.mobile_format(obj.phone_number)
-#         super(NSMAdmin, self).save_model(request, obj, form, change)
-
-
-# 
-# class ASMAdmin(GmModelAdmin):
-#     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-#     search_fields = ('asm_id', 'nsm__name',
-#                      'phone_number', 'state')
-#     list_display = ('asm_id', 'name', 'email',
-#                      'phone_number', 'get_state', 'nsm')
-# 
-#     def get_form(self, request, obj=None, **kwargs):
-#         self.exclude = ('asm_id',)
-#         form = super(ASMAdmin, self).get_form(request, obj, **kwargs)
-#         return form
-# 
-#     def save_model(self, request, obj, form, change):
-#         obj.phone_number = utils.mobile_format(obj.phone_number)
-#         super(ASMAdmin, self).save_model(request, obj, form, change)
-
          
 class DistributorForm(forms.ModelForm):
 #     distributor_id = forms.CharField(max_length=30,required=True)
@@ -574,7 +573,7 @@ class DistributorForm(forms.ModelForm):
     first_name = forms.CharField(max_length=40, label='First Name', required=False)
     mobile1 = forms.CharField(max_length=15)
     mobile2 = forms.CharField(max_length=15)
-    email = forms.CharField(max_length=50, required=False,label="Email")
+    email = forms.CharField(max_length=50, required=False, label="Email")
     email_bajaj = forms.CharField(max_length=50)
     date_birth = forms.DateTimeField(label='Date of birth', required=False)
     profile = forms.ChoiceField(choices=PROFILE_CHOICES, required=True)
@@ -587,27 +586,19 @@ class DistributorForm(forms.ModelForm):
     phone_number = forms.CharField(max_length=15, label='Phone (Land line)')
     tin = forms.IntegerField()
     cst = forms.IntegerField()
-    states = State.objects.all()
-    states = forms.ChoiceField(choices=((st.state_code, st.state_name) for st in states),label="State")
 #     DISTRICTS = (
 #    
 # )
     district = District.objects.all()
-    print district
+
     districts = forms.MultipleChoiceField(required=True, choices=((dt.id, dt.name) for dt in district))
-#     districts = forms.CharField(max_length=15)//
     is_active = forms.BooleanField(required=False)
     
-#     
     def image_tag(self):
-#         print self.image_tag,"urrrrlll"
         return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_tag)
     image_tag.short_description = 'User Image'
     image_tag.allow_tags = True
-    
-    
-    
-    
+     
     class Meta:
         model = Distributor
 #         exclude = ['sent_to_sap', 'phone_number', 'profile', 'language', 'territory']
@@ -623,25 +614,24 @@ class DistributorAdmin(GmModelAdmin):
     list_display = ('distributor_code', 'distributor_name', 'head', 'locality', 'phone',
                     'Email')
     
-
     fieldsets = (
             ('User Information', {
-              'fields': ('user', 'distributor_id', 'name', ['first_name'], ['last_name'], ['email'], 'mobile1',
-                'mobile2', 'email_bajaj', 'date_birth', 'profile','image_url','is_active')
+              'fields': ('user', 'asm', 'distributor_id', 'name', ['first_name'], ['last_name'], ['email'], 'mobile1',
+                'mobile2', 'email_bajaj', 'date_birth', 'profile', 'image_url', 'is_active')
             }),
             ('Location', {
               'fields': ('plot_no', 'locality', 'phone_number', 'street_name', 'city',
                ['pincode'])
             }),
             ('Territory', {
-              'fields': ('states', 'districts','tin','cst')
+              'fields': ('state', 'districts', 'tin', 'cst')
             }),
           )
    
 #     readonly_fields = ('image_tag',)
     
     
-    def is_active(self,obj):
+    def is_active(self, obj):
         return obj.is_active
     
     
@@ -671,7 +661,7 @@ class DistributorAdmin(GmModelAdmin):
     Email.short_description = 'Email'
     
     
-    def email(self,obj):
+    def email(self, obj):
         if obj.user:
             return obj.user.user.email
             
@@ -705,11 +695,20 @@ class DistributorAdmin(GmModelAdmin):
         return obj.city
     locality.short_description = 'locality'
     
+    
     def phone(self, obj):
-        return obj.phone_number
+        if obj.phone_number:
+            if obj.phone_number[0:3] == "+91":
+                phone_number = obj.phone_number[3:]
+    #             print obj.phone_number[3:]
+            else:
+                phone_number = obj.phone_number
+            return phone_number
+        else:
+            return "NA"
+        
     phone.short_description = 'Phone/ Mobile'
-
-
+    
     
     def staff_status(self, obj):
         if obj.user.user.is_staff == True:
@@ -726,14 +725,12 @@ class DistributorAdmin(GmModelAdmin):
         if request.method == "GET" and obj is not None:
 
             dist_obj = Distributor.objects.get(distributor_id=obj.distributor_id)
-
             first_name = dist_obj.user.user.first_name
             last_name = dist_obj.user.user.last_name
             email = dist_obj.user.user.email
             dob = dist_obj.user.date_of_birth
             pincode = dist_obj.user.pincode
             active = dist_obj.user.user.is_active
-            print active,"activeeeeeeeeeeee"
 #             dist_district_obj = DistributorDistrict.objects.select_related("district").filter(distributor_id=obj.distributor_id).all()
 #             print dist_district_obj,"district"
             district_list = []
@@ -759,8 +756,6 @@ class DistributorAdmin(GmModelAdmin):
 
             dist = request.POST.get("districts")
             dist_id = request.POST.get("distributor_id")
-            print dist_id,"iddd"
-            print dist,"disttttt"
 
             form = copy.deepcopy(form)
 #             for each in dist:
@@ -772,19 +767,12 @@ class DistributorAdmin(GmModelAdmin):
     
     
         def save_model(self, request, obj, form, Change):
-#         print form
-            print "gladminds"
             obj.address_line_2 = form.cleaned_data['plot_no']
-            
             obj.address_line_3 = form.cleaned_data['locality']
-            obj.address_line_4 = form.cleaned_data['street_name']
-            print form.cleaned_data['is_active'],"qwertyyyyyyyyyyyyyyyyyyy"
-            
-            
+            obj.address_line_4 = form.cleaned_data['street_name']          
     #         obj.user.user.is_active = form.cleaned_data['is_active']
             obj.save(using=settings.BRAND)
             user_obj = User.objects.get(id=obj.user_id)
-            print user_obj,"obhhh"
             user_obj.is_active = form.cleaned_data['is_active']
             user_obj.save(using=settings.BRAND)
             
@@ -824,23 +812,24 @@ class DistributorAdmin(GmModelAdmin):
     
     def queryset(self, request):
         query_set = self.model._default_manager.get_query_set()
-#         if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-#             asm_state_list = models.AreaSparesManager.objects.get(user__user=request.user).state.all()
-#             query_set = query_set.filter(state=asm_state_list)
+        print query_set
+        print request.user.id
+        if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            asm_state_list = models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            print asm_state_list
+            query_set = query_set.filter(state=asm_state_list)
         return query_set
     
-    
-#      form_url = ''
-#         return super(OrderPartAdmin, self).change_view(request, order_id, form_url, context)
-#         
+     
            
     def change_view(self, request, obj):
-        extra_context={}
-        retailer_obj = Retailer.objects.filter(distributor = obj).aggregate(ret=Count("distributor"))
-        distributor_obj = DistributorSalesRep.objects.filter(distributor = obj).aggregate(dist = Count("distributor"))
+        extra_context = {}
+        retailer_obj = Retailer.objects.filter(distributor=obj).aggregate(ret=Count("distributor"))
+        distributor_obj = DistributorSalesRep.objects.filter(distributor=obj).aggregate(dist=Count("distributor"))
         extra_context['retailer_count'] = retailer_obj["ret"]      
         extra_context['dist_count'] = distributor_obj["dist"] 
-        return super(DistributorAdmin, self).change_view(request, obj,extra_context=extra_context)
+        extra_context["obj"] = obj
+        return super(DistributorAdmin, self).change_view(request, obj, extra_context=extra_context)
 
     
     
@@ -878,8 +867,8 @@ class DistributorAdmin(GmModelAdmin):
 
 class PartMasterCvAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('part_number', 'description', )
-    list_display = ('part_no', 'thisdescription', 'thiscategory', 'Applicable_model','price',
+    search_fields = ('part_number', 'description',)
+    list_display = ('part_no', 'thisdescription', 'thiscategory', 'Applicable_model', 'price',
                     'quantityavailable', 'orderpending')
     
     def part_no(self, obj):
@@ -887,24 +876,23 @@ class PartMasterCvAdmin(GmModelAdmin):
     part_no.short_description = 'Parts #'
     part_no.admin_order_field = 'part_number'
     
-    def thisdescription(self,obj):
+    def thisdescription(self, obj):
         return obj.description
     thisdescription.short_description = 'Part Description'
     
-    def Applicable_model(self,obj):
-        print "ooooooooooooooooooo"
+    def Applicable_model(self, obj):
         return obj.part_model
     Applicable_model.short_description = 'Applicable Model'
     
-    def thiscategory(self,obj):
+    def thiscategory(self, obj):
         return obj.category.name
     thiscategory.short_description = 'Category'
     
-    def price(self,obj):
+    def price(self, obj):
         return obj.mrp
     price.short_description = 'Price'
     
-    def quantityavailable(self,obj):
+    def quantityavailable(self, obj):
         if obj.available is None:
             return ''
         else:
@@ -923,7 +911,7 @@ class PartMasterCvAdmin(GmModelAdmin):
 class DistributorSalesRepForm(forms.ModelForm):
     class Meta:
         model = get_model('DistributorSalesRep')
-#         exclude = ['distributor']
+        exclude = ['distributor_sales_code']
         
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -942,9 +930,21 @@ class DistributorSalesRepAdmin(GmModelAdmin):
     
     
     def mobile(self, obj):
-        
-        if obj.user:
-            return obj.user.phone_number
+        if obj.user.phone_number:
+            if obj.user.phone_number[0:3] == "+91":
+                phone_number = obj.user.phone_number[3:]
+    #             print obj.phone_number[3:]
+            else:
+                phone_number = obj.user.phone_number
+            return phone_number
+        return "NA"
+    mobile.short_description = 'Mobile'
+    
+    
+#     def mobile(self, obj):
+#         
+#         if obj.user:
+#             return obj.user.phone_number
     
     def get_form(self, request, obj=None, **kwargs):
         ModelForm = super(DistributorSalesRepAdmin, self).get_form(request, obj, **kwargs)
@@ -964,8 +964,9 @@ class DistributorSalesRepAdmin(GmModelAdmin):
 #             obj.distributor = Distributor.objects.get(id = distributorstaff.distributor.id)
 #         else:
 #             obj.distributor = Distributor.objects.get(user__user = request.user)
+
         try:
-            dsr = DistributorSalesRep.objects.filter()[0]
+            dsr = DistributorSalesRep.objects.filter().last()
             obj.distributor_sales_code = str(int(dsr.distributor_sales_code) + \
                                             constants.DSR_SEQUENCE_INCREMENT)
         except:
@@ -1050,11 +1051,16 @@ class RetailerAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = RetailerForm
     search_fields = ('retailer_name', 'retailer_town', 'billing_code')
-    list_display = ('retailer_code', 'contact','name', 'city', 'pincode', 'phone', 
+    list_display = ('retailer_code', 'contact', 'name', 'city', 'pincode', 'phone',
                     'mail', 'status')
-    exclude = ['mobile', 'approved', 'address_line_2', 'address_line_3', 'address_line_4']
+    exclude = ['mobile', 'approved', 'address_line_2', 'address_line_3', 'address_line_4', 'identification_no', \
+               'mechanic_1', 'mechanic_2', 'identity_url', 'signature_url', 'shop_size', 'total_counter_sale', \
+               'near_dealer_name', 'total_sale_parts', 'retailer_code']
+               
     list_filter = ['approved']
     
+    
+  
     
     def suit_cell_attributes(self, obj, column):
         if column == 'status':
@@ -1075,7 +1081,7 @@ class RetailerAdmin(GmModelAdmin):
     
     def contact(self, obj):
         return obj.user.user.first_name + ' ' + obj.user.user.last_name
-    contact.short_description = 'Retailer Name'
+    contact.short_description = 'Retailer Contact'
 #     
 
     
@@ -1083,12 +1089,23 @@ class RetailerAdmin(GmModelAdmin):
         return obj.retailer_town
     city.short_description = 'City'
     
-    def phone(self, obj):
-        return obj.user.phone_number 
-    phone.short_description = 'Phone/Mobile'
     
-
-
+    
+    def phone(self, obj):
+      if obj.user.phone_number:
+        if obj.user.phone_number[0:3] == "+91":
+            phone_number = obj.user.phone_number[3:]
+#             print obj.phone_number[3:]
+        else:
+            phone_number = obj.user.phone_number
+        return phone_number
+      else:
+            return "NA"
+        
+    phone.short_description = 'Phone/ Mobile'
+    
+    
+    
     
     def mail(self, obj):
         return obj.email
@@ -1126,7 +1143,7 @@ class RetailerAdmin(GmModelAdmin):
         query_set = self.model._default_manager.get_query_set()
         if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
 #             asm_state_list = models.AreaSparesManager.objects.get(user__user=request.user).state.all()
-            uery_set=query_set.filter(approved=2)
+            uery_set = query_set.filter(approved=2)
         return query_set
 
     def changelist_view(self, request, extra_context=None):
@@ -1137,6 +1154,8 @@ class RetailerAdmin(GmModelAdmin):
         queryset.update(approved=constants.STATUS['APPROVED'])
         for retailer in queryset:
             try:
+                
+                
                 send_email(sender=constants.FROM_EMAIL_ADMIN, receiver=retailer.email,
                        subject=constants.APPROVE_RETAILER_SUBJECT, body='',
                        message=constants.APPROVE_RETAILER_MESSAGE)
@@ -1156,17 +1175,20 @@ class RetailerAdmin(GmModelAdmin):
 
         # get latest retailer code, add increment and assign it, else assign the sequence first number
         try:
-            if form.has_changed:
+            print change, "change"
+            if change:
+                print "no"
                 obj.retailer_code = obj.retailer_code
                 obj.approved = obj.approved
             else:
-                retailer = Retailer.objects.filter()[0]
+#                 print "yes"
+                retailer = Retailer.objects.filter().last()
                 obj.retailer_code = str(int(retailer.retailer_code) + \
                                         constants.RETAILER_SEQUENCE_INCREMENT)
                 obj.approved = obj.approved
                 
         except:
-            obj.retailer_code = str(constants.RETAILER_SEQUENCE)
+                obj.retailer_code = str(constants.RETAILER_SEQUENCE)
             
         obj.address_line_2 = form.cleaned_data['plot_no']
         obj.address_line_3 = form.cleaned_data['locality']
@@ -1199,6 +1221,47 @@ class RetailerAdmin(GmModelAdmin):
                     return mark_safe(rejected_reason)
     status.allow_tags = True
  
+class InvoiceAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+
+     
+    def changelist_view(self, request, extra_context={}):
+        self.param = request.user
+        invoice_details = []
+        invoice_details_dict = {}
+        print request.user
+        if self.param.groups.filter(name__in=\
+                                    ['SuperAdmins', 'Admins', 'NationalSparesManagers', 'AreaSparesManagers', 'SFAAdmins']).exists():
+            do_obj = DoDetails.objects.all()
+            print do_obj,"ba"
+        elif  self.param.groups.filter(name__in=['Distributors']).exists():
+            dist_id = Distributor.objects.get(user_id=request.user).id
+            do_obj = DoDetails.objects.filter(distributor_id = dist_id)
+        print do_obj,"dooo"
+        for each in do_obj:
+#             print each.invoice_id
+            if each.invoice_id != None:
+                invoice_obj =   Invoices.objects.get(id = each.invoice_id) 
+#                 print Invoice_obj,"invoices"
+#                 for each_invoice in Invoice_obj:
+                invoice_details_dict["invoice_id"] = invoice_obj.invoice_id
+                invoice_details_dict["invoice_amount"] = invoice_obj.invoice_amount
+                invoice_details_dict["invoice_date"] = invoice_obj.invoice_date
+                invoice_details_dict["retailer_name"] = invoice_obj.retailer.retailer_name
+                invoice_details.append(invoice_details_dict.copy())
+
+        context = {"invoice_details":invoice_details}
+        print invoice_details
+        if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+            extra_context["show_upload_invoice"] = True
+        template = 'admin/bajaj/invoices/change_list.html'  # = Your new template
+        form_url = ''
+        return super(InvoiceAdmin, self).changelist_view(request, context)
+
+
+     
+
+ 
 class CollectionAdminForm(forms.ModelForm):
     class Meta:
         model = get_model('Collection')
@@ -1216,7 +1279,7 @@ class CollectionAdmin(GmModelAdmin):
      
     def __init__(self, *args, **kwargs):
         super(CollectionAdmin, self).__init__(*args, **kwargs)
-        self.list_display_links = (None, )
+        self.list_display_links = (None,)
 
 
 
@@ -1224,33 +1287,37 @@ class CollectionAdmin(GmModelAdmin):
 
 
     def changelist_view(self, request, extra_context={}):
-        self.param=request.user
-        ret_details=[]
-        ret_details_dict={}
+        self.param = request.user
+        ret_details = []
+        ret_details_dict = {}
         if self.param.groups.filter(name__in=\
-                                    ['SuperAdmins', 'Admins', 'AreaSparesManagers', 'SFAAdmins']).exists():
+                                    ['SuperAdmins', 'Admins', 'NationalSparesManagers', 'AreaSparesManagers', 'SFAAdmins']).exists():
             ret_objs = Retailer.objects.all()
         elif  self.param.groups.filter(name__in=['Distributors']).exists():
              dist_id = Distributor.objects.get(user_id=request.user).id
              ret_objs = Retailer.objects.filter(distributor=dist_id)        
         for each in ret_objs :
             ret_details_dict["retailer_name"] = each.retailer_name
-            order_objs = OrderPart.objects.filter(retailer_id = each.id).values_list("id",flat=True)
+            order_objs = OrderPart.objects.filter(retailer_id=each.id).values_list("id", flat=True)
             orderdetails_obj = OrderPartDetails.objects.filter(order_id__in=order_objs).aggregate(total_value=Sum('line_total'))
-            ret_details_dict["total_value"]=orderdetails_obj["total_value"]
+            ret_details_dict["total_value"] = orderdetails_obj["total_value"]
             total_value = ret_details_dict["total_value"]
-            if total_value!= None:
-                collection_objs = Collection.objects.filter(retailer_id=each.id).values_list("id",flat=True)
+            if total_value != None:
+                collection_objs = Collection.objects.filter(retailer_id=each.id).values_list("id", flat=True)
                 total_collected_amount = CollectionDetails.objects.filter(collection_id__in=collection_objs).aggregate(total_value=Sum('collected_amount'))              
-                tca =  total_collected_amount["total_value"]
+                if total_collected_amount["total_value"] != None:
+                    tca = total_collected_amount["total_value"]
+                else :
+                    tca = 0
                 ret_details_dict["outstanding"] = int(total_value) - int(tca)
                 ret_details_dict["retailer_id"] = each.id
                 ret_details_dict["collection_details"] = "aaaa"
                 ret_details.append(ret_details_dict.copy())  
-        context={"ret_collection_details":ret_details}
+        context = {"ret_collection_details":ret_details}
+        
         template = 'admin/bajaj/collection/change_list.html'  # = Your new template
         form_url = ''
-        return super(CollectionAdmin, self).changelist_view(request,context)
+        return super(CollectionAdmin, self).changelist_view(request, context)
 
 
 
@@ -1282,7 +1349,8 @@ class CategoriesAdmin(GmModelAdmin):
 #     list_display = ('subcategory_name', 'category', 'active')
     
     
-
+#  self. list_display = ('part_no', 'Part_Description','Applicable_Model', 'Category',
+#                     'Price', 'active')
     
 class PartListAdmin(GmModelAdmin):
     class Media:
@@ -1290,39 +1358,74 @@ class PartListAdmin(GmModelAdmin):
     
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.DISTRIBUTORSALESREP, Roles.RETAILERS]
     search_fields = ('part_number', 'description')
-#     list_display = ('part_no', 'Part_Description', 'Category',
-#                     'Price', 'Available', 'Pending',
-#                     'Current', 'active')
-    exclude = ['subcategory',] 
+    list_display = ('part_no', 'Part_Description', 'Applicable_Model', 'Category',
+                    'Price', 'Available', 'active'
+                   )
+    exclude = ['subcategory', ] 
+    
     def part_no(self, obj):
-#         print obj.part_number
         return obj.part_number
+    
     part_no.short_description = 'Parts #'
     part_no.admin_order_field = 'part_number'
     
     def Part_Description(self, obj):
-#         print "objjjjj"
-        return obj.part_model
+        return '<a href="#" data-toggle="tooltip" date-placement="top" title="hi">%s</a>' % (obj.description)
+#         return obj.description
     Part_Description.short_description = 'Part Description'
+    Part_Description.allow_tags = True
     
+    
+    
+#     def my_url_field(self, obj):
+#         return '<a href="%s%s">%s</a>' % ('http://url-to-prepend.com/', obj.url_field, obj.url_field)
+#     my_url_field.allow_tags = True
+#     my_url_field.short_description = 'Column description'
+#     
     def Category(self, obj):
-#         return None
-#         return obj.part_model
-#         if obj.category.name:
-            return obj.description
-#         else:
-#             return None
+        return "NA"
+#         return obj.category.category_name
     Category.short_description = 'Category'
     
-    def Applicable_Model(self, obj):
-        return obj.part_models
-        
-#         return obj.subcategory.part_model.name
-    Applicable_Model.short_description='Applicable Model'
+
     
     def Price(self, obj):
         return obj.mrp
-    Price.short_description = 'MRP'
+    Price.short_description = 'Price'
+    
+    
+    
+    
+    
+#     def part_no(self, obj):
+# #         print obj.part_number
+#         return obj.part_number
+#     part_no.short_description = 'Parts #'
+#     part_no.admin_order_field = 'part_number'
+#     
+#     def Part_Description(self, obj):
+# #         print "objjjjj"
+#         return obj.part_model
+#     Part_Description.short_description = 'Part Description'
+#     
+#     def Category(self, obj):
+# #         return None
+# #         return obj.part_model
+# #         if obj.category.name:
+#             return obj.description
+# #         else:
+# #             return None
+#     Category.short_description = 'Category'
+#     
+
+    def Applicable_Model(self, obj):        
+#         return obj.subcategory.part_model.name
+        return "NA"
+    Applicable_Model.short_description = 'Applicable Model'
+#     
+#     def Price(self, obj):
+#         return obj.mrp
+#     Price.short_description = 'MRP'
     
     
 #     
@@ -1331,10 +1434,8 @@ class PartListAdmin(GmModelAdmin):
 
 
     def Available(self, obj):
- 
-        print obj.id,"pppp"
         try:
-            available_qty = PartsStock.objects.get(part_number = obj.id)
+            available_qty = PartsStock.objects.get(part_number=obj.id)
             return available_qty.available_quantity
         except Exception as ex:
             print ex
@@ -1369,25 +1470,114 @@ class PartListAdmin(GmModelAdmin):
         return form
     
     
-    
-
-    
     def changelist_view(self, request, extra_context={}):
         if request.user.is_superuser or request.user.groups.filter(name=Roles.SFAADMIN).exists():
 
-            self. list_display = ('part_no', 'Part_Description','Applicable_Model', 'Category',
+            self. list_display = ('part_no', 'Part_Description', 'Applicable_Model', 'Category',
                     'Price', 'active')
             
             
         else:
-            self.list_display = ('part_no', 'Part_Description', 'Applicable_Model','Category',
-                    'Price', 'Available')
+            self.list_display = ('part_no', 'Part_Description', 'Applicable_Model', 'Category',
+                    'Price', 'Available', 'active'
+                   )
                     
         if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
             extra_context["show_upload_stock"] = True
         return super(PartListAdmin, self).changelist_view(request, extra_context=extra_context)
 
+# 
+# class PartsRackLocationForm(forms.ModelForm):
+# #     plot_no = forms.CharField(max_length=20, label="Plot No")
+# #     street_name = forms.CharField(max_length=30)
+# #     locality = forms.CharField(max_length=30)
+# #     date_birth = forms.DateTimeField(label='Date of birth', required=False)
+#     class Meta:
+#         model = get_model('PartsRackLocation')
+#         
+# #         exclude = ['approved', 'rejected_reason', 'retailer_code']
+# #         def __init__(self, *args, **kwargs):
+# #         super(ItemForm, self).__init__(*args, **kwargs)
+# #         instance = getattr(self, 'instance', None)
+# #         if instance and instance.pk:
+# #             self.fields['sku'].widget.attrs['readonly'] = True
+#     def __init__(self, *args, **kwargs):
+#         print "parttttt"
+#         self.request = kwargs.pop('request', None)
+#         super(PartsRackLocationForm, self).__init__(*args, **kwargs)
+#         instance = getattr(self, 'instance', None)
+#         print instance
+#         if instance and instance.pk:
+#             self.fields['distributor'].widget.attrs['disabled'] = True
+            
+            
+            
+#             class MyAdmin(admin.ModelAdmin):
+# 
+#     def get_readonly_fields(self, request, obj=None):
+#         if obj and obj.another_field == 'cant_change_amount':
+#             return self.readonly_fields + ['amount']
+#         return self.readonly_fields
+            
+            
+            
+#         self.fields['distributor'].widget.attrs['readonly'] = True
+#         self.fields['profile'].widget = TextInput(attrs={'placeholder': 'Retailer'})
 
+
+class PartsRackLocationAdmin(GmModelAdmin):
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+    search_fields = ('part_number__part_number', 'part_number__description', 'rack_location',)
+    list_display = ('part_number', 'part_description', 'rack_location')
+#     form = PartsRackLocationForm
+#     
+#     def get_readonly_fields(self, request, obj=None):
+#         if obj is None:
+#             return ['distributor']
+#         return []
+    
+#     
+#     def get_form(self, request, obj=None, **kwargs):
+#         ModelForm = super(PartsRackLocationAdmin, self).get_form(request, obj, **kwargs)
+# #         self.exclude = ("price)
+#         print obj,"obj"
+#         print "form"
+#         print request.user.id
+# #         Distribuot
+# #         ret_obj = Retailer.objects.get(retailer_code=obj)
+#         
+# #         print ModelForm.base_fields
+#         ModelForm.base_fields['distributor'].initial = request.user
+#         form = super(PartsRackLocationAdmin, self).get_form(request, obj, **kwargs)
+#         return form
+#     
+    
+    def part_description(self, obj):
+        print obj, "obj"
+        return obj.part_number.description
+#         return obj.description
+    part_description.short_description = 'Part Description'
+    
+
+    
+    def changelist_view(self, request, extra_context={}):
+#         if request.user.is_superuser or request.user.groups.filter(name=Roles.SFAADMIN).exists():
+# 
+#             self. list_display = ('part_no', 'Part_Description', 'Applicable_Model', 'Category',
+#                     'Price', 'active')
+#             
+#             
+#         else:
+#             self.list_display = ('part_no', 'Part_Description', 'Applicable_Model', 'Category',
+#                     'Price', 'Available', 'active'
+#                    )
+                    
+        if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+            extra_context["show_upload_rack_location"] = True
+        return super(PartsRackLocationAdmin, self).changelist_view(request, extra_context=extra_context)
+    
+    
+#         
 
     
     
@@ -1450,14 +1640,14 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = DSRWorkAllocationForm
     search_fields = ('dsr', 'date')
-    list_display = ('allocated_date','dsr_id','dist_id')
+    list_display = ('allocated_date', 'dsr_id', 'dist_id')
     
     
-    def dsr_id(self,obj):
+    def dsr_id(self, obj):
         return obj.dsr.user.user.username
     dsr_id.short_description = "DSR"
     
-    def dist_id(self,obj):
+    def dist_id(self, obj):
         print "distttt"
        
     dist_id.short_description = "Distributor"
@@ -1469,10 +1659,10 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
     def changelist_view(self, request, extra_context={}):
 
         opts = DSRWorkAllocation._meta
-        context={"opts":opts,"app_label":opts.app_label}
+        context = {"opts":opts, "app_label":opts.app_label}
         template = 'admin/bajaj/dsrworkallocation/change_list.html'  
         form_url = ''
-        return super(DSRWorkAllocationAdmin, self).changelist_view(request,context)
+        return super(DSRWorkAllocationAdmin, self).changelist_view(request, context)
     
     
     def allocated_date(self, obj):
@@ -1482,7 +1672,6 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
     
     def queryset(self, request):
         qs = super(DSRWorkAllocationAdmin, self).queryset(request)
-        print request.user
         # get workallocation objects for the logged in distributor
 #         if Distributor.objects.filter(user__user=request.user).exists():
 #             DSRWorkAllocation_objects = DSRWorkAllocation.objects.filter(distributor__user=\
@@ -1505,39 +1694,16 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
 #         obj.distributor = Distributor.objects.get(user__user=request.user)
         super(DSRWorkAllocationAdmin, self).save_model(request, obj, form, change)
 
-
-
-
 import json
 class DSRLocationDetailsAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     list_display = ('dsr',)
     def changelist_view(self, request, extra_context={}):
         opts = DSRLocationDetails._meta
-        print opts
-#         dsr_location_objs = DSRLocationDetails.objects.filter().select_related("dsr")
-#         print dsr_location_objs
-#         dsr_locations = []
-#         dsr_location_dict= {}
-#         for each in dsr_location_objs:
-#             dsr_location_dict["latitude"] =  each.latitude
-#             dsr_location_dict["longitude"] =  each.longitude
-#             dsr_location_dict["last_sync"] = each.last_sync
-#             dsr_location_dict["dsr_id"] = each.dsr_id
-#             dsr_location_dict["dsr_name"] = each.dsr.user.user.first_name
-#             
-#             dsr_locations.append(dsr_location_dict)
-# #         print dsr_location_objs
-#         
-#         print dsr_locations
-#         data = list(dsr_locations)
-#         print "hello",data
-        context={"opts":opts,"app_label":opts.app_label}
-#         context={"opts":opts,"app_label":opts.app_label}
-#         context={}
+        context = {"opts":opts, "app_label":opts.app_label}
         template = 'admin/bajaj/dsrlocationdetails/change_list.html'  # = Your new template
         form_url = ''
-        return super(DSRLocationDetailsAdmin, self).changelist_view(request,context)
+        return super(DSRLocationDetailsAdmin, self).changelist_view(request, context)
         
         
         
@@ -1546,7 +1712,6 @@ class DSRLocationDetailsAdmin(GmModelAdmin):
 #     template = 'admin/bajaj/orderpart/change_list.html'  # = Your new template
 #         form_url = ''
 #         return super(OrderPartAdmin, self).changelist_view(request,context)
-
 
 
 
@@ -1566,68 +1731,63 @@ class OrderPartAdmin(GmModelAdmin):
     change_form_template = 'admin/bajaj/orderpart/change_form.html'
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.DISTRIBUTORSALESREP, Roles.RETAILERS]
     
-#     
-#     if obj.order_placed_by == 1:
-        
+      
     
     exclude = ['so_id', 'po_id', 'do_id']    
-#     list_display = ('order_link', 'retailer_name', 'dsr_id',
-#                    'total_value', 'order_date')
-    list_filter = ['order_status',]
+    list_filter = ['order_status', ]
     
     class Media:
         js = ['js/uploadExcel.js']
     
     
        
-    def get_urls(self):
-        urls = super(OrderPartAdmin, self).get_urls()
-        my_urls = patterns('',
-                           
-#         url(r'^get_parts/(?P<order_id>\d+)/(?P<order_status>\w+)/$', self.admin_site.admin_view(self.get_items),name='get_part'),
-        url(r'^order_details/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$', self.admin_site.admin_view(self.my_view),name='pending_order_details'),
-                      
-        
-        )
-        return my_urls + urls
+#     def get_urls(self):
+#         urls = super(OrderPartAdmin, self).get_urls()
+#         my_urls = patterns('',
+#                            
+# #         url(r'^get_parts/(?P<order_id>\d+)/(?P<order_status>\w+)/$', self.admin_site.admin_view(self.get_items),name='get_part'),
+#         url(r'^order_details/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$', self.admin_site.admin_view(self.my_view), name='pending_order_details'),
+#                       
+#         
+#         )
+#         return my_urls + urls
 # #   
         
 
 
-    def my_view(self,request,order_status,retailer_id):
+    def my_view(self, request, order_status, retailer_id):
         opts = OrderPart._meta
         order_display = []
         orders = {}
-        print "pending view"
-        print order_status,"stats"
-        print retailer_id
+        print order_status,"stat"
         if order_status == "open":
-            order_obj = OrderPart.objects.filter(retailer=retailer_id,order_status=0).select_related("retailer","dsr")
-        elif order_status == "pending":
-            order_obj = OrderPart.objects.filter(retailer=retailer_id,order_status=1).select_related("retailer","dsr")
+            order_obj = OrderPart.objects.filter(retailer=retailer_id, order_status=0).select_related("retailer", "dsr")
+        elif order_status == "allocated":
+            order_obj = OrderPart.objects.filter(retailer=retailer_id, order_status=1).select_related("retailer", "dsr")
         elif order_status == "shipped":
-            order_obj = OrderPart.objects.filter(retailer=retailer_id,order_status=3).select_related("retailer","dsr")
+            order_obj = OrderPart.objects.filter(retailer=retailer_id, order_status=3).select_related("retailer", "dsr")
         elif order_status == "cancelled":
-            order_obj = OrderPart.objects.filter(retailer=retailer_id,order_status=2).select_related("retailer","dsr")    
-        print order_obj,"abc"
-        if len(order_obj) >0:
+            order_obj = OrderPart.objects.filter(retailer=retailer_id, order_status=2).select_related("retailer", "dsr")    
+        if len(order_obj) > 0:
             retailer_name = order_obj[0].retailer.retailer_name   
             retailer_id = order_obj[0].retailer.id
             for each in order_obj:
-                parts_list=[]
-#                 parts_dict={}
+                parts_list = []
                 order_id = each.id
-                print order_id,"order_idddd"
-                orders_details_obj = OrderPartDetails.objects.select_related("part_number", "order").filter(order=order_id,part_status=0)
-                print len(orders_details_obj)
-                print orders_details_obj,"objects"
+                print order_id
+                orders_details_obj = OrderPartDetails.objects.select_related("part_number", "order").filter(order=order_id, part_status=0)
                 for each_order in orders_details_obj:
-                    parts_dict={}
+                    parts_dict = {}
                     parts_dict['mrp'] = each_order.part_number.mrp
                     parts_dict['part_number'] = each_order.part_number.part_number
                     parts_dict['part_description'] = each_order.part_number.description
                     parts_dict['quantity'] = each_order.quantity
                     orders['order_id'] = each_order.order_id
+                    print each_order.quantity,"quant"
+                    print each_order.part_number.mrp,"mrp"
+                    if each_order.part_number.mrp == "#N/A":
+                        print "yes"
+                        each_order.part_number.mrp = 0
                     parts_dict['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
                     parts_dict["part_status"] = each_order.part_status
                     orders["retailer_name"] = each_order.order.retailer.retailer_name
@@ -1635,8 +1795,8 @@ class OrderPartAdmin(GmModelAdmin):
                     parts_dict["order_date"] = each_order.order.order_date
                     orderdetails_obj = OrderPartDetails.objects.filter(order_id=order_id).aggregate(Sum('line_total'))
                     orders["total_value"] = orderdetails_obj["line_total__sum"]
-                    orders["order_status"]  = order_status
-                    available_quantity = PartsStock.objects.filter(part_number = each_order.part_number.id)
+                    orders["order_status"] = order_status
+                    available_quantity = PartsStock.objects.filter(part_number=each_order.part_number.id)
                     if available_quantity:
                         available_quantity[0].available_quantity
                         parts_dict['available_quantity'] = available_quantity[0].available_quantity
@@ -1648,24 +1808,21 @@ class OrderPartAdmin(GmModelAdmin):
                         if each_order.quantity == int(order_delivered_obj["delivered_quantity__sum"]):
                           order_status = "shipped"
                         else:
-                            order_status = "pending"  
+                            order_status = "allocated"  
                         
-                        parts_dict["delivered_quantity"] =  int(order_delivered_obj["delivered_quantity__sum"])
+                        parts_dict["delivered_quantity"] = int(order_delivered_obj["delivered_quantity__sum"])
                         parts_dict['pending'] = (each_order.quantity) - int(order_delivered_obj["delivered_quantity__sum"])
                     else:
                                     
                         parts_dict["delivered_quantity"] = 0
 #                 orders['pending'] = each_order.quantity
                         parts_dict['pending'] = each_order.quantity
-                        order_status=order_status
-                        
-                    print parts_dict,"dict"
+                        order_status = order_status
                     parts_list.append(parts_dict.copy())
-                    print parts_list,"partslist"
-                if len(orders_details_obj)>0:
-                    orders["parts"]=parts_list
+                if len(orders_details_obj) > 0:
+                    orders["parts"] = parts_list
                     order_display.append(orders.copy())
-                    print order_display,"eachdisp"
+                    print order_display, "eachdisp"
 #                 print order_display
 #                 orders["retailer_name"] = each_order.retailer.retailer_name
 #                 orders["dsr_name"] = each_order.dsr
@@ -1674,7 +1831,7 @@ class OrderPartAdmin(GmModelAdmin):
 #                 orders["total_value"] = orderdetails_obj["line_total__sum"]
                 
         
-        context={"order_display":order_display,
+        context = {"order_display":order_display,
                  'order_status':order_status,
                  'app_label':opts.app_label,
                  'opts':opts,
@@ -1682,14 +1839,12 @@ class OrderPartAdmin(GmModelAdmin):
                  "retailer_id":retailer_id
                  }
         
-        form_url=""
+        form_url = ""
         template = 'admin/bajaj/orderpart/retailer_order_list.html'   
-#         return super(OrderPartAdmin, self).change_view(request, form_url, context)     
-        return render(request,template,context)
+        return render(request, template, context)
         
-#         print "hello gladminds"
-    def get_items(self,request,order_id,order_status):
-        print "hello"
+
+    def get_items(self, request, order_id, order_status):
         opts = OrderPart._meta
         orders_obj = OrderPartDetails.objects.select_related("part_number", "order").filter(order=order_id)
         length_orders = orders_obj.count() 
@@ -1707,7 +1862,7 @@ class OrderPartAdmin(GmModelAdmin):
             orders['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
             orders["part_status"] = each_order.part_status
             
-            available_quantity = PartsStock.objects.filter(part_number = each_order.part_number.id)
+            available_quantity = PartsStock.objects.filter(part_number=each_order.part_number.id)
             if available_quantity:
                 available_quantity[0].available_quantity
                 orders['available_quantity'] = available_quantity[0].available_quantity
@@ -1716,27 +1871,24 @@ class OrderPartAdmin(GmModelAdmin):
             order_obj = OrderDeliveredHistory.objects.filter(part_number_id=each_order.part_number_id, order_id=each_order.order_id).aggregate(Sum('delivered_quantity'))
             try:
                 orders_det = OrderDeliveredHistory.objects.get(part_number_id=each_order.part_number_id, order_id=each_order.order_id)
-    
-                print orders_det.delivered_date
                 orders['delivered_date'] = orders_det.delivered_date.strftime('%Y-%m-%d %H:%M')
                 orders['delivered_quantity'] = orders_det.delivered_quantity
             except Exception as ex:
-                orders['delivered_date'] =""
-                orders['delivered_quantity']=""
+                orders['delivered_date'] = ""
+                orders['delivered_quantity'] = ""
                 
             if order_obj["delivered_quantity__sum"] != None:
                 orders['pending'] = (each_order.quantity) - int(order_obj["delivered_quantity__sum"])
             else:
                 orders['pending'] = each_order.quantity
             order_display.append(orders.copy())
-            print order_display
         context = { 
-                    "data":order_display,  
+                    "data":order_display,
                     "order_id":order_id,
                     'orders_length': length_orders,
                     'order_id':order_id,
                     'delivered':0,
-                    'order_status':order_status, 
+                    'order_status':order_status,
                     "ordered_date":ordered_date  ,
                     "opts":opts,
                     'app_label':opts.app_label
@@ -1770,9 +1922,6 @@ class OrderPartAdmin(GmModelAdmin):
         return obj.retailer.address_line_2
     address_line_2.short_description = 'Locality'
     
-#     def retailer(self, obj):
-#         return obj.retailer.retailer_name
-#     retailer.short_description = 'Retailer Namesssssssssssssssss'
     def get_sql_data(self, query):
         conn = connections[settings.BRAND]
         cursor = conn.cursor()
@@ -1784,51 +1933,13 @@ class OrderPartAdmin(GmModelAdmin):
 
     
     
-    def open_orders(self,obj):
-#        
+    def open_orders(self, obj):
         open_orders = obj.retailer_id
-
         query = "Select Count(retailer_id) from gm_orderpart  where accept=0 and retailer_id={0} group by retailer_id;".format(obj.retailer_id)
-        print query
         open_orders_count = self.get_sql_data(query)
-        print open_orders_count
         return open_orders_count[0]["Count(retailer_id)"]
-#         print order_obj
 
-# [{'Count(retailer_id)': 25L}]
 
-# Transaction.objects.all().values('actor').annotate(total=Count('actor')).order_by('total')
-#         order_obj = OrderPart.objects.filter(retailer_id=obj.retailer_id,accept=0).annotate(total=Count('retailer')).values("retailer")
-#             order_obj = OrderPart.objects.filter(retailer_id=obj.retailer_id,accept=0).count
-#         a = OrderPart.objects.values().annotate(total=Sum('accept'))
-#         print 
-#         Publisher.objects.filter(book__rating__gt=3.0).annotate(num_books=Count('book'))
-        
-#         order_obj = OrderPart.objects.filter(retailer_id=obj.retailer_id,accept=0).annotate(total=Count('id')).values("retailer_id")
-#         print order_obj
-#         order_obj = OrderPart.objects.values('retailer').filter(retailer_id=obj.retailer_id,accept=0).annotate(dcount=Count('id'))
-#         return len(order_obj)
-#         
-#         return 
-    
-#     def pending_orders(self,obj):
-#         open_orders = obj.retailer_id
-#         print open_orders
-#         order_obj = OrderPart.objects.filter(retailer_id=obj.retailer_id,accept=1).values_list("id",flat=True)
-#         print order_obj
-#         history = OrderDeliveredHistory.objects.filter(order_id__in=order_obj)
-# #         print len(history)
-#     
-#     def shipped_orders(self,obj):
-#         return "8"
-#     shipped_orders.short_description="Shipped Orders"
-#     
-    
-#     
-#     def cancelled_orders(self,obj):
-#         return "9"
-#     cancelled_orders.short_description="Cancelled Orders"
-    
     
     def get_actions(self, request):
         # in case of administrator only, grant him the approve retailer option
@@ -1842,31 +1953,55 @@ class OrderPartAdmin(GmModelAdmin):
     
        
     def changelist_view(self, request, extra_context={}):
-        
-        
-#         print model_admin,"modelllllll"
-#         retailers = OrderPart.objects.values("retailer").distinct()
-#         print retailers,"open"
-        order_details=[]
-        order_details_dict={}
-            
+        order_details = []
+        order_details_dict = {}
         query = "select *from orderDetail";
         data = self.get_sql_data(query)
-        print data ,"dataaaaa"
+        print data,"datat"
         for each in data:
-            order_details_dict["open_orders_len"]=each["open_count"]
-            order_details_dict["pending_orders_len"]=each["pending_count"]
-            order_details_dict["shipped_orders_len"]=each["shipped_count"]
-            order_details_dict["cancelled_orders_len"]=each["cancelled_count"]
-            order_details_dict["ret_id"]=each["retailer_id"]
-            order_details_dict["ret_name"]=each["retailer_name"]
-    #             print order_details_dict,"dict"
-            order_details.append(order_details_dict.copy())
-        
-        context={"order_details":order_details}
+            order_details_dict["open_orders_len"] = each["open_count"]
+            order_details_dict["pending_orders_len"] = each["pending_count"]
+            order_details_dict["shipped_orders_len"] = each["shipped_count"]
+            order_details_dict["cancelled_orders_len"] = each["cancelled_count"]
+            order_details_dict["ret_id"] = each["retailer_id"]
+            retailer_obj = Retailer.objects.get(id = order_details_dict["ret_id"])
+            order_details_dict["ret_mobile"] = retailer_obj.mobile
+            order_details_dict["ret_name"] = each["retailer_name"]
+            
+            invoices = Invoices.objects.filter(retailer_id = order_details_dict["ret_id"])
+            if invoices:
+                total_amount = 0
+                collection = 0
+                for invoice in invoices:
+                    retailer_dict = {}
+                    total_amount = total_amount + invoice.invoice_amount
+#                     retailer_dict.update({'retailer_id':retailer.retailer_code})
+#                     retailer_dict.update({'invoice_id': invoice.invoice_id})
+#                     retailer_dict.update({'total_amount': total_amount})
+#                     retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
+                    #get the collections for that invoice
+                    collection_objs = Collection.objects.filter(invoice_id = invoice.id)
+                    for each in collection_objs:
+                        collections = CollectionDetails.objects.filter(collection_id = each.id)
+                        if collections:
+                            for each_collections in collections:
+                                if each_collections.collected_amount == None:
+                                        each_collections.collected_amount=0
+                                collection = collection + each_collections.collected_amount
+#                     retailer_dict.update({'collected_amount': collection})
+                outstanding = total_amount + collection
+                order_details_dict["outstanding"] = outstanding
+#                     retailer_list.append(retailer_dict)
+            else: 
+                outstanding =0
+                order_details_dict["outstanding"] = "NA"
+
+            order_details.append(order_details_dict.copy()) 
+        print order_details,"order_details"   
+        context = {"order_details":order_details}
         template = 'admin/bajaj/orderpart/change_list.html'  # = Your new template
         form_url = ''
-        return super(OrderPartAdmin, self).changelist_view(request,context)
+        return super(OrderPartAdmin, self).changelist_view(request, context)
         
         
         
@@ -1887,43 +2022,38 @@ class OrderPartAdmin(GmModelAdmin):
 
        
     
-     
-     
-    def retailer_change_view(self, request, model_admin, order_id=None):
-        template = 'admin/bajaj/orderpart/change_form.html'  # = Your new template
-        opts = model_admin.model._meta
-        order_details=[]
-        order_obj = OrderPart.objects.get(id=order_id)
-        print order_obj.retailer,"retttt"
-        order_objs = OrderPart.objects.filter(retailer=order_obj.retailer,accept=0)
-        print order_objs,"objssssssssssssssssss"
-        for each in order_objs:
-            print each.id
-            orderdetails_obj = OrderPartDetails.objects.filter(order_id=each.id).aggregate(Sum('line_total'))
-            orderdetails_obj["line_total__sum"]
-            
-            
-            order_dict={}
-            order_dict["total_value"]= orderdetails_obj["line_total__sum"]
-            order_dict["order_id"] = each.id
-            order_dict["order_date"] = order_obj.order_date
-            order_details.append(order_dict)
-        print order_details,"disppp"
-        context = { 
-                   'opts':opts,
-                   'app_label' : opts.app_label,
-                    'order_details': order_details,
-                    'order_id':order_id,
-                    'delivered':0                    
-                   }
-        template = 'admin/bajaj/orderpart/change_form.html'  # = Your new template
-        form_url = ''
-        return super(OrderPartAdmin, self).change_view(request, order_id, form_url, context)
+#      
+#      
+#     def retailer_change_view(self, request, model_admin, order_id=None):
+#         template = 'admin/bajaj/orderpart/change_form.html'  # = Your new template
+#         opts = model_admin.model._meta
+#         order_details = []
+#         order_obj = OrderPart.objects.get(id=order_id)
+#         order_objs = OrderPart.objects.filter(retailer=order_obj.retailer, accept=0)
+#         for each in order_objs:
+#             orderdetails_obj = OrderPartDetails.objects.filter(order_id=each.id).aggregate(Sum('line_total'))
+#             orderdetails_obj["line_total__sum"]
+#             order_dict = {}
+#             order_dict["total_value"] = orderdetails_obj["line_total__sum"]
+#             order_dict["order_id"] = each.id
+#             order_dict["order_date"] = order_obj.order_date
+#             order_details.append(order_dict)
+#         print order_details, "disppp"
+#         context = { 
+#                    'opts':opts,
+#                    'app_label' : opts.app_label,
+#                     'order_details': order_details,
+#                     'order_id':order_id,
+#                     'delivered':0                    
+#                    }
+#         template = 'admin/bajaj/orderpart/change_form.html'  # = Your new template
+#         form_url = ''
+#         return super(OrderPartAdmin, self).change_view(request, order_id, form_url, context)
 
-        form_url = ''
-        context={}
-        
-        return super(OrderPartAdmin, self).change_view(request, retailer_name, form_url, context)
+#         form_url = ''
+#         context = {}
+#         
+#         return super(OrderPartAdmin, self).change_view(request, retailer_name, form_url, context)
         
         
         
@@ -1939,7 +2069,6 @@ class OrderPartAdmin(GmModelAdmin):
         length_orders = orders_obj.count() 
         if length_orders == 0:
             delivered = 0
-        print length_orders,"lenhhh"
         order_display = []
         orders = {}
         for each_order in orders_obj:
@@ -1951,7 +2080,7 @@ class OrderPartAdmin(GmModelAdmin):
             orders['quantity'] = each_order.quantity
             orders['order_id'] = each_order.order_id
             orders['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
-            available_quantity = PartsStock.objects.filter(part_number = each_order.part_number.id)
+            available_quantity = PartsStock.objects.filter(part_number=each_order.part_number.id)
             
             
             if available_quantity:
@@ -1968,15 +2097,15 @@ class OrderPartAdmin(GmModelAdmin):
                 orders['delivered_date'] = orders_det.delivered_date.strftime('%Y-%m-%d %H:%M')
                 orders['delivered_quantity'] = orders_det.delivered_quantity
             except Exception as ex:
-                orders['delivered_date'] =""
-                orders['delivered_quantity']=""
+                orders['delivered_date'] = ""
+                orders['delivered_quantity'] = ""
                 
             if order_obj["delivered_quantity__sum"] != None:
                 orders['pending'] = (each_order.quantity) - int(order_obj["delivered_quantity__sum"])
             else:
                 orders['pending'] = each_order.quantity
             order_display.append(orders.copy())
-            print order_display,"disppp"
+            print order_display, "disppp"
         context = { 
                    'opts':opts,
                     'obj':obj,
@@ -1989,16 +2118,9 @@ class OrderPartAdmin(GmModelAdmin):
         template = 'admin/bajaj/orderpart/change_form.html'  # = Your new template
         form_url = ''
         return super(OrderPartAdmin, self).change_view(request, order_id, form_url, context)
-     
-#     def changelist_view(self, request, extra_context=None):
-#         
-#         return self.retailer_change_view(request, self, order_id)
-#         
+              
            
     def change_view(self, request, order_id):
-
-        print order_id
-# #         return self.admin_change_view(request, self, order_link)
         return self.retailer_change_view(request, self, order_id)
    
 #     def changelist_view(self, request, extra_context={}):
@@ -2047,14 +2169,14 @@ class OrderPartAdmin(GmModelAdmin):
             if request.GET:
                     query_set = query_set.filter(order_placed_by=2)
             
-                    self.list_display = ( 'order_link','retailer_name', 'dsr_id','open_orders',
-                                         'pending_orders','shipped_orders','cancelled_orders')
-                    self.list_display_links= ('retailer_name','open_orders','pending_orders')
+                    self.list_display = ('order_link', 'retailer_name', 'dsr_id', 'open_orders',
+                                         'pending_orders', 'shipped_orders', 'cancelled_orders')
+                    self.list_display_links = ('retailer_name', 'open_orders', 'pending_orders')
 
             else:
 #                     query_set = query_set.filter(order_placed_by=1)
                     query_set = OrderPart.objects.filter(order_placed_by=1)
-                    print query_set,"aaa"
+                    print query_set, "aaa"
 #                     print query_set
                     self.list_display = ('retailer_name', 'total_value', 'order_date')
 #             query_set.
@@ -2479,13 +2601,14 @@ def get_admin_site_custom(brand):
     
     brand_admin.register(get_model("Distributor", brand), DistributorAdmin)
     brand_admin.register(get_model("Collection", brand), CollectionAdmin)
+    brand_admin.register(get_model("Invoices", brand), InvoiceAdmin)
     # brand_admin.register(get_model("DistributorStaff", brand), DistributorStaffAdmin)
 #     brand_admin.register(get_model("BackOrders", brand), BackOrdersAdmin)
     brand_admin.register(get_model("DistributorSalesRep", brand), DistributorSalesRepAdmin)  
     brand_admin.register(get_model("DSRWorkAllocation", brand), DSRWorkAllocationAdmin)
     
     brand_admin.register(get_model("DSRLocationDetails", brand), DSRLocationDetailsAdmin)
-    
+    brand_admin.register(get_model("PartsRackLocation", brand), PartsRackLocationAdmin)
     brand_admin.register(get_model("Retailer", brand), RetailerAdmin)
     brand_admin.register(get_model("PartModel", brand), PartModelAdmin)
     brand_admin.register(get_model("Categories", brand), CategoriesAdmin)

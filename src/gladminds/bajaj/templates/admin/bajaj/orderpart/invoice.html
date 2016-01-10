@@ -1,107 +1,62 @@
-
 <!DOCTYPE html>
 <html>
-<head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<title>Invoice</title>
-<link rel="stylesheet" href="css/bootstrap.min.css" >
-<link rel="stylesheet" href="css/bootstrap-theme.min.css">
-<script src="js/jquery-1.11.3.min.js"></script>
-<script type="text/javascript" src="js/bootstrap.min.js"></script>
-<link rel="stylesheet" href="/static/css/invoice.css">
-</head>
-<body>
-<div class="container1">
-    <div class="row">
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
-            <a href="http://gladminds.co"><img class="img-responsive" src="http://gladminds.co/wp-content/uploads/2015/01/gladminds-logo3.png" alt="GladMinds"></a>
-            <br>
-            <div>
-            TIN :1234567890<br>
-            CST:1234567890
-            </div>
-        </div>
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6" id="i1" >
-            <b class="bold">SUPREME MOTORS</b><br>
-            Authorized bajaj Jwheeler Spares Distributer<br> 
-            #14 service road yeshwanthpur<br>
-            Rajaji nagar Industrial subrub<br>
-            BANGLORE - 560 022.<br>
-            Phone:8861224062,8861224076<br>
-            Email:s15576@badealer.com<br>
-        </div>
-        <h4 class="centeralign"><b>TAX INVOICE - CREDIT</b></h4>
-        <div class="row row1">
-            <div>
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 borderright rightpadding">
-                    <p class="title t3"><b>M/s SUPREME AUTO SIMOGA</b>
-                    <br>SHANKAR MUTT ROAD</p><br>
-                    <p class="title t3"><b>SIMOGA 577022</b></p>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 borderright rightpadding">
-                    <p class="t3">TIN : 432523523525<br> Phone # 786986968</p><br>
-                    <p class="t3">Order # : ORY577022</p>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 row2 rightpadding">
-                  <div class="row">
-                       <div class="col-lg-4 col-md-4 col-sm-5 col-xs-5 t4"><b>Number</b> </div>
-                       <b>: SLY05606333</b><br>
-                        <div class="col-lg-4 col-md-4 col-sm-5 col-xs-5 t4"><b>Date </b></div><b>: 24-11-2015 4:28 PM</b><br>
-                        <div class="col-lg-4 col-md-4 col-sm-5 col-xs-5 t4"><b>Sales Rep </b></div><b>: VENK  Page # 1</b><br>
-                        <div class="col-lg-4 col-md-4 col-sm-5 col-xs-5 t4"><b>Transport</b> </div><b>: </b>
-                    </div>
-                </div>
-            </div>
-    	</div>
-    	<table class="table table-responsive table-hover table-bordered border0"> 
-            <thead> 
-                <tr> <th class="centeralign">SI</th>
-                 <th>Part Number/code</th> <th>Description</th> 
-                 <th class="rightalign">MRP</th><th>Qty</th>
-                 <th class="rightalign">Rate</th>
-                 <th class="rightalign">Disc%</th>
-                 <th class="rightalign">Tax</th>
-                 <th class="lastth" id="last">Amount <br>Rs. P.</th>
-                </tr> 
-            </thead> 
-            <tbody> 
-                <tr> <td class="centeralign" >1</td>
-                 <td>24101203</td> <td>DRIVEN DOG</td>
-                 <td class="rightalign">117.00</td> 
-                 <td>10 PCS</td> 
-                 <td class="rightalign">117.00</td> 
-                 <td class="rightalign">32.50</td>
-                 <td class="rightalign">14.50</td>
-                 <td class="lastth" id="lasttd">1,170.00</td>   
-                </tr> 
-            </tbody> 
-    	</table> 
-    	<table class="table  table-bordered b1" id="i3"> 
-        <thead></thead>
-            <tbody> 
-                <tr>
-                <td id="valign">E.&amp;O.E</td>
-                <td id="tdtop">
-                <div class="row">
-                <div class="col-lg-12 col-md-12 col-xs-12 col-sm-12" id="i4"><br><p class="centeralign">Continue to next page..</p><br></div>
-                    <div class="col-lg-6 col-md-6 col-xs-6 col-sm-6">&nbsp;</div>
-                    <div class="col-lg-6 col-md-6 col-xs-6 col-sm-6" id="i5">&nbsp;</div>
-                </div>  
-                </td> </tr>
-                
-            </tbody> 
-        </table>
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 leftalign rightpadding" >
-            <p><b>Terms & conditions :</b><br>
-            Terms & conditions :<br>
-            Goods once sold canot be taken back or exchanged.
-            </p>
-        </div>
-        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6 rightalign paddingbottom">
-            <b>for SUPREME MOTORS<br>
-            <br>Authorized Signatory</b>
-        </div>
-    </div>
-</div>
-</body>
+	<head>
+		
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<title>Invoice</title>
+		<link rel="stylesheet" href="/static/css/bootstrap.min.css" >
+		<link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
+		<script src="/static/js/jquery-1.11.3.min.js"></script>
+		<script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+		<style>
+			.borderless {
+				border: none;
+			}
+
+			.borderless tbody tr td, .borderless tbody tr th, .borderless thead tr th {
+				border: none;
+			}
+
+			.container1 {
+				border: 0 !important;
+			}
+			body{
+				font-size:10px;
+			}
+			
+		</style>
+		<link rel="stylesheet" href="/static/css/invoice.css">
+	</head>
+	<body style="margin:5px;">
+		<div class="container1" style="margin:0px;float:left;width:100%">
+			<div class="row-fluid">
+
+				<table class="table table-responsive borderless table-condensed" style="border-bottom:1px dashed #000">
+					<thead style="border-bottom:1px dashed #000;border-top:1px dashed #000;">
+						<tr  style="border-bottom:1px dashed #000;border-top:1px dashed #000;">
+							<th class="centeralign" style="padding: 10px 0;margin: 10px 0;">SI</th>
+							<th style="padding: 10px 0;margin: 10px 0;">Part Number</th>
+							<th style="padding: 10px 0;margin: 10px 0;">Description</th>
+							<th class="text-center" style="padding: 10px 0;margin: 10px 0;">Allocated</th>
+							<th style="padding: 10px 0;margin: 10px 0;">Location</th>
+							<th class="rightalign" style="padding: 10px 0;margin: 10px 0;">MRP</th>
+						</tr>
+					</thead>
+					<tbody id="partsBody">
+						{% for each in picklist_details %}
+						<tr>
+							<td class='centeralign'> {{forloop.counter}} </td>
+							<td> {{each.part_number}} </td>
+							<td> {{each.part_description}} </td>
+							<td class='text-center'> {{each.allocated}} </td>
+							<td> {{each.location}} </td>
+							<td class='rightalign'> {{each.mrp}} </td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+
+			</div>
+		</div>
+	</body>
 </html>

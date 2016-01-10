@@ -215,6 +215,9 @@ SUIT_CONFIG = {
                    
                      {'model': 'partmastercv',
                       'label': 'Parts List'},
+                    
+                         {'model': 'partsracklocation',
+                    'label': 'Parts Rack Location'},
                      )
                        
           },
@@ -234,6 +237,9 @@ SUIT_CONFIG = {
                    
                      {'model': 'orderpart',
                       'label': 'Orders'},
+                                {'model': 'invoices',
+                      'label': 'Upload invoices'},
+                    
                      
                     )
                     },
@@ -254,14 +260,21 @@ SUIT_CONFIG = {
          'models':(
                   
                     {'model': 'dsrlocationdetails',
-                     'label': 'DSR Location Details'},
-                 
-       
-)},
+                     'label': 'Location Details'},
+                   
+                   
+                   )},
              
-        
-        
-        
+#             {'app': 'bajaj', 'label': 'Part Rack Location', 'icon': ' icon-folder-open',
+#         'models':(
+#                    
+#                    {'model': 'partsracklocation',
+#                     'label': 'Parts Rack Loction'},
+#                  
+       
+# )},/
+          
+ 
         
         )
 }
@@ -272,19 +285,23 @@ MANAGERS = ADMINS
 DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
 
 # for localhost
+
+
 #DB_USER = os.environ.get('DB_USER', 'root')
 #DB_HOST = os.environ.get('DB_HOST', '127.0.0.1')
 #DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
 
-# # for server
+
+# 
+# # # for server
 DB_USER = os.environ.get('DB_USER', 'dssoffline')
 DB_HOST = os.environ.get('DB_HOST', 'dssoffline.chnnvvffqwop.us-east-1.rds.amazonaws.com') 
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'dssoffline')
 
 # for bajaj MC
-#DB_USER = os.environ.get('DB_USER', 'aftersell')
-#DB_HOST = os.environ.get('DB_HOST', 'aftersell-api.chnnvvffqwop.us-east-1.rds.amazonaws.com')
-#DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
+# DB_USER = os.environ.get('DB_USER', 'aftersell')
+# DB_HOST = os.environ.get('DB_HOST', 'aftersell-api.chnnvvffqwop.us-east-1.rds.amazonaws.com')
+# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
 
 # for bajaj CV
 # DB_USER = os.environ.get('DB_USER', 'bajajcv')
@@ -487,7 +504,7 @@ ALL_APPS = (
     'django_otp',
     'django_otp.plugins.otp_totp',
     'rest_framework',
-    'adminplus',
+#     'adminplus',
 
     # 'debug_toolbar',
     # Uncomment the next line to enable admin documentation:

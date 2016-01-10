@@ -91,7 +91,7 @@ urlpatterns = patterns('',
     url(r'^save_order_history/$', 'gladminds.bajaj.views.views.save_order_history', name='save_order_history'),
     
     
-    url(r'^accept_parts/$', 'gladminds.bajaj.views.views.accept_cancel_order', name='accept_cancel_order'),
+#     url(r'^accept_parts/$', 'gladminds.bajaj.views.views.accept_cancel_order', name='accept_cancel_order'),
             
     
     url(r'^save_order_details/$', 'gladminds.bajaj.views.views.save_order_temp_history', name='save_order_temp_history'),
@@ -108,6 +108,12 @@ urlpatterns = patterns('',
     
     url(r'^admin/upload-part-sfa/$', 'gladminds.bajaj.views.upload_part_pricing',name="upload_part_pricing"),
     
+    url(r'^admin/upload-rack-location/$', 'gladminds.bajaj.views.upload_rack_location',name="upload_rack_location"),
+    
+    url(r'^admin/upload-invoices/$', 'gladminds.bajaj.views.upload_invoices',name="upload_invoices"),
+    
+    
+    
     url(r'^admin/retailer/orders/$','gladminds.bajaj.views.views.dsr_orders', name='dsr_orders'),
     url(r'^admin/retailer/approve_retailer/retailer_id/(?P<retailer_id>\d+)/$', 'gladminds.bajaj.views.views.approve_retailer', name='approve_retailer'),
 #     url(r'^admin/bajaj/view_orders/(?P<order_id>\d+)$', 'gladminds.bajaj.views.views.list_orders', name='list_orders'),
@@ -118,20 +124,30 @@ urlpatterns = patterns('',
     
     url(r'^admin/data$','gladminds.bajaj.views.views.cal_data', name='cal_data'),
     url(r'^admin/schedule_dsr','gladminds.bajaj.views.views.schedule_dsr', name='schedule_dsr'),
-    url(r'^admin/test','gladminds.bajaj.views.views.test', name='test'),
+    url(r'^admin/test','gladminds.bajaj.views.views.map_view', name='map_view'),
+    
+    url(r'^admin/get_distributor_map','gladminds.bajaj.views.views.map_view1', name='map_view1'),
     
     url(r'^admin/get_collection_details/(?P<ret_id>\d+)/$','gladminds.bajaj.views.views.get_collection_details', name='get_collection_details'),
-     url(r'^admin/invoice_details(?P<ret_id>\d+)/(?P<invoice_id>\d+)/','gladminds.bajaj.views.views.get_orders', name='get_orders'),
+    url(r'^admin/invoice_details(?P<ret_id>\d+)/(?P<invoice_id>\d+)/','gladminds.bajaj.views.views.get_orders', name='get_orders'),
+     url(r'^admin/get_dsr_retailers','gladminds.bajaj.views.views.get_dsr_retailers', name='get_dsr_retailers'),    
 
-
-    url(r'^invoice/', TemplateView.as_view(template_name="invoice.html"),
+#     url(r'^invoice/', TemplateView.as_view(template_name="invoice.html"),
+#                    name='invoice'),
+                       
+    url(r'^get_picklist/', 'gladminds.bajaj.views.views.get_picklist',
                    name='invoice'),
                        
+    url(r'^download_delivery_list/', 'gladminds.bajaj.views.views.download_delivery_list', name='download_delivery_list'),
+                       
+
+                       
     url(r'^admin/delete_temp_details','gladminds.bajaj.views.views.clear_order_temp', name='clear_order_temp'),
-                       
-                       
-                
-    
+              
+     url(r'^admin/get_location/(?P<dist_id>\d+)/$','gladminds.bajaj.views.views.get_distributor_location', name='get_distributor_location'),         
+              
+    url(r'^order_allocated_details/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$','gladminds.bajaj.views.views.pending_order_details' , name='pending_order_details'),
+    url(r'^save_order/$','gladminds.bajaj.views.views.generate_picklist_save_order' , name='generate_picklist_save_order'),
 #     url(r'^admin/cancel_order/(?P<ret_id>\d+)/(?P<order_id>\d+)/$','gladminds.bajaj.views.views.cancel_order', name='cancel_order'),
     
 
