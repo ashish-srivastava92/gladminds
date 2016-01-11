@@ -5,7 +5,7 @@ from gladminds.sqs_tasks import _tasks_map
 
 from tastypie.api import Api
 from django.conf import settings
-from gladminds.core.apis import user_apis, preferences_apis, coupon_apis, product_apis,\
+from gladminds.core.apis import user_apis, user_report_apis, preferences_apis, coupon_apis, product_apis,\
     audit_apis, dashboard_apis, service_desk_apis, loyalty_apis, part_change_apis,\
     service_circular
 from gladminds.core.managers.sms_handler import SMSResources
@@ -44,6 +44,18 @@ api_v1.register(user_apis.ServiceDeskUserResource())
 
 api_v1.register(user_apis.TransporterResource())
 api_v1.register(user_apis.SupervisorResource())
+
+###########################USER REPORT APIS######################################
+api_v1.register(user_report_apis.NsmTargetResource())
+api_v1.register(user_report_apis.AsmTargetResource())
+api_v1.register(user_report_apis.DistributorTargetResource())
+api_v1.register(user_report_apis.DistributorSalesRepTargetResource())
+api_v1.register(user_report_apis.RetailerTargetResource())
+api_v1.register(user_report_apis.AsmHighlightsResource())
+api_v1.register(user_report_apis.NsmHighlightsResource())
+api_v1.register(user_report_apis.DistributorHighlightsResource())
+api_v1.register(user_report_apis.DistributorSalesRepHighlightsResource())
+api_v1.register(user_report_apis.RetailerHighlightsResource())
 
 api_v1.register(product_apis.ProductTypeResource())
 api_v1.register(product_apis.ProductResource())
@@ -253,6 +265,10 @@ urlpatterns = patterns('',
     url(r'^getdsrs/$', 'gladminds.bajaj.views.apis.get_associated_dsrs', name='getdsrs'),
     url(r'^getretailers_acutal/$', 'gladminds.bajaj.views.apis.get_retailers_actual', name='getretailers_actual'),
     url(r'^getusers/$', 'gladminds.bajaj.views.apis.get_users', name='getusers'),
+ 
+    ##Reports API
+    url(r'^mc/get_user_reports/month/(?P<month>\d+)/year/(?P<year>\d+)/$',
+                        'gladminds.core.apis.user_report_apis.get_reports'),
  
 )
 
