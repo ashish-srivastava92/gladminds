@@ -98,7 +98,6 @@ body .modal {
 				var output = [];
 				output.push("<table><thead><tr><th>Invoice.No</th><th>Collected Amount</th><th>Collected Date</th><th>Collected By</th><th>Mode</th><tbody>");var ahref;
 				$.each(data, function(k, v) {
-					
 					output.push("<tr><td align='center'>");
 					output.push(v.invoice_no);
 					output.push("</td><td align='right'>");
@@ -118,14 +117,13 @@ body .modal {
 					}
 					else
 					output.push(v.mode);
-					//output.push("</td><td align='center'>");
-					//output.push(v.status);
-					output.push("</tr>");
+					output.push("</td><td>");
+					output.push("&nbsp;");
+					output.push("</td></tr>");
 				});
 				output.push("</tbody></table>");
 				$("#modalBody").html(output.join(""));
-                                $("#modalBody").find("table").dataTable();
-				//$("#chequehref").attr("href",ahref);
+				$("#modalBody").find("table").dataTable();
 				
 				
 				$("#myModal .modal-title span").html("").html($(obj).attr("retName"))

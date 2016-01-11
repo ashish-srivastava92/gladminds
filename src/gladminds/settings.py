@@ -232,6 +232,9 @@ SUIT_CONFIG = {
                    
                      {'model': 'orderpart',
                       'label': 'Orders'},
+                                {'model': 'invoices',
+                      'label': 'Upload invoices'},
+                    
                      
                     )
                     },
@@ -265,9 +268,6 @@ SUIT_CONFIG = {
        
 )},
              
-        
-        
-        
         
         )
 }

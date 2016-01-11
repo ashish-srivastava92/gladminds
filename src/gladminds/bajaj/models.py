@@ -715,7 +715,7 @@ class SubCategories(base_models.SubCategories):
     usps = models.CharField(max_length=500, null=True, blank=True)
     importance = models.CharField(max_length=500, null=True, blank=True)
     image_url = models.CharField(max_length=30, null=True, blank=True)
-    part_model = models.ForeignKey(PartModels)
+    part_model = models.ForeignKey(PartModel)
     category = models.ForeignKey(Categories)
     active = models.BooleanField(default = True)
 #     active = models.BooleanField(default=True)
@@ -968,7 +968,6 @@ class ManufacturingData(base_models.ManufacturingData):
 ##########################     SFA Models  #########################################3
 
 
-
    
 class PartPricing(base_models.PartPricing):
     ''' details of parts '''
@@ -1106,8 +1105,6 @@ class InvoicesDetails(base_models.InvoicesDetails):
         app_label = _APP_NAME
 
 
-
-
 class Collection(base_models.Collection):
     ''' details of spare parts and pricing '''
     retailer = models.ForeignKey(Retailer, null=True, blank=True)
@@ -1133,7 +1130,8 @@ class CollectionDetails(base_models.CollectionDetails):
     active = models.BooleanField(default=True)
     collected_cash = models.DecimalField(max_digits=20, decimal_places=4, null=True, blank=True,default=0)
     cheque_amount = models.DecimalField(max_digits=20, decimal_places=4, null=True, blank=True)
-
+    collected_amount = models.DecimalField(max_digits=20, decimal_places=4, null=True, blank=True)
+    
 #     dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
 
     class Meta(base_models.CollectionDetails.Meta):
@@ -1141,8 +1139,7 @@ class CollectionDetails(base_models.CollectionDetails):
         
         
 class BackOrders(base_models.BackOrders):
-    
-    
+        
     distributor = models.ForeignKey(Distributor, null=True, blank=True)
     qty = models.IntegerField(null=True,blank=True)
     datetime = models.DateTimeField()
@@ -1160,24 +1157,6 @@ class DSRLocationDetails(base_models.DSRLocationDetails):
     class Meta(base_models.DSRLocationDetails.Meta):
         app_label = _APP_NAME
         
-class PartMasterCv(base_models.PartMasterCv):
-    ''' details of spare parts and pricing '''
-    part_number = models.CharField(max_length=255, null=True, blank=True)
-    products = models.CharField(max_length=255, null=True, blank=True)
-    remarks = models.CharField(max_length=255, null=True, blank=True)
-    mrp = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
-    description = models.CharField(max_length=255, null=True, blank=True)
-    subcategory = models.ForeignKey(SubCategories, null=True, blank=True)
-    category = models.ForeignKey(CvCategories)
-  
-    available_quantity = models.IntegerField()
-    current_month_should = models.IntegerField()
-    active = models.BooleanField(default=True)
-    moq = models.IntegerField( null=True, blank=True)
-    
-    class Meta(base_models.PartMasterCv.Meta):
-        app_label = _APP_NAME
-    
 class PartIndexPlates(base_models.PartIndexPlates):
     ''' details of part index '''
     plate_name = models.CharField(max_length = 255)

@@ -629,6 +629,7 @@ class PartMasterCv(base_models.PartMasterCv):
     available = models.CharField(max_length=25)
     pending = models.CharField(max_length=25)
     current_month_should = models.IntegerField()
+    active = models.BooleanField(default=True)
     moq = models.IntegerField( null=True, blank=True)
     
     class Meta(base_models.PartMasterCv.Meta):
@@ -662,10 +663,8 @@ class PartsStock(base_models.PartsStock):
     available_quantity = models.IntegerField(null=True, blank=True)
     distributor = models.ForeignKey(Distributor, null=True, blank=True)
     active = models.BooleanField(default=True)
-    
     class Meta(base_models.PartsStock.Meta):
         app_label = _APP_NAME
-
 
 class OrderPart(base_models.OrderPart):
     ''' details of orders placed by retailer '''
@@ -970,3 +969,33 @@ class ManufacturingData(base_models.ManufacturingData):
     class Meta(base_models.ManufacturingData.Meta):
         app_label = _APP_NAME
 
+class PartIndexPlates(base_models.PartIndexPlates):
+    ''' details of part index '''
+    plate_name = models.CharField(max_length = 255)
+    model = models.ForeignKey(PartModels)
+    active = models.BooleanField(default = 1)
+    
+    class Meta(base_models.PartIndexPlates.Meta):
+        app_label = _APP_NAME
+    
+class PartIndexDetails(base_models.PartIndexDetails):
+    plate = models.ForeignKey(PartIndexPlates)
+    part_number = models.CharField(max_length=255, null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    quantity = models.IntegerField(null=True, blank=True)
+    mrp = models.CharField(max_length=8, null=True, blank=True)
+    
+    class Meta(base_models.PartIndexDetails.Meta):
+        app_label = _APP_NAME
+
+class OrderPartDetails(base_models.OrderPartDetails):
+    part_number = models.ForeignKey(PartMasterCv)
+    part_number_catalog = models.ForeignKey(PartIndexDetails, null=True, blank=True)
+    quantity = models.IntegerField(null=True, blank=True)
+    active = models.IntegerField(null=True, blank=True, default=1)
+    order = models.ForeignKey(OrderPart)
+    line_total = models.DecimalField(max_digits = 20, decimal_places=4, null=True, blank=True)
+
+    class Meta(base_models.OrderPartDetails.Meta):
+        app_label = _APP_NAME
+        verbose_name_plural = "Order Part Details"

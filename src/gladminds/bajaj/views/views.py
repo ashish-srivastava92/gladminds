@@ -39,7 +39,16 @@ from gladminds.core.services.message_template import get_template
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
 from gladminds.core.auth import otp_handler
+<<<<<<< HEAD
 from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor, District, State, PartPricing, OrderDeliveredHistory, DoDetails, PartsStock, OrderPart, OrderPartDetails, DistributorSalesRep, DSRWorkAllocation, BackOrders, DSRLocationDetails, OrderTempDeliveredHistory, Collection, CollectionDetails, DoDetails, PartMasterCv, AreaSparesManager, PartsRackLocation, OrderTempDetails, Invoices, PartsRackLocation, NationalSparesManager
+=======
+from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor, District, State, OrderPartDetails, \
+PartPricing, OrderDeliveredHistory, DoDetails, PartsStock, OrderPart, OrderPartDetails, DistributorSalesRep, DSRWorkAllocation, \
+BackOrders, DSRLocationDetails, OrderTempDeliveredHistory, Collection, CollectionDetails, DoDetails, PartMasterCv, \
+AreaSparesManager, PartsRackLocation, OrderTempDetails, Invoices, PartsRackLocation
+
+
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template import loader
 from django.template.context import Context
@@ -52,8 +61,12 @@ from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
 from gladminds.core.constants import DATE_FORMAT, TIME_FORMAT
 import StringIO
 import csv
+<<<<<<< HEAD
 from gladminds.sqs_tasks import send_loyalty_sms
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
+=======
+
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
@@ -91,6 +104,84 @@ def get_districts(request):
     return HttpResponse(json.dumps(list(districts), cls=DjangoJSONEncoder), content_type='application/json')
 
 
+<<<<<<< HEAD
+=======
+   
+# def accept_cancel_order(request):
+#     order_id = request.POST["order_id"]
+#     part_numbers_ids = ""
+#     opts = OrderPart._meta
+#     order_display = []
+#     orders = {}
+#     if 'cancel' in request.POST:
+#         part_numbers = request.POST.getlist("part_number")
+#         
+#         for each in part_numbers:
+#             part_obj = PartMasterCv.objects.get(part_number=each)
+#             ord = OrderPartDetails.objects.filter(part_number_id=part_obj.id, order_id=order_id).update(part_status=1)
+#             messages.success(request, "Successfully cancelled the part " + each + " from the order ID " + order_id)
+#     elif "place_order" in request.POST:
+#         part_numbers = request.POST.getlist("part_number")
+#         for each in part_numbers:
+#             part_obj = PartMasterCv.objects.get(part_number=each)
+#             ord = OrderPartDetails.objects.filter(part_number_id=part_obj.id, order_id=order_id).update(part_status=0)
+#             messages.success(request, "Successfully accepted the part " + each + " from the order ID " + order_id)
+#     order_status = "open"
+#     orders_obj = OrderPartDetails.objects.select_related("part_number", "order").filter(order=order_id)
+#     order_display = []
+#     orders = {}
+#     ordered_date = OrderPart.objects.get(id=order_id).order_date
+#     for each_order in orders_obj:
+#         orders['mrp'] = each_order.part_number.mrp
+#         orders['part_number'] = each_order.part_number.part_number
+#         orders['part_description'] = each_order.part_number.description
+#         orders['quantity'] = each_order.quantity
+#         orders['order_id'] = each_order.order_id
+#         orders['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
+#         orders["part_status"] = each_order.part_status
+#         available_quantity = PartsStock.objects.filter(part_number=each_order.part_number.id)
+#         if available_quantity:
+#             
+#               if available_quantity < each_order.quantity:
+#                dist_id = Distributor.objects.get(user=request.user.id).id
+#                orders['available_quantity'] = available_quantity[0].available_quantity
+#                remaining_qty = orders['available_quantity'] - orders["quantity"]
+#                if remaining_qty > 0:
+#                    backorder_obj = BackOrders(distributor_id=dist_id , qty=remaining_qty, datetime=datetime.datetime.now())
+#                    backorder_obj.save(using=settings.BRAND)
+#               else:
+#                   orders['available_quantity'] = available_quantity[0].available_quantity
+#         else:
+#             orders['available_quantity'] = None
+#         order_delivered_obj = OrderDeliveredHistory.objects.filter(part_number_id=each_order.part_number_id, order_id=each_order.order_id).aggregate(Sum('delivered_quantity'))                  
+#         if order_delivered_obj["delivered_quantity__sum"] != None:
+#             if each_order.quantity == int(order_delivered_obj["delivered_quantity__sum"]):
+#                  order_status = "shipped"
+#             else:
+#                 order_status = "pending"  
+#             orders["delivered_quantity"] = order_delivered_obj["delivered_quantity__sum"]
+#             orders['pending'] = (each_order.quantity) - int(order_delivered_obj["delivered_quantity__sum"])
+#         else:
+#          
+#             orders["delivered_quantity"] = 0
+#             orders['pending'] = each_order.quantity
+#             order_status = "open"
+#         order_display.append(orders.copy())
+#     context = { 
+#                 "order_display":order_display,
+#                 "order_id":order_id,
+#                 'order_id':order_id,
+#                 'delivered':0,
+#                 'order_status':order_status,
+#                 "ordered_date":ordered_date,
+#                 'app_label':opts.app_label,
+#                 'opts':opts,
+#                }
+#     template = 'admin/bajaj/orderpart/show_parts.html'  # = Your new template
+#     return render(request, template, context)
+    
+    
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
 def clear_order_temp(request):
     ret_id = request.POST.get('retailer_id')
     order_obj = OrderTempDeliveredHistory.objects.filter(retailer_id=ret_id).delete()
@@ -228,6 +319,7 @@ def download_sample_rack_location_list_csv(request):
     writer.writerow(['Part Number', 'Rack Location'])
     return response
 
+<<<<<<< HEAD
 
 def save_order_history(request):
     """
@@ -534,6 +626,409 @@ def pending_order_details(request, order_status, retailer_id):
     form_url = ''
     template = 'admin/bajaj/orderpart/retailer_order_list.html'
     return render(request, template, context)
+=======
+
+def get_distributor_location(request, dist_id):
+    dist_obj = Distributor.objects.filter(id=dist_id).select_related("user")
+    locations = []
+    dist_locations = []
+    dist_locations_dict = {}
+    lat_long = {}
+
+    
+    for each in dist_obj:
+        dist_locations_dict["latitude"] = each.latitude
+        dist_locations_dict["longitude"] = each.longitude
+        dist_locations_dict["dist_name"] = each.user.user.first_name
+        dist_locations_dict["distributor_id"] = each.distributor_id
+        
+        lat_long["max_lat"] = dist_locations_dict["latitude"]
+        lat_long["min_long"] = dist_locations_dict["longitude"]
+        
+        dist_locations.append(dist_locations_dict.copy())
+        locations.append(lat_long)
+        locations.append(dist_locations)
+    data = json.dumps(locations, cls=DjangoJSONEncoder)
+    return HttpResponse(data, content_type="application/json")
+    
+    
+from gladminds.core.core_utils.utils import dictfetchall
+from django.db import connections
+from django.conf import  settings
+def get_sql_data(query):
+        conn = connections[settings.BRAND]
+        cursor = conn.cursor()
+        cursor.execute(query)
+        data = dictfetchall(cursor)
+        conn.close()
+        return data    
+    
+
+def get_picklist(request):
+    retailer_id = request.GET.get('retailer_id')
+    picklist_details_obj = OrderTempDetails.objects.filter(retailer_id=retailer_id).select_related("part_number", "order")
+    picklist_details = []
+    dist_obj = Distributor.objects.get(user=request.user)
+    picklist_details_dict = {}
+    picklist_details_dict["name"] = dist_obj.name
+    picklist_details_dict["address_line_1"] = dist_obj.user.address + "," + dist_obj.address_line_2
+    picklist_details_dict["address_line_2"] = dist_obj.address_line_3 + "," + dist_obj.address_line_4
+    for each_picklist_row in picklist_details_obj:
+         picklist_details_dict["part_number"] = each_picklist_row.part_number.part_number
+         picklist_details_dict["part_description"] = each_picklist_row.part_number.description
+         picklist_details_dict["allocated"] = each_picklist_row.qty
+         try:
+             location = PartsRackLocation.objects.get(part_number_id=each_picklist_row.part_number.id)
+             picklist_details_dict["location"] = location.rack_location
+         except Exception as ex:
+             picklist_details_dict["location"] = "NA"
+         picklist_details_dict["mrp"] = each_picklist_row.part_number.mrp          
+         if picklist_details_dict["mrp"] == "#N/A":
+           picklist_details_dict["mrp"] = 0
+         picklist_details.append(picklist_details_dict.copy())
+    context = {"picklist_details":picklist_details}
+    template = 'admin/bajaj/orderpart/invoice.html'  # = Your new template
+    return render(request, template, context)
+
+    
+def save_order_history(request):
+    '''
+     accepts the order and allocates qty to the parts and moves the order to allocated order 
+    
+    '''
+    distributor_id = request.user.id
+    dist_id = Distributor.objects.get(user=request.user).id
+    order_id = request.POST["order_id"]
+    retailer_id = request.POST["retailer_id"]   
+    part_numbers_ids = ""
+    opts = OrderPart._meta
+    order_display = []
+    orders = {}
+    stock = request.POST.getlist("delivered_stock")
+    part_number_ids = ""
+    total_amount = 0    
+    flag = 0
+    for each in range(0, int(len(stock))):
+        delivered_stock = request.POST.getlist("delivered_stock")[each]
+        part_number = request.POST.getlist("part_number")[each]
+        delivered_qty = request.POST.getlist("delivered_quantity")[each]
+        if delivered_stock != "":
+            part_pricing_obj = PartMasterCv.objects.get(part_number=part_number)
+            part_obj = PartsStock.objects.get(part_number=part_pricing_obj.id)
+            order_temp_obj = OrderTempDetails(part_number_id=part_pricing_obj.id, order_id=order_id , distributor_id=dist_id, retailer_id=retailer_id, qty=delivered_stock)
+            order_temp_obj.save(using=settings.BRAND)
+            order_delivered_obj = OrderTempDetails.objects.filter(part_number_id=part_pricing_obj.id).aggregate(total_delivered_qty=Sum('qty'))
+            total_qty_delivered = order_delivered_obj["total_delivered_qty"]
+            if total_qty_delivered == None:
+                total_qty_delivered = 0
+            orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id).update(order_status="1")
+            order_status = "allocated"
+            part_number_ids += part_number + ","
+    part_number_ids = part_number_ids[:-1]
+    messages.success(request, "Qty for the Parts {0} have been allocated successfully and moved to picklist ".format(part_number_ids))
+    query = "select *from orderDetail";
+    data = get_sql_data(query)
+    order_details_dict = {}
+    order_details = []
+    for each in data:
+        order_details_dict["open_orders_len"] = each["open_count"]
+        order_details_dict["pending_orders_len"] = each["pending_count"]
+        order_details_dict["shipped_orders_len"] = each["shipped_count"]
+        order_details_dict["cancelled_orders_len"] = each["cancelled_count"]
+        order_details_dict["ret_id"] = each["retailer_id"]
+        retailer_obj = Retailer.objects.get(id=order_details_dict["ret_id"])
+        order_details_dict["ret_mobile"] = retailer_obj.mobile
+        order_details_dict["ret_name"] = each["retailer_name"]
+        
+        invoices = Invoices.objects.filter(retailer_id=order_details_dict["ret_id"])
+        if invoices:
+            total_amount = 0
+            collection = 0
+            for invoice in invoices:
+                retailer_dict = {}
+                total_amount = total_amount + invoice.invoice_amount
+                collection_objs = Collection.objects.filter(invoice_id=invoice.id)
+                for each in collection_objs:
+                    collections = CollectionDetails.objects.filter(collection_id=each.id)
+                    if collections:
+                        for each_collections in collections:
+                            collection = collection + each_collections.collected_amount
+            outstanding = total_amount + collection
+            order_details_dict["outstanding"] = outstanding
+        else: 
+            outstanding = 0
+            order_details_dict["outstanding"] = "NA"
+
+        order_details.append(order_details_dict.copy())   
+    context = {   "order_status":order_status,
+                   "order_details":order_details,
+                'app_label':opts.app_label,
+                'opts':opts,
+               }
+    template = 'admin/bajaj/orderpart/change_list.html'  # = Your new template
+    return render(request, template, context)
+
+
+def generate_picklist_save_order(request):
+    retailer_id = request.POST["retailer_id"]
+    distributor_id = request.user.id
+    dist_id = Distributor.objects.get(user=request.user).id
+    part_numbers_ids = ""
+    opts = OrderPart._meta
+    order_display = []
+    orders = {}
+    stock = request.POST.getlist("delivered_stock")
+    part_number_ids = ""
+    total_amount = 0    
+
+    flag = 0
+    for each in range(0, int(len(stock))):
+        delivered_stock = request.POST.getlist("delivered_stock")[each]
+        date = request.POST.getlist("order_date")[each]
+        order_id = request.POST.getlist("order_id")[each]
+        part_number = request.POST.getlist("part_number")[each]
+        delivered_qty = request.POST.getlist("delivered_quantity")[each]
+        do_obj = DoDetails(order_id=order_id,distributor_id = dist_id)
+        do_obj.save(using=settings.BRAND)
+        if delivered_stock != "":
+            part_pricing_obj = PartMasterCv.objects.get(part_number=part_number)
+	    print part_pricing_obj.id
+            part_obj = PartsStock.objects.get(part_number=part_pricing_obj.id)
+            total_delivered_stock = int(delivered_qty) + int(delivered_stock)
+            order_delivered_obj = OrderTempDetails.objects.filter(part_number_id=part_pricing_obj.id).aggregate(total_delivered_qty=Sum('qty'))
+            total_qty_delivered = order_delivered_obj["total_delivered_qty"]
+            if total_qty_delivered == None:
+                total_qty_delivered = 0
+            if total_qty_delivered != delivered_stock:
+                if delivered_stock < total_qty_delivered:
+                    part_obj.available_quantity = part_obj.available_quantity + int(delivered_stock)
+                else:
+                    part_obj.available_quantity = part_obj.available_quantity - int(delivered_stock)
+
+#                 part_obj.available_quantity = int(part_obj.available_quantity) - int(total_qty_delivered)
+#                 part_obj.save(using=settings.BRAND) 
+#                 part_obj.available_quantity = int(part_obj.available_quantity) - int(delivered_stock)
+#                 part_obj.save(using=settings.BRAND)
+#                 ordered_date = datetime.datetime.strptime(date, '%b %d %Y %I:%M%p') 
+            ordered_date = datetime.datetime.strptime('Jun 1 2005  1:33PM', '%b %d %Y %I:%M%p')
+#             order_obj = OrderDeliveredHistory(delivered_date=ordered_date, delivered_quantity=delivered_stock, order_id=order_id, part_number_id=part_pricing_obj.id, do_id=do_obj.id)
+#             order_obj.save(using=settings.BRAND)
+#             print "temp saved"
+            try:
+                order_temp_obj = OrderTempDetails.objects.get(part_number_id=part_pricing_obj.id, order_id=order_id)
+#                 .update(qty=delivered_stock)
+#                 update(.qty = delivered_stock)
+                order_temp_obj.qty = delivered_stock
+                order_temp_obj.save(using = settings.BRAND)
+            except Exception as ex:
+                if int(delivered_stock) != 0:
+                    order_temp_obj = OrderTempDetails(part_number_id=part_pricing_obj.id, order_id=order_id , distributor_id=dist_id, retailer_id=retailer_id, qty=delivered_stock)
+                    order_temp_obj.save(using=settings.BRAND)
+                
+#             order_temp_obj = OrderTempDeliveredHistory(delivered_date=ordered_date, delivered_quantity=delivered_stock, order_id=order_id, part_number_id=part_pricing_obj.id, retailer_id=retailer_id)
+#             order_temp_obj.save(using=settings.BRAND)
+#             
+            ret_id = OrderPart.objects.get(id=order_id).retailer 
+                
+    data = {"status":1, "message":"success", "distributor_id":dist_id}
+    return HttpResponse(json.dumps(data), content_type="application/json")
+ 
+
+            
+def download_delivery_list(request):   
+    retailer_id = request.POST["retailer_id"]
+    distributor_id = request.user.id
+    dist_id = Distributor.objects.get(user=request.user).id
+    part_numbers_ids = ""
+    opts = OrderPart._meta
+    order_display = []
+    orders = {}
+    stock = request.POST.getlist("delivered_stock")
+    part_number_ids = ""
+    total_amount = 0    
+    flag = 0
+    for each in range(0, int(len(stock))):
+        delivered_stock = request.POST.getlist("delivered_stock")[each]
+        date = request.POST.getlist("order_date")[each]
+        part_number = request.POST.getlist("part_number")[each]
+        order_id = request.POST.getlist("order_id")[each]
+        do_obj = DoDetails(order_id=order_id,distributor_id = dist_id)
+        do_obj.save(using=settings.BRAND)
+        delivered_qty = request.POST.getlist("delivered_quantity")[each]
+        if delivered_stock != "":
+            part_pricing_obj = PartMasterCv.objects.get(part_number=part_number)
+            part_obj = PartsStock.objects.get(part_number=part_pricing_obj.id)
+            total_delivered_stock = int(delivered_qty) + int(delivered_stock)
+            if int(delivered_stock) > int(part_obj.available_quantity) or (total_delivered_stock > int(request.POST.get("ordered_quantity"))):
+                flag = 1
+                
+                messages.error(request, "Kindly check the stock and enter again fot the part " + part_number)
+            else: 
+                part_obj.available_quantity = int(part_obj.available_quantity) - int(delivered_stock)
+                part_obj.save(using=settings.BRAND)
+#                 ordered_date = datetime.datetime.strptime(date, "%m/%d/%Y") 
+                ordered_date = datetime.datetime.strptime('Jun 1 2005  1:33PM', '%b %d %Y %I:%M%p')
+                try:
+                    order_temp_obj = OrderTempDetails.objects.get(part_number_id=part_pricing_obj.id, order_id=order_id)
+    #                 .update(qty=delivered_stock)
+    #                 update(.qty = delivered_stock)
+                    order_temp_obj.qty = delivered_stock
+                    order_temp_obj.save(using = settings.BRAND)
+                except Exception as ex:
+                    if int(delivered_stock) != 0:
+                        order_temp_obj = OrderTempDetails(part_number_id=part_pricing_obj.id, order_id=order_id , distributor_id=dist_id, retailer_id=retailer_id, qty=delivered_stock)
+                        order_temp_obj.save(using=settings.BRAND)
+                
+                
+                order_obj = OrderDeliveredHistory(delivered_date=ordered_date, delivered_quantity=delivered_stock, order_id=order_id, part_number_id=part_pricing_obj.id, do_id=do_obj.id)
+                order_obj.save(using=settings.BRAND)
+                ret_id = OrderPart.objects.get(id=order_id).retailer 
+
+
+    picklist_details_dict = {}
+    picklist_details_obj = OrderTempDetails.objects.filter(retailer_id = retailer_id).select_related("part_number", "order")
+    picklist_details = []
+    for each_picklist_row in picklist_details_obj:
+        picklist_details_dict["part_number"] = each_picklist_row.part_number.part_number
+        picklist_details_dict["part_description"] = each_picklist_row.part_number.description
+        picklist_details_dict["allocated"] = each_picklist_row.qty
+        try:
+            location = PartsRackLocation.objects.get(part_number_id=each_picklist_row.part_number.id)
+            picklist_details_dict["location"] = location.rack_location
+        except Exception as ex:
+            picklist_details_dict["location"] = "NA"
+        picklist_details_dict["mrp"] = each_picklist_row.part_number.mrp          
+        if picklist_details_dict["mrp"] == "#N/A":
+           picklist_details_dict["mrp"] = 0
+        picklist_details.append(picklist_details_dict.copy())
+    OrderTempDetails.objects.all().delete()  # to delete all records 
+    response = HttpResponse(content_type='text/excel')
+    response['Content-Disposition'] = 'attachment; filename="ReportList.xls"'
+    c = Context({
+        'data': picklist_details,
+    })
+    template = loader.get_template('admin/bajaj/orderpart/download_delivery_list.html')
+    response.write(template.render(c))
+    return response
+#     response = HttpResponse(csvfile.getvalue(), content_type='application/csv')
+#     response['Content-Disposition'] = 'attachment; filename={0}.csv'.format(file_name)
+# #     LOG.error('[download_welcome_kit]: Download of welcome kit data by user {0}'.format(request.user))
+#     return response
+            
+        
+            
+            
+            
+        
+        
+  
+
+
+def pending_order_details(request, order_status, retailer_id):
+        opts = OrderPart._meta
+        order_display = []
+        orders = {}
+        if order_status == "open":
+            order_obj = OrderPart.objects.filter(retailer=retailer_id, order_status=0).select_related("retailer", "dsr")
+        elif order_status == "allocated":
+            order_obj = OrderPart.objects.filter(retailer=retailer_id, order_status=1).select_related("retailer", "dsr")
+        elif order_status == "shipped":
+            order_obj = OrderPart.objects.filter(retailer=retailer_id, order_status=3).select_related("retailer", "dsr")
+        elif order_status == "cancelled":
+            order_obj = OrderPart.objects.filter(retailer=retailer_id, order_status=2).select_related("retailer", "dsr")    
+        if len(order_obj) > 0:
+            retailer_name = order_obj[0].retailer.retailer_name   
+            retailer_id = order_obj[0].retailer.id
+            for each in order_obj:
+                parts_list = []
+                order_id = each.id
+                orders_details_obj = OrderPartDetails.objects.select_related("part_number", "order").filter(order=order_id, part_status=0)
+                for each_order in orders_details_obj:
+                    parts_dict = {}
+                    parts_dict['mrp'] = each_order.part_number.mrp
+                    parts_dict['part_number'] = each_order.part_number.part_number
+                    parts_dict['part_description'] = each_order.part_number.description
+                    parts_dict['quantity'] = each_order.quantity
+                    orders['order_id'] = each_order.order_id
+                    if each_order.part_number.mrp == "#N/A":
+                        each_order.part_number.mrp = 0
+                    parts_dict['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
+                    parts_dict["part_status"] = each_order.part_status
+                    orders["retailer_name"] = each_order.order.retailer.retailer_name
+                    orders["dsr_name"] = each_order.order.dsr
+                    orders["order_date"] = each_order.order.order_date
+                    orderdetails_obj = OrderPartDetails.objects.filter(order_id=order_id).aggregate(Sum('line_total'))
+                    orders["total_value"] = orderdetails_obj["line_total__sum"]
+                    orders["order_status"] = order_status
+                    available_quantity = PartsStock.objects.filter(part_number=each_order.part_number.id)
+                    if available_quantity:
+                        available_qty = available_quantity[0].available_quantity
+                    order_delivered_obj = OrderTempDetails.objects.filter(part_number_id=each_order.part_number.id, order_id=order_id).aggregate(total_delivered_qty=Sum('qty'))
+                    total_qty_delivered = order_delivered_obj["total_delivered_qty"]
+                    if total_qty_delivered == None:
+                            total_qty_delivered = 0
+                    available_qty_after_blocking = int(available_qty) - int(total_qty_delivered)
+
+#                         parts_dict['available_quantity'] = available_quantity[0].available_quantity
+#                     else:
+                    parts_dict['available_quantity'] = available_qty_after_blocking
+                    order_delivered_obj = OrderDeliveredHistory.objects.filter(part_number_id=each_order.part_number_id, order_id=each_order.order_id).aggregate(Sum('delivered_quantity'))                  
+
+#                     if order_delivered_obj["delivered_quantity__sum"] != None:
+#                         if each_order.quantity == int(order_delivered_obj["delivered_quantity__sum"]):
+#                              order_status = "shipped"
+#                         else:
+#                             order_status = "pending"  
+                    parts_dict["delivered_quantity"] = order_delivered_obj["delivered_quantity__sum"]
+#                         orders['pending'] = (each_order.quantity) - int(order_delivered_obj["delivered_quantity__sum"])
+#                     else:
+#                         orders["delivered_quantity"] = each_order.quantity
+#                         orders['pending'] = each_order.quantity
+                            
+                    order_delivered_obj = OrderTempDetails.objects.filter(part_number_id=each_order.part_number_id, order_id=each_order.order_id).aggregate(total_allocated=Sum('qty'))         
+                    if order_delivered_obj["total_allocated"] != None:
+                        
+#                         if each_order.quantity == int(order_delivered_obj["total_allocated"]):
+#                           order_status = "shipped"
+#                         else:
+                        order_status = "allocated"  
+                        
+                        parts_dict["allocated_quantity"] = int(order_delivered_obj["total_allocated"])
+#                         parts_dict['pending'] = (each_order.quantity) - int(order_delivered_obj["delivered_quantity__sum"])
+                    else:
+                                    
+                        parts_dict["allocated_quantity"] = 0
+#                 orders['pending'] = each_order.quantity
+#                         parts_dict['pending'] = each_order.quantity
+                        order_status = order_status
+                    parts_list.append(parts_dict.copy())
+                if len(orders_details_obj) > 0:
+                    orders["parts"] = parts_list
+                    order_display.append(orders.copy())
+#                     print order_display, "eachdisp"
+#                 print order_display
+#                 orders["retailer_name"] = each_order.retailer.retailer_name
+#                 orders["dsr_name"] = each_order.dsr
+#                 orders["order_date"] = each_order.order_date
+#                 orderdetails_obj = OrderPartDetails.objects.filter(order_id=each_order.id).aggregate(Sum('line_total'))
+#                 orders["total_value"] = orderdetails_obj["line_total__sum"]
+                
+        
+        context = {"order_display":order_display,
+                 'order_status':order_status,
+                 'app_label':opts.app_label,
+                 'opts':opts,
+                  'model_name':opts.model_name,
+                 "retailer_name":retailer_name,
+                 "retailer_id":retailer_id
+                 }
+        
+        form_url = ""
+        template = 'admin/bajaj/orderpart/retailer_order_list.html'   
+        return render(request, template, context)
+
+    
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
 
 
 def save_order_temp_history(request):
@@ -632,9 +1127,16 @@ def ordered_part_details(request, part_number, order_id):
 
 
 def order_details(request, order_status, retailer_id):
+<<<<<<< HEAD
     opts = OrderPart._meta
     print opts, 'opts'
     app_label = opts.app_label
+=======
+    opts =OrderPart._meta
+    print opts,"opts"
+    app_label = opts.app_label
+#     opts = model._meta
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
     order_display = []
     orders = {}
     if order_status == 'open':
@@ -648,6 +1150,7 @@ def order_details(request, order_status, retailer_id):
             orders['dsr_name'] = each_order.dsr
             orders['order_date'] = each_order.order_date
             orderdetails_obj = OrderPartDetails.objects.filter(order_id=each_order.id).aggregate(Sum('line_total'))
+<<<<<<< HEAD
             orders['total_value'] = orderdetails_obj['line_total__sum']
             orders['order_id'] = each_order.id
             orders['order_number'] = each_order.order_number
@@ -662,6 +1165,22 @@ def order_details(request, order_status, retailer_id):
      'retailer_name': retailer_name,
      'retailer_id': retailer_id}
     form_url = ''
+=======
+            orders["total_value"] = orderdetails_obj["line_total__sum"]
+            orders["order_id"] = each_order.id
+            orders["ret_id"] = each_order.retailer_id
+            order_display.append(orders.copy())
+    context = {
+             "order_display":order_display,
+             'order_status':order_status,
+             'app_label':opts.app_label,
+             'opts':opts,
+             "model_name":opts.model_name,
+             "retailer_name":retailer_name,
+             "retailer_id":retailer_id
+             }
+    form_url = ""
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
     template = 'admin/bajaj/orderpart/change_form.html'
     return render(request, template, context)
 
@@ -674,6 +1193,7 @@ def shipped_order_details(request, order_status, retailer_id):
     if len(order_obj) > 0:
         retailer_name = order_obj[0].retailer.retailer_name
         for each_order in order_obj:
+<<<<<<< HEAD
             orders['order_id'] = each_order.id
             print orders['order_id']
             do_obj = DoDetails.objects.filter(order_id=orders['order_id']).select_related('invoice')
@@ -693,11 +1213,36 @@ def shipped_order_details(request, order_status, retailer_id):
      'retailer_name': retailer_name,
      'retailer_id': retailer_id}
     form_url = ''
+=======
+            orders["order_id"] = each_order.id  
+            print  orders["order_id"]         
+            do_obj = DoDetails.objects.filter(order_id=orders["order_id"]).select_related("invoice")
+            print do_obj
+            for each in do_obj:
+                orders["invoice_amt"] = each.invoice.invoice_amount
+                orders["invoice_no"] = each.invoice.id
+#                 orderpart_details = OrderDeliveredHistory.objects.filter(order_id=each_order.id, do_id=each.id)
+#                 for each_orderpart in orderpart_details:
+                orders["shipped_date"] = each.invoice.invoice_date
+
+            shipped_details.append(orders.copy())  
+            print shipped_details
+    context = {
+             "shipped_details":shipped_details,
+             'order_status':order_status,
+             'app_label':opts.app_label,
+             'opts':opts,
+             "retailer_name":retailer_name,
+             "retailer_id":retailer_id
+             }
+    form_url = ""
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
     template = 'admin/bajaj/orderpart/shipped_details.html'
     return render(request, template, context)
 
 
 def get_parts(request, order_id, order_status, retailer_id):
+<<<<<<< HEAD
     print 'parts'
     dist_id = Distributor.objects.get(user=request.user.id).id
     opts = OrderPart._meta
@@ -831,9 +1376,81 @@ def download_order_parts(request, order_id, order_status, retailer_id):
     response.write(template.render(c))
     return response
 
+=======
+        opts = OrderPart._meta
+        if order_status == "open":
+            orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id, order_status=0)
+#             orders_obj = OrderPartDetails.objects.select_related("part_number", "order").filter(order=order_id)
+        elif order_status == "allocated":
+            
+  
+            orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id, order_status=1)
+        elif order_status == "shipped":
+             orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id, order_status=3)
+              
+#             orders_obj = OrderPartDetails.objects.select_related("part_number", "order").filter(order=order_id,part_status=0,retailer = ret_id)
+        elif order_status == "cancelled":
+            orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id, order_status=2)
+#             orders_obj = OrderPartDetails.objects.select_related("part_number", "order").filter(order=order_id,part_status=1,retailer = ret_id)    
+            
+        order_display = []
+        orders = {}
+        ordered_date = OrderPart.objects.get(id=order_id).order_date
+        
+        orderdetails_obj = OrderPartDetails.objects.filter(order_id=order_id).aggregate(Sum('line_total'))
+        orders["total_value"] = orderdetails_obj["line_total__sum"]
+        
+        for each in orders_obj:
+            orderparts_obj = OrderPartDetails.objects.select_related("part_number", "order").filter(order_id=each.id)
+
+            for each_order in orderparts_obj:
+                orders['mrp'] = each_order.part_number.mrp
+                orders['part_number'] = each_order.part_number.part_number
+                orders['part_description'] = each_order.part_number.description
+                orders['quantity'] = each_order.quantity
+                orders['order_id'] = each_order.order_id
+            
+                if each_order.part_number.mrp == "#N/A":
+                    each_order.part_number.mrp = 0
+                orders['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
+                orders["part_status"] = each_order.part_status
+                
+                available_quantity = PartsStock.objects.filter(part_number=each_order.part_number.id)
+                if available_quantity:
+                    available_quantity[0].available_quantity
+                    orders['available_quantity'] = available_quantity[0].available_quantity
+                else:
+                    orders['available_quantity'] = None
+                order_delivered_obj = OrderDeliveredHistory.objects.filter(part_number_id=each_order.part_number_id, order_id=each_order.order_id).aggregate(Sum('delivered_quantity'))         
+#                 date = OrderDeliveredHistory.objects.get(part_number_id=each_order.part_number_id, order_id=each_order.order_id).delivered_date
+#                 orders["shipped_date"] = date
+#                 print date,"dateeee"
+                if order_delivered_obj["delivered_quantity__sum"] != None:
+                    orders["delivered_quantity"] = int(order_delivered_obj["delivered_quantity__sum"])
+                    orders['pending'] = (each_order.quantity) - int(order_delivered_obj["delivered_quantity__sum"])
+                    orders["allocated_qty"] = orders['quantity']  - orders["delivered_quantity"]
+                else:
+                    orders["delivered_quantity"] = 0
+                    orders['pending'] = each_order.quantity
+                    orders["allocated_qty"] = int(orders['quantity'])
+                order_display.append(orders.copy())
+        context = { 
+                "order_display":order_display,
+                "order_id":order_id,
+                'order_status':order_status,
+                "ordered_date":ordered_date,
+                'app_label':opts.app_label,
+                'opts':opts,
+                "retailer_id":retailer_id,
+                "order_total_value":orders["total_value"]     
+               }
+        template = 'admin/bajaj/orderpart/show_parts.html'  
+        return render(request, template, context)
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
 
 def accept_order(request, order_id, action):
     opts = OrderPart._meta
+<<<<<<< HEAD
     if action == 'accept':
         order_obj = OrderPart.objects.filter(id=order_id).update(order_status=1)
         order_status = 'open'
@@ -844,6 +1461,18 @@ def accept_order(request, order_id, action):
         order_status = 'cancelled'
         order_obj = OrderPart.objects.filter(order_status=2).select_related('retailer', 'dsr')
         messages.success(request, 'Successfully cancelled Order No ' + order_id)
+=======
+    if action == "accept":
+        order_obj = OrderPart.objects.filter(id=order_id).update(order_status=1)   
+        order_status = "open"
+        order_obj = OrderPart.objects.filter(order_status=0).select_related("retailer", "dsr")
+        messages.success(request, "Successfully accepted Order No " + order_id)
+    else:
+        order_obj = OrderPart.objects.filter(id=order_id).update(order_status=2) 
+        order_status = "cancelled"
+        order_obj = OrderPart.objects.filter(order_status=2).select_related("retailer", "dsr")
+        messages.success(request, "Successfully cancelled Order No " + order_id)
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
     order_display = []
     orders = {}
     if len(order_obj) > 0:
@@ -914,6 +1543,7 @@ def cal_data(request):
     ret_list = []
     import json
     data = []
+<<<<<<< HEAD
     dist_list = []
     logged_in_user = []
     user_dict = {}
@@ -930,6 +1560,27 @@ def cal_data(request):
         dsr_work_obj = DSRWorkAllocation.objects.filter().select_related('dsr', 'retailer')
     user_dict['user'] = user
     logged_in_user.append(user_dict.copy())
+=======
+    dist_list = []    
+    logged_in_user = []
+    user_dict = {}
+    if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+        user = "distributor"
+        dist_id = Distributor.objects.get(user=request.user.id).id
+        dist_obj = DistributorSalesRep.objects.filter(distributor_id=dist_id).select_related("user")
+        ret_obj = Retailer.objects.filter(distributor_id=dist_id).select_related("user") 
+        dsr_work_obj = DSRWorkAllocation.objects.filter(distributor_id=dist_id).select_related("dsr", "retailer") 
+        
+        
+    else:
+        user = "admin"
+        dist_obj = DistributorSalesRep.objects.filter().select_related("user")
+        ret_obj = Retailer.objects.filter().select_related("user")  
+        dsr_work_obj = DSRWorkAllocation.objects.filter().select_related("dsr", "retailer")
+    user_dict["user"] = user
+    logged_in_user.append(user_dict.copy())
+   
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
     for each in dist_obj:
         dist['dist_id'] = each.id
         dist['dist_code'] = each.distributor_sales_code
@@ -937,14 +1588,23 @@ def cal_data(request):
         dist_list.append(dist.copy())
 
     data.append(dist_list)
+<<<<<<< HEAD
+=======
+      
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
     for each in ret_obj:
         ret['ret_id'] = each.id
         ret['ret_code'] = each.retailer_code
         ret['firstname'] = each.user.user.first_name
         ret['location'] = each.address_line_3
         ret_list.append(ret.copy())
+<<<<<<< HEAD
 
     data.append(ret_list)
+=======
+    data.append(ret_list) 
+    
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
     events_list = []
     for each in dsr_work_obj:
         events_dict = {}
@@ -956,6 +1616,12 @@ def cal_data(request):
         events_dict['dsr_name'] = each.dsr.user.user.first_name
         events_dict['dsr_code'] = each.dsr.distributor_sales_code
         events_list.append(events_dict.copy())
+<<<<<<< HEAD
+=======
+    data.append(events_list)
+    data.append(logged_in_user)
+    return HttpResponse(json.dumps(data), content_type="application/json")
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
 
     data.append(events_list)
     data.append(logged_in_user)
@@ -967,6 +1633,7 @@ def get_collection_details(request, ret_id):
     collection_details_dict = {}
     collection_obj = Collection.objects.filter(retailer_id=ret_id)
     for each in collection_obj:
+<<<<<<< HEAD
         collection_details_dict['payment_date'] = each.payment_date
         collection_details_dict['collected_by'] = each.dsr.user.user.first_name
         collection_details_dict['collected_amount'] = each.collected_amount
@@ -988,12 +1655,44 @@ def get_collection_details(request, ret_id):
 
     return HttpResponse(json.dumps(collection_details), content_type='application/json')
 
+=======
+        collection_details_dict["payment_date"] = each.payment_date
+        collection_details_dict["collected_by"] = each.dsr.user.user.first_name
+        collection_details_dict["collected_amount"] = each.collected_amount
+#         json.dump(datetime.now().strftime('%Y-%m-%dT%H:%M:%S'))
+        
+        collection_details_dict["payment_date"] = datetime.datetime.strftime(each.payment_date, '%Y-%m-%d %H:%M:%S') 
+        more_details_obj = CollectionDetails.objects.filter(collection_id=each.id)
+        for each_obj in more_details_obj:          
+            
+            if each_obj.mode == 1:
+            
+                collection_details_dict["mode"] = "cash"
+            elif each_obj.mode == 2:
+                collection_details_dict["mode"] = "cheque"
+            elif each_obj.mode == 3:
+                collection_details_dict["mode"] = "Cash/Cheque"
+                
+            collection_details_dict["cheque_number"] = each_obj.cheque_number
+            collection_details_dict["cheque_bank"] = each_obj.cheque_bank
+            collection_details.append(collection_details_dict.copy())
+    return HttpResponse(json.dumps(collection_details), content_type="application/json")
+    
+            
+
+        
+
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
 
 def map_view(request):
     print request.user.id
     opts = DSRLocationDetails._meta
     ret_locations = []
+<<<<<<< HEAD
     ret_location_dict = {}
+=======
+    ret_location_dict = {} 
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
     dsr_locations = []
     dsr_location_dict = {}
     all_locations = []
@@ -1002,11 +1701,16 @@ def map_view(request):
     distributor_dict = {}
     distributor_list = []
     if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+<<<<<<< HEAD
         user_dict['user'] = 'distributors'
+=======
+        user_dict["user"] = "distributors"
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
         dist_id = Distributor.objects.get(user=request.user.id).id
         logged_in_user.append(user_dict)
         all_locations.append(logged_in_user)
         data = json.dumps(all_locations, cls=DjangoJSONEncoder)
+<<<<<<< HEAD
     else:
         dist_list = []
         if request.user.groups.filter(name=Roles.SFAADMIN).exists():
@@ -1076,11 +1780,146 @@ def map_view1(request):
     distributor_dict = {}
     distributor_list = []
     dist_id = Distributor.objects.get(user=request.user.id).id
+=======
+    
+    
+    else:
+        dist_list = []      
+        if request.user.groups.filter(name=Roles.SFAADMIN).exists():
+            
+            dist_obj = Distributor.objects.filter().select_related("user")
+            dist_lat_long = Distributor.objects.filter().aggregate(dsr_lat=Max('latitude'), dsr_long=Max('longitude'))
+            
+        elif request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            dist_obj = Distributor.objects.filter(asm__user=request.user).select_related("user")
+#             dist_lat_long = Distributor.objects.filter(asm__user=request.user).aggregate(dsr_lat=Max('latitude'), dsr_long=Max('longitude'))
+        elif request.user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():  
+            asm_obj = AreaSparesManager.objects.filter(nsm__user=request.user)
+            dist_obj = Distributor.objects.filter(asm=asm_obj).select_related("user")
+#             dist_lat_long = Distributor.objects.filter(asm=asm_obj).aggregate(dsr_lat=Max('latitude'), dsr_long=Max('longitude'))
+        
+#         for each in dist_obj:
+             
+#         max_long.append(dsr_lat_long["dsr_long"])
+#         max_lat.append(dsr_lat_long["dsr_lat"])  
+#         dist_list.append(max_long)
+#         dist_list.append(min_long)
+        user_dict["user"] = "others"
+                 
+        logged_in_user.append(user_dict)
+        dist_list.append(logged_in_user)
+        
+        for each in dist_obj:
+                distributor_dict["distributor_code"] = each.distributor_id
+                distributor_dict["distributor_id"] = each.id
+                distributor_dict["distributor_name"] = each.name    
+#                 distributor_dict["latitude"] = each.latitude    
+#                 distributor_dict["longitude"] = each.longitude   
+                distributor_list.append(distributor_dict.copy())
+        dist_list.append(distributor_list)
+        
+        data = json.dumps(dist_list, cls=DjangoJSONEncoder)
+    return HttpResponse(data, content_type="application/json")
+
+def get_all_distributors(request):
+    print request
+    dist_lat_long = Distributor.objects.filter(asm=asm_obj).aggregate(dsr_lat=Max('latitude'), dsr_long=Max('longitude'))
+    max_long.append(dsr_lat_long["dsr_long"])
+    max_lat.append(dsr_lat_long["dsr_lat"])  
+    dist_list.append(max_long)
+    dist_list.append(min_long)
+    for each in dist_obj:
+                distributor_dict["distributor_code"] = each.distributor_id
+                distributor_dict["distributor_id"] = each.id
+                distributor_dict["distributor_name"] = each.name    
+                distributor_dict["latitude"] = each.latitude    
+                distributor_dict["longitude"] = each.longitude   
+                distributor_list.append(distributor_dict.copy())
+    dist_list.append(distributor_list)
+        
+    data = json.dumps(dist_list, cls=DjangoJSONEncoder)
+    return HttpResponse(data, content_type="application/json")
+    
+
+def map_view1(request):
+        ret_locations = []
+        ret_location_dict = {} 
+        dsr_locations = []
+        dsr_location_dict = {}
+        logged_in_user = []
+        user_dict = {}
+        distributor_dict = {}
+        distributor_list = []
+
+        dist_id = Distributor.objects.get(user=request.user.id).id     
+        dsr_lat_long = OrderPart.objects.filter(order_placed_by=2, distributor_id=dist_id).aggregate(dsr_lat=Max('latitude'), dsr_long=Max('longitude'))
+        ret_lat_long = Retailer.objects.filter(distributor_id=dist_id).aggregate(ret_lat=Max('latitude'), ret_long=Max('longitude'))
+        max_long = []
+        max_lat = []
+        all_locations = []
+        max_long.append(ret_lat_long["ret_long"])
+        max_lat.append(ret_lat_long["ret_lat"])
+        max_long.append(dsr_lat_long["dsr_long"])
+        max_lat.append(dsr_lat_long["dsr_lat"])    
+        maximum_lat = max(max_lat)
+        minimum_long = min(max_long)
+        lat_long = {}
+        lat_long["max_lat"] = maximum_lat
+        lat_long["min_long"] = minimum_long
+        all_locations.append(lat_long.copy())
+        
+        ret_location_objs = Retailer.objects.filter(distributor__user=request.user).select_related("dsr", "retailer")
+        for each in ret_location_objs:
+            ret_location_dict["latitude"] = each.latitude
+            ret_location_dict["longitude"] = each.longitude
+#             ret_location_dict["last_sync"] = each.order_date
+            ret_location_dict["ret_id"] = each.id
+            ret_location_dict["ret_code"] = each.retailer_code
+            ret_location_dict["ret_name"] = each.user.user.first_name
+            ret_locations.append(ret_location_dict.copy())
+            
+            
+        dsr_location_objs = OrderPart.objects.filter(distributor_id=dist_id, order_placed_by=2).select_related("dsr", "retailer")
+        for each in dsr_location_objs:
+            
+#             if each.order_placed_by == 1: #retailer
+#                 ret_location_dict["latitude"] = each.latitude
+#                 ret_location_dict["longitude"] = each.longitude
+#                 ret_location_dict["last_sync"] = each.order_date
+#                 ret_location_dict["ret_id"] = each.retailer.id
+#                 ret_location_dict["ret_code"] = each.retailer.retailer_code
+#                 ret_location_dict["ret_name"] = each.retailer.user.user.first_name
+#                 ret_locations.append(ret_location_dict.copy())
+#             elif each.order_placed_by == 2: #dsr
+                dsr_location_dict["latitude"] = each.latitude
+                dsr_location_dict["longitude"] = each.longitude
+                dsr_location_dict["last_sync"] = each.order_date
+                dsr_location_dict["dsr_id"] = each.dsr_id
+                dsr_location_dict["dsr_code"] = each.dsr.distributor_sales_code
+                dsr_location_dict["dsr_name"] = each.dsr.user.user.first_name
+                dsr_locations.append(dsr_location_dict.copy())
+#         logged_in_user.append(user_dict)
+#         all_locations.append(logged_in_user)
+#         print all_locations
+        all_locations.append(ret_locations)
+        all_locations.append(dsr_locations) 
+        data = json.dumps(all_locations, cls=DjangoJSONEncoder)
+        return HttpResponse(data, content_type="application/json")
+    
+
+def get_dsr_retailers(request):
+    ''' 
+    Send all dsr and retailer of particular distributor for map location details
+    '''
+    
+    dist_id = request.GET.get('distributor')
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
     dsr_lat_long = OrderPart.objects.filter(order_placed_by=2, distributor_id=dist_id).aggregate(dsr_lat=Max('latitude'), dsr_long=Max('longitude'))
     ret_lat_long = Retailer.objects.filter(distributor_id=dist_id).aggregate(ret_lat=Max('latitude'), ret_long=Max('longitude'))
     max_long = []
     max_lat = []
     all_locations = []
+<<<<<<< HEAD
     max_long.append(ret_lat_long['ret_long'])
     max_lat.append(ret_lat_long['ret_lat'])
     max_long.append(dsr_lat_long['dsr_long'])
@@ -1164,6 +2003,48 @@ def get_dsr_retailers(request):
     all_locations.append(dsr_locations)
     data = json.dumps(all_locations, cls=DjangoJSONEncoder)
     return HttpResponse(data, content_type='application/json')
+=======
+    max_long.append(ret_lat_long["ret_long"])
+    max_lat.append(ret_lat_long["ret_lat"])
+    max_long.append(dsr_lat_long["dsr_long"])
+    max_lat.append(dsr_lat_long["dsr_lat"])    
+    maximum_lat = max(max_lat)
+    minimum_long = min(max_long)
+    lat_long = {}
+    lat_long["max_lat"] = maximum_lat
+    lat_long["min_long"] = minimum_long
+    all_locations.append(lat_long.copy())
+    ret_locations = []
+    ret_location_dict = {} 
+    dsr_locations = []
+    dsr_location_dict = {}
+    dsr_location_objs = OrderPart.objects.filter(distributor_id=dist_id, order_placed_by=2).select_related("dsr", "retailer")
+    ret_location_objs = Retailer.objects.filter(distributor_id=dist_id).select_related("dsr", "retailer")
+    for each in ret_location_objs:
+#         if each.order_placed_by == 1: #retailer
+            ret_location_dict["latitude"] = each.latitude
+            ret_location_dict["longitude"] = each.longitude
+#             ret_location_dict["last_sync"] = each.order_date
+            ret_location_dict["ret_id"] = each.id
+            ret_location_dict["ret_code"] = each.retailer_code
+            ret_location_dict["ret_name"] = each.user.user.first_name
+            ret_locations.append(ret_location_dict.copy())
+    for each in dsr_location_objs:
+        if each.order_placed_by == 2:  # dsr
+            dsr_location_dict["latitude"] = each.latitude
+            dsr_location_dict["longitude"] = each.longitude
+            dsr_location_dict["last_sync"] = each.order_date
+            dsr_location_dict["dsr_id"] = each.dsr_id
+            dsr_location_dict["dsr_code"] = each.dsr.distributor_sales_code
+            dsr_location_dict["dsr_name"] = each.dsr.user.user.first_name
+            dsr_locations.append(dsr_location_dict.copy())
+    
+    all_locations.append(ret_locations)
+    all_locations.append(dsr_locations)
+    data = json.dumps(all_locations, cls=DjangoJSONEncoder)
+    return HttpResponse(data, content_type="application/json")
+    
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
 
 
 import csv
@@ -1180,19 +2061,34 @@ def upload_part_pricing(request):
     with open(full_path) as csvfile:
         partreader = csv.DictReader(csvfile)
         for row_list in partreader:
+<<<<<<< HEAD
             part_pricing_list.append(row_list)
 
         for part in part_pricing_list:
             try:
                 part_pricing_object = PartPricing.objects.get(part_number=part['Part Number'])
+=======
+            part_pricing_list.append(row_list)         
+        for part in part_pricing_list:
+            try:
+                part_pricing_object = PartMasterCv.objects.get(part_number=part['Part Number'])
+                
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
                 try:
                     part_stock_object = PartsStock.objects.get(part_number_id=part_pricing_object.id, distributor_id=dist_id.id)
                     part_stock_object.available_quantity = part['Available Quantity']
                     part_stock_object.save(using=settings.BRAND)
                 except Exception as ex:
+<<<<<<< HEAD
                     part_stock_obj = PartsStock(part_number_id=part_pricing_object.id, available_quantity=part['Available Quantity'], distributor_id=dist_id.id)
                     part_stock_obj.save(using=settings.BRAND)
 
+=======
+                    part_stock_obj = PartsStock(part_number_id=part_pricing_object.id, available_quantity=part['Available Quantity'] , distributor_id=dist_id.id)
+                    part_stock_obj.save(using=settings.BRAND)
+
+                    
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
             except Exception as ex:
                 flag = 1
                 msg = msg + part['Part Number'] + ','
@@ -1201,14 +2097,22 @@ def upload_part_pricing(request):
             msg = msg[:-1]
             messages.error(request, 'Part Number {0} does not exist'.format(msg))
         else:
+<<<<<<< HEAD
             messages.success(request, 'Stock updated successfully')
         return HttpResponseRedirect('/admin/bajaj/partpricing')
 
+=======
+            messages.success(request, "Stock updated successfully")
+            
+        return HttpResponseRedirect('/admin/bajaj/partmastercv')
+ 
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
 
 def upload_rack_location(request):
     dist_id = Distributor.objects.get(user__user=request.user)
     flag = 0
     full_path = handle_uploaded_file(request.FILES['upload_rack_location'])
+<<<<<<< HEAD
     msg = ''
     with open(full_path) as csvfile:
         partreader = csv.DictReader(csvfile)
@@ -1421,6 +2325,69 @@ def download_sample_order_invoice_csv(request):
     return response
 
 
+=======
+    msg = ""
+    with open(full_path) as csvfile:
+        partreader = csv.DictReader(csvfile)
+        for each_row in partreader:
+
+            try:
+                part_rack_location_obj = PartsRackLocation.objects.get(part_number__part_number=each_row['Part Number'], distributor__user=request.user.id)
+                part_rack_location_obj.rack_location = each_row['Rack Location']
+                part_rack_location_obj.save(using=settings.BRAND)
+
+            except Exception as ex:
+                 try:
+                     part_pricing_object = PartMasterCv.objects.get(part_number=each_row['Part Number'])
+                     part_rack_obj = PartsRackLocation(part_number_id=part_pricing_object.id, rack_location=each_row['Rack Location'], distributor=dist_id)
+                     part_rack_obj.save(using=settings.BRAND)
+#         messages.success(request, "Added a location for the part")
+                    
+                 except Exception as ex:
+                     flag = 1
+                     msg = msg + each_row['Part Number'] + ","
+        messages.success(request, "Added a location for the parts")
+        if flag == 1:
+            msg = msg[:-1]
+            messages.error(request, 'Part Number {0} are not valid'.format(msg))
+                   
+        return HttpResponseRedirect('/admin/bajaj/partsracklocation')
+                     
+                     
+def upload_invoices(request):      
+    full_path = handle_uploaded_file(request.FILES['upload_invoices'])
+    msg = ""
+    with open(full_path) as csvfile:
+        partreader = csv.DictReader(csvfile)
+        for each_invoice in partreader:
+
+            try:
+                invoice_obj = Invoices.objects.get(invoice_id=each_invoice["invoice_number"])
+                invoice_amt_obj = Invoices.objects.filter(invoice_id=each_invoice["invoice_number"]).aggregate(invoice_amt = Sum('invoice_amount'))
+                total_amt=invoice_amt_obj["invoice_amt"] 
+                if total_amt!=None:
+                    total_amt = float(total_amt) +float(each_invoice["invoice_amount"])
+                else:
+                    total_amt = 0
+                invoice_obj.invoice_amount=total_amt
+                invoice_obj.invoice_date = each_invoice["invoice_date"]
+                invoice_obj.save(using=settings.BRAND)
+               
+            except Exception as ex:
+                inv_obj = Invoices(invoice_id = each_invoice["invoice_number"],invoice_amount = each_invoice["invoice_amount"],retailer_id = each_invoice["retailer_id"],invoice_date = each_invoice["invoice_date"])
+                do_id = DoDetails.objects.get(order_id = each_invoice["order_id"]).do_id
+                inv_details_obj = InvoiceDetails(invoice_id=inv_obj.id,do_id = do_id,invoice_date=each_invoice["invoice_amount"])
+                inv_details_obj.save(using = settings.BRAND)
+        messages.error(request, "uploaded invoice successfully")
+                   
+        return HttpResponseRedirect('/admin/bajaj/invoices')
+       
+          
+
+    
+    
+ 
+>>>>>>> bb5819cc62d187bee87f962aebb4cc2f85416c24
 def handle_uploaded_file(uploaded_file):
     """
      This method gets the uploaded file and writes it in the upload dir under the same name

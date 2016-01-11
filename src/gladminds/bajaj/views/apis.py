@@ -1,4 +1,3 @@
-
 import json, datetime, time
 from datetime import timedelta
 from collections import OrderedDict
@@ -28,11 +27,6 @@ from gladminds.bajaj.models import PartMasterCv,OrderPart,OrderPartDetails, \
 from gladminds.core.auth_helper import Roles
 
 
-#PartMasterCv                          
-                            
-# from gladminds.core.models import DistributorSalesRep, Retailer,PartModels, CvCategories, \
-#                              OrderPart, DSRWorkAllocation, AlternateParts
-
 from gladminds.core import constants
 
 today = datetime.datetime.now()
@@ -47,7 +41,6 @@ def authentication(request):
     load = json.loads(request.body)
     user = authenticate(username = load.get("username"), password = load.get("password"))
     
-    #user = authenticate(username = request.POST["username"], password = request.POST["password"])
     if user:
         if user.is_active:
             #the user is active.He should be a dsr or retailer 
@@ -318,7 +311,6 @@ def place_order(request, dsr_id):
     it in the database
     '''
     parts = json.loads(request.body)
-    
     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
     if dsr:
         for order in parts :
@@ -333,7 +325,6 @@ def place_order(request, dsr_id):
             orderpart.latitude = order['latitude']
             orderpart.longitude = order['longitude']
             orderpart.save()
-            
             #push all the items into the orderpart details
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
@@ -590,12 +581,6 @@ def uploadcollection(request):
             collection.longitude = collection_body['longitude']
             collection.save()
             #put data into collection details table
-            # payment_mode = 1
-            # for mode in constants.PAYMENT_MODES:
-            #     if mode[0][1] == collection_body['payment_mode']:
-            #         payment_mode = mode[0][0]
-            #     else:
-            #         continue
             for cheque in collection_body['cheque_details']:
                 collectiondetails = CollectionDetails()
                 collectiondetails.collection = collection
@@ -745,9 +730,6 @@ def dsr_dashboard_report(request, dsr_id):
         collections = Collection.objects.filter(retailer = retailer)
         for collection in collections:    
             # get all the collection details for this collection
-            # collection_details = CollectionDetails.objects.filter(collection = collection, \
-            #                                         created_date__month = today.strftime("%m"))
-            # for collection_detail in collection_details:
             retailer_collected_amount = retailer_collected_amount + \
                                             collection.collected_amount
         # sum up the each retailer collected amount to the total
@@ -870,8 +852,6 @@ def dsr_dashboard_report(request, dsr_id):
         if collections:
             for collection in collections:    
             # get all the collection details for this collection
-                # collection_details = CollectionDetails.objects.filter(collection = collection)
-                # for collection_detail in collection_details:
                 retailer_collected_amount = retailer_collected_amount + \
                                             collection.collected_amount
         # sum up the each retailer collected amount to the total
@@ -1160,7 +1140,6 @@ def get_orders(request, dsr_id):
                 amount = amount + each.line_total
             order_dict['amount'] = amount
             order_dict['total_quantity'] = total_line_items
-            #order_dict['status'] = order.status
             # order details dict
             order_details_list = []
             for each in order_detail:

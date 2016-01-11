@@ -89,8 +89,6 @@ urlpatterns = patterns('',
     url(r'^get_districts/$', 'gladminds.bajaj.views.views.get_districts', name='get_districts'),
     url(r'^save_order_history/$', 'gladminds.bajaj.views.views.save_order_history', name='save_order_history'),
     
-    #url(r'^get_associated_users/$', 'gladminds.bajaj.views.apis.get_users', name='getusers'),
-
     url(r'^save_order_details/$', 'gladminds.bajaj.views.views.save_order_temp_history', name='save_order_temp_history'),
     
 
@@ -134,8 +132,6 @@ urlpatterns = patterns('',
      url(r'^admin/get_dist_retailers','gladminds.bajaj.views.views.get_dist_retailers', name='get_dist_retailers'), 
     url(r'^admin/get_outstanding_details/(?P<retailer_id>\d+)/$','gladminds.bajaj.views.views.get_outstanding_details', name='get_outstanding_details'),
 
-
-
 #     url(r'^invoice/', TemplateView.as_view(template_name="invoice.html"),
 #                    name='invoice'),
 
@@ -154,7 +150,7 @@ urlpatterns = patterns('',
 
     url(r'^download_delivery_list/', 'gladminds.bajaj.views.views.download_delivery_list', name='download_delivery_list'),
                        
-    
+
                        
     url(r'^admin/delete_temp_details','gladminds.bajaj.views.views.clear_order_temp', name='clear_order_temp'),
               

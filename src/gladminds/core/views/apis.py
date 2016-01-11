@@ -20,18 +20,13 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework_jwt.settings import api_settings
 
-
-# from gladminds.core.models import DistributorSalesRep, Retailer, CvCategories, \
-#                             OrderPart, DSRWorkAllocation, AlternateParts, Collection, \
-#                             PartMasterCv,RetailerCollection
-
 from gladminds.core.models import Distributor, DistributorSalesRep, Retailer, CvCategories, \
             OrderPart, OrderPartDetails,DSRWorkAllocation, AlternateParts, Collection, \
             CollectionDetails,PartMasterCv,RetailerCollection,PartsStock, Invoices, \
-            UserProfile
-
+            UserProfile, PartIndexDetails, PartIndexPlates
 from gladminds.core import constants
 
+today = datetime.datetime.now()
 @api_view(['POST'])
 def authentication(request):
     '''
@@ -91,7 +86,11 @@ def get_retailers(request, dsr_id):
         retailer_dict.update({"retailer_mobile":retailer.mobile})
         retailer_dict.update({"retailer_email":retailer.email})
         retailer_dict.update({"retailer_address":retailer.user.address})
-        retailer_dict.update({"latitude":retailer.latitude})
+	retailer_dict.update({"locality": retailer.retailer_town})
+        if retailer.address_line_4 is not None:
+            retailer_dict.update({"locality":retailer.address_line_4 + \
+                              ' ' + retailer.retailer_town})
+	retailer_dict.update({"latitude":retailer.latitude})
         retailer_dict.update({"longitude":retailer.longitude})
         retailer_list.append(retailer_dict)
     return Response(retailer_list)
@@ -111,6 +110,11 @@ def get_retailer_profile(request, retailer_id):
         retailer_dict.update({"retailer_mobile":retailer.mobile})
         retailer_dict.update({"retailer_email":retailer.email})
         retailer_dict.update({"retailer_address":retailer.user.address})
+        if retailer.address_line_4 is not None:
+            retailer_dict.update({"locality":retailer.address_line_4 + \
+                              ' ' + retailer.retailer_town})
+        else:
+            retailer_dict.update({"locality": retailer.retailer_town})
         retailer_dict.update({"latitude":retailer.latitude})
         retailer_dict.update({"longitude":retailer.longitude})
         return Response(retailer_dict)
@@ -167,6 +171,26 @@ def get_parts(request):
         parts_list.append(parts_dict)
     return Response(parts_list)
 
+@api_view(['GET'])
+# @authentication_classes((JSONWebTokenAuthentication,))
+# @permission_classes((IsAuthenticated,))
+def get_associated_parts(request):
+    '''
+    This method returns all the spare parts details based on the catalog
+    '''
+    print "inside the function"
+    parts = PartIndexDetails.objects.filter(plate__active = True)
+    parts_list =[]
+    for part in parts:
+        parts_dict = {}
+        parts_dict.update({"part_name":part.description})
+        parts_dict.update({"part_number":part.part_number})
+        parts_dict.update({"part_model":part.plate.model.model_name})
+        parts_dict.update({"part_plate":part.plate.plate_name})
+        parts_dict.update({"quantity":part.quantity})
+        parts_dict.update({"mrp":part.mrp})
+        parts_list.append(parts_dict)
+    return Response(parts_list)
 
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
@@ -218,18 +242,8 @@ def get_schedule(request, dsr_id):
     '''
     This method gets the latest week-schedule(the retailers he has to visit) given the dsr id
     '''
-    #schedule_date = split_date(date)
-    #finaldate = datetime.datetime.strptime(date, '%Y-%m-%d')
     
-    # schedules = DSRWorkAllocation.objects.filter(date__startswith = \
-    #                 datetime.date(int(schedule_date[2]),int(schedule_date[1]), \
-    #                               int(schedule_date[0])), dsr__distributor_sales_code=dsr_id)
-    #schedules = DSRWorkAllocation.objects.filter(date__year=finaldate.year,
-    #                                             date__month=finaldate.strftime("%m"),
-    #                                             date__day=finaldate.strftime("%e"),
-    #                                             dsr__distributor_sales_code = dsr_id)
     schedules = DSRWorkAllocation.objects.filter(dsr__distributor_sales_code = dsr_id, is_active = True)#__isnull = True)
- 
     if schedules:                   
         schedules_list = []
         for schedule in schedules:
@@ -389,37 +403,6 @@ def uploadcollection(request):
     return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
    
 
-    
-    # dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-    # retailers = Retailer.objects.filter(distributor = dsr.distributor, \
-    #                                     approved = constants.STATUS['APPROVED'])
-    # retailer_list = []
-    # #for a particular retailer, get all the invoices and total the invoice amount
-    # for retailer in retailers:
-    #     invoices = Invoices.objects.filter(retailer = retailer)
-    #     if invoices:
-    #         for invoice in invoices:
-    #             retailer_dict = {}
-    #             total_amount = 0
-    #             collection = 0
-    #             total_amount = total_amount + invoice.invoice_amount
-    #             retailer_dict.update({'retailer_id':retailer.retailer_code})
-    #             retailer_dict.update({'invoice_id': invoice.invoice_id})
-    #             retailer_dict.update({'total_amount': total_amount})
-    #             retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
-    #             #get the collections for that invoice
-    #             collection_objs = Collection.objects.filter(invoice_id = invoice.id)
-    #             for each in collection_objs:
-    #                 # collections = CollectionDetails.objects.filter(collection_id = each.id)
-    #                 # if collections:
-    #                 #     for each_collections in collections:
-    #                 collection = collection + each.collected_amount
-    #             retailer_dict.update({'collected_amount': collection})
-    #             retailer_list.append(retailer_dict)
-    #     else:
-    #         retailer_dict.update({'message': 'There are no invoices /outstanding for this dsr'})
-    #         retailer_list.append(retailer_dict)
-    # return Response(retailer_list)
 
 @api_view(['GET'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
@@ -677,19 +660,6 @@ def dsr_dashboard_report(request, dsr_id):
         total_collected_amount = total_collected_amount + retailer_collected_amount
     retailer_dict.update({"collections": total_collected_amount})
     
-
-@api_view(['POST'])
-# @authentication_classes((JSONWebTokenAuthentication,))
-# @permission_classes((IsAuthenticated,))
-def add_retailer(request, ):
-    # get the retailer details from the api payload
-    #retailer_profile = json.loads(request.body)
-    
-    
-    return Response({'message': 'Retailer Collection is updated successfully', 'status':1})
-
-
-
     # calculation of zero-billed
     exist_retailers = []
     for retailer in retailers:
@@ -1117,6 +1087,7 @@ def get_retailer_orders(request, retailer_id):
         order_dict['order_id'] = order.id
         order_dict['retailer_id'] = order.retailer.retailer_code
         order_dict['order_date'] = order.order_date.date()
+        order_dict['distributor_id'] = order.distributor.distributor_id
         # check the status of the order and get it from the constants
         for k,v in constants.ORDER_STATUS.iteritems():
             if v == order.order_status:
@@ -1143,3 +1114,78 @@ def get_retailer_orders(request, retailer_id):
             order_dict['order_details'] = order_details_list
         orders_list.append(order_dict)
     return Response(orders_list)
+
+@api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def dsr_average_orders(request, dsr_id):
+    '''
+    This method returns the sale average of last 6 months as well as the previous month
+    retailer wise
+    '''
+    dsr =  DistributorSalesRep.objects.select_related('distributor').get(distributor_sales_code = dsr_id)
+    distributor = dsr.distributor
+    retailers_list = []
+    # get the retailer objects for this distributor
+    retailers = Retailer.objects.filter(distributor = distributor)
+    # get the current month date object with the first day
+    date_str =  str(today.year) + '/' + str(today.strftime('%m')) + '/' + '01 00:00:00'
+    #first_date = datetime.datetime.strptime(date_str, '%Y/%m/%d %H:%M:%S')
+    first_date = today
+    # get the date object of the past six months with the first day
+    previous_date = first_date - timedelta(days = constants.AVERAGE_API_TIME_MONTHS * 30)
+    previous_date_str = str(previous_date.year) + '/' + str(previous_date.strftime('%m')) + \
+                                                    '/' + '01'
+    previous_date = datetime.datetime.strptime(previous_date_str, '%Y/%m/%d')
+    retailer_parts_list = []
+    for retailer in retailers:
+        previous_date = datetime.datetime.strptime(previous_date_str, '%Y/%m/%d')
+        # get all the unique parts ordered for the retailer
+        retailer_parts = OrderPartDetails.objects.filter(order__retailer = retailer,
+                        created_date__gte = previous_date, created_date__lte = first_date).\
+                                    values('part_number__part_number').distinct()
+        if retailer_parts:
+            total_sale = 0
+            for part in retailer_parts:
+                # set the previous date to the last 6 months
+                previous_date = datetime.datetime.strptime(previous_date_str, '%Y/%m/%d')
+                retailer_dict = OrderedDict()
+                # get all the orders of the part number
+                part_orders = OrderPartDetails.objects.filter(order__retailer = retailer,
+                        created_date__gte = previous_date, created_date__lte = first_date,
+                            part_number__part_number = part['part_number__part_number'])
+                # for each order sum up the quantity and divide it by 6 
+                for part_order in part_orders:
+                    total_sale = total_sale + part_order.quantity
+                average_sale = total_sale / constants.AVERAGE_API_TIME_MONTHS
+                retailer_dict['retailer_id'] = retailer.retailer_code
+                retailer_dict['part_number'] = part['part_number__part_number']
+                retailer_dict['average_sale_last_six_months'] = \
+                                                average_sale
+                # calculate area average (retailer area ) for the previous month
+                # set the previous date to the last month
+                previous_date = previous_date = first_date - timedelta(days = 30)
+                part_orders = OrderPartDetails.objects.filter(order__retailer = retailer,
+                        created_date__gte = previous_date, created_date__lte = first_date,
+                            part_number__part_number = part['part_number__part_number'])
+                # for this part add the quantity of all the orders
+                total_sale = 0
+                for part_order in part_orders:
+                    total_sale = total_sale + part_order.quantity
+                retailer_dict['total_sale_last_month'] = total_sale
+                retailer_parts_list.append(retailer_dict)
+    if retailer_parts_list == []:
+        return Response({'message':'There are no parts ordered for any of the retailer', \
+                         'status': 0})
+    else:
+        return Response(retailer_parts_list)
+   
+    
+    
+    
+
+
+    
+
+    
+

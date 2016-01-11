@@ -379,4 +379,5 @@ ORDER_STATUS = {'OPEN': 0, 'ALLOCATED': 1, 'SHIPPED': 2, 'DLCREATE': 3}
 #this variable is to set how many month data to be taken into account for APP DSR report
 DSR_REPORT_MONTHS_DATA = 3
 
-
+#this variable is used to set the time period in the average api
+AVERAGE_API_TIME_MONTHS = 6
