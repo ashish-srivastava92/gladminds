@@ -36,6 +36,12 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from gladminds.core.auth_helper import Roles
 from gladminds.core import constants
+from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
+                            PartPricing, Distributor,  Invoices, \
+                            Collection,CollectionDetails,PartsStock,DSRWorkAllocation,DSRLocationDetails, \
+                            NationalSparesManager,AreaSparesManager
+from gladminds.bajaj.models import PartMasterCv,OrderPart,OrderPartDetails, \
+                        PartIndexDetails, PartIndexPlates, FocusedPart
 
 LOG = logging.getLogger('gladminds')
 
@@ -212,14 +218,14 @@ def get_admin_reports(request,month,year):
         retailer_count=0
         newretailers=0
         for nsm in nsms:
-            asms=AreaSparesManager.objects.filter(nsm__nsm_id=nsm_id)
+            asms=AreaSparesManager.objects.filter(nsm__nsm_id=nsm.nsm_id)
             for asm in asms:
-                distributors=Distributor.objects.filter(asm__asm_id=asm_id)
+                distributors=Distributor.objects.filter(asm__asm_id=asm.asm_id)
                 for distributor in distributors:
-                    dsrs=DistributorSalesRep.objects.filter(distributor__distributor_id=distributor_id)
+                    dsrs=DistributorSalesRep.objects.filter(distributor__distributor_id=distributor.distributor_id)
                     for dsr in dsrs:
-                        dsr_id=dsr.dsr_id
-                        retailer=Retailer.objects.filter(dsr_id=dsr_id)
+                        dsr_id=dsr.id
+                        retailers=Retailer.objects.filter(dsr_id=dsr_id)
                         ##FIXME:Can use len()
                         retailer_count+=Retailer.objects.filter(dsr_id=dsr_id).count()
                         newretailers+=Retailer.objects.filter(dsr_id=dsr_id,created_date__month=month,created_date__year=year).count()
@@ -264,12 +270,12 @@ def get_nsm_reports(request,nsm_id,month,year):
         retailer_count=0
         newretailers=0
         for asm in asms:
-            distributors=Distributor.objects.filter(asm__asm_id=asm_id)
+            distributors=Distributor.objects.filter(asm__asm_id=asm.asm_id)
             for distributor in distributors:
-                dsrs=DistributorSalesRep.objects.filter(distributor__distributor_id=distributor_id)
+                dsrs=DistributorSalesRep.objects.filter(distributor__distributor_id=distributor.distributor_id)
                 for dsr in dsrs:
-                    dsr_id=dsr.dsr_id
-                    retailer=Retailer.objects.filter(dsr_id=dsr_id)
+                    dsr_id=dsr.id
+                    retailers=Retailer.objects.filter(dsr_id=dsr_id)
                     ##FIXME:Can use len()
                     retailer_count+=Retailer.objects.filter(dsr_id=dsr_id).count()
                     newretailers+=Retailer.objects.filter(dsr_id=dsr_id,created_date__month=month,created_date__year=year).count()
@@ -315,10 +321,10 @@ def get_asm_reports(request,asm_id,month,year):
         retailer_count=0
         newretailers=0
         for distributor in distributors:
-            dsrs=DistributorSalesRep.objects.filter(distributor__distributor_id=distributor_id)
+            dsrs=DistributorSalesRep.objects.filter(distributor__distributor_id=distributor.distributor_id)
             for dsr in dsrs:
-                dsr_id=dsr.dsr_id
-                retailer=Retailer.objects.filter(dsr_id=dsr_id)
+                dsr_id=dsr.id
+                retailers=Retailer.objects.filter(dsr_id=dsr_id)
                 ##FIXME:Can use len()
                 retailer_count+=Retailer.objects.filter(dsr_id=dsr_id).count()
                 newretailers+=Retailer.objects.filter(dsr_id=dsr_id,created_date__month=month,created_date__year=year).count()
@@ -352,7 +358,7 @@ def get_asm_reports(request,asm_id,month,year):
     return Response(report)
 
 @api_view(['GET'])
-def get_distributor_reports(request):
+def get_distributor_reports(request,distributor_id,month,year):
     report=[]
     report_type1={}
     report_type1["report_type"] = "month"
@@ -364,8 +370,8 @@ def get_distributor_reports(request):
         retailer_count=0
         newretailers=0
         for dsr in dsrs:
-            dsr_id=dsr.dsr_id
-            retailer=Retailer.objects.filter(dsr_id=dsr_id)
+            dsr_id=dsr.id
+            retailers=Retailer.objects.filter(dsr_id=dsr_id)
             ##FIXME:Can use len()
             retailer_count+=Retailer.objects.filter(dsr_id=dsr_id).count()
             newretailers+=Retailer.objects.filter(dsr_id=dsr_id,created_date__month=month,created_date__year=year).count()
@@ -451,7 +457,7 @@ def get_reports(request,month,year):
     #year=request.GET.__getitem__('year')
     if request.user.groups.filter(name=Roles.DISTRIBUTORSALESREP).exists():
         if request.user.is_authenticated():
-            dsr_id = DistributorSalesRep.objects.get(user_id=request.user.id).dsr_id
+            dsr_id = DistributorSalesRep.objects.get(user_id=request.user.id).id
             return get_dsr_reports(request, dsr_id,month,year)
         else:
             return Response({'error':'Not an authenticated user'})
