@@ -64,7 +64,7 @@ def authentication(request):
         else:
             return Response({'message': 'you are not active. Please contact your distributor', 'status':0})
     else:
-    return Response({'message': 'you are not a registered user', 'status':0})
+        return Response({'message': 'you are not a registered user', 'status':0})
     
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
