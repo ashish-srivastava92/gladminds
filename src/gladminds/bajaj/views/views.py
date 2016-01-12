@@ -45,7 +45,7 @@ from gladminds.bajaj.services.coupons import export_feed
 from gladminds.core.auth import otp_handler
 from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor, District, State, OrderPartDetails, \
 PartPricing, OrderDeliveredHistory, DoDetails, PartsStock, OrderPart, OrderPartDetails, DistributorSalesRep, DSRWorkAllocation, \
-BackOrders, DSRLocationDetails, OrderTempDeliveredHistory, Collection, CollectionDetails, DoDetails, PartMasterCv, \
+BackOrders, DSRLocationDetails, OrderTempDeliveredHistory, Collection, CollectionDetails, DoDetails,\
 AreaSparesManager, PartsRackLocation, OrderTempDetails, Invoices, PartsRackLocation
 
 
@@ -599,17 +599,17 @@ def get_outstanding_details(request, retailer_id):
     day_margin_90 = datetime.timedelta(days = 90)
     today = datetime.date.today()
     for invoice_obj in invoice_objs:
-    ind_invoice_dict = {}
-    ind_invoice_dict["invoice_amount"] = invoice_obj.invoice_amount
-    ind_invoice_dict["invoice_date"] = invoice_obj.invoice_date
+        ind_invoice_dict = {}
+        ind_invoice_dict["invoice_amount"] = invoice_obj.invoice_amount
+        ind_invoice_dict["invoice_date"] = invoice_obj.invoice_date
         if (today - day_margin_30  <= invoice_obj.invoice_date.date() <= today):
-        #invoice_list_now_30_days.append(ind_invoice_dict)
-        ind_invoice_dict['now_30_days'] = invoice_obj.invoice_id
+            #invoice_list_now_30_days.append(ind_invoice_dict)
+            ind_invoice_dict['now_30_days'] = invoice_obj.invoice_id
         if (today - day_margin_60  <= invoice_obj.invoice_date.date() <= today - day_margin_30):
             #invoice_list_30_60_days.append(ind_invoice_dict)
-        ind_invoice_dict['30_60_days'] = invoice_obj.invoice_id
+            ind_invoice_dict['30_60_days'] = invoice_obj.invoice_id
         if (today - day_margin_90  <= invoice_obj.invoice_date.date() <= today - day_margin_60):
-        ind_invoice_dict['60_90_days'] = invoice_obj.invoice_id
+            ind_invoice_dict['60_90_days'] = invoice_obj.invoice_id
             #invoice_list_60_90_days.append(ind_invoice_dict)
         invoice_list.append(ind_invoice_dict)
 
@@ -977,7 +977,7 @@ def get_collection_details(request, ret_id):
         collection_details_dict['collected_by'] = each.dsr.user.user.first_name
         collection_details_dict['collected_amount'] = each.collected_amount
         collection_details_dict['payment_date'] = datetime.datetime.strftime(each.payment_date, '%Y-%m-%d %H:%M:%S')
-    more_details_obj = CollectionDetails.objects.filter(collection_id=each.id)
+        more_details_obj = CollectionDetails.objects.filter(collection_id=each.id)
         for each_obj in more_details_obj:
             if each_obj.mode == 1:
                 collection_details_dict['mode'] = 'Cash'
@@ -990,7 +990,7 @@ def get_collection_details(request, ret_id):
         collection_details_dict['cheque_img_url'] = each_obj.img_url.path.replace('/var/www/demosfa/gladminds/src/static/','')
         collection_details_dict['status'] = ''
         collection_details_dict['invoice_no'] = each_obj.collection.invoice.invoice_id
-            collection_details.append(collection_details_dict.copy())
+        collection_details.append(collection_details_dict.copy())
 
     return HttpResponse(json.dumps(collection_details), content_type='application/json')
 
@@ -1381,10 +1381,10 @@ def upload_collection_details(request):
                 invoice_number = each_collection['Invoice Number']
                 try:
                     invoice_obj = Invoices.objects.get(invoice_id=invoice_number)
-            uploaded_paid_amount = float(each_collection.get('Total Collected Amount', 0))
-            invoice_amount = invoice_obj.invoice_amount
-            amount_difference = invoice_amount - uploaded_paid_amount
-            if (amount_difference < 0):
+                    uploaded_paid_amount = float(each_collection.get('Total Collected Amount', 0))
+                    invoice_amount = invoice_obj.invoice_amount
+                    amount_difference = invoice_amount - uploaded_paid_amount
+                    if (amount_difference < 0):
                         messages.error(request, "Collection details upload failed, Collected amount exceeds invoice amount - " + invoice_number)
                         return HttpResponseRedirect('/admin/bajaj/collection/')
             

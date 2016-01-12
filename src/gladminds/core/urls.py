@@ -139,6 +139,7 @@ urlpatterns = patterns('',
                         'gladminds.bajaj.views.apis.get_orders'),
     url(r'^mc/get_retailer_orders/retailer_id/(?P<retailer_id>\d+)/$',
                         'gladminds.bajaj.views.apis.get_retailer_orders'),
+    url(r'^cv/get_stock/(?P<dsr_id>\d+)/$', 'gladminds.core.views.apis.get_stock'),    
 
     
     # url(r'^mc/sync_location_details/dsr_id/(?P<dsr_id>\d+)/$',
@@ -166,9 +167,9 @@ urlpatterns = patterns('',
     url(r'^cv/get_schedule/dsr_id/(?P<dsr_id>\d+)/date/(?P<date>[-\d]+)/$',
                        'gladminds.bajaj.views.apis.get_schedule'),
     url(r'^cv/place_order/dsr_id/(?P<dsr_id>\d+)/$',
-                        'gladminds.bajaj.views.apis.place_order'),
+                        'gladminds.core.views.apis.place_order'),
     url(r'^cv/place_order/retailer_id/(?P<retailer_id>\d+)/$',
-                        'gladminds.bajaj.views.apis.retailer_place_order'),
+                        'gladminds.core.views.apis.retailer_place_order'),
     url(r'^cv/add_retailer/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.bajaj.views.apis.add_retailer'),
     url(r'^cv/dsr_dashboard_report/dsr_id/(?P<dsr_id>\d+)/$',
@@ -252,6 +253,7 @@ urlpatterns = patterns('',
     url(r'^getdsrs/$', 'gladminds.bajaj.views.apis.get_associated_dsrs', name='getdsrs'),
     url(r'^getretailers_acutal/$', 'gladminds.bajaj.views.apis.get_retailers_actual', name='getretailers_actual'),
     url(r'^getusers/$', 'gladminds.bajaj.views.apis.get_users', name='getusers'),
+    url(r'^cv/get_focused_parts/', 'gladminds.core.views.apis.get_focused_parts'),
  
 )
 

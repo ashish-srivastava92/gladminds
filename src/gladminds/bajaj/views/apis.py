@@ -22,7 +22,7 @@ from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Cat
                             PartPricing, Distributor,  Invoices, \
                             Collection,CollectionDetails,PartsStock,DSRWorkAllocation,DSRLocationDetails, \
 			    NationalSparesManager,AreaSparesManager
-from gladminds.bajaj.models import PartMasterCv,OrderPart,OrderPartDetails, \
+from gladminds.bajaj.models import OrderPart,OrderPartDetails, \
                         PartIndexDetails, PartIndexPlates, FocusedPart
 from gladminds.core.auth_helper import Roles
 
@@ -67,7 +67,7 @@ def authentication(request):
         else:
             return Response({'message': 'you are not active. Please contact your distributor', 'status':0})
     else:
-        return Response({'message': 'you are not a registered user', 'status':0})
+    return Response({'message': 'you are not a registered user', 'status':0})
     
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
@@ -156,7 +156,7 @@ def get_stock(request,dsr_id):
 def get_parts(request):
     '''
     This method returns all the spare parts details
-    '''
+    ''' 
     parts = PartPricing.objects.filter(active = True)
     parts_list =[]
     for part in parts:
@@ -245,7 +245,7 @@ def get_parts_catalog(request):
         parts_dict.update({"part_number":part.part_number})
         parts_dict.update({"part_model":part.plate.model.model_name})
         parts_dict.update({"part_plate":part.plate.plate_name})
-	parts_dict.update({"plate_id":part.plate_id})
+        parts_dict.update({"plate_id":part.plate_id})
         parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
     return Response(parts_list)
@@ -1282,25 +1282,24 @@ def get_retailer_dict(retailer):
 	return retailer_dict
 
 def get_retailer_unassigned_dict(retailer):
-     retailer_unassigned_dict={}
-     retailer_unassigned_dict['firstname'] = retailer.user.user.first_name
-     retailer_unassigned_dict['lastname'] = retailer.user.user.last_name
-     retailer_unassigned_dict['shopname'] = retailer.retailer_name
-     if retailer.latitude and retailer.longitude:
-	     retailer_unassigned_dict['latitude'] = str(retailer.latitude)
-	     retailer_unassigned_dict['longitude'] = str(retailer.longitude)
-     else:
-	     #FIXME: check if object is collected
-             return None
-     retailer_unassigned_dict['outstanding'] = retailer.retailer_name
-     retailer_unassigned_dict['nsm_id'] = retailer.distributor.asm.nsm.nsm_id
-     retailer_unassigned_dict['dsr_id'] = retailer.dsr_id
-     retailer_unassigned_dict['contact'] = retailer.mobile
-     dsr_work_allocation = DSRWorkAllocation.objects.filter(retailer=retailer)
-     if dsr_work_allocation:
-	#pass
-	retailer_unassigned_dict['day'] = dsr_work_allocation[0].pjp_day
-     return retailer_unassigned_dict
+    retailer_unassigned_dict={}
+    retailer_unassigned_dict['firstname'] = retailer.user.user.first_name
+    retailer_unassigned_dict['lastname'] = retailer.user.user.last_name
+    retailer_unassigned_dict['shopname'] = retailer.retailer_name
+    if retailer.latitude and retailer.longitude:
+	    retailer_unassigned_dict['latitude'] = str(retailer.latitude)
+	    retailer_unassigned_dict['longitude'] = str(retailer.longitude)
+    else:
+	    #FIXME: check if object is collected
+            return None
+    retailer_unassigned_dict['outstanding'] = retailer.retailer_name
+    retailer_unassigned_dict['nsm_id'] = retailer.distributor.asm.nsm.nsm_id
+    retailer_unassigned_dict['dsr_id'] = retailer.dsr_id
+    retailer_unassigned_dict['contact'] = retailer.mobile
+    dsr_work_allocation = DSRWorkAllocation.objects.filter(retailer=retailer)
+    if dsr_work_allocation:
+	    retailer_unassigned_dict['day'] = dsr_work_allocation[0].pjp_day
+    return retailer_unassigned_dict
 
 @api_view(['GET'])
 def get_associated_nsms(request):	

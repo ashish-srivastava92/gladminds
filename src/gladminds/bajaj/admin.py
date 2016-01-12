@@ -1905,7 +1905,6 @@ class OrderPartAdmin(GmModelAdmin):
         # FIXME: Return false other than all the known user roles
         # FIXME: Move this method to a more generic location, may be auth_helper
         retailer_obj = Retailer.objects.get(id=order_details_dict['ret_id'])
-	print Roles.DISTRIBUTORS, user.groups.values()
         if user.groups.filter(name=Roles.DISTRIBUTORS).exists():
             associated_dist_id = retailer_obj.distributor_id
             logged_in_dist = Distributor.objects.get(user=user.id).id

@@ -603,6 +603,7 @@ class SubCategories(base_models.SubCategories):
     
     class Meta(base_models.SubCategories.Meta):
         app_label = _APP_NAME
+
         
 class CvCategories(base_models.CvCategories):
     ''' details of alternate parts and pricing '''
@@ -614,23 +615,22 @@ class CvCategories(base_models.CvCategories):
     
     class Meta(base_models.CvCategories.Meta):
         app_label = _APP_NAME
+
         
 class PartMasterCv(base_models.PartMasterCv):
     ''' details of spare parts and pricing '''
-    part_number = models.CharField(max_length=255, null=True, blank=True)
-    products = models.CharField(max_length=255, null=True, blank=True)
-    remarks = models.CharField(max_length=255, null=True, blank=True)
-    mrp = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
-    description = models.CharField(max_length=255, null=True, blank=True)
-    subcategory = models.ForeignKey(SubCategories, null=True, blank=True)
+    bajaj_id = models.IntegerField()
+    part_number = models.CharField(max_length = 255)
+    description = models.TextField()
+    part_model = models.TextField()
+    valid_from = models.DateField()
+    part_models = models.CharField(max_length = 255)
     category = models.ForeignKey(CvCategories)
     mrp = models.CharField(max_length = 255)
     active = models.BooleanField(default = True)
     available = models.CharField(max_length=25)
     pending = models.CharField(max_length=25)
-    current_month_should = models.IntegerField()
-    active = models.BooleanField(default=True)
-    moq = models.IntegerField( null=True, blank=True)
+    associated_parts = models.ManyToManyField("self", blank=True, null=True)
     
     class Meta(base_models.PartMasterCv.Meta):
         app_label = _APP_NAME
@@ -638,7 +638,19 @@ class PartMasterCv(base_models.PartMasterCv):
     def __unicode__(self):
         return self.description
 
-    
+class FocusedPart(base_models.FocusedPart):
+    '''Focused parts during a duration'''
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    part = models.ForeignKey(PartMasterCv)
+    # Remove null=True once data is corrected
+    locality = models.ForeignKey(Locality, null=True, blank=True)
+    class Meta(base_models.FocusedPart.Meta):
+        app_label = _APP_NAME
+    def __unicode__(self):
+        return self.part.part_number + "-" + self.locality.name
+
+
 class Collection(base_models.Collection):
     ''' details of spare parts and pricing '''
     retailer = models.ForeignKey(Retailer)
@@ -711,16 +723,35 @@ class DoDetails(base_models.DoDetails):
     class Meta(base_models.DoDetails.Meta):
         app_label = _APP_NAME
 
+
 class OrderDeliveredHistory(base_models.OrderDeliveredHistory):
     part_number = models.ForeignKey(PartMasterCv)
     delivered_quantity = models.IntegerField(null=True, blank=True)
     active = models.IntegerField(null=True, blank=True, default=1)
     order = models.ForeignKey(OrderPart)
     delivered_date = models.DateTimeField(null=True, blank=True)
-    do= models.ForeignKey(DoDetails)
+    do = models.ForeignKey(DoDetails)
+    vat = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    service_tax = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    other_taxes = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    discount = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     class Meta(base_models.OrderDeliveredHistory.Meta):
         app_label = _APP_NAME
         verbose_name_plural = "Order Delivered History"
+
+class OrderTempDeliveredHistory(base_models.OrderTempDeliveredHistory):
+    part_number = models.ForeignKey(PartMasterCv)
+    delivered_quantity = models.IntegerField(null=True, blank=True)
+    active = models.IntegerField(null=True, blank=True, default=1)
+    order = models.ForeignKey(OrderPart)
+    delivered_date = models.DateTimeField(null=True, blank=True)
+    retailer = models.ForeignKey(Retailer)
+    
+#     do= models.ForeignKey(DoDetails)
+    class Meta(base_models.OrderTempDeliveredHistory.Meta):
+        app_label = _APP_NAME
+        verbose_name_plural = "Order Temp Delivered History"
+
 
 class Invoices(base_models.Invoices):
     retailer = models.ForeignKey(Retailer)
@@ -740,6 +771,15 @@ class InvoicesDetails(base_models.InvoicesDetails):
     class Meta(base_models.InvoicesDetails.Meta):
         app_label = _APP_NAME
 
+
+class PartsRackLocation(base_models.PartsRackLocation):
+    part_number = models.ForeignKey(PartMasterCv)
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    rack_location = models.CharField(max_length=255,null=True, blank=True)
+    class Meta(base_models.PartsRackLocation.Meta):
+        app_label = _APP_NAME
+
+
 class Collection(base_models.Collection):
     ''' details of spare parts and pricing '''
     retailer = models.ForeignKey(Retailer, null=True, blank=True)
@@ -752,7 +792,23 @@ class Collection(base_models.Collection):
     
     class Meta(base_models.Collection.Meta):
         app_label = _APP_NAME
-        
+
+
+class OrderTempDetails(base_models.OrderTempDetails):
+    part_number = models.ForeignKey(PartMasterCv)
+    order = models.ForeignKey(OrderPart)
+    qty = models.IntegerField(null=True,blank=True)
+    retailer = models.ForeignKey(Retailer, null=True, blank=True)
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    ordered_quantity = models.IntegerField(null=True, blank=True)
+    do = models.ForeignKey(DoDetails)
+    mrp = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    line_total = models.DecimalField(max_digits = 20, decimal_places=10, null=True, blank=True)
+    class Meta(base_models.OrderTempDetails.Meta):
+        app_label = _APP_NAME
+
+
+
 class CollectionDetails(base_models.CollectionDetails):
     ''' details of spare parts and pricing '''
     collection = models.ForeignKey(Collection, null=True, blank=True)

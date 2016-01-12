@@ -34,7 +34,7 @@ def authentication(request):
     a token as response
     '''
     #load the json input of username and password as json
-    #load = json.loads(request.body)
+    load = json.loads(request.body)
     load = request.data
     user = authenticate(username = load["username"], password = load["password"])
     
@@ -64,7 +64,7 @@ def authentication(request):
         else:
             return Response({'message': 'you are not active. Please contact your distributor', 'status':0})
     else:
-        return Response({'message': 'you are not a registered user', 'status':0})
+    return Response({'message': 'you are not a registered user', 'status':0})
     
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
@@ -178,7 +178,6 @@ def get_associated_parts(request):
     '''
     This method returns all the spare parts details based on the catalog
     '''
-    print "inside the function"
     parts = PartIndexDetails.objects.filter(plate__active = True)
     parts_list =[]
     for part in parts:
@@ -248,13 +247,13 @@ def get_schedule(request, dsr_id):
         schedules_list = []
         for schedule in schedules:
             schedule_dict = {}
-	    schedule_dict['locality_id'] = schedule.locality_id
-	    try:
-	        if schedule.locality:
-	    	    schedule_dict['locality_name'] = schedule.locality.name
-	    except:
-	        schedule_dict['locality_name'] = 'Locality missing'
-	    schedule_dict['pjp_day'] = schedule.pjp_day
+            schedule_dict['locality_id'] = schedule.locality_id
+            try:
+                if schedule.locality:
+                    schedule_dict['locality_name'] = schedule.locality.name
+            except:
+                schedule_dict['locality_name'] = 'Locality missing'
+                schedule_dict['pjp_day'] = schedule.pjp_day
             #schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
             #schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
             #tm = time.strptime(str(schedule.date.time()), "%H:%M:%S")
@@ -266,6 +265,33 @@ def get_schedule(request, dsr_id):
         return Response(schedules_list)
     else:
         return Response({'status':0, 'message':'There are no schedules for the DSR'})
+
+@api_view(['GET'])
+# @authentication_classes((JSONWebTokenAuthentication,))
+# @permission_classes((IsAuthenticated,))
+def get_stock(request,dsr_id):
+    '''
+    This method returns all the stock details
+    '''
+    #get the disributor id
+    try:
+        distributor_obj = DistributorSalesRep.objects.get(distributor_sales_code=dsr_id).distributor
+    except:
+       return Response([{"error":"Distributor not present"}])
+    #get the parts with the distributor
+    stocks = PartsStock.objects.filter(distributor=distributor_obj)
+    stock_list =[]
+    for part in stocks:
+        parts_dict = {}
+    try:
+        parts_dict["part_number"]=part.part_number.part_number
+        parts_dict["part_available_quantity"]=part.available_quantity
+        parts_dict["mrp"]=part.part_number.mrp
+        stock_list.append(parts_dict)
+    except:
+        # FIXME: Remove try except from here and confirm if exceptions are due to curropt data
+        pass
+    return Response(stock_list)
 
 
 def split_date(date):
@@ -463,6 +489,53 @@ def get_distributor_for_retailer(request, retailer_id):
                 }
             distributor_list.append(distributor_dict)
     return Response(distributor_list)
+
+
+@api_view(['GET'])
+# @authentication_classes((JSONWebTokenAuthentication,))
+# @permission_classes((IsAuthenticated,))
+def get_focused_parts(request):
+    '''
+    Returns all the focused parts along with locality
+    '''
+    retailer_code = request.GET.get('retailer_code')
+    dsr_code = request.GET.get('dsr_code')
+    if retailer_code:
+        locality = Retailer.objects.get(retailer_code=retailer_code).locality
+        all_focused_parts = FocusedPart.objects.filter(locality=locality)
+    elif dsr_code:
+        retailer_objs = Retailer.objects.filter(dsr__distributor_sales_code=dsr_code)
+        localities = [i.locality for i in retailer_objs]
+        all_focused_parts = FocusedPart.objects.filter(locality__in=localities)
+    else:
+        all_focused_parts = FocusedPart.objects.all()
+
+    all_focused_parts = FocusedPart.objects.all()
+    parts_list = []
+    for focused_part in all_focused_parts:
+        parts_dict = {}
+        parts_dict.update({"part_name":focused_part.part.description})
+        parts_dict.update({"part_number":focused_part.part.part_number})
+        parts_dict.update({"part_category":focused_part.part.subcategory.name})
+        associated_categories = focused_part.part.associated_parts.all()
+        parts_dict.update({"associated_categories_str": [i.part_number for i in associated_categories]})
+        try:
+            available_quantity = PartsStock.objects.get(part_number = focused_part.part)
+        except:
+            available_quantity = 'NA'
+        if available_quantity == 'NA':
+            parts_dict.update({"part_available_quantity":'NA'})
+        else:
+            parts_dict.update({"part_available_quantity":available_quantity.available_quantity})
+        parts_dict.update({"part_products":focused_part.part.products})
+        parts_dict.update({"mrp":focused_part.part.mrp})
+        parts_dict.update({"locality_id": focused_part.locality_id})
+        parts_dict.update({"city": focused_part.locality.city.city})
+        parts_dict.update({"state": focused_part.locality.city.state.state_name})
+        parts_dict.update({"locality": focused_part.locality.name})
+        parts_list.append(parts_dict)
+    return Response(parts_list) 
+
 
 @api_view(['POST'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
@@ -1060,7 +1133,6 @@ def get_orders(request, dsr_id):
                 amount = amount + each.line_total
             order_dict['amount'] = amount
             order_dict['total_quantity'] = total_line_items
-            #order_dict['status'] = order.order_status
             # order details dict
             order_details_list = []
             for each in order_detail:
