@@ -599,10 +599,21 @@ class Categories(base_models.Categories):
         app_label = _APP_NAME
         
 class SubCategories(base_models.SubCategories):
-    ''' details of model sub categories'''
-    
+    ''' details of model subcategories '''
+    name = models.CharField(max_length=255)
+    usps = models.CharField(max_length=500, null=True, blank=True)
+    importance = models.CharField(max_length=500, null=True, blank=True)
+    image_url = models.CharField(max_length=30, null=True, blank=True)
+    part_model = models.ForeignKey(PartModel)
+    category = models.ForeignKey(Categories)
+    active = models.BooleanField(default = True)
+#     active = models.BooleanField(default=True)
+
     class Meta(base_models.SubCategories.Meta):
         app_label = _APP_NAME
+         
+    def __unicode__(self):
+        return self.name
 
         
 class CvCategories(base_models.CvCategories):
