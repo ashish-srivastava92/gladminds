@@ -89,13 +89,13 @@ def get_retailers(request, dsr_id):
         retailer_dict.update({"retailer_mobile":retailer.mobile})
         retailer_dict.update({"retailer_email":retailer.email})
         retailer_dict.update({"retailer_address":retailer.user.address})
-	    retailer_dict.update({"locality":retailer.address_line_4})
-	    if retailer.locality:
+        retailer_dict.update({"locality":retailer.address_line_4})
+        if retailer.locality:
             retailer_dict["locality"] = retailer.locality.name
             retailer_dict.update({"city":retailer.locality.city.city})
             retailer_dict.update({"state":retailer.locality.city.state.state_name})
             retailer_dict.update({"locality_id":retailer.locality_id})
-	    else:
+        else:
             retailer_dict.update({"city":''})
             retailer_dict.update({"state":''})
             retailer_dict.update({"locality_id":''})
