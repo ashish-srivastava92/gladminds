@@ -239,11 +239,11 @@ SUIT_CONFIG = {
                     )
                     },
 #              
-          {'app': 'bajaj', 'label': 'PJP Schedule', 'icon': ' icon-folder-open',
+          {'app': 'bajaj', 'label': 'Permanent Journey Plan', 'icon': ' icon-folder-open',
           'models':(
 
                      {'model': 'permanentjourneyplan',
-                      'label': 'PJP Schedule'},
+                      'label': 'Permanent Journey Plan'},
 
                     )
                     },

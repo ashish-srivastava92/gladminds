@@ -1006,7 +1006,7 @@ class DistributorStaffAdmin(GmModelAdmin):
 class RetailerForm(forms.ModelForm):
     plot_no = forms.CharField(max_length=20, label="Plot No")
     street_name = forms.CharField(max_length=30)
-    locality = forms.CharField(max_length=30)
+    #locality = forms.CharField(max_length=30)
     date_birth = forms.DateTimeField(label='Date of birth', required=False)
     class Meta:
         model = get_model('Retailer')
@@ -1087,7 +1087,7 @@ class RetailerAdmin(GmModelAdmin):
             
             ModelForm.base_fields['date_birth'].initial = ret_obj.user.date_of_birth
             ModelForm.base_fields['plot_no'].initial = ret_obj.address_line_2
-            ModelForm.base_fields['locality'].initial = ret_obj.address_line_3
+            #ModelForm.base_fields['locality'].initial = ret_obj.address_line_3
             ModelForm.base_fields['street_name'].initial = ret_obj.address_line_4
   
         class ModelFormMetaClass(ModelForm):
@@ -1153,7 +1153,7 @@ class RetailerAdmin(GmModelAdmin):
             obj.retailer_code = str(constants.RETAILER_SEQUENCE)
             
         obj.address_line_2 = form.cleaned_data['plot_no']
-        obj.address_line_3 = form.cleaned_data['locality']
+        #obj.address_line_3 = form.cleaned_data['locality']
         obj.address_line_4 = form.cleaned_data['street_name']
         obj.save(using=settings.BRAND)
         super(RetailerAdmin, self).save_model(request, obj, form, change)

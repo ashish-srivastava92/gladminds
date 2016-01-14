@@ -1224,4 +1224,3 @@ class PermanentJourneyPlan(base_models.PermanentJourneyPlan):
 
     class Meta(base_models.PermanentJourneyPlan.Meta):
         app_label = _APP_NAME
-        verbose_name_plural = "Permanent Journey Plan"

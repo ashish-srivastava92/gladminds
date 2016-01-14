@@ -2182,4 +2182,4 @@ class PermanentJourneyPlan(BaseModel):
     class Meta:
         abstract = True
         db_table = "gm_permanent_journey_plan"
-        verbose_name_plural = "Order Temp Details"
+        verbose_name_plural = "Permanent Journey Plan"
