@@ -1849,7 +1849,7 @@ class OrderPartAdmin(GmModelAdmin):
     def changelist_view(self, request, extra_context={}):
         order_details = []
         order_details_dict = {}
-        query = "select *from gm_orderpart_details";
+        query = "select *from orderDetail";
         data = self.get_sql_data(query)
         for each in data:
             order_details_dict["open_orders_len"] = each["open_count"]

@@ -138,22 +138,47 @@ def place_order(request, dsr_id):
     '''
     parts = json.loads(request.body)
     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-    id = dsr.id
     if dsr:
         for order in parts :
-                orderpart = OrderPart(dsr =  dsr)
-                orderpart.dsr = dsr
-                orderpart.order_date = datetime.datetime.now()
-                orderpart.save(using=settings.BRAND)
-                for item in order['order_items']:
-                    part_number = item['part_number']
-                    quantity = item['qty']
-                    orderpart_details = OrderPartDetails()
-                    orderpart_details.part_number = part_number
-                    orderpart_details.quantity = quantity
-                    orderpart_details.order_id = orderpart.id
-                    orderpart_details.save()
-                return Response({'message': 'Order updated successfully', 'status':1})
+            orderpart = OrderPart()
+            orderpart.dsr = dsr
+            retailer = Retailer.objects.get(retailer_code = order['retailer_id'])
+            orderpart.retailer = retailer
+            orderpart.order_date = order['date']
+            orderpart.distributor = dsr.distributor
+            orderpart.order_placed_by = order['order_placed_by']
+            orderpart.order_number = order['order_id']
+            orderpart.latitude = order['latitude']
+            orderpart.longitude = order['longitude']
+            orderpart.save()
+            #push all the items into the orderpart details
+            for item in order['order_items']:
+                orderpart_details = OrderPartDetails()
+                try:
+                    if item['part_type'] == 1:
+                        '''Get the part details from Catalog Table'''
+                        orderpart_details.part_number_catalog = PartIndexDetails.objects.\
+                                                 get(part_number=item['part_number'], plate_id=item.get("plate_id"))
+                    elif item['part_type'] == 2:
+                        '''Get the part detailes from PartPricing Table'''
+                        orderpart_details.part_number = PartPricing.objects.\
+                                                 get(part_number=item['part_number'])
+                except:
+            try:
+            orderpart_details.part_number_catalog = PartIndexDetails.objects.\
+                                                 get(part_number=item['part_number'])
+            except:
+                        orderpart_details.part_number = PartPricing.objects.\
+                                                 get(part_number=item['part_number'])
+
+                    #return Response({'error': 'Part '+ item['part_number'] +' not found'})
+                orderpart_details.quantity = item['qty']
+                orderpart_details.order = orderpart
+                orderpart_details.line_total = item['line_total']
+                orderpart_details.save()
+        transaction.commit()
+            send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
+    return Response({'message': 'Order updated successfully', 'status':1})
         
 
 @api_view(['GET'])
@@ -366,18 +391,38 @@ def retailer_place_order(request, retailer_id):
             orderpart.retailer = retailer
             orderpart.distributor = Distributor.objects.get(distributor_id = order['distributor_id'])
             orderpart.order_date = order['date']
+            orderpart.order_number = order['order_id']
             orderpart.order_placed_by = order['order_placed_by']
-            orderpart.order_status = 0
             orderpart.save()
             #push all the items into the orderpart details
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
-                orderpart_details.part_number = PartPricing.objects.\
-                                                get(part_number = item['part_number'])
+        try:
+                    if item['part_type'] == 1:
+                        '''Get the part details from Catalog Table'''
+                        orderpart_details.part_number_catalog = PartIndexDetails.objects.\
+                                                 get(part_number = item['part_number'], plate_id=item.get('plate_id'))
+                    elif item['part_type'] == 2:
+                        '''Get the part detailes from PartPricing Table'''
+                        orderpart_details.part_number = PartPricing.objects.\
+                                                 get(part_number = item['part_number'])
+                except:
+                    #return Response({'error': 'Part '+ item['part_number'] +' not found'})
+                    try:
+                        orderpart_details.part_number_catalog = PartIndexDetails.objects.\
+                                                 get(part_number=item['part_number'])
+                    except:
+                        orderpart_details.part_number = PartPricing.objects.\
+                                                 get(part_number=item['part_number'])
+
+
+
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
                 orderpart_details.save()
+        transaction.commit()
+            send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
     return Response({'message': 'Order updated successfully', 'status':1})
 
 
