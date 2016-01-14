@@ -23,7 +23,7 @@ from rest_framework_jwt.settings import api_settings
 from gladminds.core.models import Distributor, DistributorSalesRep, Retailer, CvCategories, \
             OrderPart, OrderPartDetails,DSRWorkAllocation, AlternateParts, Collection, \
             CollectionDetails,PartMasterCv,RetailerCollection,PartsStock, Invoices, \
-            UserProfile, PartIndexDetails, PartIndexPlates
+            UserProfile, PartIndexDetails, PartIndexPlates, PartPricing
 from gladminds.core import constants
 
 today = datetime.datetime.now()
@@ -156,7 +156,7 @@ def get_parts(request):
     '''
     This method returns all the spare parts details
     '''
-    parts = PartMasterCv.objects.filter(active = True)
+    parts = PartPricing.objects.filter(active = True)
     parts_list =[]
     for part in parts:
         available_quantity = PartsStock.objects.get(part_number = part)
@@ -327,7 +327,7 @@ def place_order(request, dsr_id):
             #push all the items into the orderpart details
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
-                orderpart_details.part_number = PartMasterCv.objects.\
+                orderpart_details.part_number = PartPricing.objects.\
                                                 get(part_number = item['part_number'])
                 orderpart_details.quantity = int(item['qty'])
                 orderpart_details.order = orderpart
@@ -356,7 +356,7 @@ def retailer_place_order(request, retailer_id):
             #push all the items into the orderpart details
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
-                orderpart_details.part_number = PartMasterCv.objects.\
+                orderpart_details.part_number = PartPricing.objects.\
                                                 get(part_number = item['part_number'])
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart

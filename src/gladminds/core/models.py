@@ -616,6 +616,27 @@ class CvCategories(base_models.CvCategories):
     class Meta(base_models.CvCategories.Meta):
         app_label = _APP_NAME
 
+
+class PartPricing(base_models.PartPricing):
+    ''' details of parts '''
+    part_number = models.CharField(max_length=255, null=True, blank=True)
+    products = models.CharField(max_length=255, null=True, blank=True)
+    remarks = models.CharField(max_length=255, null=True, blank=True)
+    mrp = models.CharField(max_length=8, null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    subcategory = models.ForeignKey(SubCategories)
+    category = models.ForeignKey(Categories)
+  #  applicable_model = models.CharField(max_length=255, null=True, blank=True)
+    current_month_should = models.IntegerField()
+    active = models.BooleanField(default=True)
+    moq = models.IntegerField(null=True, blank=True)
+    associated_parts = models.ManyToManyField("self", blank=True, null=True)
+    class Meta(base_models.PartPricing.Meta):
+        app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.part_number     
+
         
 class PartMasterCv(base_models.PartMasterCv):
     ''' details of spare parts and pricing '''
