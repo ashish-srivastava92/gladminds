@@ -1017,7 +1017,7 @@ class PartsStock(base_models.PartsStock):
 class OrderPart(base_models.OrderPart):
     ''' details of orders placed by retailer '''
     order_date =models.DateTimeField(auto_now_add=True)
-    order_number = models.CharField(max_length=15, null=True, blank=True)
+    order_number = models.CharField(max_length=100, null=True, blank=True)
     retailer = models.ForeignKey(Retailer)
     dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
     distributor = models.ForeignKey(Distributor, null=True, blank=True)

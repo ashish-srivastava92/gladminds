@@ -743,6 +743,7 @@ class OrderPart(base_models.OrderPart):
     ''' details of orders placed by retailer '''
 
     order_date =models.DateTimeField(auto_now_add=True)
+    order_number = models.CharField(max_length=100, null=True, blank=True)
     retailer = models.ForeignKey(Retailer)
     dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
     distributor = models.ForeignKey(Distributor, null=True, blank=True)
@@ -752,8 +753,7 @@ class OrderPart(base_models.OrderPart):
     fullfill = models.NullBooleanField()
     delivered = models.IntegerField(null=True, blank=True)
     no_fullfill_reason = models.CharField(max_length=300, null=True, blank=True)
-    accept = models.BooleanField(default = False)
-    order_status = models.IntegerField()
+    order_status = models.IntegerField(null=True, blank=True,default=0)
     order_placed_by = models.IntegerField()
     latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=11, decimal_places=6, null=True, blank=True)
