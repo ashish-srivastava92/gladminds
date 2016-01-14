@@ -164,12 +164,12 @@ def place_order(request, dsr_id):
                         orderpart_details.part_number = PartPricing.objects.\
                                                  get(part_number=item['part_number'])
                 except:
-            try:
-            orderpart_details.part_number_catalog = PartIndexDetails.objects.\
-                                                 get(part_number=item['part_number'])
-            except:
+                    try:
+                        orderpart_details.part_number_catalog = PartIndexDetails.objects.\
+                                                         get(part_number=item['part_number'])
+                    except:
                         orderpart_details.part_number = PartPricing.objects.\
-                                                 get(part_number=item['part_number'])
+                                                         get(part_number=item['part_number'])
 
                     #return Response({'error': 'Part '+ item['part_number'] +' not found'})
                 orderpart_details.quantity = item['qty']
@@ -177,7 +177,7 @@ def place_order(request, dsr_id):
                 orderpart_details.line_total = item['line_total']
                 orderpart_details.save()
         transaction.commit()
-            send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
+        send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
     return Response({'message': 'Order updated successfully', 'status':1})
         
 
@@ -397,7 +397,7 @@ def retailer_place_order(request, retailer_id):
             #push all the items into the orderpart details
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
-        try:
+                try:
                     if item['part_type'] == 1:
                         '''Get the part details from Catalog Table'''
                         orderpart_details.part_number_catalog = PartIndexDetails.objects.\
@@ -414,15 +414,12 @@ def retailer_place_order(request, retailer_id):
                     except:
                         orderpart_details.part_number = PartPricing.objects.\
                                                  get(part_number=item['part_number'])
-
-
-
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
                 orderpart_details.save()
-        transaction.commit()
-            send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
+    transaction.commit()
+    send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
     return Response({'message': 'Order updated successfully', 'status':1})
 
 
