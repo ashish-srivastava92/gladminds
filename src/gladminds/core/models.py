@@ -591,7 +591,18 @@ class PartModels(base_models.PartModels):
     
     class Meta(base_models.PartModels.Meta):
         app_label = _APP_NAME
+
+class PartModel(base_models.PartModel):
+    ''' details of model categories '''
+    name = models.CharField(max_length=50)
+    active = models.BooleanField(default=True)
+    
+    class Meta(base_models.PartModel.Meta):
+        app_label = _APP_NAME
         
+    def __unicode__(self):
+        return self.name
+
 class Categories(base_models.Categories):
     ''' details of model categories '''
     category_name = models.CharField(max_length=255)
