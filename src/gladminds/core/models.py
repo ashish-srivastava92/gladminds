@@ -541,7 +541,7 @@ class RetailerCollection(base_models.RetailerCollection):
  
 class Locality(base_models.Locality):
     '''details of Locality'''
-    city_id = models.IntegerField(null=True,blank = True)
+    city = models.ForeignKey(City, null=True, blank=True)
 
     class Meta(base_models.Locality.Meta):
         app_label = _APP_NAME
