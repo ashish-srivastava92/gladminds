@@ -165,8 +165,8 @@ def get_parts(request):
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
         parts_dict.update({"part_category":part.subcategory.name})
-    associated_categories = part.associated_parts.all()
-    parts_dict.update({"associated_categories_str": [i.part_number for i in associated_categories]})
+        associated_categories = part.associated_parts.all()
+        parts_dict.update({"associated_categories_str": [i.part_number for i in associated_categories]})
         try:
             available_quantity = PartsStock.objects.get(part_number = part)
         except:
