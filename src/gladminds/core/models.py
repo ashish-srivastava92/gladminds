@@ -400,6 +400,13 @@ class City(base_models.City):
     class Meta(base_models.City.Meta):
         app_label = _APP_NAME
 
+class Locality(base_models.Locality):
+    ''' List of cities mapped to states'''
+    city = models.ForeignKey(City, null=True, blank=True)
+
+    class Meta(base_models.Locality.Meta):
+        app_label = _APP_NAME
+
 class NationalSparesManager(base_models.NationalSparesManager):
     '''details of National Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
