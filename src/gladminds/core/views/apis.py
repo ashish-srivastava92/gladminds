@@ -159,13 +159,22 @@ def get_parts(request):
     parts = PartPricing.objects.filter(active = True)
     parts_list =[]
     for part in parts:
-        #available_quantity = PartsStock.objects.get(part_number = part)
+        #available_quantity = PartsStock.objects.get(part_number_id = part.id ).available_quantity
+        available_quantity = 'NA'
         parts_dict = {}
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
-        parts_dict.update({"part_category":part.category.category_name})
-        #parts_dict.update({"part_available_quantity":available_quantity.available_quantity})
-        parts_dict.update({"part_available_quantity":'NA'})
+        parts_dict.update({"part_category":part.subcategory.name})
+    associated_categories = part.associated_parts.all()
+    parts_dict.update({"associated_categories_str": [i.part_number for i in associated_categories]})
+        try:
+            available_quantity = PartsStock.objects.get(part_number = part)
+        except:
+            available_quantity = 'NA'
+        if available_quantity == 'NA':
+            parts_dict.update({"part_available_quantity":'NA'})
+        else:
+            parts_dict.update({"part_available_quantity":available_quantity.available_quantity})
         parts_dict.update({"part_products":part.products})
         parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
