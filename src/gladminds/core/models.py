@@ -498,6 +498,7 @@ class Retailer(base_models.Retailer):
     image_url = models.FileField(upload_to="image",
                                    max_length=255, null=True, blank=True)
     district = models.CharField(max_length = 20)
+    locality = models.ForeignKey(Locality, null=True, blank=True)
     near_dealer_name = models.CharField(max_length = 50)
     total_counter_sale = models.DecimalField(max_digits=10, decimal_places=4, null=True, \
                                                 blank=True)
