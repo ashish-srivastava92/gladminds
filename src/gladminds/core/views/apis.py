@@ -75,10 +75,11 @@ def get_retailers(request, dsr_id):
     '''
     
     distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+    print "this is diretibutor id==========", distributor.distributor.id
     retailers = Retailer.objects.filter(distributor = distributor.distributor, \
                                 approved = constants.STATUS['APPROVED'] )
     retailer_list = []
-    
+    print "thse a re retialers=====", retailers
     for retailer in retailers:
         retailer_dict = {}
         retailer_dict.update({"retailer_Id":retailer.retailer_code})
@@ -98,7 +99,7 @@ def get_retailers(request, dsr_id):
             retailer_dict.update({"locality_id":''})
             retailer_dict.update({"latitude":retailer.latitude})
             retailer_dict.update({"longitude":retailer.longitude})
-            retailer_list.append(retailer_dict)
+        retailer_list.append(retailer_dict)
     return Response(retailer_list)
 
 @api_view(['GET'])

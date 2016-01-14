@@ -101,7 +101,7 @@ def get_retailers(request, dsr_id):
             retailer_dict.update({"locality_id":''})
             retailer_dict.update({"latitude":retailer.latitude})
             retailer_dict.update({"longitude":retailer.longitude})
-            retailer_list.append(retailer_dict)
+        retailer_list.append(retailer_dict)
     return Response(retailer_list)
 
 @api_view(['GET'])
