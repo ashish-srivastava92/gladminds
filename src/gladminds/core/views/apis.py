@@ -23,7 +23,7 @@ from rest_framework_jwt.settings import api_settings
 from gladminds.core.models import Distributor, DistributorSalesRep, Retailer, CvCategories, \
             OrderPart, OrderPartDetails,DSRWorkAllocation, AlternateParts, Collection, \
             CollectionDetails,PartMasterCv,RetailerCollection,PartsStock, Invoices, \
-            UserProfile, PartIndexDetails, PartIndexPlates, PartPricing
+            UserProfile, PartIndexDetails, PartIndexPlates, PartPricing, FocusedPart
 from gladminds.core import constants
 
 today = datetime.datetime.now()
