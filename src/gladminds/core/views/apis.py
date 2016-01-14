@@ -86,13 +86,19 @@ def get_retailers(request, dsr_id):
         retailer_dict.update({"retailer_mobile":retailer.mobile})
         retailer_dict.update({"retailer_email":retailer.email})
         retailer_dict.update({"retailer_address":retailer.user.address})
-	retailer_dict.update({"locality": retailer.retailer_town})
-        if retailer.address_line_4 is not None:
-            retailer_dict.update({"locality":retailer.address_line_4 + \
-                              ' ' + retailer.retailer_town})
-	retailer_dict.update({"latitude":retailer.latitude})
-        retailer_dict.update({"longitude":retailer.longitude})
-        retailer_list.append(retailer_dict)
+        retailer_dict.update({"locality":retailer.address_line_4})
+        if retailer.locality:
+            retailer_dict["locality"] = retailer.locality.name
+            retailer_dict.update({"city":retailer.locality.city.city})
+            retailer_dict.update({"state":retailer.locality.city.state.state_name})
+            retailer_dict.update({"locality_id":retailer.locality_id})
+        else:
+            retailer_dict.update({"city":''})
+            retailer_dict.update({"state":''})
+            retailer_dict.update({"locality_id":''})
+            retailer_dict.update({"latitude":retailer.latitude})
+            retailer_dict.update({"longitude":retailer.longitude})
+            retailer_list.append(retailer_dict)
     return Response(retailer_list)
 
 @api_view(['GET'])
