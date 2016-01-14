@@ -593,10 +593,20 @@ class PartModels(base_models.PartModels):
         app_label = _APP_NAME
         
 class Categories(base_models.Categories):
-    ''' details of model categories'''
+    ''' details of model categories '''
+    category_name = models.CharField(max_length=255)
+    
+    image_url = models.CharField(max_length=255, null=True, blank=True)
+    
+    model = models.ForeignKey(PartModels)
+
+    active = models.BooleanField(default=True)
     
     class Meta(base_models.Categories.Meta):
         app_label = _APP_NAME
+        
+    def __unicode__(self):
+        return self.category_name
         
 class SubCategories(base_models.SubCategories):
     ''' details of model subcategories '''
