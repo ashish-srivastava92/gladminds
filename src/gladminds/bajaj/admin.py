@@ -1518,47 +1518,7 @@ class DSRWorkAllocationForm(forms.ModelForm):
 #             retailer_objects = Retailer.objects.all()
 #         self.fields['retailer'].queryset = retailer_objects
 
-class PJPForm(forms.ModelForm):
-    class Meta:
-        model = get_model('PermanentJourneyPlan')
 
-class PJPAdmin(GmModelAdmin):
-
-    def changelist_view(self, request, extra_context={}):
-
-        opts = PermanentJourneyPlan._meta
-        context = {"opts":opts, "app_label":opts.app_label}
-        template = 'admin/bajaj/dsrworkallocation/change_list.html'
-        form_url = ''
-        return super(PJPAdmin, self).changelist_view(request, context)
-
-    def queryset(self, request):
-        qs = super(PJPAdmin, self).queryset(request)
-        # get workallocation objects for the logged in distributor
-#         if Distributor.objects.filter(user__user=request.user).exists():
-#             DSRWorkAllocation_objects = DSRWorkAllocation.objects.filter(distributor__user=\
-#                                                                          request.user)
-#         else:
-#         qs = DSRWorkAllocation.objects.all()
-        return qs
-
-    def get_form(self, request, obj=None, **kwargs):
-        ModelForm = super(PJPAdmin, self).get_form(request, obj, **kwargs)
-        class ModelFormMetaClass(ModelForm):
-            def __new__(cls, *args, **kwargs):
-                kwargs['request'] = request
-                return ModelForm(*args, **kwargs)
-        return ModelFormMetaClass
-
-    def save_model(self, request, obj, form, change):
-
-
-#         obj.distributor = Distributor.objects.get(user__user=request.user)
-        super(PJPAdmin, self).save_model(request, obj, form, change)
-
-
-
-            
 class DSRWorkAllocationAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     form = DSRWorkAllocationForm
@@ -1610,6 +1570,41 @@ class DSRWorkAllocationAdmin(GmModelAdmin):
     
 #         obj.distributor = Distributor.objects.get(user__user=request.user)
         super(DSRWorkAllocationAdmin, self).save_model(request, obj, form, change)
+
+class PermanentJourneyPlanForm(forms.ModelForm):
+    class Meta:
+        model = get_model('PermanentJourneyPlan')
+
+class PermanentJourneyPlanAdmin(GmModelAdmin):
+    form = PermanentJourneyPlanForm
+
+    def changelist_view(self, request, extra_context={}):
+
+        opts = PermanentJourneyPlan._meta
+        context = {"opts":opts, "app_label":opts.app_label}
+        template = 'admin/bajaj/permanentjourneyplan/change_list.html'
+        form_url = ''
+        return super(PermanentJourneyPlanAdmin, self).changelist_view(request, context)
+
+    def queryset(self, request):
+        qs = super(PermanentJourneyPlanAdmin, self).queryset(request)
+        return qs
+
+    def get_form(self, request, obj=None, **kwargs):
+        ModelForm = super(PermanentJourneyPlanAdmin, self).get_form(request, obj, **kwargs)
+        class ModelFormMetaClass(ModelForm):
+            def __new__(cls, *args, **kwargs):
+                kwargs['request'] = request
+                return ModelForm(*args, **kwargs)
+        return ModelFormMetaClass
+
+    def save_model(self, request, obj, form, change):
+
+
+#         obj.distributor = Distributor.objects.get(user__user=request.user)
+        super(PermanentJourneyPlanAdmin, self).save_model(request, obj, form, change)
+
+
 
 import json
 class DSRLocationDetailsAdmin(GmModelAdmin):
@@ -1854,7 +1849,7 @@ class OrderPartAdmin(GmModelAdmin):
     def changelist_view(self, request, extra_context={}):
         order_details = []
         order_details_dict = {}
-        query = "select *from orderDetail";
+        query = "select *from gm_orderpart_details";
         data = self.get_sql_data(query)
         for each in data:
             order_details_dict["open_orders_len"] = each["open_count"]
@@ -2527,7 +2522,7 @@ def get_admin_site_custom(brand):
 #     brand_admin.register(get_model("BackOrders", brand), BackOrdersAdmin)
     brand_admin.register(get_model("DistributorSalesRep", brand), DistributorSalesRepAdmin)  
     brand_admin.register(get_model("DSRWorkAllocation", brand), DSRWorkAllocationAdmin)
-    brand_admin.register(get_model("PermanentJourneyPlan", brand), PJPAdmin) 
+    brand_admin.register(get_model("PermanentJourneyPlan", brand), PermanentJourneyPlanAdmin) 
     brand_admin.register(get_model("DSRLocationDetails", brand), DSRLocationDetailsAdmin)
     brand_admin.register(get_model("PartsRackLocation", brand), PartsRackLocationAdmin)
     brand_admin.register(get_model("Retailer", brand), RetailerAdmin)
