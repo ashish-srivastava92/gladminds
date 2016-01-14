@@ -342,39 +342,6 @@ def split_date(date):
     yyyy = date_array[0]
     return dd, mm, yyyy
 
-@api_view(['POST'])
-# @authentication_classes((JSONWebTokenAuthentication,))
-# @permission_classes((IsAuthenticated,))
-def place_order(request, dsr_id):
-    '''
-    This method gets the orders placed by the dsr on behalf of the retailer and puts
-    it in the database
-    '''
-    
-    parts = json.loads(request.body)
-    dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-    if dsr:
-        for order in parts :
-            orderpart = OrderPart()
-            orderpart.dsr = dsr
-            retailer = Retailer.objects.get(retailer_code = order['retailer_id'])
-            orderpart.retailer = retailer
-            orderpart.order_date = order['date']
-            orderpart.order_placed_by = order['order_placed_by']
-            orderpart.latitude = order['latitude']
-            orderpart.longitude = order['longitude']
-            orderpart.order_status = 0
-            orderpart.save()
-            #push all the items into the orderpart details
-            for item in order['order_items']:
-                orderpart_details = OrderPartDetails()
-                orderpart_details.part_number = PartPricing.objects.\
-                                                get(part_number = item['part_number'])
-                orderpart_details.quantity = int(item['qty'])
-                orderpart_details.order = orderpart
-                orderpart_details.line_total = item['line_total']
-                orderpart_details.save()
-    return Response({'message': 'Order updated successfully', 'status':1})
 
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
