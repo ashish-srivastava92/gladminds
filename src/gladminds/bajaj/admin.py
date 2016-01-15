@@ -1306,7 +1306,17 @@ class CategoriesAdmin(GmModelAdmin):
     
     
 class FocusedPartAdmin(GmModelAdmin):
-    pass
+    list_display = ('part_number', 'description', 'start_date', 'end_date', 'get_locality')
+
+    def part_number(self, obj):
+        return obj.part.part_number
+    
+    def description(self, obj):
+        return obj.part.description
+    description.short_description = 'Description'
+
+    def get_locality(self, obj):
+        return obj.locality.name
 
 from django.contrib.admin.filters import SimpleListFilter
 

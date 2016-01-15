@@ -25,6 +25,15 @@ from gladminds.core.models import Distributor, DistributorSalesRep, Retailer, Cv
             CollectionDetails,PartMasterCv,RetailerCollection,PartsStock, Invoices, \
             UserProfile, PartIndexDetails, PartIndexPlates, PartPricing, FocusedPart
 from gladminds.core import constants
+from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
+from django.conf import settings
+from gladminds.core.services.message_template import get_template
+from gladminds.core import utils
+from gladminds.core.managers.audit_manager import sms_log
+from gladminds.sqs_tasks import send_loyalty_sms
+
+AUDIT_ACTION = 'SEND TO QUEUE'
+
 
 today = datetime.datetime.now()
 @api_view(['POST'])
@@ -65,7 +74,23 @@ def authentication(request):
             return Response({'message': 'you are not active. Please contact your distributor', 'status':0})
     else:
         return Response({'message': 'you are not a registered user', 'status':0})
-    
+
+
+def send_msg_to_retailer_on_place_order(request,retailer_id,order_id):
+#     print retailer
+
+    print request
+    retailer_obj = Retailer.objects.get(id=retailer_id)
+    print retailer_obj.mobile
+    print order_id,"order"
+    phone_number=utils.get_phone_number_format(retailer_obj.mobile)
+    message=get_template('SEND_RETAILER_ON_ORDER_PLACEMENT').format(
+                        retailer_name=retailer_obj.user.user.first_name,order_id=order_id)
+    sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
+    send_job_to_queue(send_loyalty_sms, {'phone_number': phone_number,
+                    'message': message, "sms_client": settings.SMS_CLIENT})
+
+
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))

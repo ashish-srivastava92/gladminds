@@ -351,7 +351,7 @@ def place_order(request, dsr_id):
                 orderpart_details.line_total = item['line_total']
                 orderpart_details.save()
 	    transaction.commit()
-            send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
+    send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
     return Response({'message': 'Order updated successfully', 'status':1})
 
 @api_view(['POST'])
@@ -1214,6 +1214,7 @@ def send_msg_to_retailer_on_adding(request,retailer_id,username,password):
     sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
     send_job_to_queue(send_loyalty_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
+
 
 def send_msg_to_retailer_on_place_order(request,retailer_id,order_id):
 #     print retailer

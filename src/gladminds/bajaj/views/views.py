@@ -704,12 +704,13 @@ def shipped_order_details(request, order_status, retailer_id):
 
 
 def get_parts(request, order_id, order_status, retailer_id):
-    dist_id = Distributor.objects.get(user=request.user.id).id
+    dist_id = Distributor.objects.get(user_id=request.user.id).id
     opts = OrderPart._meta
     if order_status == 'open':
         orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id, order_status=0)
     elif order_status == 'allocated':
-        orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id, order_status=1)
+        orders_obj = OrderPart.objects.fil
+        ter(retailer_id=retailer_id, id=order_id, order_status=1)
     elif order_status == 'shipped':
         orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id, order_status=3)
     elif order_status == 'cancelled':
