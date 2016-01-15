@@ -1317,7 +1317,7 @@ class FocusedPartAdmin(GmModelAdmin):
 
     def get_locality(self, obj):
         return obj.locality.name
-    description.short_description = 'Locality'
+    get_locality.short_description = 'Locality'
 
 from django.contrib.admin.filters import SimpleListFilter
 
