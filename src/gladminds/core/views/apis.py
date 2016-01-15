@@ -296,7 +296,7 @@ def pjp_schedule(request):
         dsrworkallocation.date = datetime.datetime.now()#schedules.get('pjp_creation_date')
         dsrworkallocation.locality_id = location_details['locality_id']
         dsrworkallocation.is_active = True
-        dsrworkallocation.pjp_day = location_details['pjp_day']
+        dsrworkallocation.pjp_day = location_details.get('pjp_day')
         dsrworkallocation.save()
     return Response({'status':1, 'message':'DSR schedule has been submitted'})
 
