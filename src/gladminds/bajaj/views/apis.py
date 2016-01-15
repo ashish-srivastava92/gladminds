@@ -1400,6 +1400,8 @@ def get_associated_dsrs(request,distributor_id=None):
     if distributor_id == None:
         distributor_id = request.GET.__getitem__('distributor_id') #Handle the multivaluedictkey error
     dsrs = DistributorSalesRep.objects.filter(distributor__distributor_id=distributor_id)
+    if not dsrs:
+        dsrs = DistributorSalesRep.objects.filter(distributor_id=distributor_id)
     response_dict = {}
     response_dict['role_id'] = 1
     response_dict['role_name'] = "Distributor"
@@ -1409,7 +1411,8 @@ def get_associated_dsrs(request,distributor_id=None):
         dsr_dict = {}
         dsr_dict['userid'] = dsr.distributor_sales_code
         dsr_dict['firstname'] = dsr.user.user.first_name
-        dsr_dict['lastname'] = dsr.user.user.last_name
+        dsr_dict['lastname'] = d
+        sr.user.user.last_name
         dsr_dict['retailers'] = []
 	retailers = Retailer.objects.filter(dsr_id=dsr.id)#.exclude(dsr_id__isnull=True)
 	for retailer in retailers:
@@ -1423,6 +1426,7 @@ def get_associated_dsrs(request,distributor_id=None):
              retailer_unassigned_dict=get_retailer_unassigned_dict(retailer)
              if retailer_unassigned_dict != None:
 		response_dict['retailers'].append(retailer_unassigned_dict)
+    print "this is respoeeeee============",response_dict 
     return Response(response_dict)
 
 @api_view(['GET'])

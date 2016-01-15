@@ -531,7 +531,7 @@ $.ajax({
         loadMap(userObj);
     }
     else if(userObj.role_name=="Distributor"){
-        var distributors=$("#distributor").val()
+        var distributors=userObj.role_id
         $("#asm,#nsm,#distributor").remove();
 
        $(".filtersRight").empty();
@@ -570,12 +570,6 @@ $.ajax({
     }
 }
 });
-
-
-
-
-
-
 
 
 //**************************************************DSRButton Click****************************************//
