@@ -461,6 +461,10 @@ def get_dsr_outstanding(request, dsr_id):
         invoices = Invoices.objects.filter(retailer = retailer)
         if invoices:
             for invoice in invoices:
+                if not invoice.invoice_amount:
+                    invoice.invoice_amount = 0
+                if not invoice.paid_amount:
+                    invoice.paind_amount = 0
                 retailer_dict = {}
                 total_amount = 0
                 collection = 0

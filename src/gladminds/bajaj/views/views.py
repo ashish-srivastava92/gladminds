@@ -682,11 +682,38 @@ def shipped_order_details(request, order_status, retailer_id):
         
         retailer_name = order_obj[0].retailer.retailer_name   
         for each_order in order_obj:
-            orders["order_id"] = each_order.id            
+            orders["order_id"] = each_order.id
             do_obj = DoDetails.objects.filter(order_id=orders["order_id"]).select_related("invoice")
             for each in do_obj:
-                orders['invoice_amt'] = each.invoice.invoice_amount
+
+                invoices = Invoices.objects.filter(retailer_id = retailer_id)
+                if invoices:
+                    total_amount = 0
+                    collection = 0
+                    for invoice in invoices:
+                        retailer_dict = {}
+                        total_amount = total_amount + invoice.invoice_amount
+    #                     retailer_dict.update({'retailer_id':retailer.retailer_code})
+    #                     retailer_dict.update({'invoice_id': invoice.invoice_id})
+    #                     retailer_dict.update({'total_amount': total_amount})
+    #                     retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
+                        #get the collections for that invoice
+                        collection_objs = Collection.objects.filter(invoice_id = invoice.id)
+                        for each in collection_objs:
+                            collections = CollectionDetails.objects.filter(collection_id = each.id)
+                            if collections:
+                                for each_collections in collections:
+                                    if each_collections.collected_amount == None:
+                                            each_collections.collected_amount=0
+                                    collection = collection + each_collections.collected_amount
+    #                     retailer_dict.update({'collected_amount': collection})
+                    outstanding = total_amount + collection
+                    orders["invoice_amt"] = outstanding
+
+                #orders['invoice_amt'] = each.invoice.invoice_amount
                 orders['invoice_no'] = each.invoice.id
+                orders['invoice_number'] = each.invoice.invoice_id            
+
                 orders['shipped_date'] = each.invoice.invoice_date
 
             shipped_details.append(orders.copy())
@@ -709,8 +736,7 @@ def get_parts(request, order_id, order_status, retailer_id):
     if order_status == 'open':
         orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id, order_status=0)
     elif order_status == 'allocated':
-        orders_obj = OrderPart.objects.fil
-        ter(retailer_id=retailer_id, id=order_id, order_status=1)
+        orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id, order_status=1)
     elif order_status == 'shipped':
         orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id, order_status=3)
     elif order_status == 'cancelled':
@@ -1327,7 +1353,7 @@ def upload_order_invoice(request):
                 discount_abs = discount_per * 100 / mrp
                 order_number = each_invoice.get('Order Number')
                 invoice_date_str = each_invoice.get('Invoice Date (YYYY-MM-DD)')
-                part_number = each_invoice.get('Part Number')
+                #part_number = each_invoice.get('Part Number')
                 delivery_order_details_id = each_invoice.get('Delivery Order Number')
                 invoice_date = datetime.datetime.strptime(invoice_date_str, '%Y-%m-%d').date()
                 grand_total = mrp + service_tax_abs + other_taxes_abs + vat_abs - discount_abs
@@ -1344,20 +1370,22 @@ def upload_order_invoice(request):
 
                 do_details_obj.invoice = invoice_obj
                 do_details_obj.save(update_fields=['invoice'])
-                try:
-                    order_delivery_history_obj = OrderDeliveredHistory.objects.get(part_number=part_number, do_id=delivery_order_details_id, order=order_part_obj)
-                except:
-                    messages.error(request, 'Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
-                    return HttpResponseRedirect('/admin/bajaj/orderpart/')
+                # try:
+                #     part_id = PartPricing.objects.get(part_number=part_number)
+                #     order_delivery_history_obj = OrderDeliveredHistory.objects.get(part_number=part_number.part_number, do_id=delivery_order_details_id, order=order_part_obj)
+                # except:
+                #     print "comes in he  exception here=======", 
+                #     messages.error(request, 'Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
+                #     return HttpResponseRedirect('/admin/bajaj/orderpart/')
 
-                order_delivery_history_obj.discount = discount_per
-                order_delivery_history_obj.service_tax = service_tax_per
-                order_delivery_history_obj.vat = vat_per
-                order_delivery_history_obj.other_taxes = other_taxes_per
-                order_delivery_history_obj.save(update_fields=['discount',
-                 'service_tax',
-                 'vat',
-                 'other_taxes'])
+                # order_delivery_history_obj.discount = discount_per
+                # order_delivery_history_obj.service_tax = service_tax_per
+                # order_delivery_history_obj.vat = vat_per
+                # order_delivery_history_obj.other_taxes = other_taxes_per
+                # order_delivery_history_obj.save(update_fields=['discount',
+                #  'service_tax',
+                #  'vat',
+                #  'other_taxes'])
             except:
                 messages.error(request, 'Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
                 return HttpResponseRedirect('/admin/bajaj/orderpart/')
@@ -1413,7 +1441,6 @@ def download_sample_order_invoice_csv(request):
     response['Content-Disposition'] = 'attachment; filename="SampleOrderInvoice.csv"'
     writer = csv.writer(response, dialect=csv.excel)
     writer.writerow(['Order Number',
-     'Part Number',
      'Invoice Number',
      'Delivery Order Number',
      'Invoice Date (YYYY-MM-DD)',
