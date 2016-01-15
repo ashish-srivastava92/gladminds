@@ -512,6 +512,7 @@ class Retailer(base_models.Retailer):
     total_sale_parts = models.DecimalField(max_digits=10, decimal_places=4, null=True, \
                                                 blank=True)
     identification_no = models.CharField(max_length = 30)
+    dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
     mechanic_1 = models.CharField(max_length = 50)
     mechanic_2 = models.CharField(max_length = 50)
     shop_size = models.CharField(max_length = 15)

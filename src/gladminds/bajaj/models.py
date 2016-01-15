@@ -634,7 +634,8 @@ class Retailer(base_models.Retailer):
                                                 blank=True)
     actual = models.DecimalField(max_digits=20, decimal_places=4, null=True, \
                                                 blank=True)
-    
+    dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
+
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
     image_tag.short_description = 'User Image'

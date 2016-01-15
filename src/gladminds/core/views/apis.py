@@ -560,7 +560,6 @@ def get_focused_parts(request):
     else:
         all_focused_parts = FocusedPart.objects.all()
 
-    all_focused_parts = FocusedPart.objects.all()
     parts_list = []
     for focused_part in all_focused_parts:
         parts_dict = {}
