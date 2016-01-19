@@ -1,4 +1,3 @@
-#Embedded file name: /var/www/demosfa/gladminds/src/gladminds/bajaj/views/views.py
 import logging
 import json
 import random
@@ -11,7 +10,8 @@ from gladminds.core.utils import check_password
 from tastypie.http import HttpBadRequest
 from collections import OrderedDict
 from django.shortcuts import render_to_response, render
-from django.http.response import HttpResponseRedirect, HttpResponse, HttpResponseBadRequest, Http404
+from django.http.response import HttpResponseRedirect, HttpResponse, \
+    HttpResponseBadRequest, Http404
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
@@ -23,14 +23,18 @@ from django.db.models import F
 from gladminds.settings import BRAND_META
 from gladminds.bajaj import models
 from gladminds.core import utils, constants
-from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message, send_mail_for_feed_failure, send_mail_customer_phone_number_update_exceeds
-from gladminds.core.managers.mail import sent_otp_email, send_recovery_email_to_admin, send_mail_when_vin_does_not_exist
+from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message, \
+    send_mail_for_feed_failure, send_mail_customer_phone_number_update_exceeds
+from gladminds.core.managers.mail import sent_otp_email, \
+    send_recovery_email_to_admin, send_mail_when_vin_does_not_exist
 from gladminds.bajaj.services.coupons.import_feed import SAPFeed
 from gladminds.core.apis.coupon_apis import CouponDataResource
 from gladminds.core.managers.feed_log_remark import FeedLogWithRemark
 from gladminds.core.cron_jobs.scheduler import SqsTaskQueue
-from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING, USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS, STATUS
-from gladminds.core.utils import get_email_template, format_product_object, get_file_name
+from gladminds.core.constants import PROVIDER_MAPPING, PROVIDERS, GROUP_MAPPING, \
+    USER_GROUPS, REDIRECT_USER, TEMPLATE_MAPPING, ACTIVE_MENU, MONTHS, STATUS
+from gladminds.core.utils import get_email_template, format_product_object, \
+    get_file_name
 from gladminds.core.auth_helper import Roles
 from gladminds.core.auth.service_handler import check_service_active, Services
 from gladminds.core.core_utils.utils import log_time
@@ -39,14 +43,23 @@ from gladminds.core.services.message_template import get_template
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.bajaj.services.coupons import export_feed
 from gladminds.core.auth import otp_handler
-from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor, District, State, PartPricing, OrderDeliveredHistory, DoDetails, PartsStock, OrderPart, OrderPartDetails, DistributorSalesRep, DSRWorkAllocation, BackOrders, DSRLocationDetails, OrderTempDeliveredHistory, Collection, CollectionDetails, DoDetails, PartMasterCv, AreaSparesManager, PartsRackLocation, OrderTempDetails, Invoices, PartsRackLocation, NationalSparesManager
+from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor, District, State, OrderPartDetails, \
+PartPricing, OrderDeliveredHistory, DoDetails, PartsStock, OrderPart, OrderPartDetails, DistributorSalesRep, DSRWorkAllocation, \
+BackOrders, DSRLocationDetails, OrderTempDeliveredHistory, Collection, CollectionDetails, DoDetails,\
+AreaSparesManager, PartsRackLocation, OrderTempDetails, Invoices, PartsRackLocation
+
+
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template import loader
 from django.template.context import Context
 from gladminds.core.managers.mail import send_email
+
 from django.contrib import messages
+
 from django.db.models import Sum, Count, Max, Min
 from django.core.urlresolvers import reverse
+
+from gladminds.bajaj.admin import OrderPartAdmin
 from django.http import HttpResponse
 from gladminds.core.core_utils.date_utils import convert_utc_to_local_time
 from gladminds.core.constants import DATE_FORMAT, TIME_FORMAT
@@ -74,73 +87,66 @@ def send_msg_to_retailer_on_approval(request, retailer_id):
 def get_user_info(request):
     user_id = request.GET.get('user_id')
     user_obj = UserProfile.objects.get(user_id=user_id)
-    data = {'first_name': user_obj.user.first_name,
-     'last_name': user_obj.user.last_name,
-     'email': user_obj.user.email,
-     'dob': user_obj.date_of_birth,
-     'pincode': user_obj.pincode}
-    return HttpResponse(json.dumps(data), content_type='application/json')
-
-
+    data = {"first_name": user_obj.user.first_name , "last_name": user_obj.user.last_name , "email" : user_obj.user.email, "dob" : user_obj.date_of_birth, "pincode":user_obj.pincode}
+    return HttpResponse(json.dumps(data), content_type="application/json")
+    
 def get_districts(request):
     state = request.GET.get('selected_state')
-    print state
-    state_obj = State.objects.get(id=state)
-    print state_obj
-    districts = District.objects.filter(state=state_obj.id).values('name', 'id')
-    return HttpResponse(json.dumps(list(districts), cls=DjangoJSONEncoder), content_type='application/json')
+    state_obj = State.objects.get(state_code=state)
+    districts = District.objects.filter(state=state_obj.id).values("name", "id")
+    return HttpResponse(json.dumps(list(districts), cls=DjangoJSONEncoder), content_type="application/json")
 
+ 
 
 def clear_order_temp(request):
-    ret_id = request.POST.get('retailer_id')
+    ret_id = request.POST.get("retailer_id") 
     order_obj = OrderTempDeliveredHistory.objects.filter(retailer_id=ret_id).delete()
-    data = {'status': 1,
-     'message': 'success'}
-    return HttpResponse(json.dumps(data), content_type='application/json')
-
+    data = {"status":1, "message":"success"}
+    return HttpResponse(json.dumps(data), content_type="application/json")
+        
 
 def get_orders(request, ret_id, invoice_id):
     print invoice_id
-    print ret_id, 'rettt'
-
 
 def get_distributor_location(request, dist_id):
-    dist_obj = Distributor.objects.filter(id=dist_id).select_related('user')
+    dist_obj = Distributor.objects.filter(id=dist_id).select_related("user")
     locations = []
     dist_locations = []
     dist_locations_dict = {}
     lat_long = {}
+
+    
     for each in dist_obj:
-        dist_locations_dict['latitude'] = each.latitude
-        dist_locations_dict['longitude'] = each.longitude
-        dist_locations_dict['dist_name'] = each.user.user.first_name
-        dist_locations_dict['distributor_id'] = each.distributor_id
-        lat_long['max_lat'] = dist_locations_dict['latitude']
-        lat_long['min_long'] = dist_locations_dict['longitude']
+        dist_locations_dict["latitude"] = each.latitude
+        dist_locations_dict["longitude"] = each.longitude
+        dist_locations_dict["dist_name"] = each.user.user.first_name
+        dist_locations_dict["distributor_id"] = each.distributor_id
+        
+        lat_long["max_lat"] = dist_locations_dict["latitude"]
+        lat_long["min_long"] = dist_locations_dict["longitude"]
+        
         dist_locations.append(dist_locations_dict.copy())
         locations.append(lat_long)
         locations.append(dist_locations)
-
     data = json.dumps(locations, cls=DjangoJSONEncoder)
-    return HttpResponse(data, content_type='application/json')
-
-
+    return HttpResponse(data, content_type="application/json")
+    
+    
 from gladminds.core.core_utils.utils import dictfetchall
 from django.db import connections
-from django.conf import settings
-
+from django.conf import  settings
 def get_sql_data(query):
-    conn = connections[settings.BRAND]
-    cursor = conn.cursor()
-    cursor.execute(query)
-    data = dictfetchall(cursor)
-    conn.close()
-    return data
-
+        conn = connections[settings.BRAND]
+        cursor = conn.cursor()
+        cursor.execute(query)
+        data = dictfetchall(cursor)
+        conn.close()
+        return data    
+    
 
 def get_picklist(request):
     retailer_id = request.GET.get('retailer_id')
-    picklist_details_obj = OrderTempDetails.objects.filter(retailer_id=retailer_id).select_related('part_number', 'order')
+    picklist_details_obj = OrderTempDetails.objects.filter(retailer_id=retailer_id).select_related("part_number", "order")
     picklist_details = []
     dist_obj = Distributor.objects.get(user=request.user)
     retailer_name = Retailer.objects.get(id=retailer_id).retailer_name
@@ -313,7 +319,7 @@ def generate_picklist_save_order(request):
     retailer_id = request.POST['retailer_id']
     distributor_id = request.user.id
     dist_id = Distributor.objects.get(user=request.user).id
-    print dist_id
+    part_numbers_ids = ""
     opts = OrderPart._meta
     stock = request.POST.getlist('delivered_stock')
     for each in range(0, int(len(stock))):
@@ -535,13 +541,16 @@ def pending_order_details(request, order_status, retailer_id):
     template = 'admin/bajaj/orderpart/retailer_order_list.html'
     return render(request, template, context)
 
+    
 
+  
 def save_order_temp_history(request):
-    ret_id = request.POST.get('retailer_id')
-    stock = request.POST.getlist('delivered_stock')
-    part_number_ids = ''
-    total_amount = 0
+    ret_id = request.POST.get("retailer_id")
+    stock = request.POST.getlist("delivered_stock")
+    part_number_ids = ""
+    total_amount = 0    
     flag = 0
+
     for each in range(0, int(len(stock))):
         order_id = request.POST.getlist('order_id')[each]
         delivered_stock = request.POST.getlist('delivered_stock')[each]
@@ -565,17 +574,16 @@ def save_order_temp_history(request):
     invoice_details = []
     invoice_details_dict = {}
     for each_invoice in invoice_details_obj:
-        invoice_details_dict['part_number'] = each_invoice.part_number.part_number
-        invoice_details_dict['part_description'] = each_invoice.part_number.description
-        invoice_details_dict['mrp'] = each_invoice.part_number.mrp
-        invoice_details_dict['qty'] = each_invoice.delivered_quantity
-        invoice_details_dict['rate'] = float(invoice_details_dict['mrp']) * float(invoice_details_dict['qty'])
-        invoice_details_dict['disc'] = 0
-        invoice_details_dict['tax'] = 0
-        invoice_details_dict['amount'] = invoice_details_dict['rate'] - invoice_details_dict['disc'] + invoice_details_dict['tax']
-        invoice_details.append(invoice_details_dict.copy())
-
-    return HttpResponse(json.dumps(invoice_details), content_type='application/json')
+         invoice_details_dict["part_number"] = each_invoice.part_number.part_number
+         invoice_details_dict["part_description"] = each_invoice.part_number.description
+         invoice_details_dict["mrp"] = each_invoice.part_number.mrp
+         invoice_details_dict["qty"] = each_invoice.delivered_quantity
+         invoice_details_dict["rate"] = float(invoice_details_dict["mrp"]) * float(invoice_details_dict["qty"])
+         invoice_details_dict["disc"] = 0
+         invoice_details_dict["tax"] = 0
+         invoice_details_dict["amount"] = (invoice_details_dict["rate"] - invoice_details_dict["disc"]) + invoice_details_dict["tax"]
+         invoice_details.append(invoice_details_dict.copy())
+    return HttpResponse(json.dumps(invoice_details), content_type="application/json") 
 
 
 def get_outstanding_details(request, retailer_id):
@@ -591,29 +599,29 @@ def get_outstanding_details(request, retailer_id):
     day_margin_90 = datetime.timedelta(days = 90)
     today = datetime.date.today()
     for invoice_obj in invoice_objs:
-	ind_invoice_dict = {}
-	ind_invoice_dict["invoice_amount"] = invoice_obj.invoice_amount
-	ind_invoice_dict["invoice_date"] = invoice_obj.invoice_date
-    	if (today - day_margin_30  <= invoice_obj.invoice_date.date() <= today):
-	    #invoice_list_now_30_days.append(ind_invoice_dict)
-	    ind_invoice_dict['now_30_days'] = invoice_obj.invoice_id
+        ind_invoice_dict = {}
+        ind_invoice_dict["invoice_amount"] = invoice_obj.invoice_amount
+        ind_invoice_dict["invoice_date"] = invoice_obj.invoice_date
+        if (today - day_margin_30  <= invoice_obj.invoice_date.date() <= today):
+            #invoice_list_now_30_days.append(ind_invoice_dict)
+            ind_invoice_dict['now_30_days'] = invoice_obj.invoice_id
         if (today - day_margin_60  <= invoice_obj.invoice_date.date() <= today - day_margin_30):
             #invoice_list_30_60_days.append(ind_invoice_dict)
-	    ind_invoice_dict['30_60_days'] = invoice_obj.invoice_id
-    	if (today - day_margin_90  <= invoice_obj.invoice_date.date() <= today - day_margin_60):
-	    ind_invoice_dict['60_90_days'] = invoice_obj.invoice_id
+            ind_invoice_dict['30_60_days'] = invoice_obj.invoice_id
+        if (today - day_margin_90  <= invoice_obj.invoice_date.date() <= today - day_margin_60):
+            ind_invoice_dict['60_90_days'] = invoice_obj.invoice_id
             #invoice_list_60_90_days.append(ind_invoice_dict)
-    	invoice_list.append(ind_invoice_dict)
+        invoice_list.append(ind_invoice_dict)
 
     context = {
-		'retailer_name': retailer_name,
-		'invoice_list_now_30_days': invoice_list_now_30_days,
-		'invoice_list_30_60_days': invoice_list_30_60_days,
-		'invoice_list_60_90_days': invoice_list_60_90_days,
-		'invoice_list': invoice_list,
-	        'app_label': opts.app_label,
-     		'opts': opts,
-		}
+        'retailer_name': retailer_name,
+        'invoice_list_now_30_days': invoice_list_now_30_days,
+        'invoice_list_30_60_days': invoice_list_30_60_days,
+        'invoice_list_60_90_days': invoice_list_60_90_days,
+        'invoice_list': invoice_list,
+            'app_label': opts.app_label,
+            'opts': opts,
+        }
     template = 'admin/bajaj/orderpart/outstanding_amount_details.html'
     return render(request, template, context)
 
@@ -633,8 +641,6 @@ def ordered_part_details(request, part_number, order_id):
 
 def order_details(request, order_status, retailer_id):
     opts = OrderPart._meta
-    print opts, 'opts'
-    app_label = opts.app_label
     order_display = []
     orders = {}
     if order_status == 'open':
@@ -644,24 +650,25 @@ def order_details(request, order_status, retailer_id):
     if len(order_obj) > 0:
         retailer_name = order_obj[0].retailer.retailer_name
         for each_order in order_obj:
-            orders['retailer_name'] = each_order.retailer.retailer_name
-            orders['dsr_name'] = each_order.dsr
-            orders['order_date'] = each_order.order_date
+            orders["retailer_name"] = each_order.retailer.retailer_name
+            orders["dsr_name"] = each_order.dsr
+            orders["order_date"] = each_order.order_date
             orderdetails_obj = OrderPartDetails.objects.filter(order_id=each_order.id).aggregate(Sum('line_total'))
             orders['total_value'] = orderdetails_obj['line_total__sum']
             orders['order_id'] = each_order.id
             orders['order_number'] = each_order.order_number
             orders['ret_id'] = each_order.retailer_id
             order_display.append(orders.copy())
-
-    context = {'order_display': order_display,
-     'order_status': order_status,
-     'app_label': opts.app_label,
-     'opts': opts,
-     'model_name': opts.model_name,
-     'retailer_name': retailer_name,
-     'retailer_id': retailer_id}
-    form_url = ''
+    context = {
+             "order_display":order_display,
+             'order_status':order_status,
+             'app_label':opts.app_label,
+             'opts':opts,
+             "model_name":opts.model_name,
+             "retailer_name":retailer_name,
+             "retailer_id":retailer_id
+             }
+    form_url = ""
     template = 'admin/bajaj/orderpart/change_form.html'
     return render(request, template, context)
 
@@ -670,21 +677,46 @@ def shipped_order_details(request, order_status, retailer_id):
     opts = OrderPart._meta
     shipped_details = []
     orders = {}
-    order_obj = OrderPart.objects.filter(retailer=retailer_id, order_status=3).select_related('retailer', 'dsr')
+    order_obj = OrderPart.objects.filter(retailer=retailer_id, order_status=3).select_related("retailer", "dsr")
     if len(order_obj) > 0:
-        retailer_name = order_obj[0].retailer.retailer_name
+        
+        retailer_name = order_obj[0].retailer.retailer_name   
         for each_order in order_obj:
-            orders['order_id'] = each_order.id
-            print orders['order_id']
-            do_obj = DoDetails.objects.filter(order_id=orders['order_id']).select_related('invoice')
-            print do_obj
+            orders["order_id"] = each_order.id
+            do_obj = DoDetails.objects.filter(order_id=orders["order_id"]).select_related("invoice")
             for each in do_obj:
-                orders['invoice_amt'] = each.invoice.invoice_amount
+
+                invoices = Invoices.objects.filter(retailer_id = retailer_id)
+                if invoices:
+                    total_amount = 0
+                    collection = 0
+                    for invoice in invoices:
+                        retailer_dict = {}
+                        total_amount = total_amount + invoice.invoice_amount
+    #                     retailer_dict.update({'retailer_id':retailer.retailer_code})
+    #                     retailer_dict.update({'invoice_id': invoice.invoice_id})
+    #                     retailer_dict.update({'total_amount': total_amount})
+    #                     retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
+                        #get the collections for that invoice
+                        collection_objs = Collection.objects.filter(invoice_id = invoice.id)
+                        for each in collection_objs:
+                            collections = CollectionDetails.objects.filter(collection_id = each.id)
+                            if collections:
+                                for each_collections in collections:
+                                    if each_collections.collected_amount == None:
+                                            each_collections.collected_amount=0
+                                    collection = collection + each_collections.collected_amount
+    #                     retailer_dict.update({'collected_amount': collection})
+                    outstanding = total_amount + collection
+                    orders["invoice_amt"] = outstanding
+
+                #orders['invoice_amt'] = each.invoice.invoice_amount
                 orders['invoice_no'] = each.invoice.id
+                orders['invoice_number'] = each.invoice.invoice_id            
+
                 orders['shipped_date'] = each.invoice.invoice_date
 
             shipped_details.append(orders.copy())
-            print shipped_details
 
     context = {'shipped_details': shipped_details,
      'order_status': order_status,
@@ -695,11 +727,11 @@ def shipped_order_details(request, order_status, retailer_id):
     form_url = ''
     template = 'admin/bajaj/orderpart/shipped_details.html'
     return render(request, template, context)
+    
 
 
 def get_parts(request, order_id, order_status, retailer_id):
-    print 'parts'
-    dist_id = Distributor.objects.get(user=request.user.id).id
+    dist_id = Distributor.objects.get(user_id=request.user.id).id
     opts = OrderPart._meta
     if order_status == 'open':
         orders_obj = OrderPart.objects.filter(retailer_id=retailer_id, id=order_id, order_status=0)
@@ -834,71 +866,73 @@ def download_order_parts(request, order_id, order_status, retailer_id):
 
 def accept_order(request, order_id, action):
     opts = OrderPart._meta
-    if action == 'accept':
-        order_obj = OrderPart.objects.filter(id=order_id).update(order_status=1)
-        order_status = 'open'
-        order_obj = OrderPart.objects.filter(order_status=0).select_related('retailer', 'dsr')
-        messages.success(request, 'Successfully accepted Order No ' + order_id)
+    if action == "accept":
+        order_obj = OrderPart.objects.filter(id=order_id).update(order_status=1)   
+        order_status = "open"
+        order_obj = OrderPart.objects.filter(order_status=0).select_related("retailer", "dsr")
+        messages.success(request, "Successfully accepted Order No " + order_id)
     else:
-        order_obj = OrderPart.objects.filter(id=order_id).update(order_status=2)
-        order_status = 'cancelled'
-        order_obj = OrderPart.objects.filter(order_status=2).select_related('retailer', 'dsr')
-        messages.success(request, 'Successfully cancelled Order No ' + order_id)
+        order_obj = OrderPart.objects.filter(id=order_id).update(order_status=2) 
+        order_status = "cancelled"
+        order_obj = OrderPart.objects.filter(order_status=2).select_related("retailer", "dsr")
+        messages.success(request, "Successfully cancelled Order No "+order_id)
     order_display = []
     orders = {}
+#     order_obj = OrderPart.objects.filter(id=order_id,order_status=0).select_related("retailer","dsr")
     if len(order_obj) > 0:
         retailer_name = order_obj[0].retailer.retailer_name
         retailer_id = order_obj[0].retailer.id
+    
         for each_order in order_obj:
-            orders['retailer_name'] = each_order.retailer.retailer_name
-            orders['dsr_name'] = each_order.dsr
-            orders['order_date'] = each_order.order_date
+            orders["retailer_name"] = each_order.retailer.retailer_name
+            orders["dsr_name"] = each_order.dsr
+            orders["order_date"] = each_order.order_date
             orderdetails_obj = OrderPartDetails.objects.filter(order_id=each_order.id).aggregate(Sum('line_total'))
-            orders['total_value'] = orderdetails_obj['line_total__sum']
-            orders['order_id'] = each_order.id
-            orders['ret_id'] = each_order.retailer_id
-            order_display.append(orders.copy())
-
-        context = {'order_display': order_display,
-         'order_status': order_status,
-         'app_label': opts.app_label,
-         'opts': opts,
-         'retailer_name': retailer_name,
-         'retailer_id': retailer_id}
+            orders["total_value"] = orderdetails_obj["line_total__sum"]
+            orders["order_id"] = each_order.id
+            orders["ret_id"] = each_order.retailer_id
+            order_display.append(orders.copy())  
+        context = {
+                 "order_display":order_display,
+                 "order_status":order_status,
+                 'app_label':opts.app_label,
+                 'opts':opts,
+                 "retailer_name":retailer_name,
+                 "retailer_id":retailer_id
+                 }
     else:
-        messages.success(request, 'No open orders')
-        context = {'order_status': order_status,
-         'app_label': opts.app_label,
-         'opts': opts}
-    form_url = ''
+        messages.success(request, "No open orders")
+        context = { "order_status":order_status,
+                 'app_label':opts.app_label,
+                 'opts':opts}
+    form_url = ""
     template = 'admin/bajaj/orderpart/change_form.html'
     return render(request, template, context)
 
-
 def schedule_dsr(request):
-    retailer_ids = request.POST.getlist('retailer[]')
-    dsr_id = request.POST['dsr']
+    retailer_ids = request.POST.getlist("retailer[]")
+    dsr_id = request.POST["dsr"]
     dist_id = Distributor.objects.get(user=request.user.id).id
-    scheduled_time = request.POST['dateTime']
+    scheduled_time = request.POST["dateTime"]
     import pytz
-    scheduled_time = datetime.datetime.strptime(scheduled_time, '%d/%m/%Y')
+    scheduled_time = datetime.datetime.strptime(scheduled_time, "%d/%m/%Y")
+
     now_aware = scheduled_time.replace(tzinfo=pytz.UTC)
-    date_time = convert_utc_to_local_time(now_aware).strftime(TIME_FORMAT)
+    date_time = convert_utc_to_local_time(now_aware).strftime(TIME_FORMAT)   
     for each in retailer_ids:
         schedule_obj = DSRWorkAllocation(distributor_id=dist_id, dsr_id=dsr_id, retailer_id=each, date=date_time)
         schedule_obj.save()
-
-    dsr_work_obj = DSRWorkAllocation.objects.filter(distributor_id=dist_id).select_related('dsr', 'retailer')
+    dsr_work_obj = DSRWorkAllocation.objects.filter(distributor_id=dist_id).select_related("dsr", "retailer")
     events_list = []
     for each in dsr_work_obj:
         events_dict = {}
-        events_dict['location'] = each.retailer.address_line_3
-        events_dict['retailer_name'] = each.retailer.retailer_name
-        events_dict['firstname'] = each.retailer.user.user.first_name
-        scheduled_time = datetime.datetime.strftime(each.date.date(), '%Y-%m-%d')
-        events_dict['start'] = scheduled_time
-        events_dict['dsr_name'] = each.dsr.user.user.first_name
-        events_dict['dsr_code'] = each.dsr.distributor_sales_code
+        events_dict["location"] = each.retailer.address_line_3
+        events_dict["retailer_name"] = each.retailer.retailer_name
+        events_dict["firstname"] = each.retailer.user.user.first_name
+        scheduled_time = datetime.datetime.strftime(each.date.date(), "%Y-%m-%d") 
+        events_dict["start"] = scheduled_time
+        events_dict["dsr_name"] = each.dsr.user.user.first_name
+        events_dict["dsr_code"] = each.dsr.distributor_sales_code
         events_list.append(events_dict.copy())
 
     data = {'status': 0,
@@ -931,32 +965,31 @@ def cal_data(request):
     user_dict['user'] = user
     logged_in_user.append(user_dict.copy())
     for each in dist_obj:
-        dist['dist_id'] = each.id
-        dist['dist_code'] = each.distributor_sales_code
-        dist['firstname'] = each.user.user.first_name
+        dist["dist_id"] = each.id
+        dist["dist_code"] = each.distributor_sales_code
+        dist["firstname"] = each.user.user.first_name
         dist_list.append(dist.copy())
-
     data.append(dist_list)
+    ret_obj = Retailer.objects.filter(distributor_id=dist_id).select_related("user")    
     for each in ret_obj:
-        ret['ret_id'] = each.id
-        ret['ret_code'] = each.retailer_code
-        ret['firstname'] = each.user.user.first_name
-        ret['location'] = each.address_line_3
+        ret["ret_id"] = each.id
+        ret["ret_code"] = each.retailer_code
+        ret["firstname"] = each.user.user.first_name
+        ret["location"] = each.address_line_3
         ret_list.append(ret.copy())
-
-    data.append(ret_list)
+    data.append(ret_list) 
+    dsr_work_obj = DSRWorkAllocation.objects.filter(distributor_id=dist_id).select_related("dsr", "retailer")
     events_list = []
     for each in dsr_work_obj:
         events_dict = {}
-        events_dict['location'] = each.retailer.address_line_3
-        events_dict['retailer_name'] = each.retailer.retailer_name
-        events_dict['firstname'] = each.retailer.user.user.first_name
-        scheduled_time = datetime.datetime.strftime(each.date.date(), '%Y-%m-%d')
-        events_dict['start'] = scheduled_time
-        events_dict['dsr_name'] = each.dsr.user.user.first_name
-        events_dict['dsr_code'] = each.dsr.distributor_sales_code
+        events_dict["location"] = each.retailer.address_line_3
+        events_dict["retailer_name"] = each.retailer.retailer_name
+        events_dict["firstname"] = each.retailer.user.user.first_name
+        scheduled_time = datetime.datetime.strftime(each.date.date(), "%Y-%m-%d") 
+        events_dict["start"] = scheduled_time
+        events_dict["dsr_name"] = each.dsr.user.user.first_name
+        events_dict["dsr_code"] = each.dsr.distributor_sales_code
         events_list.append(events_dict.copy())
-
     data.append(events_list)
     data.append(logged_in_user)
     return HttpResponse(json.dumps(data), content_type='application/json')
@@ -971,7 +1004,7 @@ def get_collection_details(request, ret_id):
         collection_details_dict['collected_by'] = each.dsr.user.user.first_name
         collection_details_dict['collected_amount'] = each.collected_amount
         collection_details_dict['payment_date'] = datetime.datetime.strftime(each.payment_date, '%Y-%m-%d %H:%M:%S')
-	more_details_obj = CollectionDetails.objects.filter(collection_id=each.id)
+        more_details_obj = CollectionDetails.objects.filter(collection_id=each.id)
         for each_obj in more_details_obj:
             if each_obj.mode == 1:
                 collection_details_dict['mode'] = 'Cash'
@@ -981,10 +1014,10 @@ def get_collection_details(request, ret_id):
                 collection_details_dict['mode'] = 'Cash/Cheque'
             collection_details_dict['cheque_number'] = each_obj.cheque_number
             collection_details_dict['cheque_bank'] = each_obj.cheque_bank
-	    collection_details_dict['cheque_img_url'] = each_obj.img_url.path.replace('/var/www/demosfa/gladminds/src/static/','')
-	    collection_details_dict['status'] = ''
-	    collection_details_dict['invoice_no'] = each_obj.collection.invoice.invoice_id
-            collection_details.append(collection_details_dict.copy())
+        collection_details_dict['cheque_img_url'] = each_obj.img_url.path.replace('/var/www/demosfa/gladminds/src/static/','')
+        collection_details_dict['status'] = ''
+        collection_details_dict['invoice_no'] = each_obj.collection.invoice.invoice_id
+        collection_details.append(collection_details_dict.copy())
 
     return HttpResponse(json.dumps(collection_details), content_type='application/json')
 
@@ -1061,10 +1094,8 @@ def get_dist_retailers(request):
         distributor_list.append(distributor_dict.copy())
 
     dist_list.append(distributor_list)
-    print dist_list
     data = json.dumps(dist_list, cls=DjangoJSONEncoder)
     return HttpResponse(data, content_type='application/json')
-
 
 def map_view1(request):
     ret_locations = []
@@ -1215,7 +1246,6 @@ def upload_rack_location(request):
         for each_row in partreader:
             try:
                 part_rack_location_obj = PartsRackLocation.objects.get(part_number__part_number=each_row['Part Number'], distributor__user=request.user.id)
-                print part_rack_location_obj.part_number.part_number
                 part_rack_location_obj.rack_location = each_row['Rack Location']
                 part_rack_location_obj.save(using=settings.BRAND)
             except Exception as ex:
@@ -1323,7 +1353,7 @@ def upload_order_invoice(request):
                 discount_abs = discount_per * 100 / mrp
                 order_number = each_invoice.get('Order Number')
                 invoice_date_str = each_invoice.get('Invoice Date (YYYY-MM-DD)')
-                part_number = each_invoice.get('Part Number')
+                #part_number = each_invoice.get('Part Number')
                 delivery_order_details_id = each_invoice.get('Delivery Order Number')
                 invoice_date = datetime.datetime.strptime(invoice_date_str, '%Y-%m-%d').date()
                 grand_total = mrp + service_tax_abs + other_taxes_abs + vat_abs - discount_abs
@@ -1340,20 +1370,22 @@ def upload_order_invoice(request):
 
                 do_details_obj.invoice = invoice_obj
                 do_details_obj.save(update_fields=['invoice'])
-                try:
-                    order_delivery_history_obj = OrderDeliveredHistory.objects.get(part_number=part_number, do_id=delivery_order_details_id, order=order_part_obj)
-                except:
-                    messages.error(request, 'Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
-                    return HttpResponseRedirect('/admin/bajaj/orderpart/')
+                # try:
+                #     part_id = PartPricing.objects.get(part_number=part_number)
+                #     order_delivery_history_obj = OrderDeliveredHistory.objects.get(part_number=part_number.part_number, do_id=delivery_order_details_id, order=order_part_obj)
+                # except:
+                #     print "comes in he  exception here=======", 
+                #     messages.error(request, 'Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
+                #     return HttpResponseRedirect('/admin/bajaj/orderpart/')
 
-                order_delivery_history_obj.discount = discount_per
-                order_delivery_history_obj.service_tax = service_tax_per
-                order_delivery_history_obj.vat = vat_per
-                order_delivery_history_obj.other_taxes = other_taxes_per
-                order_delivery_history_obj.save(update_fields=['discount',
-                 'service_tax',
-                 'vat',
-                 'other_taxes'])
+                # order_delivery_history_obj.discount = discount_per
+                # order_delivery_history_obj.service_tax = service_tax_per
+                # order_delivery_history_obj.vat = vat_per
+                # order_delivery_history_obj.other_taxes = other_taxes_per
+                # order_delivery_history_obj.save(update_fields=['discount',
+                #  'service_tax',
+                #  'vat',
+                #  'other_taxes'])
             except:
                 messages.error(request, 'Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
                 return HttpResponseRedirect('/admin/bajaj/orderpart/')
@@ -1375,16 +1407,16 @@ def upload_collection_details(request):
         collection_reader = csv.DictReader(csvfile)
         for each_collection in collection_reader:
             try:
-            	invoice_number = each_collection['Invoice Number']
+                invoice_number = each_collection['Invoice Number']
                 try:
                     invoice_obj = Invoices.objects.get(invoice_id=invoice_number)
-		    uploaded_paid_amount = float(each_collection.get('Total Collected Amount', 0))
-		    invoice_amount = invoice_obj.invoice_amount
-		    amount_difference = invoice_amount - uploaded_paid_amount
-		    if (amount_difference < 0):
+                    uploaded_paid_amount = float(each_collection.get('Total Collected Amount', 0))
+                    invoice_amount = invoice_obj.invoice_amount
+                    amount_difference = invoice_amount - uploaded_paid_amount
+                    if (amount_difference < 0):
                         messages.error(request, "Collection details upload failed, Collected amount exceeds invoice amount - " + invoice_number)
                         return HttpResponseRedirect('/admin/bajaj/collection/')
-			
+            
                 except:
                     messages.error(request, "Collection details upload failed, Invoice Number doesn't exist - " + invoice_number)
                     return HttpResponseRedirect('/admin/bajaj/collection/')
@@ -1409,7 +1441,6 @@ def download_sample_order_invoice_csv(request):
     response['Content-Disposition'] = 'attachment; filename="SampleOrderInvoice.csv"'
     writer = csv.writer(response, dialect=csv.excel)
     writer.writerow(['Order Number',
-     'Part Number',
      'Invoice Number',
      'Delivery Order Number',
      'Invoice Date (YYYY-MM-DD)',
@@ -1455,6 +1486,7 @@ def auth_login(request, provider):
         user = authenticate(username=username, password=password)
         if user is not None:
             if user.is_active:
+                
                 login(request, user)
                 return HttpResponseRedirect('/aftersell/provider/redirect')
     return HttpResponseRedirect(request.path_info + '?auth_error=true')
@@ -1473,6 +1505,7 @@ def redirect_user(request):
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def user_logout(request):
     if request.method == 'GET':
+        # TODO: Implement brand restrictions.
         user_groups = utils.get_user_groups(request.user)
         for group in USER_GROUPS:
             if group in user_groups:
@@ -1497,17 +1530,14 @@ def change_password(request):
             check_pass = user.check_password(str(old_password))
             if check_pass:
                 invalid_password = check_password(new_password)
-                if invalid_password:
-                    data = {'message': 'password does not match the rules',
-                     'status': False}
-                else:
+                if (invalid_password):
+                    data = {'message':"password does not match the rules", 'status':False}
+                else:    
                     user.set_password(str(new_password))
                     user.save()
-                    data = {'message': 'Password Changed successfully',
-                     'status': True}
+                    data = {'message': 'Password Changed successfully', 'status': True}
             else:
-                data = {'message': 'Old password wrong',
-                 'status': False}
+                data = {'message': 'Old password wrong', 'status': False}
             return HttpResponse(json.dumps(data), content_type='application/json')
         else:
             return HttpResponseBadRequest('Not Allowed')
@@ -1526,26 +1556,27 @@ def generate_otp(request):
                 logger.info('OTP request received . username: {0}'.format(username))
                 token = otp_handler.get_otp(user=user)
                 message = get_template('SEND_OTP').format(token)
-                send_job_to_queue(send_otp, {'phone_number': phone_number,
-                 'message': message,
-                 'sms_client': settings.SMS_CLIENT})
+                send_job_to_queue(send_otp, {'phone_number': phone_number, 'message': message,
+                                         'sms_client': settings.SMS_CLIENT})
                 logger.info('OTP sent to mobile {0}'.format(phone_number))
+#             #Send email if email address exist
             if user.email:
                 sent_otp_email(data=token, receiver=user.email, subject='Forgot Password')
+        
             return HttpResponseRedirect('/aftersell/users/otp/validate?username=' + username)
+        
         except Exception as ex:
             logger.error('Invalid details, mobile {0}'.format(ex))
-            return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')
-
+            return HttpResponseRedirect('/aftersell/users/otp/generate?details=invalid')    
+    
     elif request.method == 'GET':
         return render(request, 'portal/get_otp.html')
-
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 def validate_otp(request):
     if request.method == 'GET':
         return render(request, 'portal/validate_otp.html')
-    if request.method == 'POST':
+    elif request.method == 'POST':
         try:
             otp = request.POST['otp']
             username = request.POST['username']
@@ -1567,6 +1598,7 @@ def update_pass(request):
         password = request.POST['password']
         data = utils.update_pass(otp, password)
         return HttpResponse(json.dumps(data), content_type='application/json')
+
     except:
         logger.error('Password update failed.')
         return HttpResponseRedirect('/aftersell/asc/login?error=true')
@@ -1586,50 +1618,55 @@ def register(request, menu):
             return render(request, 'portal/change_password.html')
         if Roles.DEALERS in groups:
             use_cdms = models.Dealer.objects.get(user__user=user_id).use_cdms
-        return render(request, TEMPLATE_MAPPING.get(menu, 'portal/404.html'), {'active_menu': ACTIVE_MENU.get(menu),
-         'groups': groups,
-         'user_id': user_id,
-         'use_cdms': use_cdms})
-    if request.method == 'POST':
-        save_user = {'asc': save_asc_registration,
-         'sa': save_sa_registration,
-         'customer': register_customer}
+        return render(request, TEMPLATE_MAPPING.get(menu, 'portal/404.html'), {'active_menu' : ACTIVE_MENU.get(menu)\
+                                                                    , 'groups': groups,
+                                                                    'user_id' : user_id,
+                                                                    'use_cdms' : use_cdms})
+    elif request.method == 'POST':
+        save_user = {
+            'asc': save_asc_registration,
+            'sa': save_sa_registration,
+            'customer': register_customer
+        }
         try:
             response_object = save_user[menu](request, groups)
-            return HttpResponse(response_object, content_type='application/json')
+            return HttpResponse(response_object, content_type="application/json")
         except Exception as ex:
             logger.error('[registration failure {0}] : {1}'.format(menu, ex))
             return HttpResponseBadRequest()
-
     else:
         return HttpResponseBadRequest()
-
 
 ASC_REGISTER_SUCCESS = 'ASC registration is complete.'
 EXCEPTION_INVALID_DEALER = 'The dealer-id provided is not registered.'
 ALREADY_REGISTERED = 'Already Registered Number.'
 
+
 @check_service_active(Services.FREE_SERVICE_COUPON)
 @log_time
 def save_asc_registration(request, groups = None):
     if request.method == 'GET':
-        return render(request, 'portal/asc_registration.html', {'asc_registration': True})
-    if request.method == 'POST':
+        return render(request, 'portal/asc_registration.html',
+                      {'asc_registration': True})
+    elif request.method == 'POST':
         data = request.POST
         try:
             asc_obj = models.ASCTempRegistration.objects.get(phone_number=data['phone-number'])
-            return HttpResponse(json.dumps({'message': ALREADY_REGISTERED}), content_type='application/json')
+            return HttpResponse(json.dumps({'message': ALREADY_REGISTERED}),
+                            content_type='application/json')
         except ObjectDoesNotExist as ex:
-            dealer_data = data['dealer_id'] if data.has_key('dealer_id') else None
-            asc_obj = models.ASCTempRegistration(name=data['name'], address=data['address'], password=data['password'], phone_number=data['phone-number'], email=data['email'], pincode=data['pincode'], dealer_id=dealer_data)
+            
+            dealer_data = data["dealer_id"] if data.has_key('dealer_id') else None  
+            asc_obj = models.ASCTempRegistration(name=data['name'],
+                 address=data['address'], password=data['password'],
+                 phone_number=data['phone-number'], email=data['email'],
+                 pincode=data['pincode'], dealer_id=dealer_data)
             asc_obj.save()
-
-        return HttpResponse(json.dumps({'message': ASC_REGISTER_SUCCESS}), content_type='application/json')
-
+        return HttpResponse(json.dumps({'message': ASC_REGISTER_SUCCESS}),
+                            content_type='application/json')
 
 SA_UPDATE_SUCCESS = 'Service advisor status has been updated.'
 SA_REGISTER_SUCCESS = 'Service advisor registration is complete.'
-
 @log_time
 def save_sa_registration(request, groups):
     data = request.POST
@@ -1640,31 +1677,34 @@ def save_sa_registration(request, groups):
         service_advisor_id = data['sa-id']
         existing_sa = True
     else:
-        service_advisor_id = TEMP_SA_ID_PREFIX + str(random.randint(100000, 1000000))
+        service_advisor_id = TEMP_SA_ID_PREFIX + str(random.randint(10 ** 5, 10 ** 6))
     data_source.append(utils.create_sa_feed_data(data, request.user.username, service_advisor_id))
     logger.info('[Temporary_sa_registration]:: Initiating dealer-sa feed for ID' + service_advisor_id)
     if Roles.ASCS in groups:
         feed_type = 'asc_sa'
     else:
         feed_type = 'dealer'
-    feed_remark = FeedLogWithRemark(len(data_source), feed_type='Dealer Feed', action='Received', status=True)
+    feed_remark = FeedLogWithRemark(len(data_source),
+                                                feed_type='Dealer Feed',
+                                                action='Received', status=True)
     sap_obj = SAPFeed()
-    feed_response = sap_obj.import_to_db(feed_type=feed_type, data_source=data_source, feed_remark=feed_remark)
+    feed_response = sap_obj.import_to_db(feed_type=feed_type,
+                        data_source=data_source, feed_remark=feed_remark)
     if feed_response.failed_feeds > 0:
         failure_msg = list(feed_response.remarks.elements())[0]
         logger.info('[Temporary_sa_registration]:: dealer-sa feed fialed ' + failure_msg)
-        return json.dumps({'message': failure_msg})
+        return json.dumps({"message": failure_msg})
     logger.info('[Temporary_sa_registration]:: dealer-sa feed completed')
     if existing_sa:
         return json.dumps({'message': SA_UPDATE_SUCCESS})
     return json.dumps({'message': SA_REGISTER_SUCCESS})
 
-
 CUST_UPDATE_SUCCESS = 'Customer phone number has been updated.'
 CUST_REGISTER_SUCCESS = 'Customer has been registered with ID: '
 
+
 @log_time
-def register_customer(request, group = None):
+def register_customer(request, group=None):
     post_data = request.POST
     data_source = []
     existing_customer = False
@@ -1675,18 +1715,22 @@ def register_customer(request, group = None):
         temp_customer_id = post_data['customer-id']
         existing_customer = True
     data_source.append(utils.create_purchase_feed_data(post_data, product_obj[0], temp_customer_id))
-    check_with_invoice_date = utils.subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)
+
+    check_with_invoice_date = utils.subtract_dates(data_source[0]['product_purchase_date'], product_obj[0].invoice_date)    
     check_with_today_date = utils.subtract_dates(data_source[0]['product_purchase_date'], datetime.datetime.now())
     if not existing_customer and check_with_invoice_date.days < 0 or check_with_today_date.days > 0:
-        message = 'Product purchase date should be between {0} and {1}'.format(product_obj[0].invoice_date.strftime('%d-%m-%Y'), datetime.datetime.now().strftime('%d-%m-%Y'))
+        message = "Product purchase date should be between {0} and {1}".\
+                format((product_obj[0].invoice_date).strftime("%d-%m-%Y"), (datetime.datetime.now()).strftime("%d-%m-%Y"))
         logger.info('[Temporary_cust_registration]:: {0} Entered date is: {1}'.format(message, str(data_source[0]['product_purchase_date'])))
-        return json.dumps({'message': message})
+        return json.dumps({"message": message})
+
     try:
         with transaction.atomic():
             update_count = models.Constant.objects.get(constant_name='vin_to_mobile_mapping_count').constant_value
             if models.CustomerTempRegistration.objects.filter(new_number__contains=data_source[0]['customer_phone_number']).count() >= int(update_count):
                 message = get_template('PHONE_NUMBER_CANNOT_BE_REGISTERED')
-                return json.dumps({'message': message})
+                return json.dumps({'message' : message})
+
             customer_obj = models.CustomerTempRegistration.objects.filter(temp_customer_id=temp_customer_id)
             if customer_obj:
                 customer_obj = customer_obj[0]
@@ -1700,6 +1744,7 @@ def register_customer(request, group = None):
                     if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']):
                         message = get_template('FAILED_UPDATE_PHONE_NUMBER').format(phone_number=data_source[0]['customer_phone_number'])
                         return json.dumps({'message': message})
+                    
                     old_number = customer_obj.new_number
                     customer_obj.new_number = data_source[0]['customer_phone_number']
                     customer_obj.product_data = product_obj[0]
@@ -1712,26 +1757,24 @@ def register_customer(request, group = None):
                     for phone_number in [customer_obj.new_number, old_number]:
                         phone_number = utils.get_phone_number_format(phone_number)
                         sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
-                        send_job_to_queue(send_customer_phone_number_update_message, {'phone_number': phone_number,
-                         'message': message,
-                         'sms_client': settings.SMS_CLIENT})
-
+                        send_job_to_queue(send_customer_phone_number_update_message, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
+                            
                     if models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS).exists():
                         groups = utils.stringify_groups(request.user)
                         if Roles.ASCS in groups:
-                            dealer_asc_id = 'asc : ' + customer_obj.dealer_asc_id
+                            dealer_asc_id = "asc : " + customer_obj.dealer_asc_id
                         elif Roles.DEALERS in groups:
-                            dealer_asc_id = 'dealer : ' + customer_obj.dealer_asc_id
-                        else:
-                            dealer_asc_id = 'manager : ' + customer_obj.dealer_asc_id
-                        message = get_template('CUSTOMER_PHONE_NUMBER_UPDATE').format(customer_id=customer_obj.temp_customer_id, old_number=old_number, new_number=customer_obj.new_number, dealer_asc_id=dealer_asc_id)
+                            dealer_asc_id = "dealer : " + customer_obj.dealer_asc_id
+                        else :
+                            dealer_asc_id = "manager : " + customer_obj.dealer_asc_id
+                        
+                        message = get_template('CUSTOMER_PHONE_NUMBER_UPDATE').format(customer_id=customer_obj.temp_customer_id, old_number=old_number,
+                                                                                  new_number=customer_obj.new_number, dealer_asc_id=dealer_asc_id)
                         managers = models.UserProfile.objects.filter(user__groups__name=Roles.BRANDMANAGERS)
                         for manager in managers:
                             phone_number = utils.get_phone_number_format(manager.phone_number)
                             sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
-                            send_job_to_queue(send_customer_phone_number_update_message, {'phone_number': phone_number,
-                             'message': message,
-                             'sms_client': settings.SMS_CLIENT})
+                            send_job_to_queue(send_customer_phone_number_update_message, {"phone_number":phone_number, "message":message, "sms_client":settings.SMS_CLIENT})
 
             else:
                 if models.UserProfile.objects.filter(phone_number=data_source[0]['customer_phone_number']):
@@ -1747,10 +1790,10 @@ def register_customer(request, group = None):
                 logger.info('[Temporary_cust_registration]:: ' + json.dumps(feed_response.remarks))
                 raise ValueError('purchase feed failed!')
             logger.info('[Temporary_cust_registration]:: purchase feed completed')
-    except Exception as ex:
+    except Exception as ex: 
         logger.info(ex)
-        return HttpResponseBadRequest()
 
+        return HttpResponseBadRequest()
     if existing_customer:
         return json.dumps({'message': CUST_UPDATE_SUCCESS})
     return json.dumps({'message': CUST_REGISTER_SUCCESS + temp_customer_id})
@@ -1769,17 +1812,18 @@ def recover_coupon_info(data):
         file_obj.name = get_file_name(data, file_obj)
         destination = settings.JOBCARD_DIR.format('bajaj')
         bucket = settings.JOBCARD_BUCKET
-        path = utils.upload_file(destination, bucket, file_obj, logger_msg='JobCard')
-        ucn_recovery_obj = models.UCNRecovery(reason=reason, user=user_obj, customer_id=customer_id, file_location=path, unique_service_coupon=coupon_data.unique_service_coupon)
+        path = utils.upload_file(destination, bucket, file_obj, logger_msg="JobCard")
+        ucn_recovery_obj = models.UCNRecovery(reason=reason, user=user_obj,
+                                        customer_id=customer_id, file_location=path,
+                                        unique_service_coupon=coupon_data.unique_service_coupon)
         ucn_recovery_obj.save()
         send_recovery_email_to_admin(ucn_recovery_obj, coupon_data)
-        message = 'UCN for customer {0} is {1}.'.format(customer_id, coupon_data.unique_service_coupon)
-        return {'status': True,
-         'message': message}
+        message = 'UCN for customer {0} is {1}.'.format(customer_id,
+                                                    coupon_data.unique_service_coupon)
+        return {'status': True, 'message': message}
     else:
-        message = 'No coupon in progress for customerID {0}.'.format(customer_id)
-        return {'status': False,
-         'message': message}
+        message = 'No coupon in progress for customerID {0}.'.format(customer_id) 
+        return {'status': False, 'message': message}
 
 
 def get_customer_info_old(data):
@@ -1787,60 +1831,53 @@ def get_customer_info_old(data):
         product_obj = models.ProductData.objects.get(product_id=data['vin'])
     except Exception as ex:
         logger.info(ex)
-        message = "VIN '{0}' does not exist in our records. Please contact customer support: +91-7847011011.".format(data['vin'])
+        message = '''VIN '{0}' does not exist in our records. Please contact customer support: +91-7847011011.'''.format(data['vin'])
         if data['groups'][0] == Roles.DEALERS:
-            data['groups'][0] = 'Dealer'
+            data['groups'][0] = "Dealer"
         else:
-            data['groups'][0] = 'ASC'
+            data['groups'][0] = "ASC"
         template = get_email_template('VIN DOES NOT EXIST', settings.BRAND)['body'].format(data['current_user'], data['vin'], data['groups'][0])
         send_mail_when_vin_does_not_exist(data=template)
-        return {'message': message,
-         'status': 'fail'}
-
+        return {'message': message, 'status': 'fail'}
     if product_obj.purchase_date:
         product_data = format_product_object(product_obj)
-        product_data['group'] = data['groups'][0]
+        product_data['group'] = data['groups'][0] 
         return product_data
     else:
-        message = "VIN '{0}' has no associated customer. Please register the customer.".format(data['vin'])
+        message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
         return {'message': message}
-
 
 def vin_sync_feed(request):
     message = ''
     post_data = request.POST.copy()
     post_data['current_user'] = request.user
     try:
-        vin_sync_feed = export_feed.ExportUnsyncProductFeed(username=settings.SAP_CRM_DETAIL['username'], password=settings.SAP_CRM_DETAIL['password'], wsdl_url=settings.VIN_SYNC_WSDL_URL, feed_type='VIN sync Feed')
+        vin_sync_feed = export_feed.ExportUnsyncProductFeed(username=settings.SAP_CRM_DETAIL[
+                       'username'], password=settings.SAP_CRM_DETAIL['password'],
+                      wsdl_url=settings.VIN_SYNC_WSDL_URL, feed_type='VIN sync Feed')
         message = vin_sync_feed.export(data=post_data)
     except Exception as ex:
         logger.info(ex)
 
-    return HttpResponse(content=json.dumps({'message': message}), content_type='application/json')
-
-
+    return HttpResponse(content=json.dumps({'message':message}), content_type='application/json')
+    
 def get_customer_info(data):
     try:
         product_obj = models.ProductData.objects.get(product_id=data['vin'])
     except Exception as ex:
         logger.info(ex)
-        message = 'The Chassis {0} is not available in the current database, please wait while the Main database is being scanned.'.format(data['vin'])
-        return {'message': message,
-         'status': 0}
-
+        message = "The Chassis {0} is not available in the current database, please wait while the Main database is being scanned.".format(data['vin'])
+        return {'message': message, 'status': 0}
     if product_obj.purchase_date:
         product_data = format_product_object(product_obj)
-        product_data['group'] = data['groups'][0]
-        return {'product': product_data,
-         'status': 1}
+        product_data['group'] = data['groups'][0] 
+        return {'product': product_data, 'status': 1}
     else:
-        message = "VIN '{0}' has no associated customer. Please register the customer.".format(data['vin'])
-        return {'message': message,
-         'status': 1}
-
+        message = '''VIN '{0}' has no associated customer. Please register the customer.'''.format(data['vin'])
+        return {'message': message, 'status': 1}
 
 @login_required()
-def exceptions(request, exception = None):
+def exceptions(request, exception=None):
     groups = utils.stringify_groups(request.user)
     if len(set([Roles.ASCS, Roles.DEALERS, Roles.SDMANAGERS]).intersection(set(groups))) == 0:
         return HttpResponseBadRequest()
@@ -1850,21 +1887,21 @@ def exceptions(request, exception = None):
     if request.method == 'GET':
         template = 'portal/exception.html'
         data = None
-        if exception in ('close', 'check'):
+        if exception in ['close', 'check']:
             if Roles.ASCS in groups:
                 data = models.ServiceAdvisor.objects.active_under_asc(request.user)
             else:
                 data = models.ServiceAdvisor.objects.active_under_dealer(request.user)
         return render(request, template, {'active_menu': exception,
-         'data': data,
-         'groups': groups,
-         'is_dealer': is_dealer})
-    if request.method == 'POST':
-        function_mapping = {'customer': get_customer_info,
-         'recover': recover_coupon_info,
-         'search': utils.search_details,
-         'status': utils.services_search_details,
-         'serviceadvisor': utils.service_advisor_search}
+                                           "data": data, 'groups': groups, 'is_dealer':is_dealer})
+    elif request.method == 'POST':
+        function_mapping = {
+            'customer': get_customer_info,
+            'recover': recover_coupon_info,
+            'search': utils.search_details,
+            'status': utils.services_search_details,
+            'serviceadvisor': utils.service_advisor_search
+        }
         try:
             post_data = request.POST.copy()
             post_data['current_user'] = request.user
@@ -1876,46 +1913,44 @@ def exceptions(request, exception = None):
         except Exception as ex:
             logger.error(ex)
             return HttpResponseBadRequest()
-
     else:
         return HttpResponseBadRequest()
 
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 @login_required()
-def users(request, users = None):
+def users(request, users=None):
     groups = utils.stringify_groups(request.user)
     if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
-    elif request.method == 'GET':
+    if request.method == 'GET':
         template = 'portal/users.html'
         data = None
-        data_mapping = {'sa': utils.get_sa_list_for_login_dealer,
-         'asc': utils.get_asc_list_for_login_dealer}
+        data_mapping = {
+            'sa': utils.get_sa_list_for_login_dealer,
+            'asc': utils.get_asc_list_for_login_dealer
+        }
         try:
             data = data_mapping[users](request.user)
         except:
+            # It is acceptable if there is no data_mapping defined for a function
             pass
-
-        return render(request, template, {'active_menu': users,
-         'data': data,
-         'groups': groups})
+        return render(request, template, {'active_menu' : users, "data" : data, 'groups': groups})
     else:
         return HttpResponseBadRequest()
 
 
 @check_service_active(Services.FREE_SERVICE_COUPON)
 @login_required()
-def get_sa_under_asc(request, id = None):
+def get_sa_under_asc(request, id=None):
     template = 'portal/sa_list.html'
     data = None
     try:
         data = utils.get_sa_list_for_login_dealer(id)
     except:
+            # It is acceptable if there is no data_mapping defined for a function
         pass
-
-    return render(request, template, {'active_menu': 'sa',
-     'data': data})
+    return render(request, template, {'active_menu':'sa', "data": data})
 
 
 def sqs_tasks_view(request):
@@ -1923,19 +1958,22 @@ def sqs_tasks_view(request):
 
 
 def trigger_sqs_tasks(request):
-    sqs_tasks = {'send-feed-mail': 'send_report_mail_for_feed',
-     'export-coupon-redeem': 'export_coupon_redeem_to_sap',
-     'expire-service-coupon': 'expire_service_coupon',
-     'send-reminder': 'send_reminder',
-     'export-customer-registered': 'export_customer_reg_to_sap',
-     'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk',
-     'export_purchase_feed_sync_to_sap': 'export_purchase_feed_sync_to_sap',
-     'send_mail_for_policy_discrepency': 'send_mail_for_policy_discrepency',
-     'export_cts_to_sap': 'export_cts_to_sap',
-     'send_mail_for_feed_failure': 'send_mail_for_feed_failure',
-     'send_mail_for_customer_phone_number_update': 'send_mail_for_customer_phone_number_update',
-     'send_mail_for_manufacture_data_discrepancy': 'send_mail_for_manufacture_data_discrepancy',
-     'send_vin_sync_feed_details': 'send_vin_sync_feed_details'}
+    sqs_tasks = {
+        'send-feed-mail': 'send_report_mail_for_feed',
+        'export-coupon-redeem': 'export_coupon_redeem_to_sap',
+        'expire-service-coupon': 'expire_service_coupon',
+        'send-reminder': 'send_reminder',
+        'export-customer-registered': 'export_customer_reg_to_sap',
+        'send_reminders_for_servicedesk': 'send_reminders_for_servicedesk',
+        'export_purchase_feed_sync_to_sap': 'export_purchase_feed_sync_to_sap',
+        'send_mail_for_policy_discrepency': 'send_mail_for_policy_discrepency',
+        'export_cts_to_sap': 'export_cts_to_sap',
+        'send_mail_for_feed_failure': 'send_mail_for_feed_failure',
+        'send_mail_for_customer_phone_number_update':'send_mail_for_customer_phone_number_update',
+        'send_mail_for_manufacture_data_discrepancy': 'send_mail_for_manufacture_data_discrepancy',
+        'send_vin_sync_feed_details': 'send_vin_sync_feed_details'
+    }
+
     taskqueue = SqsTaskQueue(settings.SQS_QUEUE_NAME, settings.BRAND)
     taskqueue.add(sqs_tasks[request.POST['task']], settings.BRAND)
     return HttpResponse()
@@ -1955,16 +1993,14 @@ def reports(request):
     report_data = []
     if not (Roles.ASCS in groups or Roles.DEALERS in groups):
         return HttpResponseBadRequest()
-    status_options = {'4': 'In Progress',
-     '2': 'Closed'}
-    report_options = {'reconciliation': 'Reconciliation',
-     'credit': 'Credit Note'}
+    status_options = {'4': 'In Progress', '2':'Closed'}
+    report_options = {'reconciliation': 'Reconciliation', 'credit':'Credit Note'}
     min_date, max_date = utils.get_min_and_max_filter_date()
     template_rendered = 'portal/reconciliation_report.html'
     report_data = {'status_options': status_options,
-     'report_options': report_options,
-     'min_date': min_date,
-     'max_date': max_date}
+                    'report_options': report_options,
+                    'min_date':min_date,
+                    'max_date': max_date}
     if request.method == 'POST':
         report_data['params'] = request.POST.copy()
         if report_data['params']['type'] == 'credit':
@@ -1974,7 +2010,6 @@ def reports(request):
         if '_download' in request.POST:
             return download_reconcilation_reports(report_data)
     return render(request, template_rendered, report_data)
-
 
 @log_time
 def create_reconciliation_report(query_params, user):
@@ -1989,24 +2024,25 @@ def create_reconciliation_report(query_params, user):
     else:
         ascs = models.AuthorizedServiceCenter.objects.filter(user=user)
         coupon_filter = [Q(service_advisor__asc=ascs[0]), Q(servicing_dealer=ascs[0].asc_id)]
+    
     status = query_params.get('status')
     from_date = query_params.get('from')
     to_date = query_params.get('to')
     input_date_range = (str(from_date) + ' 00:00:00', str(to_date) + ' 23:59:59')
-    if query_params['type'] == 'credit':
+
+    if query_params['type'] == 'credit': 
         filter['credit_date__range'] = input_date_range
     elif status == '4':
         filter['actual_service_date__range'] = input_date_range
     else:
         filter['closed_date__range'] = input_date_range
+
     if status:
         args = [Q(status=status)]
         if status == '2':
             args = [Q(status=2), Q(status=6)]
     all_coupon_data = models.CouponData.objects.filter(reduce(operator.or_, args), reduce(operator.or_, coupon_filter), **filter).order_by('-actual_service_date')
-    map_status = {'6': 'Old FSC Closed',
-     '4': 'In Progress',
-     '2': 'DFSC Closed'}
+    map_status = {'6': 'Old FSC Closed', '4': 'In Progress', '2':'DFSC Closed'}
     for coupon_data in all_coupon_data:
         coupon_data_dict = {}
         coupon_data_dict['vin'] = coupon_data.product.product_id
@@ -2015,7 +2051,6 @@ def create_reconciliation_report(query_params, user):
             coupon_data_dict['sa_phone_name'] = sa.user.phone_number
         except:
             coupon_data_dict['sa_phone_name'] = None
-
         coupon_data_dict['service_avil_date'] = coupon_data.actual_service_date
         coupon_data_dict['closed_date'] = coupon_data.closed_date
         coupon_data_dict['service_status'] = map_status[str(coupon_data.status)]
@@ -2033,15 +2068,15 @@ def create_reconciliation_report(query_params, user):
             coupon_data_dict['service_type'] = coupon_data.service_type
             coupon_data_dict['special_case'] = coupon_data.special_case
         report_data.append(coupon_data_dict)
-
+        
     return report_data
 
-
+# FIXME: Refactor the code
 @check_service_active(Services.FREE_SERVICE_COUPON)
-def get_active_asc_report(request, role = None):
-    """get number of tickets closed by ASC"""
+def get_active_asc_report(request, role=None):
+    '''get number of tickets closed by ASC'''
     if request.method != 'GET':
-        return HttpResponse(json.dumps({'message': 'method not allowed'}), content_type='application/json', status=401)
+        return HttpResponse(json.dumps({"message":"method not allowed"}), content_type="application/json", status=401)
     try:
         role = request.path.split('/')[3]
         data = request.GET.copy()
@@ -2055,20 +2090,20 @@ def get_active_asc_report(request, role = None):
         no_of_days = utils.get_number_of_days(year, month)
         coupon_resource = CouponDataResource()
         asc_query = coupon_resource.closed_ticket(year, month, role)
+
         asc_list = []
         for asc in asc_query:
             active = filter(lambda active: active['id'] == asc['asc_id'], asc_list)
             if not active:
                 temp = {}
-                temp['id'] = asc['asc_id']
+                temp['id'] = asc['asc_id'] 
                 temp['name'] = asc['first_name']
                 temp['address'] = asc['address']
                 temp['coupon_closed'] = {}
                 for day in range(1, no_of_days):
                     temp['coupon_closed'][day] = 0
-
                 day = int(asc['day'])
-                temp['total_coupon_closed'] = 0
+                temp['total_coupon_closed'] = 0 
                 temp['coupon_closed'][day] = asc['cnt']
                 temp['total_coupon_closed'] = temp['total_coupon_closed'] + asc['cnt']
                 asc_list.append(temp)
@@ -2076,78 +2111,84 @@ def get_active_asc_report(request, role = None):
                 day = int(asc['day'])
                 active[0]['coupon_closed'][day] = asc['cnt']
                 active[0]['total_coupon_closed'] = active[0]['total_coupon_closed'] + asc['cnt']
-
     except Exception as ex:
         logger.error('Exception while counting data : {0}'.format(ex))
         return HttpResponseBadRequest()
-
     years = utils.gernate_years()
-    return render(request, 'portal/asc_report.html', {'data': asc_list,
-     'range': range(1, no_of_days),
-     'month': MONTHS,
-     'years': years,
-     'mon': MONTHS[int(month) - 1],
-     'cyear': str(year),
-     'role': role})
-
-
+    return render(request, 'portal/asc_report.html', \
+                  {"data": asc_list,
+                   "range": range(1, no_of_days),
+                   "month": MONTHS,
+                   "years": years,
+                   "mon": MONTHS[int(month) - 1],
+                   "cyear": str(year),
+                   "role": role
+                   })
+    
+'''Download the reconciliation report under the filter criteria'''
+    
 def download_reconcilation_reports(download_data):
     response = HttpResponse(content_type='text/excel')
     response['Content-Disposition'] = 'attachment; filename="ReportList.xls"'
-    c = Context({'data': download_data['records']})
+    c = Context({
+        'data': download_data['records'],
+    })
     if download_data['params']['type'] == 'credit':
         template = loader.get_template('portal/reconciliation_credit_download.html')
     else:
         template = loader.get_template('portal/reconciliation_download.html')
+    
     response.write(template.render(c))
     return response
 
-
 @login_required
 def rejected_reason(request):
-    """
+    '''
     This method updates the retailer with the reason for rejection by the ASM/admin
-    """
+    '''
     retailer_id = request.POST['retailer_id']
     rejected_reason = request.POST['rejected_reason']
     retailer_email = request.POST['retailer_email']
-    Retailer.objects.filter(id=retailer_id).update(approved=STATUS['REJECTED'], rejected_reason=rejected_reason)
+    Retailer.objects.filter(id=retailer_id).update(approved=STATUS['REJECTED'], \
+                                                 rejected_reason=rejected_reason)
     try:
-        send_email(sender=constants.FROM_EMAIL_ADMIN, receiver=retailer_email, subject=constants.REJECT_RETAILER_SUBJECT, body='', message=constants.REJECT_RETAILER_MESSAGE)
+        send_email(sender=constants.FROM_EMAIL_ADMIN, receiver=retailer_email,
+                   subject=constants.REJECT_RETAILER_SUBJECT, body='',
+                   message=constants.REJECT_RETAILER_MESSAGE)
     except Exception as e:
         logger.error('Mail is not sent. Exception occurred', e)
-
     return HttpResponseRedirect('/admin/bajaj/retailer/')
 
-
 def handle_uploaded_file(uploaded_file):
-    """
+    '''
     This method gets the uploaded file and writes it in the upload dir under the same name
-    """
+    '''
     path = settings.UPLOAD_DIR + uploaded_file.name
     with open(path, 'wb+') as destination:
         for chunk in uploaded_file.chunks():
             destination.write(chunk)
-
     return path
-
 
 @login_required
 def bulk_upload_retailer(request):
-    """
+    '''
     This method uploads retailers in bulk to the retailer model
-    """
+    '''
+    # upload the file to the upload_bajaj folder
     full_path = handle_uploaded_file(request.FILES['bulk_upload_retailer'])
     with open(full_path) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
+            # get the userprofile data and save it in userprofile model
             userprofile = UserProfile()
-            userprofile.user = User.objects.create_user(username=row['username'], password=row['password'])
+            userprofile.user = \
+                    User.objects.create_user(username=row['username'], password=row['password'])
             userprofile.country = row['country']
             userprofile.pincode = row['pincode']
             userprofile.state = row['state']
             userprofile.address = row['address']
             userprofile.save()
+            # get the retailer data and save it in retailer model
             retailer = Retailer()
             retailer.retailer_name = row['retailer name']
             retailer.retailer_town = row['retailer town']
@@ -2159,9 +2200,10 @@ def bulk_upload_retailer(request):
             retailer.user = UserProfile.objects.get(user__username=row['username'])
             if DistributorStaff.objects.filter(user__user=request.user).exists():
                 distributorstaff = DistributorStaff.objects.get(user__user=request.user)
-                retailer.distributor = Distributor.objects.get(id=distributorstaff.distributor.id)
+                retailer.distributor = \
+                        Distributor.objects.get(id=distributorstaff.distributor.id)
             else:
-                retailer.distributor = Distributor.objects.get(user__user=request.user)
+                retailer.distributor = \
+                        Distributor.objects.get(user__user=request.user)
             retailer.save()
-
     return HttpResponseRedirect('/admin/bajaj/retailer/')

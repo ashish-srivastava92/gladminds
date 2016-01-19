@@ -19,8 +19,6 @@
 		$ = Suit.$;
 </script>
 
-<!-- <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script> -->
 <script src="https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.10/js/dataTables.bootstrap.min.js"></script>
 <script>
@@ -111,11 +109,6 @@
 	<table class="table table-striped table-bordered table-responsive" id="showParts">
 		<thead>
 			<tr>
-				<!-- {% if order_status == "open" %}
-				<th style="text-align:center">
-				<input type="checkbox" id="selectall"/>
-				</th>
-				{% endif %} -->
 
 				<th class="text-center">PartNumber</th>
 				<th class="text-center">Available Qty</th>
@@ -158,8 +151,6 @@
 				<td class="text-center">{{each.line_total}}</td>
 
 			
-				
-
 				<td class="text-center">
 							
 				{% if each.available_quantity > 0 %}

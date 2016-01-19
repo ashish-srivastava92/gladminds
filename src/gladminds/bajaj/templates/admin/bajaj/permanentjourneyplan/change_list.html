@@ -531,6 +531,7 @@ $.ajax({
         loadMap(userObj);
     }
     else if(userObj.role_name=="Distributor"){
+        var distributors=userObj.role_id
         $("#asm,#nsm,#distributor").remove();
 
        $(".filtersRight").empty();
@@ -569,12 +570,6 @@ $.ajax({
     }
 }
 });
-
-
-
-
-
-
 
 
 //**************************************************DSRButton Click****************************************//
@@ -632,7 +627,8 @@ function getRetailerLocations1(dsrsobj,userId,arr){
                                 weekArray.push();
                             }
                         }
-                          
+            
+
                     });
                 }
             }

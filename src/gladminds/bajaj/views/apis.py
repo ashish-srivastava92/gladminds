@@ -1,4 +1,3 @@
-
 import json, datetime, time
 from datetime import timedelta
 from collections import OrderedDict
@@ -23,15 +22,10 @@ from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Cat
                             PartPricing, Distributor,  Invoices, \
                             Collection,CollectionDetails,PartsStock,DSRWorkAllocation,DSRLocationDetails, \
 			    NationalSparesManager,AreaSparesManager
-from gladminds.bajaj.models import PartMasterCv,OrderPart,OrderPartDetails, \
+from gladminds.bajaj.models import OrderPart,OrderPartDetails, \
                         PartIndexDetails, PartIndexPlates, FocusedPart
 from gladminds.core.auth_helper import Roles
 
-
-#PartMasterCv                          
-                            
-# from gladminds.core.models import DistributorSalesRep, Retailer,PartModels, CvCategories, \
-#                              OrderPart, DSRWorkAllocation, AlternateParts
 
 from gladminds.core import constants
 
@@ -47,7 +41,6 @@ def authentication(request):
     load = json.loads(request.body)
     user = authenticate(username = load.get("username"), password = load.get("password"))
     
-    #user = authenticate(username = request.POST["username"], password = request.POST["password"])
     if user:
         if user.is_active:
             #the user is active.He should be a dsr or retailer 
@@ -96,18 +89,18 @@ def get_retailers(request, dsr_id):
         retailer_dict.update({"retailer_mobile":retailer.mobile})
         retailer_dict.update({"retailer_email":retailer.email})
         retailer_dict.update({"retailer_address":retailer.user.address})
-	retailer_dict.update({"locality":retailer.address_line_4})
-	if retailer.locality:
+        retailer_dict.update({"locality":retailer.address_line_4})
+        if retailer.locality:
             retailer_dict["locality"] = retailer.locality.name
             retailer_dict.update({"city":retailer.locality.city.city})
             retailer_dict.update({"state":retailer.locality.city.state.state_name})
             retailer_dict.update({"locality_id":retailer.locality_id})
-	else:
+        else:
             retailer_dict.update({"city":''})
             retailer_dict.update({"state":''})
             retailer_dict.update({"locality_id":''})
-        retailer_dict.update({"latitude":retailer.latitude})
-        retailer_dict.update({"longitude":retailer.longitude})
+            retailer_dict.update({"latitude":retailer.latitude})
+            retailer_dict.update({"longitude":retailer.longitude})
         retailer_list.append(retailer_dict)
     return Response(retailer_list)
 
@@ -163,7 +156,7 @@ def get_stock(request,dsr_id):
 def get_parts(request):
     '''
     This method returns all the spare parts details
-    '''
+    ''' 
     parts = PartPricing.objects.filter(active = True)
     parts_list =[]
     for part in parts:
@@ -252,7 +245,7 @@ def get_parts_catalog(request):
         parts_dict.update({"part_number":part.part_number})
         parts_dict.update({"part_model":part.plate.model.model_name})
         parts_dict.update({"part_plate":part.plate.plate_name})
-	parts_dict.update({"plate_id":part.plate_id})
+        parts_dict.update({"plate_id":part.plate_id})
         parts_dict.update({"mrp":part.mrp})
         parts_list.append(parts_dict)
     return Response(parts_list)
@@ -318,7 +311,6 @@ def place_order(request, dsr_id):
     it in the database
     '''
     parts = json.loads(request.body)
-    
     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
     if dsr:
         for order in parts :
@@ -333,7 +325,6 @@ def place_order(request, dsr_id):
             orderpart.latitude = order['latitude']
             orderpart.longitude = order['longitude']
             orderpart.save()
-            
             #push all the items into the orderpart details
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
@@ -360,7 +351,7 @@ def place_order(request, dsr_id):
                 orderpart_details.line_total = item['line_total']
                 orderpart_details.save()
 	    transaction.commit()
-            send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
+    send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
     return Response({'message': 'Order updated successfully', 'status':1})
 
 @api_view(['POST'])
@@ -470,6 +461,10 @@ def get_dsr_outstanding(request, dsr_id):
         invoices = Invoices.objects.filter(retailer = retailer)
         if invoices:
             for invoice in invoices:
+                if not invoice.invoice_amount:
+                    invoice.invoice_amount = 0
+                if not invoice.paid_amount:
+                    invoice.paid_amount = 0
                 retailer_dict = {}
                 total_amount = 0
                 collection = 0
@@ -590,12 +585,6 @@ def uploadcollection(request):
             collection.longitude = collection_body['longitude']
             collection.save()
             #put data into collection details table
-            # payment_mode = 1
-            # for mode in constants.PAYMENT_MODES:
-            #     if mode[0][1] == collection_body['payment_mode']:
-            #         payment_mode = mode[0][0]
-            #     else:
-            #         continue
             for cheque in collection_body['cheque_details']:
                 collectiondetails = CollectionDetails()
                 collectiondetails.collection = collection
@@ -745,9 +734,6 @@ def dsr_dashboard_report(request, dsr_id):
         collections = Collection.objects.filter(retailer = retailer)
         for collection in collections:    
             # get all the collection details for this collection
-            # collection_details = CollectionDetails.objects.filter(collection = collection, \
-            #                                         created_date__month = today.strftime("%m"))
-            # for collection_detail in collection_details:
             retailer_collected_amount = retailer_collected_amount + \
                                             collection.collected_amount
         # sum up the each retailer collected amount to the total
@@ -870,8 +856,6 @@ def dsr_dashboard_report(request, dsr_id):
         if collections:
             for collection in collections:    
             # get all the collection details for this collection
-                # collection_details = CollectionDetails.objects.filter(collection = collection)
-                # for collection_detail in collection_details:
                 retailer_collected_amount = retailer_collected_amount + \
                                             collection.collected_amount
         # sum up the each retailer collected amount to the total
@@ -1160,7 +1144,6 @@ def get_orders(request, dsr_id):
                 amount = amount + each.line_total
             order_dict['amount'] = amount
             order_dict['total_quantity'] = total_line_items
-            #order_dict['status'] = order.status
             # order details dict
             order_details_list = []
             for each in order_detail:
@@ -1236,6 +1219,7 @@ def send_msg_to_retailer_on_adding(request,retailer_id,username,password):
     send_job_to_queue(send_loyalty_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
 
+
 def send_msg_to_retailer_on_place_order(request,retailer_id,order_id):
 #     print retailer
 
@@ -1303,25 +1287,24 @@ def get_retailer_dict(retailer):
 	return retailer_dict
 
 def get_retailer_unassigned_dict(retailer):
-     retailer_unassigned_dict={}
-     retailer_unassigned_dict['firstname'] = retailer.user.user.first_name
-     retailer_unassigned_dict['lastname'] = retailer.user.user.last_name
-     retailer_unassigned_dict['shopname'] = retailer.retailer_name
-     if retailer.latitude and retailer.longitude:
-	     retailer_unassigned_dict['latitude'] = str(retailer.latitude)
-	     retailer_unassigned_dict['longitude'] = str(retailer.longitude)
-     else:
-	     #FIXME: check if object is collected
-             return None
-     retailer_unassigned_dict['outstanding'] = retailer.retailer_name
-     retailer_unassigned_dict['nsm_id'] = retailer.distributor.asm.nsm.nsm_id
-     retailer_unassigned_dict['dsr_id'] = retailer.dsr_id
-     retailer_unassigned_dict['contact'] = retailer.mobile
-     dsr_work_allocation = DSRWorkAllocation.objects.filter(retailer=retailer)
-     if dsr_work_allocation:
-	#pass
-	retailer_unassigned_dict['day'] = dsr_work_allocation[0].pjp_day
-     return retailer_unassigned_dict
+    retailer_unassigned_dict={}
+    retailer_unassigned_dict['firstname'] = retailer.user.user.first_name
+    retailer_unassigned_dict['lastname'] = retailer.user.user.last_name
+    retailer_unassigned_dict['shopname'] = retailer.retailer_name
+    if retailer.latitude and retailer.longitude:
+	    retailer_unassigned_dict['latitude'] = str(retailer.latitude)
+	    retailer_unassigned_dict['longitude'] = str(retailer.longitude)
+    else:
+	    #FIXME: check if object is collected
+            return None
+    retailer_unassigned_dict['outstanding'] = retailer.retailer_name
+    retailer_unassigned_dict['nsm_id'] = retailer.distributor.asm.nsm.nsm_id
+    retailer_unassigned_dict['dsr_id'] = retailer.dsr_id
+    retailer_unassigned_dict['contact'] = retailer.mobile
+    dsr_work_allocation = DSRWorkAllocation.objects.filter(retailer=retailer)
+    if dsr_work_allocation:
+	    retailer_unassigned_dict['day'] = dsr_work_allocation[0].pjp_day
+    return retailer_unassigned_dict
 
 @api_view(['GET'])
 def get_associated_nsms(request):	
@@ -1417,6 +1400,8 @@ def get_associated_dsrs(request,distributor_id=None):
     if distributor_id == None:
         distributor_id = request.GET.__getitem__('distributor_id') #Handle the multivaluedictkey error
     dsrs = DistributorSalesRep.objects.filter(distributor__distributor_id=distributor_id)
+    if not dsrs:
+        dsrs = DistributorSalesRep.objects.filter(distributor_id=distributor_id)
     response_dict = {}
     response_dict['role_id'] = 1
     response_dict['role_name'] = "Distributor"
@@ -1426,7 +1411,8 @@ def get_associated_dsrs(request,distributor_id=None):
         dsr_dict = {}
         dsr_dict['userid'] = dsr.distributor_sales_code
         dsr_dict['firstname'] = dsr.user.user.first_name
-        dsr_dict['lastname'] = dsr.user.user.last_name
+        dsr_dict['lastname'] = d
+        sr.user.user.last_name
         dsr_dict['retailers'] = []
 	retailers = Retailer.objects.filter(dsr_id=dsr.id)#.exclude(dsr_id__isnull=True)
 	for retailer in retailers:
@@ -1440,6 +1426,7 @@ def get_associated_dsrs(request,distributor_id=None):
              retailer_unassigned_dict=get_retailer_unassigned_dict(retailer)
              if retailer_unassigned_dict != None:
 		response_dict['retailers'].append(retailer_unassigned_dict)
+    print "this is respoeeeee============",response_dict 
     return Response(response_dict)
 
 @api_view(['GET'])

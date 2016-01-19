@@ -86,17 +86,6 @@
 	$(document).ready(function() {
 
     	$("#orderForm input:text").eq(0).focus();
-// 
-		// $(document).on("submit", "#orderForm", function (e) {
-			// alert("in")
-            // $.fileDownload($(this).prop('action'), {
-                // preparingMessageHtml: "We are preparing your report, please wait...",
-                // failMessageHtml: "There was a problem generating your report, please try again.",
-                // httpMethod: "POST",
-                // data: $(this).serialize()
-            // });
-            // e.preventDefault(); //otherwise a normal form submit would occur
-        // });
 
 		$('#myModal1').on('hidden.bs.modal', function() {
 			showLoading();
@@ -214,8 +203,6 @@
 	}
 
 	function rescale() {
-		
-			// height : $(window).height()
 		var size = {
 			width : $(window).width(),
 			height :600
@@ -229,22 +216,6 @@
 		$('.modal-body').css('height', size.height);
 		$('#myModal1').css('top', 10);
 	}
-	
-	// function generateDeliveryPickList(){
-		// bootbox.confirm("Are you sure you want to download Delivery List?", function(){
-// 
-// 		
-		// showLoading();
-		// $.fileDownload($(this).prop('action'), {
-                // preparingMessageHtml: "We are preparing your report, please wait...",
-                // failMessageHtml: "There was a problem generating your report, please try again.",
-                // httpMethod: "POST",
-                // data: $(this).serialize()
-            // });
-//             
-	// });
-	// return false;
-	// }
 
 
 	$(window).bind("resize", rescale);
@@ -340,9 +311,6 @@ Order Date : {{each.order_date}}
 		
 				<td class="text-center">
 				{{each_part.delivered_quantity}}</td>
-
-
-
 
 				<td class="text-center">
 				

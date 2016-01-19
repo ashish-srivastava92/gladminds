@@ -232,15 +232,18 @@ SUIT_CONFIG = {
                    
                      {'model': 'orderpart',
                       'label': 'Orders'},
+                                {'model': 'invoices',
+                      'label': 'Upload invoices'},
+                    
                      
                     )
                     },
 #              
-          {'app': 'bajaj', 'label': 'PJP Schedule', 'icon': ' icon-folder-open',
+          {'app': 'bajaj', 'label': 'Permanent Journey Plan', 'icon': ' icon-folder-open',
           'models':(
 
                      {'model': 'permanentjourneyplan',
-                      'label': 'PJP Schedule'},
+                      'label': 'Permanent Journey Plan'},
 
                     )
                     },
@@ -266,9 +269,6 @@ SUIT_CONFIG = {
 )},
              
         
-        
-        
-        
         )
 }
 
@@ -283,14 +283,14 @@ DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
 #DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
 
 # # for server
-# DB_USER = os.environ.get('DB_USER', 'dssoffline')
-# DB_HOST = os.environ.get('DB_HOST', 'dssoffline.chnnvvffqwop.us-east-1.rds.amazonaws.com') 
-# DB_PASSWORD = os.environ.get('DB_PASSWORD', 'dssoffline')
+DB_USER = 'dssoffline'
+DB_HOST = 'dssoffline.chnnvvffqwop.us-east-1.rds.amazonaws.com'
+DB_PASSWORD = 'dssoffline'
 
 # for bajaj MC
-DB_USER = os.environ.get('DB_USER', 'aftersell')
-DB_HOST = os.environ.get('DB_HOST', 'aftersell-api.chnnvvffqwop.us-east-1.rds.amazonaws.com')
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
+#DB_USER = os.environ.get('DB_USER', 'aftersell')
+#DB_HOST = os.environ.get('DB_HOST', 'aftersell-api.chnnvvffqwop.us-east-1.rds.amazonaws.com')
+#DB_PASSWORD = os.environ.get('DB_PASSWORD', 'aftersell321')
 
 # for bajaj CV
 # DB_USER = os.environ.get('DB_USER', 'bajajcv')

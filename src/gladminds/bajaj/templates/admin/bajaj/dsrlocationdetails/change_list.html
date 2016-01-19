@@ -210,7 +210,7 @@ function loadMarkers()
 }
 function gmap(data)
 {
-       map = new google.maps.Map(document.getElementById('map'),
+    map = new google.maps.Map(document.getElementById('map'),
    {
         zoom: 12,
         disableDefaultUI: true,
@@ -265,18 +265,6 @@ function main1(data,max_lat,min_long,mapcolor,option)
             allButtons(controlDiv);
             maploaded=1;
         }
-    }
-    if(data[2]==undefined)
-        { 
-            $.each(data[1], function(key, val) 
-            {
-                            
-                
-                var  x = new Array("<table class='gtable'><tr><td align='right'><b>Name: </b></td><td >" + val.distributor_name + "</td></tr></table>", val.latitude, val.longitude);
-                
-                locations.push(x);
-            });
-        }
 
     }
     var homeControl = new HomeControl( homeControlDiv, map );
@@ -284,9 +272,6 @@ function main1(data,max_lat,min_long,mapcolor,option)
     map.controls[ google.maps.ControlPosition.TOP_RIGHT ] .push( homeControlDiv );
     var infowindow = new google.maps.InfoWindow();
     var marker="", i;
-    
-    // map.setCenter(new GLatLng(lat, lon));
-    
 }
 
 
