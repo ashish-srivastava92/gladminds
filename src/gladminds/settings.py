@@ -1,4 +1,3 @@
-
 # Django settings for gladminds project.
 import os
 import djcelery
@@ -211,7 +210,7 @@ SUIT_CONFIG = {
                       'label': 'Focused Parts'},
                      {'model': 'partsracklocation',
                     'label': 'Parts Rack Location'},
-		     {'model': 'partindexdetails',
+             {'model': 'partindexdetails',
                     'label': 'Product Catalogue'},
                      )
                
@@ -907,4 +906,3 @@ HOME_URLS = {
 LOGIN_URL = '/login'
 BATCH_SIZE = 100
 LOGAN_ACTIVE = False
-
