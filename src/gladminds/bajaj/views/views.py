@@ -153,8 +153,8 @@ def get_picklist(request):
     picklist_details_dict = {}
     picklist_details_dict['name'] = dist_obj.name
     picklist_details_dict['retailer_name'] = retailer_name
-    picklist_details_dict['address_line_1'] = dist_obj.user.address + ',' + dist_obj.address_line_2
-    picklist_details_dict['address_line_2'] = dist_obj.address_line_3 + ',' + dist_obj.address_line_4
+    picklist_details_dict['address_line_1'] = ','.join(filter(None, (dist_obj.user.address, dist_obj.address_line_2)))
+    picklist_details_dict['address_line_2'] = ','.join(filter(None, (dist_obj.address_line_3, dist_obj.address_line_4)))
     for each_picklist_row in picklist_details_obj:
         picklist_details_dict['part_number'] = each_picklist_row.part_number.part_number
         picklist_details_dict['part_description'] = each_picklist_row.part_number.description
@@ -185,8 +185,8 @@ def download_picklist(request, retailer_id):
     picklist_details_dict = {}
     retailer_name = Retailer.objects.get(id=retailer_id).retailer_name
     picklist_details_dict['name'] = dist_obj.name
-    picklist_details_dict['address_line_1'] = dist_obj.user.address + ',' + dist_obj.address_line_2
-    picklist_details_dict['address_line_2'] = dist_obj.address_line_3 + ',' + dist_obj.address_line_4
+    picklist_details_dict['address_line_1'] = ','.join(filter(None, (dist_obj.user.address, dist_obj.address_line_2)))
+    picklist_details_dict['address_line_2'] = ','.join(filter(None, (dist_obj.address_line_3, dist_obj.address_line_4)))
     for each_picklist_row in picklist_details_obj:
         picklist_details_dict['part_number'] = each_picklist_row.part_number.part_number
         picklist_details_dict['part_description'] = each_picklist_row.part_number.description
@@ -248,11 +248,11 @@ def save_order_history(request):
     opts = OrderPart._meta
     order_display = []
     orders = {}
-    stock = request.POST.getlist('delivered_stock')
+    stocks = request.POST.getlist('delivered_stock')
     part_number_ids = ''
     total_amount = 0
     flag = 0
-    for each in range(0, int(len(stock))):
+    for each in range(0, int(len(stocks))):
         delivered_stock = request.POST.getlist('delivered_stock')[each]
         part_number = request.POST.getlist('part_number')[each]
         delivered_qty = request.POST.getlist('delivered_quantity')[each]
@@ -287,24 +287,29 @@ def save_order_history(request):
         order_details_dict['ret_mobile'] = retailer_obj.mobile
         order_details_dict['ret_name'] = each['retailer_name']
         invoices = Invoices.objects.filter(retailer_id=order_details_dict['ret_id'])
-        if invoices:
-            total_amount = 0
-            collection = 0
-            for invoice in invoices:
-                retailer_dict = {}
-                total_amount = total_amount + invoice.invoice_amount
-                collection_objs = Collection.objects.filter(invoice_id=invoice.id)
-                for each in collection_objs:
-                    collections = CollectionDetails.objects.filter(collection_id=each.id)
-                    if collections:
-                        for each_collections in collections:
-                            collection = collection + each_collections.collected_amount
+        total_outstanding_amount = 0
+        for invoice in invoices:
+            total_outstanding_amount = total_outstanding_amount + (invoice.invoice_amount - invoice.paid_amount)
+        order_details_dict['outstanding'] = total_outstanding_amount      
+        # if invoices:
+        #     total_amount = 0
+        #     collection = 0
+        #     for invoice in invoices:
+        #         retailer_dict = {}
+        #         total_amount = total_amount + invoice.invoice_amount
+        #         collection_objs = Collection.objects.filter(invoice_id=invoice.id)
+        #         for each in collection_objs:
+        #             collections = CollectionDetails.objects.filter(collection_id=each.id)
+        #             if collections:
+        #                 for each_collections in collections:
+        #                     collection = collection + each_collections.collected_amount
 
-            outstanding = total_amount + collection
-            order_details_dict['outstanding'] = outstanding
-        else:
-            outstanding = 0
-            order_details_dict['outstanding'] = 'NA'
+        #     outstanding = total_amount + collection
+        #     order_details_dict['outstanding'] = outstanding
+        # else:
+        #     outstanding = 0
+        #     order_details_dict['outstanding'] = 'NA'
+
         order_details.append(order_details_dict.copy())
 
     context = {'order_status': order_status,
@@ -326,7 +331,6 @@ def generate_picklist_save_order(request):
         delivered_stock = request.POST.getlist('delivered_stock')[each]
         date = request.POST.getlist('order_date')[each]
         order_id = request.POST.getlist('order_id')[each]
-        print order_id, 'id'
         part_number = request.POST.getlist('part_number')[each]
         delivered_qty = request.POST.getlist('delivered_quantity')[each]
         ordered_qty = request.POST.getlist('ordered_quantity')[each]
@@ -380,13 +384,16 @@ def download_delivery_list(request):
     part_number_ids = ''
     total_amount = 0
     flag = 0
+    if stock:
+        do_obj = DoDetails(distributor_id=dist_id)
+        do_obj.save(using=settings.BRAND)
     for each in range(0, int(len(stock))):
         delivered_stock = request.POST.getlist('delivered_stock')[each]
         date = request.POST.getlist('order_date')[each]
         part_number = request.POST.getlist('part_number')[each]
         order_id = request.POST.getlist('order_id')[each]
-        do_obj = DoDetails(order_id=order_id, distributor_id=dist_id)
-        do_obj.save(using=settings.BRAND)
+        order_obj = OrderPart.objects.get(id=order_id)
+        do_obj.order.add(order_obj)
         delivered_qty = request.POST.getlist('delivered_quantity')[each]
         ordered_qty = request.POST.getlist('ordered_quantity')[each]
         if delivered_stock != '':
@@ -449,8 +456,6 @@ def download_delivery_list(request):
 def pending_order_details(request, order_status, retailer_id):
     opts = OrderPart._meta
     distributor_id = request.user.id
-    print 'comesi n here'
-    print request.user.id
     dist_id = Distributor.objects.get(user=request.user).id
     order_display = []
     orders = {}
@@ -462,7 +467,6 @@ def pending_order_details(request, order_status, retailer_id):
         order_obj = OrderPart.objects.filter(retailer=retailer_id, order_status=3).select_related('retailer', 'dsr')
     elif order_status == 'cancelled':
         order_obj = OrderPart.objects.filter(retailer=retailer_id, order_status=2).select_related('retailer', 'dsr')
-    print order_obj, 'objjj'
     if len(order_obj) > 0:
         msg = ''
         retailer_name = order_obj[0].retailer.retailer_name
@@ -470,13 +474,11 @@ def pending_order_details(request, order_status, retailer_id):
         for each in order_obj:
             parts_list = []
             order_id = each.id
-            print order_id, 'this is order id'
             orders_details_obj = OrderPartDetails.objects.select_related('part_number', 'order').filter(order=order_id, part_status=0)
             for each_order in orders_details_obj:
                 if not each_order.part_number:
                     continue
                 parts_dict = {}
-                print 'this is order apr id========================', each_order.id, each_order, each_order.part_number_id
                 parts_dict['mrp'] = each_order.part_number.mrp
                 parts_dict['part_number'] = each_order.part_number.part_number
                 parts_dict['part_description'] = each_order.part_number.description
@@ -513,7 +515,6 @@ def pending_order_details(request, order_status, retailer_id):
                 else:
                     parts_dict['delivered_quantity'] = order_delivered_obj['delivered_quantity__sum']
                 order_delivered_obj = OrderTempDetails.objects.filter(part_number_id=each_order.part_number_id, order_id=each_order.order_id).aggregate(total_allocated=Sum('qty'))
-                print order_delivered_obj, 'del'
                 if order_delivered_obj['total_allocated'] != None:
                     if available_quantity == None:
                         parts_dict['allocated_quantity'] = 0
@@ -523,12 +524,10 @@ def pending_order_details(request, order_status, retailer_id):
                     parts_dict['allocated_quantity'] = 0
                     order_status = order_status
                 parts_list.append(parts_dict.copy())
-                print parts_list, 'list'
 
             if len(orders_details_obj) > 0:
                 orders['parts'] = parts_list
                 order_display.append(orders.copy())
-            print order_display, 'eachdisp'
 
     context = {'order_display': order_display,
      'order_status': order_status,
@@ -683,32 +682,32 @@ def shipped_order_details(request, order_status, retailer_id):
         retailer_name = order_obj[0].retailer.retailer_name   
         for each_order in order_obj:
             orders["order_id"] = each_order.id
-            do_obj = DoDetails.objects.filter(order_id=orders["order_id"]).select_related("invoice")
+
+            do_obj = DoDetails.objects.filter(order=each_order).select_related("invoice")
             for each in do_obj:
 
-                invoices = Invoices.objects.filter(retailer_id = retailer_id)
-                if invoices:
-                    total_amount = 0
-                    collection = 0
-                    for invoice in invoices:
-                        retailer_dict = {}
-                        total_amount = total_amount + invoice.invoice_amount
-    #                     retailer_dict.update({'retailer_id':retailer.retailer_code})
-    #                     retailer_dict.update({'invoice_id': invoice.invoice_id})
-    #                     retailer_dict.update({'total_amount': total_amount})
-    #                     retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
-                        #get the collections for that invoice
-                        collection_objs = Collection.objects.filter(invoice_id = invoice.id)
-                        for each in collection_objs:
-                            collections = CollectionDetails.objects.filter(collection_id = each.id)
-                            if collections:
-                                for each_collections in collections:
-                                    if each_collections.collected_amount == None:
-                                            each_collections.collected_amount=0
-                                    collection = collection + each_collections.collected_amount
-    #                     retailer_dict.update({'collected_amount': collection})
-                    outstanding = total_amount + collection
-                    orders["invoice_amt"] = outstanding
+                # invoices = Invoices.objects.filter(id=do_obj.invoice_id)
+                # total_amount = 0
+                # for invoice in invoices:
+                #     retailer_dict = {}
+                #total_amount = total_amount + each.invoice.invoice_amount
+#                     retailer_dict.update({'retailer_id':retailer.retailer_code})
+#                     retailer_dict.update({'invoice_id': invoice.invoice_id})
+#                     retailer_dict.update({'total_amount': total_amount})
+#                     retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
+                    #get the collections for that invoice
+#                     collection_objs = Collection.objects.filter(invoice_id = invoice.id)
+#                     for each in collection_objs:
+#                         collections = CollectionDetails.objects.filter(collection_id = each.id)
+#                         if collections:
+#                             for each_collections in collections:
+#                                 if each_collections.collected_amount == None:
+#                                         each_collections.collected_amount=0
+#                                 collection = collection + each_collections.collected_amount
+# #                     retailer_dict.update({'collected_amount': collection})
+                # outstanding = total_amount + collection
+
+                orders["invoice_amt"] = each.invoice.invoice_amount
 
                 #orders['invoice_amt'] = each.invoice.invoice_amount
                 orders['invoice_no'] = each.invoice.id
@@ -1344,21 +1343,26 @@ def upload_order_invoice(request):
                 invoice_number = each_invoice.get('Invoice Number')
                 mrp = float(each_invoice.get('MRP', 0))
                 vat_per = float(each_invoice.get('VAT (in percentage)', 0))
-                vat_abs = vat_per * 100 / mrp
+                vat_abs = (vat_per * mrp) / 100
                 service_tax_per = float(each_invoice.get('Service Tax(in percentage)', 0))
-                service_tax_abs = service_tax_per * 100 / mrp
+                service_tax_abs = (service_tax_per * mrp) / 100
                 other_taxes_per = float(each_invoice.get('Other Taxes(in percentage)', 0))
-                other_taxes_abs = other_taxes_per * 100 / mrp
+                other_taxes_abs = (other_taxes_per * mrp) / 100
                 discount_per = float(each_invoice.get('Discount(in percentage)', 0))
-                discount_abs = discount_per * 100 / mrp
+                discount_abs = (discount_per * mrp) / 100
                 order_number = each_invoice.get('Order Number')
                 invoice_date_str = each_invoice.get('Invoice Date (YYYY-MM-DD)')
-                #part_number = each_invoice.get('Part Number')
+                part_number = each_invoice.get('Part Number')
                 delivery_order_details_id = each_invoice.get('Delivery Order Number')
                 invoice_date = datetime.datetime.strptime(invoice_date_str, '%Y-%m-%d').date()
                 grand_total = mrp + service_tax_abs + other_taxes_abs + vat_abs - discount_abs
-                invoice_obj = Invoices(retailer_id=retailer_id, invoice_id=invoice_number, invoice_date=invoice_date, invoice_amount=grand_total)
-                invoice_obj.save(using=settings.BRAND)
+                try:
+                    invoice_obj = Invoices.objects.get(retailer_id=retailer_id, invoice_id=invoice_number)
+                    invoice_obj.invoice_amount = invoice_obj.invoice_amount + grand_total
+                    invoice_obj.save(update_fields=['invoice_amount'])
+                except:
+                    invoice_obj = Invoices(retailer_id=retailer_id, invoice_id=invoice_number, invoice_date=invoice_date, invoice_amount=grand_total)
+                    invoice_obj.save(using=settings.BRAND)
                 order_part_obj.order_status = 3
                 order_part_obj.do_id = delivery_order_details_id
                 order_part_obj.save(update_fields=['order_status', 'do_id'])
@@ -1370,22 +1374,21 @@ def upload_order_invoice(request):
 
                 do_details_obj.invoice = invoice_obj
                 do_details_obj.save(update_fields=['invoice'])
-                # try:
-                #     part_id = PartPricing.objects.get(part_number=part_number)
-                #     order_delivery_history_obj = OrderDeliveredHistory.objects.get(part_number=part_number.part_number, do_id=delivery_order_details_id, order=order_part_obj)
-                # except:
-                #     print "comes in he  exception here=======", 
-                #     messages.error(request, 'Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
-                #     return HttpResponseRedirect('/admin/bajaj/orderpart/')
+                try:
+                    part_obj = PartPricing.objects.get(part_number=part_number)
+                    order_delivery_history_obj = OrderDeliveredHistory.objects.get(part_number=part_obj, do_id=delivery_order_details_id, order=order_part_obj)
+                except:
+                    messages.error(request, 'HistoryUploadError: Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
+                    return HttpResponseRedirect('/admin/bajaj/orderpart/')
 
-                # order_delivery_history_obj.discount = discount_per
-                # order_delivery_history_obj.service_tax = service_tax_per
-                # order_delivery_history_obj.vat = vat_per
-                # order_delivery_history_obj.other_taxes = other_taxes_per
-                # order_delivery_history_obj.save(update_fields=['discount',
-                #  'service_tax',
-                #  'vat',
-                #  'other_taxes'])
+                order_delivery_history_obj.discount = discount_per
+                order_delivery_history_obj.service_tax = service_tax_per
+                order_delivery_history_obj.vat = vat_per
+                order_delivery_history_obj.other_taxes = other_taxes_per
+                order_delivery_history_obj.save(update_fields=['discount',
+                 'service_tax',
+                 'vat',
+                 'other_taxes'])
             except:
                 messages.error(request, 'Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
                 return HttpResponseRedirect('/admin/bajaj/orderpart/')
@@ -1444,6 +1447,7 @@ def download_sample_order_invoice_csv(request):
      'Invoice Number',
      'Delivery Order Number',
      'Invoice Date (YYYY-MM-DD)',
+     'Part Number',
      'MRP',
      'VAT (in percentage)',
      'Service Tax(in percentage)',

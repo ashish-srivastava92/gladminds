@@ -1055,7 +1055,7 @@ class Invoices(base_models.Invoices):
 class DoDetails(base_models.DoDetails):
     ''' List of Do Details'''
     
-    order = models.ForeignKey(OrderPart)
+    order = models.ManyToManyField(OrderPart)
     invoice = models.ForeignKey(Invoices)
     distributor = models.ForeignKey(Distributor, null=True, blank=True)
     

@@ -1254,21 +1254,33 @@ class CollectionAdmin(GmModelAdmin):
              ret_objs = Retailer.objects.filter(distributor=dist_id)        
         for each in ret_objs :
             ret_details_dict["retailer_name"] = each.retailer_name
-            order_objs = OrderPart.objects.filter(retailer_id = each.id).values_list("id",flat=True)
-            orderdetails_obj = OrderPartDetails.objects.filter(order_id__in=order_objs).aggregate(total_value=Sum('line_total'))
-            ret_details_dict["total_value"] = orderdetails_obj["total_value"]
-            total_value = ret_details_dict["total_value"]
-            if total_value != None:
-                collection_objs = Collection.objects.filter(retailer_id=each.id).values_list("id", flat=True)
-                total_collected_amount = CollectionDetails.objects.filter(collection_id__in=collection_objs).aggregate(total_value=Sum('collected_amount'))              
-                if total_collected_amount["total_value"] != None:
-                    tca = total_collected_amount["total_value"]
-                else :
-                    tca = 0
-                ret_details_dict["outstanding"] = int(total_value) - int(tca)
-                ret_details_dict["retailer_id"] = each.id
-                ret_details_dict["collection_details"] = "aaaa"
-                ret_details.append(ret_details_dict.copy())  
+            # order_objs = OrderPart.objects.filter(retailer_id = each.id).values_list("id",flat=True)
+            # orderdetails_obj = OrderPartDetails.objects.filter(order_id__in=order_objs).aggregate(total_value=Sum('line_total'))
+            # ret_details_dict["total_value"] = orderdetails_obj["total_value"]
+            # total_value = ret_details_dict["total_value"]
+            # if total_value != None:
+            #     collection_objs = Collection.objects.filter(retailer_id=each.id).values_list("id", flat=True)
+            #     total_collected_amount = CollectionDetails.objects.filter(collection_id__in=collection_objs).aggregate(total_value=Sum('collected_amount'))              
+            #     if total_collected_amount["total_value"] != None:
+            #         tca = total_collected_amount["total_value"]
+            #     else :
+            #         tca = 0
+
+            ret_details_dict["collection_details"] = "aaaa"
+            total_outstanding_amount = 0
+            total_order_value = 0
+            invoices = Invoices.objects.filter(retailer_id=each.id)
+            for invoice in invoices:
+                invoice.invoice_amount = invoice.invoice_amount if invoice.invoice_amount else 0
+                invoice.paid_amount = invoice.paid_amount if invoice.paid_amount else 0
+                total_order_value = total_order_value + invoice.invoice_amount
+                total_outstanding_amount = total_outstanding_amount + (invoice.invoice_amount - invoice.paid_amount)
+            ret_details_dict["outstanding"] = total_outstanding_amount
+            ret_details_dict["total_value"] = total_order_value
+            ret_details_dict["retailer_id"] = each.id
+            ret_details.append(ret_details_dict.copy()) 
+
+
         context = {"ret_collection_details":ret_details}
         
         template = 'admin/bajaj/collection/change_list.html'  # = Your new template
