@@ -2183,3 +2183,10 @@ class PermanentJourneyPlan(BaseModel):
         abstract = True
         db_table = "gm_permanent_journey_plan"
         verbose_name_plural = "Permanent Journey Plan"
+
+class AveragePartSalesHistory(BaseModel):
+    sale_value = models.IntegerField(default=0)
+    class Meta:
+        abstract = True
+        db_table = "gm_average_part_sales_history"
+        verbose_name_plural = "Average Part Sales History"

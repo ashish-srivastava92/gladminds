@@ -1225,3 +1225,13 @@ class PermanentJourneyPlan(base_models.PermanentJourneyPlan):
 
     class Meta(base_models.PermanentJourneyPlan.Meta):
         app_label = _APP_NAME
+
+
+class AveragePartSalesHistory(base_models.AveragePartSalesHistory):
+    retailer = models.ForeignKey(Retailer)
+    part = models.ForeignKey(PartPricing)
+    month = models.IntegerField(null=True, blank=True)
+    year = models.IntegerField(null=True, blank=True)
+
+    class Meta(base_models.AveragePartSalesHistory.Meta):
+        app_label = _APP_NAME

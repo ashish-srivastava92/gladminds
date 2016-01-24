@@ -257,6 +257,13 @@ SUIT_CONFIG = {
        
 )},
              
+        {'app': 'bajaj', 'label': 'Sales History', 'icon': ' icon-folder-open',
+         'models':(
+                  
+                    {'model': 'averagepartsaleshistory',
+                     'label': 'Average Part Sales History'},
+
+)},
              
              {'app': 'bajaj', 'label': 'Location Details', 'icon': ' icon-folder-open',
          'models':(

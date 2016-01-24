@@ -1628,6 +1628,38 @@ class PermanentJourneyPlanAdmin(GmModelAdmin):
         super(PermanentJourneyPlanAdmin, self).save_model(request, obj, form, change)
 
 
+class AveragePartSalesHistoryAdmin(GmModelAdmin):
+    search_fields = ('month', 'year')
+    list_display = ('get_retailer_code', 'get_retailer_name', 'get_part', 'sale_value', 'month', 'year')
+
+    def get_retailer_name(self, obj):
+        return obj.retailer.retailer_name
+    def get_retailer_code(self, obj):
+        return obj.retailer.retailer_code
+    def get_part(self, obj):
+        return obj.part.part_number
+
+    get_retailer_name.short_description = "Retailer Name"
+    get_retailer_code.short_description = "Retailer Code"
+    get_part.short_description = "Part Number"
+
+# class AverageLocationSalesHistoryAdmin(GmModelAdmin):
+#     search_fields = ('month', 'year')
+#     list_display = ('get_location_name', 'get_location_city', 'get_location_state', 'sale_value')
+
+#     def get_retailer_name(self, obj):
+#         return obj.retailer.retailer_name
+#     def get_retailer_code(self, obj):
+#         return obj.retailer.retailer_code
+#     def get_part(self, obj):
+#         return obj.part.part_number
+
+#     get_retailer_name.short_description = "Retailer Name"
+#     get_retailer_code.short_description = "Retailer Code"
+#     get_part.short_description = "Part Number"
+
+
+
 
 import json
 class DSRLocationDetailsAdmin(GmModelAdmin):
@@ -2597,6 +2629,9 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("ContainerIndent", brand), ContainerIndentAdmin)
     brand_admin.register(get_model("ContainerLR", brand), ContainerLRAdmin)
     brand_admin.register(get_model("PartIndexDetails", brand), ProductCatalogAdmin)
+    brand_admin.register(get_model("AveragePartSalesHistory", brand), AveragePartSalesHistoryAdmin)
+
+
     # Disable the delete action throughout the admin site
     brand_admin.disable_action('delete_selected')
    
