@@ -122,6 +122,9 @@ def get_retailers(request, dsr_id):
             retailer_dict.update({"city":''})
             retailer_dict.update({"state":''})
             retailer_dict.update({"locality_id":''})
+        if not retailer.latitude or not retailer.longitude:
+            retailer.latitude=''
+            retailer.longitude=''
         retailer_dict.update({"latitude":str(retailer.latitude)})
         retailer_dict.update({"longitude":str(retailer.longitude)})
         retailer_list.append(retailer_dict)
