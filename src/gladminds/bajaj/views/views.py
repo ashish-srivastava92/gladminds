@@ -599,7 +599,7 @@ def get_outstanding_details(request, retailer_id):
     today = datetime.date.today()
     for invoice_obj in invoice_objs:
         ind_invoice_dict = {}
-        ind_invoice_dict["invoice_amount"] = invoice_obj.invoice_amount
+        ind_invoice_dict["invoice_amount"] = invoice_obj.invoice_amount - invoice_obj.paid_amount
         ind_invoice_dict["invoice_date"] = invoice_obj.invoice_date
         if (today - day_margin_30  <= invoice_obj.invoice_date.date() <= today):
             #invoice_list_now_30_days.append(ind_invoice_dict)

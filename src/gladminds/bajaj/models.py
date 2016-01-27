@@ -1235,3 +1235,14 @@ class AveragePartSalesHistory(base_models.AveragePartSalesHistory):
 
     class Meta(base_models.AveragePartSalesHistory.Meta):
         app_label = _APP_NAME
+
+
+class AverageLocationSalesHistory(base_models.AverageLocationSalesHistory):
+    location = models.ForeignKey(Locality)
+    part = models.ForeignKey(PartPricing)
+    start_month = models.IntegerField(null=True, blank=True)
+    end_month = models.IntegerField(null=True, blank=True)
+    year = models.IntegerField(null=True, blank=True)
+
+    class Meta(base_models.AverageLocationSalesHistory.Meta):
+        app_label = _APP_NAME

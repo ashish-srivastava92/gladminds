@@ -263,6 +263,9 @@ SUIT_CONFIG = {
                     {'model': 'averagepartsaleshistory',
                      'label': 'Average Part Sales History'},
 
+                    {'model': 'averagelocationsaleshistory',
+                     'label': 'Average Location Sales History'},
+
 )},
              
              {'app': 'bajaj', 'label': 'Location Details', 'icon': ' icon-folder-open',
