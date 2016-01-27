@@ -21,11 +21,11 @@ from rest_framework_jwt.settings import api_settings
 from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
                             PartPricing, Distributor,  Invoices, \
                             Collection,CollectionDetails,PartsStock,DSRWorkAllocation,DSRLocationDetails, \
-			    NationalSparesManager,AreaSparesManager
+			    NationalSparesManager,AreaSparesManager,OrderDeliveredHistory
 from gladminds.bajaj.models import OrderPart,OrderPartDetails, \
                         PartIndexDetails, PartIndexPlates, FocusedPart
 from gladminds.core.auth_helper import Roles
-
+from django.db.models import Sum
 
 from gladminds.core import constants
 
@@ -1128,7 +1128,7 @@ def get_orders(request, dsr_id):
     orders_list = []
     for order in order_details:
         order_dict = OrderedDict()
-        order_dict['order_id'] = order.id
+        order_dict['order_id'] = order.order_number
         order_dict['retailer_id'] = order.retailer.retailer_code
         order_dict['order_date'] = order.order_date.date()
         # check the status of the order and get it from the constants
@@ -1147,10 +1147,15 @@ def get_orders(request, dsr_id):
             # order details dict
             order_details_list = []
             for each in order_detail:
+                order_delivered_obj = OrderDeliveredHistory.objects.filter(part_number=each.part_number, order=each.order).aggregate(Sum('delivered_quantity'))
                 order_details_dict = OrderedDict()
                 order_details_dict['part_id'] = each.part_number.part_number
                 order_details_dict['part_name'] = each.part_number.description
                 order_details_dict['quantity'] = each.quantity
+                if order_delivered_obj.get('delivered_quantity__sum') == None:
+                    order_details_dict['delivered_quantity'] = 0
+                else:
+                    order_details_dict['delivered_quantity'] = order_delivered_obj.get('delivered_quantity__sum')
                 order_details_dict['mrp'] = each.part_number.mrp
                 order_details_dict['line_total'] = each.line_total
                 order_details_list.append(order_details_dict)
