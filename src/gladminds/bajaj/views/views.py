@@ -289,6 +289,8 @@ def save_order_history(request):
         invoices = Invoices.objects.filter(retailer_id=order_details_dict['ret_id'])
         total_outstanding_amount = 0
         for invoice in invoices:
+            invoice.invoice_amount = invoice.invoice_amount if invoice.invoice_amount else 0
+            invoice.paid_amount = invoice.paid_amount if invoice.paid_amount else 0
             total_outstanding_amount = total_outstanding_amount + (invoice.invoice_amount - invoice.paid_amount)
         order_details_dict['outstanding'] = total_outstanding_amount      
         # if invoices:
