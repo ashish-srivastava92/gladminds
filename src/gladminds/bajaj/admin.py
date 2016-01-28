@@ -1921,6 +1921,8 @@ class OrderPartAdmin(GmModelAdmin):
                 total_amount = 0
                 collection = 0
                 for invoice in invoices:
+                    invoice.invoice_amount = invoice.invoice_amount if invoice.invoice_amount else 0
+                    invoice.paid_amount = invoice.paid_amount if invoice.paid_amount else 0
                     total_amount = total_amount + (invoice.invoice_amount - invoice.paid_amount)
 #                     retailer_dict.update({'retailer_id':retailer.retailer_code})
 #                     retailer_dict.update({'invoice_id': invoice.invoice_id})

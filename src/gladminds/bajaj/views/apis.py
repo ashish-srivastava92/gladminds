@@ -583,29 +583,30 @@ def uploadcollection(request):
             collection.retailer = retailer
             collection.latitude = collection_body['latitude']
             collection.longitude = collection_body['longitude']
+            collection.collected_amount = collection_body['collected_amount']
             collection.save()
             #put data into collection details table
+            collectiondetails = CollectionDetails()
+            collectiondetails.collection = collection
+            collectiondetails.mode = collection_body['payment_mode']
+            collectiondetails.collected_amount = collection_body['collected_amount']
+            collectiondetails.collected_cash = collection_body['collected_cash']
             for cheque in collection_body['cheque_details']:
-                collectiondetails = CollectionDetails()
-                collectiondetails.collection = collection
-                collectiondetails.mode = collection_body['payment_mode']
-                collectiondetails.collected_amount = collection_body['collected_amount']
-                collectiondetails.collected_cash = collection_body['collected_cash']
                 collectiondetails.cheque_bank = cheque['cheque_bank']
                 collectiondetails.cheque_number = cheque['cheque_number']
                 collectiondetails.cheque_amount = cheque['cheque_amount']
                 collectiondetails.img_url = cheque['cheque_image_url']
-                collectiondetails.save()
+            collectiondetails.save()
             message = message + '\n' + 'status : 1' + ' ' + \
                       'message : Retailer Collection(s) is updated successfully'
         else:
             message = message + '\n' + 'status : 0' + ' ' + \
                 'message : Collection is greater than the invoice amount for the invoice id: ' + collection_body['invoice_id']
     try:
-    	transaction.commit()
-	message = {'status': 1, 'message': 'Collection update successfully'}
+        transaction.commit()
+        message = {'status': 1, 'message': 'Collection update successfully'}
     except:
-	message = {'status': 0, 'message': 'Collection update failed'}
+        message = {'status': 0, 'message': 'Collection update failed'}
     send_msg_to_retailer_on_collection(request,retailer.id)
     return Response(message)
 
@@ -1411,8 +1412,7 @@ def get_associated_dsrs(request,distributor_id=None):
         dsr_dict = {}
         dsr_dict['userid'] = dsr.distributor_sales_code
         dsr_dict['firstname'] = dsr.user.user.first_name
-        dsr_dict['lastname'] = d
-        sr.user.user.last_name
+        dsr_dict['lastname'] = dsr.user.user.last_name
         dsr_dict['retailers'] = []
 	retailers = Retailer.objects.filter(dsr_id=dsr.id)#.exclude(dsr_id__isnull=True)
 	for retailer in retailers:
@@ -1426,7 +1426,6 @@ def get_associated_dsrs(request,distributor_id=None):
              retailer_unassigned_dict=get_retailer_unassigned_dict(retailer)
              if retailer_unassigned_dict != None:
 		response_dict['retailers'].append(retailer_unassigned_dict)
-    print "this is respoeeeee============",response_dict 
     return Response(response_dict)
 
 @api_view(['GET'])

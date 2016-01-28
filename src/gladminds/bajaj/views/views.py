@@ -1013,10 +1013,10 @@ def get_collection_details(request, ret_id):
                 collection_details_dict['mode'] = 'Cash/Cheque'
             collection_details_dict['cheque_number'] = each_obj.cheque_number
             collection_details_dict['cheque_bank'] = each_obj.cheque_bank
-        collection_details_dict['cheque_img_url'] = each_obj.img_url.path.replace('/var/www/demosfa/gladminds/src/static/','')
-        collection_details_dict['status'] = ''
-        collection_details_dict['invoice_no'] = each_obj.collection.invoice.invoice_id
-        collection_details.append(collection_details_dict.copy())
+            #collection_details_dict['cheque_img_url'] = each_obj.img_url.path.replace('/var/www/demosfa/gladminds/src/static/','')
+            collection_details_dict['status'] = ''
+            collection_details_dict['invoice_no'] = each_obj.collection.invoice.invoice_id
+            collection_details.append(collection_details_dict.copy())
 
     return HttpResponse(json.dumps(collection_details), content_type='application/json')
 
@@ -1353,9 +1353,15 @@ def upload_order_invoice(request):
                 order_number = each_invoice.get('Order Number')
                 invoice_date_str = each_invoice.get('Invoice Date (YYYY-MM-DD)')
                 part_number = each_invoice.get('Part Number')
+                part_quantity = float(each_invoice.get('Part Quantity'))
+
                 delivery_order_details_id = each_invoice.get('Delivery Order Number')
                 invoice_date = datetime.datetime.strptime(invoice_date_str, '%Y-%m-%d').date()
-                grand_total = mrp + service_tax_abs + other_taxes_abs + vat_abs - discount_abs
+                line_grand_total = each_invoice.get('Line Grand Total')
+                if line_grand_total:
+                    grand_total = float(line_grand_total)
+                else:
+                    grand_total = (mrp * part_quantity) + service_tax_abs + other_taxes_abs + vat_abs - discount_abs                 
                 try:
                     invoice_obj = Invoices.objects.get(retailer_id=retailer_id, invoice_id=invoice_number)
                     invoice_obj.invoice_amount = invoice_obj.invoice_amount + grand_total
@@ -1448,11 +1454,13 @@ def download_sample_order_invoice_csv(request):
      'Delivery Order Number',
      'Invoice Date (YYYY-MM-DD)',
      'Part Number',
+     'Part Quantity',
      'MRP',
      'VAT (in percentage)',
      'Service Tax(in percentage)',
      'Other Taxes(in percentage)',
-     'Discount(in percentage)'])
+     'Discount(in percentage)',
+     'Line Grand Total'])
     return response
 
 
