@@ -468,6 +468,8 @@ def get_dsr_outstanding(request, dsr_id):
                 retailer_dict = {}
                 total_amount = 0
                 collection = 0
+                invoice.invoice_amount = invoice.invoice_amount if invoice.invoice_amount else 0
+                invoice.paid_amount = invoice.paid_amount if invoice.paid_amount else 0
                 total_amount = total_amount + (invoice.invoice_amount - invoice.paid_amount)
                 retailer_dict.update({'retailer_id':retailer.retailer_code})
                 retailer_dict.update({'invoice_id': invoice.invoice_id})
@@ -480,6 +482,7 @@ def get_dsr_outstanding(request, dsr_id):
                     # collections = CollectionDetails.objects.filter(collection_id = each.id)
                     # if collections:
                     #     for each_collections in collections:
+                    each.collected_amount = each.collected_amount if each.collected_amount else 0
                     collection = collection + each.collected_amount
                 retailer_dict.update({'collected_amount': collection})
                 retailer_dict.update({'period': diff.days})
@@ -735,6 +738,7 @@ def dsr_dashboard_report(request, dsr_id):
         collections = Collection.objects.filter(retailer = retailer)
         for collection in collections:    
             # get all the collection details for this collection
+            collection.collected_amount = collection.collected_amount if collection.collected_amount else 0
             retailer_collected_amount = retailer_collected_amount + \
                                             collection.collected_amount
         # sum up the each retailer collected amount to the total

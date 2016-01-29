@@ -183,7 +183,9 @@ def download_picklist(request, retailer_id):
     picklist_details = []
     dist_obj = Distributor.objects.get(user=request.user)
     picklist_details_dict = {}
-    retailer_name = Retailer.objects.get(id=retailer_id).retailer_name
+    retailer_obj = Retailer.objects.get(id=retailer_id)
+    retailer_name = retailer_obj.retailer_name
+    retailer_code = retailer_obj.retailer_code
     picklist_details_dict['name'] = dist_obj.name
     picklist_details_dict['address_line_1'] = ','.join(filter(None, (dist_obj.user.address, dist_obj.address_line_2)))
     picklist_details_dict['address_line_2'] = ','.join(filter(None, (dist_obj.address_line_3, dist_obj.address_line_4)))
@@ -206,7 +208,8 @@ def download_picklist(request, retailer_id):
     response = HttpResponse(content_type='text/excel')
     response['Content-Disposition'] = 'attachment; filename="PickList.xls"'
     c = Context({'data': picklist_details,
-     'retailer_name': retailer_name})
+     'retailer_name': retailer_name,
+     'retailer_code': retailer_code})
     template = loader.get_template('admin/bajaj/orderpart/download_picklist.html')
     response.write(template.render(c))
     return response
@@ -814,9 +817,11 @@ def download_order_parts(request, order_id, order_status, retailer_id):
     ordered_date = order_part_obj.order_date
     orderdetails_obj = OrderPartDetails.objects.filter(order_id=order_id).aggregate(Sum('line_total'))
     orders['total_value'] = orderdetails_obj['line_total__sum']
+    retailer_obj = Retailer.objects.get(id=retailer_id)
+    retailer_name = retailer_obj.retailer_name
+    retailer_code = retailer_obj.retailer_code
     for each in orders_obj:
         orderparts_obj = OrderPartDetails.objects.select_related('part_number', 'order').filter(order_id=each.id)
-        print orderparts_obj, 'obj'
         for each_order in orderparts_obj:
             print each_order.part_number, 'part'
             orders['mrp'] = each_order.part_number.mrp
@@ -855,6 +860,8 @@ def download_order_parts(request, order_id, order_status, retailer_id):
      'app_label': opts.app_label,
      'opts': opts,
      'retailer_id': retailer_id,
+     'retailer_name': retailer_name,
+     'retailer_code': retailer_code,
      'order_number': order_number,
      'order_total_value': orders['total_value']}
     response = HttpResponse(content_type='text/excel')
