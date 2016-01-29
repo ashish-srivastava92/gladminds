@@ -712,8 +712,9 @@ def dsr_dashboard_report(request, dsr_id):
         total_achieved = 0
         for each in achieved_list:
             total_achieved = total_achieved + each
-        mtd = str(total_achieved/ len(retailers)) + '%'
-        retailer_dict.update({"MTD performance": mtd})
+        if len(retailers):
+            mtd = str(total_achieved/ len(retailers)) + '%'
+            retailer_dict.update({"MTD performance": mtd})
     # calculation of total sales value
     total_sales_value = 0
     for retailer in retailers:
@@ -861,6 +862,7 @@ def dsr_dashboard_report(request, dsr_id):
         if collections:
             for collection in collections:    
             # get all the collection details for this collection
+                collection.collected_amount = collection.collected_amount if collection.collected_amount else 0
                 retailer_collected_amount = retailer_collected_amount + \
                                             collection.collected_amount
         # sum up the each retailer collected amount to the total
@@ -956,6 +958,7 @@ def dsr_dashboard_report(request, dsr_id):
             # get all the collection details for this collection
             collection_details = CollectionDetails.objects.filter(collection = collection)
             for collection_detail in collection_details:
+                collection.collected_amount = collection.collected_amount if collection.collected_amount else 0
                 retailer_collected_amount = retailer_collected_amount + \
                                             collection.collected_amount
         # sum up the each retailer collected amount to the total
