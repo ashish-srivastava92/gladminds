@@ -295,6 +295,7 @@ def save_order_history(request):
             invoice.invoice_amount = invoice.invoice_amount if invoice.invoice_amount else 0
             invoice.paid_amount = invoice.paid_amount if invoice.paid_amount else 0
             total_outstanding_amount = total_outstanding_amount + (invoice.invoice_amount - invoice.paid_amount)
+        total_outstanding_amount = float(format(total_outstanding_amount, '.2f'))
         order_details_dict['outstanding'] = total_outstanding_amount      
         # if invoices:
         #     total_amount = 0
@@ -1364,7 +1365,7 @@ def upload_order_invoice(request):
                 order_number = each_invoice.get('Order Number')
                 invoice_date_str = each_invoice.get('Invoice Date (YYYY-MM-DD)')
                 part_number = each_invoice.get('Part Number')
-                part_quantity = float(each_invoice.get('Part Quantity'))
+                part_quantity = float(each_invoice.get('Billed Part Quantity'))
 
                 delivery_order_details_id = each_invoice.get('Delivery Order Number')
                 invoice_date = datetime.datetime.strptime(invoice_date_str, '%Y-%m-%d').date()
@@ -1465,7 +1466,12 @@ def download_sample_order_invoice_csv(request):
      'Delivery Order Number',
      'Invoice Date (YYYY-MM-DD)',
      'Part Number',
-     'Part Quantity',
+     'Billed Part Quantity',
+     'Part Description',
+     'Transporter ID',
+     'Transporter/Courier Name',
+     'Shipping Date',
+     'LR Number',
      'MRP',
      'VAT (in percentage)',
      'Service Tax(in percentage)',

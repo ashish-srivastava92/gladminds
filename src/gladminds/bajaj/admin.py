@@ -1275,6 +1275,8 @@ class CollectionAdmin(GmModelAdmin):
                 invoice.paid_amount = invoice.paid_amount if invoice.paid_amount else 0
                 total_order_value = total_order_value + invoice.invoice_amount
                 total_outstanding_amount = total_outstanding_amount + (invoice.invoice_amount - invoice.paid_amount)
+            total_outstanding_amount = float(format(total_outstanding_amount, '.2f'))
+            total_order_value = float(format(total_order_value, '.2f'))
             ret_details_dict["outstanding"] = total_outstanding_amount
             ret_details_dict["total_value"] = total_order_value
             ret_details_dict["retailer_id"] = each.id
@@ -1940,6 +1942,7 @@ class OrderPartAdmin(GmModelAdmin):
 #                     retailer_dict.update({'collected_amount': collection})
                 
                 # outstanding = total_amount + collection
+                total_amount = float(format(total_amount, '.2f'))
                 order_details_dict["outstanding"] = total_amount
 #                     retailer_list.append(retailer_dict)
             else: 
