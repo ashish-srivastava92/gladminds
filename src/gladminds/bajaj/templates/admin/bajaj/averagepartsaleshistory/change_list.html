@@ -2,7 +2,7 @@
 {% load i18n %}
 {% block object-tools %}
     <div class="span6">
-            <form action="{% url 'upload_order_invoice' %}" method="POST" enctype="multipart/form-data" >
+            <form action="{% url 'upload_average_part_history' %}" method="POST" enctype="multipart/form-data" >
             <table width>
                     <tr>
                         <td>
@@ -24,7 +24,7 @@
 
     <script type="text/javascript">
         function downloadSampleRetailerSalesHistoryCsv(){
-            url = "{% url 'download_sample_order_invoice_csv' %}"
+            url = "{% url 'download_sample_average_part_history' %}"
             location.href= url;
         }
     </script>

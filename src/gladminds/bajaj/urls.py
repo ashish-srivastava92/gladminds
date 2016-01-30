@@ -147,10 +147,13 @@ urlpatterns = patterns('',
                    name='invoice'),
     url(r'^download_sample_Collection_upload_csv/', 'gladminds.bajaj.views.views.download_sample_Collection_upload_csv',
                    name='download_sample_Collection_upload_csv'),
+    url(r'^download_sample_average_part_history/', 'gladminds.bajaj.views.views.download_sample_average_part_history',
+                   name='download_sample_average_part_history'),
 
     url(r'^download_delivery_list/', 'gladminds.bajaj.views.views.download_delivery_list', name='download_delivery_list'),
                        
 
+    url(r'^upload_average_part_history/', 'gladminds.bajaj.views.views.upload_average_part_history', name='upload_average_part_history'),
                        
     url(r'^admin/delete_temp_details','gladminds.bajaj.views.views.clear_order_temp', name='clear_order_temp'),
               

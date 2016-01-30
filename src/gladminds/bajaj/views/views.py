@@ -46,7 +46,7 @@ from gladminds.core.auth import otp_handler
 from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor, District, State, OrderPartDetails, \
 PartPricing, OrderDeliveredHistory, DoDetails, PartsStock, OrderPart, OrderPartDetails, DistributorSalesRep, DSRWorkAllocation, \
 BackOrders, DSRLocationDetails, OrderTempDeliveredHistory, Collection, CollectionDetails, DoDetails,\
-AreaSparesManager, PartsRackLocation, OrderTempDetails, Invoices, PartsRackLocation
+AreaSparesManager, PartsRackLocation, OrderTempDetails, Invoices, PartsRackLocation, AveragePartSalesHistory
 
 
 from django.core.serializers.json import DjangoJSONEncoder
@@ -715,8 +715,8 @@ def shipped_order_details(request, order_status, retailer_id):
 # #                     retailer_dict.update({'collected_amount': collection})
                 # outstanding = total_amount + collection
 
-                orders["invoice_amt"] = each.invoice.invoice_amount
-
+                invoice_amount = float(format(each.invoice.invoice_amount, '.2f'))
+                orders["invoice_amt"] = invoice_amount
                 #orders['invoice_amt'] = each.invoice.invoice_amount
                 orders['invoice_no'] = each.invoice.id
                 orders['invoice_number'] = each.invoice.invoice_id            
@@ -1315,7 +1315,7 @@ def get_invoice_details(request, ret_id, invoice_id):
         ind_invoice['invoice_number'] = order_history.do.invoice.invoice_id
         ind_invoice['order_number'] = order_history.order.order_number
         ind_invoice['invoice_date'] = order_history.do.invoice.invoice_date
-        ind_invoice['mrp'] = order_history.do.invoice.invoice_amount
+        ind_invoice['mrp'] = order_history.part_number.mrp
         ind_invoice['vat'] = order_history.vat
         ind_invoice['service_tax'] = order_history.service_tax
         ind_invoice['other_taxes'] = order_history.other_taxes
@@ -1330,6 +1330,45 @@ def get_invoice_details(request, ret_id, invoice_id):
     form_url = ''
     template = 'admin/bajaj/orderpart/invoice_details.html'
     return render(request, template, context)
+
+@transaction.commit_manually
+def upload_average_part_history(request):
+    full_path = handle_uploaded_file(request.FILES['upload_average_retailer_sales_history'])
+    msg = ''
+    retailer_obj = None
+    with open(full_path) as csvfile:
+        all_average_part_history = csv.DictReader(csvfile)
+        for each_part_history in all_average_part_history:
+            retailer_code =  each_part_history['Retailer Code']
+            part_number = each_part_history['Part Number']
+            part_quantity = each_part_history['Parts Qunatity']
+            month = int(each_part_history['Month'])
+            year = int(each_part_history['Year'])
+            retailer_obj = Retailer.objects.get(retailer_code=retailer_code)
+            part_obj = PartPricing.objects.get(part_number=part_number)
+            avg_parts_sales_history = AveragePartSalesHistory(retailer=retailer_obj, part=part_obj, month=month, year=year, sale_value=part_quantity)
+            avg_parts_sales_history.save()
+        try:
+            transaction.commit()
+        except:
+            messages.error(request, 'Average Retailer History upload failed')
+            return HttpResponseRedirect('/admin/bajaj/averagepartsaleshistory/')
+
+        messages.success(request, 'Average Retailer History successfully')
+        return HttpResponseRedirect('/admin/bajaj/averagepartsaleshistory/')
+
+
+def download_sample_average_part_history(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="SampleAveragePartHistory.csv"'
+    writer = csv.writer(response, dialect=csv.excel)
+    writer.writerow(['Retailer Code',
+        'Part Number',
+        'Parts Qunatity',
+        'Month',
+        'Year'])
+    return response
+
 
 
 @transaction.commit_manually
