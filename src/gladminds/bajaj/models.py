@@ -1076,6 +1076,11 @@ class OrderDeliveredHistory(base_models.OrderDeliveredHistory):
     service_tax = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     other_taxes = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     discount = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    transporter_id = models.CharField(max_length=50, null=True, blank=True)
+    transporter_name = models.CharField(max_length=100, null=True, blank=True)
+    shipping_date = models.DateTimeField(null=True, blank=True)
+    lr_number = models.CharField(max_length=50, null=True, blank=True)
+
     class Meta(base_models.OrderDeliveredHistory.Meta):
         app_label = _APP_NAME
         verbose_name_plural = "Order Delivered History"

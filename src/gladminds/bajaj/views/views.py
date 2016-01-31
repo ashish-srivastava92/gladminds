@@ -1363,10 +1363,14 @@ def download_sample_average_part_history(request):
     response['Content-Disposition'] = 'attachment; filename="SampleAveragePartHistory.csv"'
     writer = csv.writer(response, dialect=csv.excel)
     writer.writerow(['Retailer Code',
+        'Retailer Name',
+        'State',
+        'City',
+        'Locality',
         'Part Number',
-        'Parts Qunatity',
-        'Month',
-        'Year'])
+        'Part Qunatity',
+        'Date (YYYY-MM-DD)'
+        ])
     return response
 
 
@@ -1393,7 +1397,7 @@ def upload_order_invoice(request):
                     retailer_id = retailer_obj.id
                 invoice_number = each_invoice.get('Invoice Number')
                 mrp = float(each_invoice.get('MRP', 0))
-                vat_per = float(each_invoice.get('VAT (in percentage)', 0))
+                vat_per = float(each_invoice.get('VAT(in percentage)', 0))
                 vat_abs = (vat_per * mrp) / 100
                 service_tax_per = float(each_invoice.get('Service Tax(in percentage)', 0))
                 service_tax_abs = (service_tax_per * mrp) / 100
@@ -1402,12 +1406,17 @@ def upload_order_invoice(request):
                 discount_per = float(each_invoice.get('Discount(in percentage)', 0))
                 discount_abs = (discount_per * mrp) / 100
                 order_number = each_invoice.get('Order Number')
-                invoice_date_str = each_invoice.get('Invoice Date (YYYY-MM-DD)')
+                invoice_date_str = each_invoice.get('Invoice Date(YYYY-MM-DD)')
                 part_number = each_invoice.get('Part Number')
                 part_quantity = float(each_invoice.get('Billed Part Quantity'))
+                transported_id = each_invoice.get('Transporter ID')
+                transporter_name = each_invoice.get('Transporter/Courier Name')
+                shipping_date_str = each_invoice.get('Shipping Date(YYYY-MM-DD)')
+                lr_number = each_invoice.get('LR Number')
 
                 delivery_order_details_id = each_invoice.get('Delivery Order Number')
                 invoice_date = datetime.datetime.strptime(invoice_date_str, '%Y-%m-%d').date()
+                shipping_date = datetime.datetime.strptime(shipping_date_str, '%Y-%m-%d').date()
                 line_grand_total = each_invoice.get('Line Grand Total')
                 if line_grand_total:
                     grand_total = float(line_grand_total)
@@ -1442,6 +1451,11 @@ def upload_order_invoice(request):
                 order_delivery_history_obj.service_tax = service_tax_per
                 order_delivery_history_obj.vat = vat_per
                 order_delivery_history_obj.other_taxes = other_taxes_per
+                order_delivery_history_obj.transporter_id = transporter_id
+                order_delivery_history_obj.transporter_name = transporter_name
+                order_delivery_history_obj.shipping_date = shipping_date
+                order_delivery_history_obj.lr_number = lr_number
+
                 order_delivery_history_obj.save(update_fields=['discount',
                  'service_tax',
                  'vat',
@@ -1500,19 +1514,20 @@ def download_sample_order_invoice_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="SampleOrderInvoice.csv"'
     writer = csv.writer(response, dialect=csv.excel)
-    writer.writerow(['Order Number',
+    writer.writerow([
      'Invoice Number',
+     'Invoice Date(YYYY-MM-DD)',
+     'Order Number',
      'Delivery Order Number',
-     'Invoice Date (YYYY-MM-DD)',
      'Part Number',
      'Billed Part Quantity',
      'Part Description',
      'Transporter ID',
      'Transporter/Courier Name',
-     'Shipping Date',
+     'Shipping Date(YYYY-MM-DD)',
      'LR Number',
      'MRP',
-     'VAT (in percentage)',
+     'VAT(in percentage)',
      'Service Tax(in percentage)',
      'Other Taxes(in percentage)',
      'Discount(in percentage)',
