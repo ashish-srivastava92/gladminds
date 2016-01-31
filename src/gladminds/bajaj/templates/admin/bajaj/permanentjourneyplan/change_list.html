@@ -531,12 +531,12 @@ $.ajax({
         loadMap(userObj);
     }
     else if(userObj.role_name=="Distributor"){
-        var distributors=userObj.role_id
         $("#asm,#nsm,#distributor").remove();
-
-       $(".filtersRight").empty();
-         //loadMap(userObj);
-        /*$.ajax({
+      var distributorsUser=userObj;
+      globalUserobj=distributorsUser;
+      //$(".filtersRight").empty();
+      loadMap(userObj);
+      /*  $.ajax({
                 url : "{% url 'getdsrs' %}",
                 async : "true",
                 success : function(dsrsObj)
@@ -549,23 +549,11 @@ $.ajax({
                     }); 
                 }
         });*/
-$.ajax({
-        url : "{% url 'getdsrs' %}",
-        async : "true",
-        method:"GET",
-        data:{"distributor_id":distributors},
-        success : function(dsrsObj)
-    // $.getJSON( "getdsrs.json", function( dsrsObj ) {
-        {
-            hideLoading();
-            loadMap(dsrsObj);globalUserobj=dsrsObj;
-            $.each( dsrsObj.users, function( key, val ) {
+        $.each( distributorsUser.users, function( key, val ) {
                 var dsrLength;
                 dsrLength=val.retailers.length; 
                 $( '<button type="button" class="btn btn-primary btn-lg dsrButton"  ><div class="span12"><b>'+ val.firstname+'</b><br><span style="">Retailers count : '+dsrLength+'</span></div></button>').attr( "dsrid", val.userid).attr( "id", val.userid).appendTo( "#rightside");
             });
-       } 
-    });
         $(".filtersRight").css("display","block")
     }
 }
