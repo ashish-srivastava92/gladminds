@@ -1461,15 +1461,15 @@ class PartCategoryAdmin(GmModelAdmin):
 class PartsRackLocationAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('part_number__part_number', 'part_number__description', 'rack_location')
-    list_display = ('part_number', 'part_description', 'rack_location')
+    list_display = ('get_part_number', 'part_description', 'rack_location')
 	
     def rack_location(self,obj):
-	return obj.rack_location
+	   return obj.rack_location
     rack_location.short_description = "Rack Location"
  
-    def part_number(self, obj):
+    def get_part_number(self, obj):
         return obj.part_number.part_number
-    part_number.short_description = 'Part Number'
+    get_part_number.short_description = 'Part Number'
 
     def part_description(self, obj):
         return obj.part_number.description
