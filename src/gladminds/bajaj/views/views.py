@@ -1409,7 +1409,7 @@ def upload_order_invoice(request):
                 invoice_date_str = each_invoice.get('Invoice Date(YYYY-MM-DD)')
                 part_number = each_invoice.get('Part Number')
                 part_quantity = float(each_invoice.get('Billed Part Quantity'))
-                transported_id = each_invoice.get('Transporter ID')
+                transporter_id = each_invoice.get('Transporter ID')
                 transporter_name = each_invoice.get('Transporter/Courier Name')
                 shipping_date_str = each_invoice.get('Shipping Date(YYYY-MM-DD)')
                 lr_number = each_invoice.get('LR Number')
