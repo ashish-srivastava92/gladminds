@@ -4,7 +4,6 @@
 	<tr><td>Order Number - {{order_number}}</td></tr>
         <tr>
                 <td><strong>Part Number</strong></td>
-                <td><strong>Available Quantity</strong></td>
                 <td><strong>Order Quantity</strong></td>
                 <td><strong>MRP</strong></td>
                 <td><strong>Line Total</strong></td>
@@ -14,7 +13,6 @@
                 {% for record in order_display %}
         <tr>
                 <td>{{record.part_number|default_if_none:""}}</td>
-                <td>{{record.available_quantity|default_if_none:""}}</td>
                 <td>{{record.quantity|default_if_none:""}}</td>
                 <td>{{record.mrp|default_if_none:""}}</td>
 		<td>{{record.line_total|default_if_none:""}}</td>
