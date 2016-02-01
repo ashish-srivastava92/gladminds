@@ -1653,7 +1653,7 @@ class AverageLocationSalesHistoryAdmin(GmModelAdmin):
     def get_state_name(self, obj):
         return obj.location.city.state.state_name
     def get_city_name(self, obj):
-        return obj.location.city.name
+        return obj.location.city.city
     def get_locality_name(self, obj):
         return obj.location.name
     def get_part(self, obj):
