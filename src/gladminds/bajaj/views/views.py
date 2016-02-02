@@ -757,6 +757,9 @@ def get_parts(request, order_id, order_status, retailer_id):
     ordered_date = order_part_obj.order_date
     orderdetails_obj = OrderPartDetails.objects.filter(order_id=order_id).aggregate(Sum('line_total'))
     orders['total_value'] = orderdetails_obj['line_total__sum']
+    retailer_obj = Retailer.objects.get(id=retailer_id)
+    retailer_name = retailer_obj.retailer_name
+    retailer_code = retailer_obj.retailer_code
     for each in orders_obj:
         orderparts_obj = OrderPartDetails.objects.select_related('part_number', 'order').filter(order_id=each.id)
         print orderparts_obj, 'obj'
@@ -793,6 +796,8 @@ def get_parts(request, order_id, order_status, retailer_id):
 
     context = {'order_display': order_display,
      'order_id': order_id,
+     'retailer_name': retailer_name,
+     'retailer_code': retailer_code,
      'order_status': order_status,
      'ordered_date': ordered_date,
      'app_label': opts.app_label,
