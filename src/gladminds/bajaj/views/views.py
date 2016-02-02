@@ -6,6 +6,7 @@ import operator
 import re
 import requests
 import csv
+from operator import itemgetter
 from gladminds.core.utils import check_password
 from tastypie.http import HttpBadRequest
 from collections import OrderedDict
@@ -171,8 +172,9 @@ def get_picklist(request):
             picklist_details_dict['mrp'] = 0
         if picklist_details_dict['allocated'] != 0:
             picklist_details.append(picklist_details_dict.copy())
-
-    context = {'picklist_details': picklist_details,
+    
+    new_picklist_details = sorted(picklist_details, key=itemgetter('location'))
+    context = {'picklist_details': new_picklist_details,
      'retailer_name': retailer_name}
     template = 'admin/bajaj/orderpart/invoice.html'
     return render(request, template, context)
