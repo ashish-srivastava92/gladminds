@@ -1392,7 +1392,7 @@ def upload_order_invoice(request):
         for each_invoice in invoice_reader:
             try:
                 if not retailer_obj:
-                    order_number = each_invoice['Order Ref. No.']
+                    order_number = each_invoice['Order Ref. No.'].strip()
                     try:
                         order_part_obj = OrderPart.objects.get(order_number=order_number)
                     except:
@@ -1402,7 +1402,7 @@ def upload_order_invoice(request):
                     retailer_obj = order_part_obj.retailer
                     associated_distributor_id = retailer_obj.distributor_id
                     retailer_id = retailer_obj.id
-                invoice_number = each_invoice.get('Invoice No.')
+                invoice_number = each_invoice.get('Invoice No.').strip()
                 mrp = float(each_invoice.get('MRP', 0))
                 vat_per = float(each_invoice.get('VAT in %ge', 0))
                 vat_abs = (vat_per * mrp) / 100
@@ -1421,7 +1421,7 @@ def upload_order_invoice(request):
                 except:
                     discount_per = 0 
                 discount_abs = (discount_per * mrp) / 100
-                order_number = each_invoice.get('Order Ref. No.')
+                order_number = each_invoice.get('Order Ref. No.').strip()
                 try:
                     invoice_date_str = each_invoice.get('Invoice Date')
                 except:
