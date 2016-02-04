@@ -1,12 +1,10 @@
 <table class="table table-striped table-bordered report-table" border="1">
         <tr><td>Retailer Name - {{retailer_name}}</td></tr>
         <tr><td>Retailer Id - {{retailer_code}}</td></tr>
-	<tr><td>Order Number - {{order_number}}</td></tr>
+	<tr><td>Order Reference Number - {{order_number}}</td></tr>
         <tr>
                 <td><strong>Part Number</strong></td>
                 <td><strong>Order Quantity</strong></td>
-                <td><strong>MRP</strong></td>
-                <td><strong>Line Total</strong></td>
 		<td><strong>Allocated Quantity</strong></td>
 
         </tr>
@@ -14,8 +12,6 @@
         <tr>
                 <td>{{record.part_number|default_if_none:""}}</td>
                 <td>{{record.quantity|default_if_none:""}}</td>
-                <td>{{record.mrp|default_if_none:""}}</td>
-		<td>{{record.line_total|default_if_none:""}}</td>
 		<td>{{record.allocated_qty|default_if_none:""}}</td>
         </tr>
         {% endfor %}
