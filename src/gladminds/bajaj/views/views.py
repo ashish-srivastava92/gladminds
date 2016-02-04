@@ -1406,25 +1406,34 @@ def upload_order_invoice(request):
                 mrp = float(each_invoice.get('MRP', 0))
                 vat_per = float(each_invoice.get('VAT in %ge', 0))
                 vat_abs = (vat_per * mrp) / 100
-                service_tax_per = float(each_invoice.get('Service Tax in %ge', 0))
+                try:
+                    service_tax_per = float(each_invoice.get('Service Tax in %ge', 0))
+                except:
+                    service_tax_per = 0
                 service_tax_abs = (service_tax_per * mrp) / 100
-                other_taxes_per = float(each_invoice.get('Other Tax in %ge', 0))
+                try:
+                    other_taxes_per = float(each_invoice.get('Other Tax in %ge', 0))
+                except:
+                    other_taxes_per = 0
                 other_taxes_abs = (other_taxes_per * mrp) / 100
-                discount_per = float(each_invoice.get('Discount in %ge', 0))
+                try:
+                    discount_per = float(each_invoice.get('Discount in %ge', 0))
+                except:
+                    discount_per = 0 
                 discount_abs = (discount_per * mrp) / 100
                 order_number = each_invoice.get('Order Ref. No.')
                 try:
-                    invoice_date_str = each_invoice.get('Invoice Date(YYYY-MM-DD)')
-                except:
                     invoice_date_str = each_invoice.get('Invoice Date')
+                except:
+                    invoice_date_str = each_invoice.get('Invoice Date(YYYY-MM-DD)')
                 part_number = each_invoice.get('Part Number')
                 part_quantity = float(each_invoice.get('Billed Part Quantity'))
                 transporter_id = each_invoice.get('Transporter ID')
                 transporter_name = each_invoice.get('Transporter/Courier Name')
                 try:
-                    shipping_date_str = each_invoice.get('Shipping Date(YYYY-MM-DD)')
-                except:
                     shipping_date_str = each_invoice.get('Shipping Date')
+                except:
+                    shipping_date_str = each_invoice.get('Shipping Date(YYYY-MM-DD)')
                 lr_number = each_invoice.get('LR Number')
 
                 #delivery_order_details_id = each_invoice.get('Delivery Order Number')
