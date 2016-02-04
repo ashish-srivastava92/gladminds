@@ -1392,7 +1392,7 @@ def upload_order_invoice(request):
         for each_invoice in invoice_reader:
             try:
                 if not retailer_obj:
-                    order_number = each_invoice['Order Reference Number']
+                    order_number = each_invoice['Order Ref. No.']
                     try:
                         order_part_obj = OrderPart.objects.get(order_number=order_number)
                     except:
@@ -1402,23 +1402,29 @@ def upload_order_invoice(request):
                     retailer_obj = order_part_obj.retailer
                     associated_distributor_id = retailer_obj.distributor_id
                     retailer_id = retailer_obj.id
-                invoice_number = each_invoice.get('Invoice Number')
+                invoice_number = each_invoice.get('Invoice No.')
                 mrp = float(each_invoice.get('MRP', 0))
-                vat_per = float(each_invoice.get('VAT(in percentage)', 0))
+                vat_per = float(each_invoice.get('VAT in %ge', 0))
                 vat_abs = (vat_per * mrp) / 100
-                service_tax_per = float(each_invoice.get('Service Tax(in percentage)', 0))
+                service_tax_per = float(each_invoice.get('Service Tax in %ge', 0))
                 service_tax_abs = (service_tax_per * mrp) / 100
-                other_taxes_per = float(each_invoice.get('Other Taxes(in percentage)', 0))
+                other_taxes_per = float(each_invoice.get('Other Tax in %ge', 0))
                 other_taxes_abs = (other_taxes_per * mrp) / 100
-                discount_per = float(each_invoice.get('Discount(in percentage)', 0))
+                discount_per = float(each_invoice.get('Discount in %ge', 0))
                 discount_abs = (discount_per * mrp) / 100
-                order_number = each_invoice.get('Order Reference Number')
-                invoice_date_str = each_invoice.get('Invoice Date(YYYY-MM-DD)')
+                order_number = each_invoice.get('Order Ref. No.')
+                try:
+                    invoice_date_str = each_invoice.get('Invoice Date(YYYY-MM-DD)')
+                except:
+                    invoice_date_str = each_invoice.get('Invoice Date')
                 part_number = each_invoice.get('Part Number')
                 part_quantity = float(each_invoice.get('Billed Part Quantity'))
                 transporter_id = each_invoice.get('Transporter ID')
                 transporter_name = each_invoice.get('Transporter/Courier Name')
-                shipping_date_str = each_invoice.get('Shipping Date(YYYY-MM-DD)')
+                try:
+                    shipping_date_str = each_invoice.get('Shipping Date(YYYY-MM-DD)')
+                except:
+                    shipping_date_str = each_invoice.get('Shipping Date')
                 lr_number = each_invoice.get('LR Number')
 
                 #delivery_order_details_id = each_invoice.get('Delivery Order Number')
@@ -1523,9 +1529,9 @@ def download_sample_order_invoice_csv(request):
     response['Content-Disposition'] = 'attachment; filename="SampleOrderInvoice.csv"'
     writer = csv.writer(response, dialect=csv.excel)
     writer.writerow([
-     'Invoice Number',
+     'Invoice No.',
      'Invoice Date(YYYY-MM-DD)',
-     'Order Reference Number',
+     'Order Ref. No.',
      'Part Number',
      'Billed Part Quantity',
      'Part Description',
@@ -1534,10 +1540,10 @@ def download_sample_order_invoice_csv(request):
      'Shipping Date(YYYY-MM-DD)',
      'LR Number',
      'MRP',
-     'VAT(in percentage)',
-     'Service Tax(in percentage)',
-     'Other Taxes(in percentage)',
-     'Discount(in percentage)',
+     'VAT in %ge',
+     'Service Tax in %ge',
+     'Other Tax in %ge',
+     'Discount in %ge',
      'Line Grand Total'])
     return response
 
