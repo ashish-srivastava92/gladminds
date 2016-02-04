@@ -1456,8 +1456,9 @@ def upload_order_invoice(request):
                  'service_tax',
                  'vat',
                  'other_taxes'])
+                delivery_order_details_id = order_delivery_history_obj.do_id
                 order_part_obj.order_status = 3
-                order_part_obj.do_id = order_delivery_history_obj.do_id
+                order_part_obj.do_id = delivery_order_details_id
                 order_part_obj.save(update_fields=['order_status', 'do_id'])
                 try:
                     do_details_obj = DoDetails.objects.get(id=delivery_order_details_id)
