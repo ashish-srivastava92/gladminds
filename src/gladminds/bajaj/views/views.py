@@ -1392,7 +1392,7 @@ def upload_order_invoice(request):
         for each_invoice in invoice_reader:
             try:
                 if not retailer_obj:
-                    order_number = each_invoice['Order Number']
+                    order_number = each_invoice['Order Reference Number']
                     try:
                         order_part_obj = OrderPart.objects.get(order_number=order_number)
                     except:
@@ -1412,7 +1412,7 @@ def upload_order_invoice(request):
                 other_taxes_abs = (other_taxes_per * mrp) / 100
                 discount_per = float(each_invoice.get('Discount(in percentage)', 0))
                 discount_abs = (discount_per * mrp) / 100
-                order_number = each_invoice.get('Order Number')
+                order_number = each_invoice.get('Order Reference Number')
                 invoice_date_str = each_invoice.get('Invoice Date(YYYY-MM-DD)')
                 part_number = each_invoice.get('Part Number')
                 part_quantity = float(each_invoice.get('Billed Part Quantity'))
@@ -1421,7 +1421,7 @@ def upload_order_invoice(request):
                 shipping_date_str = each_invoice.get('Shipping Date(YYYY-MM-DD)')
                 lr_number = each_invoice.get('LR Number')
 
-                delivery_order_details_id = each_invoice.get('Delivery Order Number')
+                #delivery_order_details_id = each_invoice.get('Delivery Order Number')
                 invoice_date = datetime.datetime.strptime(invoice_date_str, '%Y-%m-%d').date()
                 shipping_date = datetime.datetime.strptime(shipping_date_str, '%Y-%m-%d').date()
                 line_grand_total = each_invoice.get('Line Grand Total')
@@ -1436,24 +1436,13 @@ def upload_order_invoice(request):
                 except:
                     invoice_obj = Invoices(retailer_id=retailer_id, invoice_id=invoice_number, invoice_date=invoice_date, invoice_amount=grand_total)
                     invoice_obj.save(using=settings.BRAND)
-                order_part_obj.order_status = 3
-                order_part_obj.do_id = delivery_order_details_id
-                order_part_obj.save(update_fields=['order_status', 'do_id'])
-                try:
-                    do_details_obj = DoDetails.objects.get(id=delivery_order_details_id)
-                except:
-                    messages.error(request, 'Invoice upload failed, Please correct Delivery order id for order number - ' + order_number)
-                    return HttpResponseRedirect('/admin/bajaj/orderpart/')
 
-                do_details_obj.invoice = invoice_obj
-                do_details_obj.save(update_fields=['invoice'])
                 try:
                     part_obj = PartPricing.objects.get(part_number=part_number)
-                    order_delivery_history_obj = OrderDeliveredHistory.objects.get(part_number=part_obj, do_id=delivery_order_details_id, order=order_part_obj)
+                    order_delivery_history_obj = OrderDeliveredHistory.objects.filter(part_number=part_obj, order=order_part_obj)[0]
                 except:
                     messages.error(request, 'HistoryUploadError: Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
                     return HttpResponseRedirect('/admin/bajaj/orderpart/')
-
                 order_delivery_history_obj.discount = discount_per
                 order_delivery_history_obj.service_tax = service_tax_per
                 order_delivery_history_obj.vat = vat_per
@@ -1467,6 +1456,17 @@ def upload_order_invoice(request):
                  'service_tax',
                  'vat',
                  'other_taxes'])
+                order_part_obj.order_status = 3
+                order_part_obj.do_id = order_delivery_history_obj.do_id
+                order_part_obj.save(update_fields=['order_status', 'do_id'])
+                try:
+                    do_details_obj = DoDetails.objects.get(id=delivery_order_details_id)
+                except:
+                    messages.error(request, 'Invoice upload failed, Please correct Delivery order id for order number - ' + order_number)
+                    return HttpResponseRedirect('/admin/bajaj/orderpart/')
+
+                do_details_obj.invoice = invoice_obj
+                do_details_obj.save(update_fields=['invoice'])
             except:
                 messages.error(request, 'Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
                 return HttpResponseRedirect('/admin/bajaj/orderpart/')
@@ -1524,8 +1524,7 @@ def download_sample_order_invoice_csv(request):
     writer.writerow([
      'Invoice Number',
      'Invoice Date(YYYY-MM-DD)',
-     'Order Number',
-     'Delivery Order Number',
+     'Order Reference Number',
      'Part Number',
      'Billed Part Quantity',
      'Part Description',
