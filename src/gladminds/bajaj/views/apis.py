@@ -28,6 +28,7 @@ from gladminds.core.auth_helper import Roles
 from django.db.models import Sum
 
 from gladminds.core import constants
+import pytz
 
 today = datetime.datetime.now()
 
@@ -1283,10 +1284,11 @@ def get_retailer_dict(retailer):
 	if last_order_date:
 	    retailer_dict['lastorderdate'] = last_order_date[0].order_date
 	retailer_dict['contact'] = retailer.mobile
-	dsr_work_allocation = DSRWorkAllocation.objects.filter(retailer=retailer).order_by('-date')
+	#dsr_work_allocation = DSRWorkAllocation.objects.filter(retailer__dsr_id=retailer.dsr_id).order_by('-date')
+	dsr_work_allocation = DSRWorkAllocation.objects.filter(dsr=retailer.dsr).order_by('-date')
 	##FIXME: Add for all days
 	if dsr_work_allocation:
-            retailer_dict['day'] = dsr_work_allocation[0].pjp_day
+            retailer_dict['day'] = str(dsr_work_allocation[0].pjp_day).lower()
 	else:
 	    retailer_dict['day'] = 0 
 	return retailer_dict
@@ -1416,8 +1418,7 @@ def get_associated_dsrs(request,distributor_id=None):
         dsr_dict = {}
         dsr_dict['userid'] = dsr.distributor_sales_code
         dsr_dict['firstname'] = dsr.user.user.first_name
-        dsr_dict['lastname'] = d
-        sr.user.user.last_name
+        dsr_dict['lastname'] = dsr.user.user.last_name
         dsr_dict['retailers'] = []
 	retailers = Retailer.objects.filter(dsr_id=dsr.id)#.exclude(dsr_id__isnull=True)
 	for retailer in retailers:
@@ -1437,57 +1438,61 @@ def get_associated_dsrs(request,distributor_id=None):
 @api_view(['GET'])
 def get_retailers_actual(request):
     dsr_id = request.GET.__getitem__('dsr_id')
-    date = request.GET.__getitem__('date')
-    retailers = Retailer.objects.filter(dsr_id=dsr_id)#.count()
+    date_string = request.GET.__getitem__('date')
+    date=datetime.datetime.strptime(date_string,'%m-%d-%Y')
+    print date
+    start_datetime=datetime.datetime(date.year,date.month,date.day,0,0,0,0,pytz.timezone('UTC'))
+    retailers=set()
+    dsr=DistributorSalesRep.objects.get(distributor_sales_code=dsr_id)
+    end_datetime=start_datetime+timedelta(days=1)
+    #FIXME:update end_datetime.seconds by -1 second since it is inclusive
+    orders=OrderPart.objects.filter(dsr__distributor_sales_code=dsr_id,created_date__range=(start_datetime,end_datetime))
+    collections=Collection.objects.filter(dsr__distributor_sales_code=dsr_id,payment_date__range=(start_datetime,end_datetime))
+    for each in orders:
+        retailers.add(each.retailer)
+    for each in collections:
+        retailers.add(each.retailer)
     response_dict = {}
-    response_dict['date'] = date #FIXME: Confirm the field
+    response_dict['date'] = date.date()
     response_dict['users'] = []
     for retailer in retailers:
-        last_order_date = OrderPart.objects.filter(retailer=retailer).order_by('-order_date')
-	retailer_dict = {}
-	retailer_dict['userid'] = retailer.id #FIXME: Could be retailer_id
+        #FIXME:Try with order_date and instead of 2 queries use group_by in one query
+        last_orders = OrderPart.objects.filter(retailer=retailer,dsr__distributor_sales_code=dsr_id,created_date__range=(start_datetime,end_datetime)).order_by('-created_date')
+        retailer_dict = {}
+        retailer_dict['userid'] = retailer.retailer_code
         retailer_dict['firstname'] = retailer.user.user.first_name
         retailer_dict['lastname'] = retailer.user.user.last_name
-	if retailer.latitude and retailer.longitude:
-	    retailer_dict['latitude'] = str(retailer.latitude)
-	    retailer_dict['longitude'] = str(retailer.longitude)
-	else:
-	    #Do not send the retailers if the retailer's gps-coordinates is not available
-	    continue
-	retailer_dict['data1'] = []
-	###Get the retailer name 
-        invoices = Invoices.objects.filter(retailer__retailer_code = retailer.id)
-        if invoices:
-            for invoice in invoices:
-                retailer_dict = {}
-                outstanding = 0
-                collection = 0
-                outstanding = outstanding + invoice.invoice_amount
-                #get the collections for that invoice
-                collection_objs = Collection.objects.filter(invoice_id = invoice.id)
-                for each in collection_objs:
-                    collections = CollectionDetails.objects.filter(collection_id = each.id)
-                    if collections:
-                        for each_collections in collections:
-                            collection = collection + each_collections.collected_amount
-		collection_dict={}
-		collection_dict['type1'] = "collection"
-		collection_dict['amount'] = collection
-		collection_dict['accepttime'] = ""
-		retailer_dict['data1'].append(collection_dict)
-	    retailer_dict['outstanding'] = outstanding
-	else:
-	    retailer_dict['outstanding'] = 0
-	if last_order_date:
-	    retailer_dict['lastorderdate'] = last_order_date[0].order_date
-        retailer_dict['contact'] = retailer.mobile
-        dsr_work_allocation = DSRWorkAllocation.objects.filter(retailer=retailer).order_by('-date')
-	##FIXME: Add for all days
-	if dsr_work_allocation:
-	    retailer_dict['day'] = dsr_work_allocation[0].pjp_day
-	else:
-	    retailer_dict['day'] = 0
-    	response_dict['retailers'].append(retailer_dict)
+        if retailer.latitude and retailer.longitude:
+            retailer_dict['latitude'] = retailer.latitude
+            retailer_dict['longitude'] = retailer.longitude
+        else:
+            continue
+        retailer_dict['data1'] = []
+        order_dict={}
+        order_dict['type1']='order'
+        total_order=0
+        if last_orders:
+            order_dict['accepttime']='%s:%s'%(last_orders[0].created_date.hour,last_orders[0].created_date.minute)
+            print order_dict['accepttime']
+        for order in last_orders:
+            order_detail=OrderPartDetails.objects.filter(order=order)
+            for each in order_detail:
+                total_order+=each.line_total
+        order_dict['amount']=total_order
+        retailer_dict['data1'].append(order_dict)
+        #FIXME:Instead of 2 queries use group_by in one query
+        collections_list=Collection.objects.filter(retailer=retailer,dsr__distributor_sales_code=dsr_id,payment_date__range=(start_datetime,end_datetime)).order_by('-payment_date')
+        collection_dict={}
+        collection_dict['type1'] = "collection"
+        collection_value=0
+        #FIXME:Displaying only the collected_amount column
+        for collection in collections_list:
+            collection_value+=collection.collected_amount
+        if collections_list:
+            collection_dict['accepttime'] = '%s:%s'%(collections_list[0].payment_date.hour,collections_list[0].payment_date.minute)
+        collection_dict['amount'] = collection_value 
+        retailer_dict['data1'].append(collection_dict)
+        response_dict['users'].append(retailer_dict)
     return Response(response_dict)
 
 
@@ -1496,12 +1501,10 @@ def get_users(request):
 # FIXME: Return false other than all the known user roles
 # FIXME: Move this method to a more generic location, may be auth_helper
     print request.user.groups.all()
+    print request.user.id
     if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
-	try:
 	    distributor_id = Distributor.objects.get(user_id=request.user.id).distributor_id
 	    return get_associated_dsrs(request, distributor_id)
-	except:
-	    return Response({'error':'Distributor object error'})
     if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
 	asm_id = AreaSparesManager.objects.get(user_id=request.user.id).asm_id
         return get_associated_distributors(request, asm_id)
