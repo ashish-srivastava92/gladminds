@@ -1,4 +1,3 @@
-
 # Django settings for gladminds project.
 import os
 import djcelery
@@ -211,7 +210,7 @@ SUIT_CONFIG = {
                       'label': 'Focused Parts'},
                      {'model': 'partsracklocation',
                     'label': 'Parts Rack Location'},
-		     {'model': 'partindexdetails',
+             {'model': 'partindexdetails',
                     'label': 'Product Catalogue'},
                      )
                
@@ -258,6 +257,16 @@ SUIT_CONFIG = {
        
 )},
              
+        {'app': 'bajaj', 'label': 'Sales History', 'icon': ' icon-folder-open',
+         'models':(
+                  
+                    {'model': 'averagepartsaleshistory',
+                     'label': 'Average Part Sales History'},
+
+                    {'model': 'averagelocationsaleshistory',
+                     'label': 'Average Location Sales History'},
+
+)},
              
              {'app': 'bajaj', 'label': 'Location Details', 'icon': ' icon-folder-open',
          'models':(
@@ -907,4 +916,3 @@ HOME_URLS = {
 LOGIN_URL = '/login'
 BATCH_SIZE = 100
 LOGAN_ACTIVE = False
-

@@ -94,6 +94,11 @@
 <div class="row-fluid">
 	<div class="span6">
 		<b>Order Number:</b> {{order_number}}
+		<br/>
+		<b>Retailer Name:</b> {{retailer_name}}
+		<br/>
+		<b>Retailer Id:</b> {{retailer_code}}
+
 	</div>
 	<div class="span6" style="text-align: right">
 		<b> Ordered Date:</b> {{ordered_date}}
@@ -103,6 +108,7 @@
 </div>
 
 <hr/>
+
 
 <form action="{% url 'save_order_history' %}" method="POST" enctyype="multipart/form-data" onsubmit="return validator()">
 

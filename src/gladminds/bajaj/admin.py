@@ -1254,21 +1254,35 @@ class CollectionAdmin(GmModelAdmin):
              ret_objs = Retailer.objects.filter(distributor=dist_id)        
         for each in ret_objs :
             ret_details_dict["retailer_name"] = each.retailer_name
-            order_objs = OrderPart.objects.filter(retailer_id = each.id).values_list("id",flat=True)
-            orderdetails_obj = OrderPartDetails.objects.filter(order_id__in=order_objs).aggregate(total_value=Sum('line_total'))
-            ret_details_dict["total_value"] = orderdetails_obj["total_value"]
-            total_value = ret_details_dict["total_value"]
-            if total_value != None:
-                collection_objs = Collection.objects.filter(retailer_id=each.id).values_list("id", flat=True)
-                total_collected_amount = CollectionDetails.objects.filter(collection_id__in=collection_objs).aggregate(total_value=Sum('collected_amount'))              
-                if total_collected_amount["total_value"] != None:
-                    tca = total_collected_amount["total_value"]
-                else :
-                    tca = 0
-                ret_details_dict["outstanding"] = int(total_value) - int(tca)
-                ret_details_dict["retailer_id"] = each.id
-                ret_details_dict["collection_details"] = "aaaa"
-                ret_details.append(ret_details_dict.copy())  
+            # order_objs = OrderPart.objects.filter(retailer_id = each.id).values_list("id",flat=True)
+            # orderdetails_obj = OrderPartDetails.objects.filter(order_id__in=order_objs).aggregate(total_value=Sum('line_total'))
+            # ret_details_dict["total_value"] = orderdetails_obj["total_value"]
+            # total_value = ret_details_dict["total_value"]
+            # if total_value != None:
+            #     collection_objs = Collection.objects.filter(retailer_id=each.id).values_list("id", flat=True)
+            #     total_collected_amount = CollectionDetails.objects.filter(collection_id__in=collection_objs).aggregate(total_value=Sum('collected_amount'))              
+            #     if total_collected_amount["total_value"] != None:
+            #         tca = total_collected_amount["total_value"]
+            #     else :
+            #         tca = 0
+
+            ret_details_dict["collection_details"] = "aaaa"
+            total_outstanding_amount = 0
+            total_order_value = 0
+            invoices = Invoices.objects.filter(retailer_id=each.id)
+            for invoice in invoices:
+                invoice.invoice_amount = invoice.invoice_amount if invoice.invoice_amount else 0
+                invoice.paid_amount = invoice.paid_amount if invoice.paid_amount else 0
+                total_order_value = total_order_value + invoice.invoice_amount
+                total_outstanding_amount = total_outstanding_amount + (invoice.invoice_amount - invoice.paid_amount)
+            total_outstanding_amount = float(format(total_outstanding_amount, '.2f'))
+            total_order_value = float(format(total_order_value, '.2f'))
+            ret_details_dict["outstanding"] = total_outstanding_amount
+            ret_details_dict["total_value"] = total_order_value
+            ret_details_dict["retailer_id"] = each.id
+            ret_details.append(ret_details_dict.copy()) 
+
+
         context = {"ret_collection_details":ret_details}
         
         template = 'admin/bajaj/collection/change_list.html'  # = Your new template
@@ -1447,15 +1461,15 @@ class PartCategoryAdmin(GmModelAdmin):
 class PartsRackLocationAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     search_fields = ('part_number__part_number', 'part_number__description', 'rack_location')
-    list_display = ('part_number', 'part_description', 'rack_location')
+    list_display = ('get_part_number', 'part_description', 'rack_location')
 	
     def rack_location(self,obj):
-	return obj.rack_location
+	   return obj.rack_location
     rack_location.short_description = "Rack Location"
  
-    def part_number(self, obj):
+    def get_part_number(self, obj):
         return obj.part_number.part_number
-    part_number.short_description = 'Part Number'
+    get_part_number.short_description = 'Part Number'
 
     def part_description(self, obj):
         return obj.part_number.description
@@ -1616,6 +1630,39 @@ class PermanentJourneyPlanAdmin(GmModelAdmin):
         super(PermanentJourneyPlanAdmin, self).save_model(request, obj, form, change)
 
 
+class AveragePartSalesHistoryAdmin(GmModelAdmin):
+    search_fields = ('month', 'year')
+    list_display = ('get_retailer_code', 'get_retailer_name', 'get_part', 'sale_value', 'month', 'year')
+
+    def get_retailer_name(self, obj):
+        return obj.retailer.retailer_name
+    def get_retailer_code(self, obj):
+        return obj.retailer.retailer_code
+    def get_part(self, obj):
+        return obj.part.part_number
+
+    get_retailer_name.short_description = "Retailer Name"
+    get_retailer_code.short_description = "Retailer Code"
+    get_part.short_description = "Part Number"
+
+
+class AverageLocationSalesHistoryAdmin(GmModelAdmin):
+    search_fields = ('month', 'year')
+    list_display = ('get_state_name', 'get_city_name', 'get_locality_name', 'get_part', 'sale_value', 'start_month', 'end_month', 'year')
+
+    def get_state_name(self, obj):
+        return obj.location.city.state.state_name
+    def get_city_name(self, obj):
+        return obj.location.city.city
+    def get_locality_name(self, obj):
+        return obj.location.name
+    def get_part(self, obj):
+        return obj.part.part_number
+
+    get_state_name.short_description = "State Name"
+    get_city_name.short_description = "City Name"
+    get_locality_name.short_description = "Locality Name"
+    get_part.short_description = "Part Number"
 
 import json
 class DSRLocationDetailsAdmin(GmModelAdmin):
@@ -1871,29 +1918,32 @@ class OrderPartAdmin(GmModelAdmin):
             retailer_obj = Retailer.objects.get(id = order_details_dict["ret_id"])
             order_details_dict["ret_mobile"] = retailer_obj.mobile
             order_details_dict["ret_name"] = each["retailer_name"]
-	    invoices = Invoices.objects.filter(retailer_id = order_details_dict["ret_id"])
+            invoices = Invoices.objects.filter(retailer_id = order_details_dict["ret_id"])
             if invoices:
                 total_amount = 0
                 collection = 0
                 for invoice in invoices:
-                    retailer_dict = {}
-                    total_amount = total_amount + invoice.invoice_amount
+                    invoice.invoice_amount = invoice.invoice_amount if invoice.invoice_amount else 0
+                    invoice.paid_amount = invoice.paid_amount if invoice.paid_amount else 0
+                    total_amount = total_amount + (invoice.invoice_amount - invoice.paid_amount)
 #                     retailer_dict.update({'retailer_id':retailer.retailer_code})
 #                     retailer_dict.update({'invoice_id': invoice.invoice_id})
 #                     retailer_dict.update({'total_amount': total_amount})
 #                     retailer_dict.update({'invoice_date': invoice.invoice_date.date()})
                     #get the collections for that invoice
-                    collection_objs = Collection.objects.filter(invoice_id = invoice.id)
-                    for each in collection_objs:
-                        collections = CollectionDetails.objects.filter(collection_id = each.id)
-                        if collections:
-                            for each_collections in collections:
-                                if each_collections.collected_amount == None:
-                                        each_collections.collected_amount=0
-                                collection = collection + each_collections.collected_amount
+                    # collection_objs = Collection.objects.filter(invoice_id = invoice.id)
+                    # for each in collection_objs:
+                    #     collections = CollectionDetails.objects.filter(collection_id = each.id)
+                    #     if collections:
+                    #         for each_collections in collections:
+                    #             if each_collections.collected_amount == None:
+                    #                     each_collections.collected_amount=0
+                    #             collection = collection + each_collections.collected_amount
 #                     retailer_dict.update({'collected_amount': collection})
-                outstanding = total_amount + collection
-                order_details_dict["outstanding"] = outstanding
+                
+                # outstanding = total_amount + collection
+                total_amount = float(format(total_amount, '.2f'))
+                order_details_dict["outstanding"] = total_amount
 #                     retailer_list.append(retailer_dict)
             else: 
                 outstanding =0
@@ -2539,6 +2589,10 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("Retailer", brand), RetailerAdmin)
     brand_admin.register(get_model("PartModel", brand), PartModelAdmin)
     brand_admin.register(get_model("Categories", brand), CategoriesAdmin)
+    brand_admin.register(get_model("AveragePartSalesHistory", brand), AveragePartSalesHistoryAdmin)
+    brand_admin.register(get_model("AverageLocationSalesHistory", brand), AverageLocationSalesHistoryAdmin
+)
+
     # brand_admin.register(get_model("SubCategories", brand), SubCategoriesAdmin)
 #     brand_admin.register(get_model("PartMasterCv", brand), PartListAdmin)
     brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
@@ -2585,6 +2639,8 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("ContainerIndent", brand), ContainerIndentAdmin)
     brand_admin.register(get_model("ContainerLR", brand), ContainerLRAdmin)
     brand_admin.register(get_model("PartIndexDetails", brand), ProductCatalogAdmin)
+
+
     # Disable the delete action throughout the admin site
     brand_admin.disable_action('delete_selected')
    

@@ -469,6 +469,8 @@ def get_dsr_outstanding(request, dsr_id):
                 retailer_dict = {}
                 total_amount = 0
                 collection = 0
+                invoice.invoice_amount = invoice.invoice_amount if invoice.invoice_amount else 0
+                invoice.paid_amount = invoice.paid_amount if invoice.paid_amount else 0
                 total_amount = total_amount + (invoice.invoice_amount - invoice.paid_amount)
                 retailer_dict.update({'retailer_id':retailer.retailer_code})
                 retailer_dict.update({'invoice_id': invoice.invoice_id})
@@ -481,6 +483,7 @@ def get_dsr_outstanding(request, dsr_id):
                     # collections = CollectionDetails.objects.filter(collection_id = each.id)
                     # if collections:
                     #     for each_collections in collections:
+                    each.collected_amount = each.collected_amount if each.collected_amount else 0
                     collection = collection + each.collected_amount
                 retailer_dict.update({'collected_amount': collection})
                 retailer_dict.update({'period': diff.days})
@@ -584,29 +587,30 @@ def uploadcollection(request):
             collection.retailer = retailer
             collection.latitude = collection_body['latitude']
             collection.longitude = collection_body['longitude']
+            collection.collected_amount = collection_body['collected_amount']
             collection.save()
             #put data into collection details table
+            collectiondetails = CollectionDetails()
+            collectiondetails.collection = collection
+            collectiondetails.mode = collection_body['payment_mode']
+            collectiondetails.collected_amount = collection_body['collected_amount']
+            collectiondetails.collected_cash = collection_body['collected_cash']
             for cheque in collection_body['cheque_details']:
-                collectiondetails = CollectionDetails()
-                collectiondetails.collection = collection
-                collectiondetails.mode = collection_body['payment_mode']
-                collectiondetails.collected_amount = collection_body['collected_amount']
-                collectiondetails.collected_cash = collection_body['collected_cash']
                 collectiondetails.cheque_bank = cheque['cheque_bank']
                 collectiondetails.cheque_number = cheque['cheque_number']
                 collectiondetails.cheque_amount = cheque['cheque_amount']
                 collectiondetails.img_url = cheque['cheque_image_url']
-                collectiondetails.save()
+            collectiondetails.save()
             message = message + '\n' + 'status : 1' + ' ' + \
                       'message : Retailer Collection(s) is updated successfully'
         else:
             message = message + '\n' + 'status : 0' + ' ' + \
                 'message : Collection is greater than the invoice amount for the invoice id: ' + collection_body['invoice_id']
     try:
-    	transaction.commit()
-	message = {'status': 1, 'message': 'Collection update successfully'}
+        transaction.commit()
+        message = {'status': 1, 'message': 'Collection update successfully'}
     except:
-	message = {'status': 0, 'message': 'Collection update failed'}
+        message = {'status': 0, 'message': 'Collection update failed'}
     send_msg_to_retailer_on_collection(request,retailer.id)
     return Response(message)
 
@@ -709,8 +713,9 @@ def dsr_dashboard_report(request, dsr_id):
         total_achieved = 0
         for each in achieved_list:
             total_achieved = total_achieved + each
-        mtd = str(total_achieved/ len(retailers)) + '%'
-        retailer_dict.update({"MTD performance": mtd})
+        if len(retailers):
+            mtd = str(total_achieved/ len(retailers)) + '%'
+            retailer_dict.update({"MTD performance": mtd})
     # calculation of total sales value
     total_sales_value = 0
     for retailer in retailers:
@@ -735,6 +740,7 @@ def dsr_dashboard_report(request, dsr_id):
         collections = Collection.objects.filter(retailer = retailer)
         for collection in collections:    
             # get all the collection details for this collection
+            collection.collected_amount = collection.collected_amount if collection.collected_amount else 0
             retailer_collected_amount = retailer_collected_amount + \
                                             collection.collected_amount
         # sum up the each retailer collected amount to the total
@@ -857,6 +863,7 @@ def dsr_dashboard_report(request, dsr_id):
         if collections:
             for collection in collections:    
             # get all the collection details for this collection
+                collection.collected_amount = collection.collected_amount if collection.collected_amount else 0
                 retailer_collected_amount = retailer_collected_amount + \
                                             collection.collected_amount
         # sum up the each retailer collected amount to the total
@@ -952,6 +959,7 @@ def dsr_dashboard_report(request, dsr_id):
             # get all the collection details for this collection
             collection_details = CollectionDetails.objects.filter(collection = collection)
             for collection_detail in collection_details:
+                collection.collected_amount = collection.collected_amount if collection.collected_amount else 0
                 retailer_collected_amount = retailer_collected_amount + \
                                             collection.collected_amount
         # sum up the each retailer collected amount to the total
@@ -1432,7 +1440,6 @@ def get_associated_dsrs(request,distributor_id=None):
              retailer_unassigned_dict=get_retailer_unassigned_dict(retailer)
              if retailer_unassigned_dict != None:
 		response_dict['retailers'].append(retailer_unassigned_dict)
-    print "this is respoeeeee============",response_dict 
     return Response(response_dict)
 
 @api_view(['GET'])

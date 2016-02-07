@@ -1275,7 +1275,7 @@ class Invoices(base_models.Invoices):
 class DoDetails(base_models.DoDetails):
     ''' List of Do Details'''
     
-    order = models.ForeignKey(OrderPart)
+    order = models.ManyToManyField(OrderPart)
     invoice = models.ForeignKey(Invoices)
     distributor = models.ForeignKey(Distributor, null=True, blank=True)
     
@@ -1296,6 +1296,11 @@ class OrderDeliveredHistory(base_models.OrderDeliveredHistory):
     service_tax = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     other_taxes = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     discount = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    transporter_id = models.CharField(max_length=50, null=True, blank=True)
+    transporter_name = models.CharField(max_length=100, null=True, blank=True)
+    shipping_date = models.DateTimeField(null=True, blank=True)
+    lr_number = models.CharField(max_length=50, null=True, blank=True)
+
     class Meta(base_models.OrderDeliveredHistory.Meta):
         app_label = _APP_NAME
         verbose_name_plural = "Order Delivered History"
@@ -1444,4 +1449,25 @@ class PermanentJourneyPlan(base_models.PermanentJourneyPlan):
     pass
 
     class Meta(base_models.PermanentJourneyPlan.Meta):
+        app_label = _APP_NAME
+
+
+class AveragePartSalesHistory(base_models.AveragePartSalesHistory):
+    retailer = models.ForeignKey(Retailer)
+    part = models.ForeignKey(PartPricing)
+    month = models.IntegerField(null=True, blank=True)
+    year = models.IntegerField(null=True, blank=True)
+
+    class Meta(base_models.AveragePartSalesHistory.Meta):
+        app_label = _APP_NAME
+
+
+class AverageLocationSalesHistory(base_models.AverageLocationSalesHistory):
+    location = models.ForeignKey(Locality)
+    part = models.ForeignKey(PartPricing)
+    start_month = models.IntegerField(null=True, blank=True)
+    end_month = models.IntegerField(null=True, blank=True)
+    year = models.IntegerField(null=True, blank=True)
+
+    class Meta(base_models.AverageLocationSalesHistory.Meta):
         app_label = _APP_NAME
