@@ -1139,7 +1139,7 @@ def get_orders(request, dsr_id):
         order_dict = OrderedDict()
         order_dict['order_id'] = order.order_number
         order_dict['retailer_id'] = order.retailer.retailer_code
-        order_dict['order_date'] = order.order_date.date()
+        order_dict['order_date'] = order.order_date.strftime('%d-%m-%Y')
         # check the status of the order and get it from the constants
         for k,v in constants.ORDER_STATUS.iteritems():
             if v == order.order_status:
@@ -1521,7 +1521,50 @@ def get_users(request):
     if request.user.groups.filter(name=Roles.SFAADMIN).exists():
         return get_associated_nsms(request)
     else:
-	##FIXME: Added this to test with 
-	return get_associated_nsms(request)
-    return Response({'error':'error'}) 
+        return Response({'error':'Not an authorized user'}) 
+
+@api_view(['GET'])
+def get_collection(request):
+    try:
+        dsr_id = request.GET.get('dsr_id')
+        date = request.GET.get('date')
+    except:
+        return Response({'error':'parameters missing'})
+    collection_details = []
+    if date:
+        #FIXME:make >(current date-5months)
+        collection_obj = Collection.objects.filter(dsr__distributor_sales_code=dsr_id,payment_date__gt=date)
+    else:
+        collection_obj = Collection.objects.filter(dsr__distributor_sales_code=dsr_id)#,payment_date__gt=datetime.datetime.now())
+    for each in collection_obj:
+        collection_details_dict = {}
+        collection_details_dict['retailer_id'] = each.retailer_id
+        collection_details_dict['collection_id'] = each.id
+        collection_details_dict['invoice_id'] = each.invoice_id
+        collection_details_dict['collected_amount'] = each.collected_amount
+        collection_details_dict['date'] = str(each.payment_date)
+        collection_details_dict['collection_details'] = []
+        more_details_obj = CollectionDetails.objects.filter(collection_id=each.id)
+        collected_by_cash=0
+        for each_obj in more_details_obj:
+            more_details_dict={}
+            if each_obj.mode == 1:
+                collection_details_dict['mode'] = 1 #'Cash'
+                collection_details_dict['collected_by_cash'] = each_obj.collected_cash
+                break
+            elif each_obj.mode == 2:
+                collection_details_dict['mode'] = 2  #'Cheque'
+            elif each_obj.mode == 3:
+                collection_details_dict['mode'] = 3  #'Cash/Cheque'
+                #FIXME: Confirm if the collected_cash is same for all the filtered records
+                collection_details_dict['collected_by_cash'] = each_obj.collected_cash
+            more_details_dict['cheque_number'] = each_obj.cheque_number
+            more_details_dict['cheque_bank'] = each_obj.cheque_bank
+            more_details_dict['cheque_img_url'] = str(each_obj.img_url)
+            more_details_dict['cheque_amount'] = each_obj.cheque_amount
+            collection_details_dict['collection_details'].append(more_details_dict)
+        collection_details.append(collection_details_dict)
+
+    return HttpResponse(json.dumps(collection_details), content_type='application/json')
+
 

@@ -176,8 +176,8 @@ urlpatterns = patterns('',
                         'gladminds.bajaj.views.apis.uploadcollection'),
     url(r'^cv/get_distributor_for_retailer/retailer_id/(?P<retailer_id>\d+)/$',
                         'gladminds.bajaj.views.apis.get_distributor_for_retailer'),
-    url(r'^cv/get_schedule/dsr_id/(?P<dsr_id>\d+)/date/(?P<date>[-\d]+)/$',
-                       'gladminds.bajaj.views.apis.get_schedule'),
+    url(r'^cv/get_schedule/dsr_id/(?P<dsr_id>\d+)/$',
+                       'gladminds.core.views.apis.get_schedule'),
     url(r'^cv/place_order/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.core.views.apis.place_order'),
     url(r'^cv/retailer_place_order/retailer_id/(?P<retailer_id>\d+)/$',
@@ -268,8 +268,9 @@ urlpatterns = patterns('',
     url(r'^cv/get_focused_parts/', 'gladminds.core.views.apis.get_focused_parts'),
  
     ##Reports API
-    url(r'^mc/get_user_reports/month/(?P<month>\d+)/year/(?P<year>\d+)/$',
-                        'gladminds.core.apis.user_report_apis.get_reports'),
+
+    ##Collection 
+    url(r'^mc/get_collection/$','gladminds.bajaj.views.apis.get_collection'),
  
 )
 
