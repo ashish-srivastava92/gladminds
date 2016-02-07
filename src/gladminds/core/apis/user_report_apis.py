@@ -40,7 +40,7 @@ from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Cat
                             PartPricing, Distributor,  Invoices, \
                             Collection,CollectionDetails,PartsStock,DSRWorkAllocation,DSRLocationDetails, \
                             NationalSparesManager,AreaSparesManager
-from gladminds.bajaj.models import PartMasterCv,OrderPart,OrderPartDetails, \
+from gladminds.bajaj.models import PartPricing,OrderPart,OrderPartDetails, \
                         PartIndexDetails, PartIndexPlates, FocusedPart
 
 LOG = logging.getLogger('gladminds')
