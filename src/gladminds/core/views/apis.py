@@ -352,14 +352,14 @@ def get_stock(request,dsr_id):
     stock_list =[]
     for part in stocks:
         parts_dict = {}
-    try:
-        parts_dict["part_number"]=part.part_number.part_number
-        parts_dict["part_available_quantity"]=part.available_quantity
-        parts_dict["mrp"]=part.part_number.mrp
-        stock_list.append(parts_dict)
-    except:
-        # FIXME: Remove try except from here and confirm if exceptions are due to curropt data
-        pass
+        try:
+            parts_dict["part_number"]=part.part_number.part_number
+            parts_dict["part_available_quantity"]=part.available_quantity
+            parts_dict["mrp"]=part.part_number.mrp
+            stock_list.append(parts_dict)
+        except:
+            # FIXME: Remove try except from here and confirm if exceptions are due to curropt data
+            pass
     return Response(stock_list)
 
 
