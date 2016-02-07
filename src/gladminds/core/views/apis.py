@@ -317,12 +317,12 @@ def get_schedule(request, dsr_id):
         for schedule in schedules:
             schedule_dict = {}
             schedule_dict['locality_id'] = schedule.locality_id
+            schedule_dict['pjp_day'] = schedule.pjp_day
             try:
                 if schedule.locality:
                     schedule_dict['locality_name'] = schedule.locality.name
             except:
                 schedule_dict['locality_name'] = 'Locality missing'
-                schedule_dict['pjp_day'] = schedule.pjp_day
             #schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
             #schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
             #tm = time.strptime(str(schedule.date.time()), "%H:%M:%S")

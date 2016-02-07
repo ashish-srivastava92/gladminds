@@ -350,7 +350,13 @@ $('.icon1').clickToggle1(function(){
         $(this).removeClass('icon-chevron-down');
         $(this).addClass('icon-chevron-up');
 });
-$('#actualdate').datepicker().on('changeDate', function (ev) {   
+var selectedDate;
+$('#actualdate').datepicker().on('changeDate', function (ev) {  
+     if (ev.dates && !ev.date && selectedDate)
+     {
+           $(this).datepicker('setDate',selectedDate);
+     }
+    else if (ev.date && ev.date!=selectedDate) selectedDate = ev.date; 
     $('.datepicker').hide();
     var x=$("#actualdate").val();
     var d = new Date(x);

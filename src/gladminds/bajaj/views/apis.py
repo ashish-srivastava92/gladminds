@@ -1278,19 +1278,21 @@ def get_retailer_dict(retailer):
                 retailer_dict = {}
                 outstanding = 0
                 collection = 0
-                outstanding = outstanding + invoice.invoice_amount
+                outstanding = outstanding + (invoice.invoice_amount - invoice.paid_amount)
                 #get the collections for that invoice
-                collection_objs = Collection.objects.filter(invoice_id = invoice.id)
-                for each in collection_objs:
-                    collections = CollectionDetails.objects.filter(collection_id = each.id)
-                    if collections:
-                        for each_collections in collections:
-                            collection = collection + each_collections.collected_amount
+                #collection_objs = Collection.objects.filter(invoice_id = invoice.id)
+                #for each in collection_objs:
+                #    collections = CollectionDetails.objects.filter(collection_id = each.id)
+                #    if collections:
+                #        for each_collections in collections:
+                #            collection = collection + each_collections.collected_amount
 	    retailer_dict['outstanding'] = outstanding
 	else:
 	    retailer_dict['outstanding'] = 0
 	if last_order_date:
-	    retailer_dict['lastorderdate'] = last_order_date[0].order_date
+	    retailer_dict['lastorderdate'] = last_order_date[0].order_date.date()
+        else:
+            retailer_dict['lastorderdate'] = ''
 	retailer_dict['contact'] = retailer.mobile
 	#dsr_work_allocation = DSRWorkAllocation.objects.filter(retailer__dsr_id=retailer.dsr_id).order_by('-date')
 	dsr_work_allocation = DSRWorkAllocation.objects.filter(dsr=retailer.dsr).order_by('-date')
@@ -1510,15 +1512,15 @@ def get_users(request):
     print request.user.groups.all()
     print request.user.id
     if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
-	    distributor_id = Distributor.objects.get(user_id=request.user.id).distributor_id
-	    return get_associated_dsrs(request, distributor_id)
+        distributor_id = Distributor.objects.get(user_id=request.user.id).distributor_id
+        return get_associated_dsrs(request, distributor_id)
     if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
 	asm_id = AreaSparesManager.objects.get(user_id=request.user.id).asm_id
         return get_associated_distributors(request, asm_id)
     if request.user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
 	nsm_id = NationalSparesManager.objects.get(user_id=request.user.id).nsm_id
     	return get_associated_asms(request,nsm_id)
-    if request.user.groups.filter(name=Roles.SFAADMIN).exists():
+    if request.user.groups.filter(name=Roles.SFAADMIN).exists() or request.user.groups.filter(name=Roles.SUPERADMINS).exists():
         return get_associated_nsms(request)
     else:
         return Response({'error':'Not an authorized user'}) 
