@@ -177,7 +177,7 @@ def get_retailer_report(retailer,month,year):
     retailer_report={}
     retailer_report["report_type"] = "month"
     #print(type(month))
-    date=datetime.strptime(month+'-1'+'-'+year,"%m-%d-%Y")
+    date=datetime.strptime(str(month)+'-1'+'-'+str(year),"%m-%d-%Y")
     start_datetime=datetime(date.year,date.month,date.day,0,0,0,0,pytz.timezone('UTC'))
     print start_datetime
     today=datetime.today()
@@ -254,13 +254,13 @@ def get_retailer_report(retailer,month,year):
         retailer_report["collection_value"] = 0
     return retailer_report
 
-@api_view(['GET'])
-def get_admin_reports(request,month,year):
+#@api_view(['GET'])
+def get_admin_reports(month,year,flag=None):
     report=[]
     report_type1={}
     report_type1["report_type"] = "month"
     report.append(report_type1)
-    date=datetime.strptime(month+'-1'+'-'+year,"%m-%d-%Y")
+    date=datetime.strptime(str(month)+'-1'+'-'+str(year),"%m-%d-%Y")
     start_datetime=datetime(date.year,date.month,date.day,0,0,0,0,pytz.timezone('UTC'))
     print start_datetime
     today=datetime.today()
@@ -302,8 +302,8 @@ def get_admin_reports(request,month,year):
                         #Monthly Report
                         for retailer in retailers:
                            retailer_report = get_retailer_report(retailer,month,year)
-                            #FIXME: total_order_value is now based on total retailer's orders
-                           #total_order_value += retailer_report["order_value"]
+                           #FIXME: total_order_value is now based on total retailer's orders
+                           total_order_value += retailer_report["order_value"]
                            report.append(retailer_report)
         report_type1={}
         report_type1["target"] = "NA"
@@ -320,16 +320,18 @@ def get_admin_reports(request,month,year):
         #report_type1["number_of_new_parts_billed"]=0
         report_type1["number_of_new_retailers_registered"]=0
         report[0].update(report_type1)
-    return Response(report)
+    if flag:
+        return Response(report)
+    else:
+        return report
 
      
-@api_view(['GET'])
-def get_nsm_reports(request,nsm_id,month,year):
+def get_nsm_reports(nsm_id,month,year,flag=None):
     report=[]
     report_type1={}
     report_type1["report_type"] = "month"
     report.append(report_type1)
-    date=datetime.strptime(month+'-1'+'-'+year,"%m-%d-%Y")
+    date=datetime.strptime(str(month)+'-1'+'-'+str(year),"%m-%d-%Y")
     start_datetime=datetime(date.year,date.month,date.day,0,0,0,0,pytz.timezone('UTC'))
     print start_datetime
     today=datetime.today()
@@ -367,11 +369,11 @@ def get_nsm_reports(request,nsm_id,month,year):
                        total_order_value += retailer_report['order_value']
                        report.append(retailer_report)
         report_type1={}
-        print report
-        nsmtarget=NsmTarget.objects.filter(nsm__nsm_id=nsm_id,month=month,year=year,active=1).values()
+        # print report
+        nsmtarget=NsmTarget.objects.filter(nsm__nsm_id=nsm_id,month=month,year=year,active=1)
         print nsmtarget
         if nsmtarget:
-            report_type1["target"] = nsmtarget.target
+            report_type1["target"] = nsmtarget[0].target
         else:
             report_type1["target"] = 0
         report_type1["total_order_value"] = total_order_value
@@ -383,20 +385,34 @@ def get_nsm_reports(request,nsm_id,month,year):
         report_type1={}
         print e
         nsmtarget=NsmTarget.objects.filter(nsm__nsm_id=nsm_id,month=month,year=year,active=1).values()
-        report_type1["target"] = nsmtarget.target
+        #report_type1["target"] = nsmtarget.target
         report_type1["total_order_value"]=0
         report_type1["total_retailers"]=0
         #report_type1["number_of_new_parts_billed"]=0
         report_type1["number_of_new_retailers_registered"]=0
         report[0].update(report_type1)
-    return Response(report)
+    if flag:
+        return Response(report)
+    else:
+        return report
 
-@api_view(['GET'])
-def get_asm_reports(request,asm_id,month,year):
+#@api_view(['GET'])
+def get_asm_reports(asm_id,month,year,flag=None):
     report=[]
     report_type1={}
     report_type1["report_type"] = "month"
     report.append(report_type1)
+    date=datetime.strptime(str(month)+'-1'+'-'+str(year),"%m-%d-%Y")
+    start_datetime=datetime(date.year,date.month,date.day,0,0,0,0,pytz.timezone('UTC'))
+    print start_datetime
+    today=datetime.today()
+    if date.month == today.month and date.year == today.year:
+        end_date=datetime.today()#.date()
+    else:
+        end_date=datetime.strptime(str(int(month)+1)+'-1'+'-'+str(year),"%m-%d-%Y")
+        end_datetime=datetime(end_date.year,end_date.month,end_date.day,0,0,0,0,pytz.timezone('UTC'))
+        
+    print end_datetime
     try:
         distributors=Distributor.objects.filter(asm__asm_id=asm_id)
         new_parts_billed=0
@@ -410,42 +426,61 @@ def get_asm_reports(request,asm_id,month,year):
                 retailers=Retailer.objects.filter(dsr_id=dsr_id)
                 ##FIXME:Can use len()
                 retailer_count+=Retailer.objects.filter(dsr_id=dsr_id).count()
-                newretailers+=Retailer.objects.filter(dsr_id=dsr_id,created_date__month=month,created_date__year=year).count()
-                orderpart=OrderPart.objects.filter(dsr_id=dsr_id,created_date__month=month,created_date__year=year)
+                newretailers+=Retailer.objects.filter(dsr_id=dsr_id,created_date__range=(start_datetime,end_datetime)).count()
+                orderpart=OrderPart.objects.filter(dsr_id=dsr_id,created_date__range=(start_datetime,end_datetime))
                 #New parts billed
                 for order in orderpart:
-                    orderpartdetails=OrderPartDetails.objects.filter(order=order,created_date__month=month,created_date__year=year).count()
+                    orderpartdetails=OrderPartDetails.objects.filter(order=order).count()#,created_date__month=month,created_date__year=year).count()
                     new_parts_billed += orderpartdetails
                 #Monthly Report
                 for retailer in retailers:
                    retailer_report = get_retailer_report(retailer,month,year)
-                   total_order_value += retailer_report['order_value']
+                   #total_order_value += retailer_report['order_value']
                    report.append(retailer_report)
         report_type1={}
-        asmtarget=AsmTarget.objects.filter(asm_id=asm_id,created_date__month=month,created_date__year=year)
-        report_type1["target"] = asmtarget.target
+        asmtarget=AsmTarget.objects.filter(asm__asm_id=asm_id,month=month,year=year,active=1)
+        print asmtarget
+        if asmtarget:
+            report_type1["target"] = asmtarget[0].target
+        else:
+            report_type1["target"] = 0
+
         report_type1["total_order_value"] = total_order_value
         report_type1["total_retailers"] = retailer_count
         #report_type1["number_of_new_parts_billed"] = new_parts_billed
         report_type1["number_of_new_retailers_registered"] = newretailers
         report[0].update(report_type1)
-    except:
+    except Exception as e:
+        print e
         report_type1={}
-        asmtarget=AsmTarget.objects.filter(asm_id=asm_id,created_date__month=month,created_date__year=year)
-        report_type1["target"] = asmtarget.target
+        asmtarget=AsmTarget.objects.filter(asm__asm_id=asm_id,created_date__month=month,created_date__year=year)
+        report_type1["target"] = 0#asmtarget.target
         report_type1["total_order_value"]=0
         report_type1["total_retailers"]=0
         #report_type1["number_of_new_parts_billed"]=0
         report_type1["number_of_new_retailers_registered"]=0
         report[0].update(report_type1)
-    return Response(report)
+    if flag:
+        return Response(report)
+    else:
+        return report
 
-@api_view(['GET'])
-def get_distributor_reports(request,distributor_id,month,year):
+def get_distributor_reports(distributor_id,month,year,flag=None):
     report=[]
     report_type1={}
     report_type1["report_type"] = "month"
     report.append(report_type1)
+    date=datetime.strptime(str(month)+'-1'+'-'+str(year),"%m-%d-%Y")
+    start_datetime=datetime(date.year,date.month,date.day,0,0,0,0,pytz.timezone('UTC'))
+    print start_datetime
+    today=datetime.today()
+    if date.month == today.month and date.year == today.year:
+        end_date=datetime.today()#.date()
+    else:
+        end_date=datetime.strptime(str(int(month)+1)+'-1'+'-'+str(year),"%m-%d-%Y")
+        end_datetime=datetime(end_date.year,end_date.month,end_date.day,0,0,0,0,pytz.timezone('UTC'))
+        
+    print end_datetime
     try:
         dsrs=DistributorSalesRep.objects.filter(distributor__distributor_id=distributor_id)
         new_parts_billed=0
@@ -457,11 +492,11 @@ def get_distributor_reports(request,distributor_id,month,year):
             retailers=Retailer.objects.filter(dsr_id=dsr_id)
             ##FIXME:Can use len()
             retailer_count+=Retailer.objects.filter(dsr_id=dsr_id).count()
-            newretailers+=Retailer.objects.filter(dsr_id=dsr_id,created_date__month=month,created_date__year=year).count()
+            newretailers+=Retailer.objects.filter(dsr_id=dsr_id,created_date__range=(start_datetime,end_datetime)).count()
             orderpart=OrderPart.objects.filter(dsr_id=dsr_id,created_date__month=month,created_date__year=year)
             #New parts billed
             for order in orderpart:
-                orderpartdetails=OrderPartDetails.objects.filter(order=order,created_date__month=month,created_date__year=year).count()
+                orderpartdetails=OrderPartDetails.objects.filter(order=order).count()#,created_date__range=(start_datetime,end_datetime)).count()
                 new_parts_billed += orderpartdetails
             #Monthly Report
             for retailer in retailers:
@@ -469,8 +504,11 @@ def get_distributor_reports(request,distributor_id,month,year):
                total_order_value += retailer_report['order_value']
                report.append(retailer_report)
         report_type1={}
-        distributortarget=DistributorTarget.objects.filter(distributor__distributor_id=distributor_id,created_date__month=month,created_date__year=year)
-        report_type1["target"] = distributortarget.target
+        distributortarget=DistributorTarget.objects.filter(distributor__distributor_id=distributor_id,month=month,year=year,active=1)
+        if distributortarget:
+            report_type1["target"] = distributortarget[0].target
+        else:
+            report_type1["target"] = 0
         report_type1["total_order_value"] = total_order_value
         report_type1["total_retailers"] = retailer_count
         #report_type1["number_of_new_parts_billed"] = new_parts_billed
@@ -485,20 +523,33 @@ def get_distributor_reports(request,distributor_id,month,year):
         #report_type1["number_of_new_parts_billed"]=0
         report_type1["number_of_new_retailers_registered"]=0
         report[0].update(report_type1)
-    return Response(report)
+    if flag:
+        return Response(report)
+    else:
+        return report
 
-@api_view(['GET'])
-def get_dsr_reports(request,dsr_id,month,year):
+def get_dsr_reports(dsr_id,month,year,flag=None):
     report=[]
     report_type1={}
     report_type1["report_type"] = "month"
     report.append(report_type1)
+    date=datetime.strptime(str(month)+'-1'+'-'+str(year),"%m-%d-%Y")
+    start_datetime=datetime(date.year,date.month,date.day,0,0,0,0,pytz.timezone('UTC'))
+    print start_datetime
+    today=datetime.today()
+    if date.month == today.month and date.year == today.year:
+        end_date=datetime.today()#.date()
+    else:
+        end_date=datetime.strptime(str(int(month)+1)+'-1'+'-'+str(year),"%m-%d-%Y")
+        end_datetime=datetime(end_date.year,end_date.month,end_date.day,0,0,0,0,pytz.timezone('UTC'))
+        
+    print end_datetime
     try:
         retailer=Retailer.objects.filter(dsr_id=dsr_id)
         ##FIXME:Can use len()
         retailer_count=Retailer.objects.filter(dsr_id=dsr_id).count()
-        newretailers=Retailer.objects.filter(dsr_id=dsr_id,created_date__month=month,created_date__year=year).count()
-        orderpart=OrderPart.objects.filter(dsr_id=dsr_id,created_date__month=month,created_date__year=year)
+        newretailers=Retailer.objects.filter(dsr_id=dsr_id,created_date__range=(start_datetime,end_datetime)).count()
+        orderpart=OrderPart.objects.filter(dsr_id=dsr_id,created_date__range=(start_datetime,end_datetime))
         new_parts_billed=0
         #New parts billed
         top_qty=0
@@ -506,8 +557,8 @@ def get_dsr_reports(request,dsr_id,month,year):
         top_qty_dict={}
         top_val_dict={}
         for order in orderpart:
-            orderpartdetails_count=OrderPartDetails.objects.filter(order=order,created_date__month=month,created_date__year=year).count()
-            orderpartdetails=OrderPartDetails.objects.filter(order=order,created_date__month=month,created_date__year=year)
+            orderpartdetails_count=OrderPartDetails.objects.filter(order=order).count()#,created_date__month=month,created_date__year=year).count()
+            orderpartdetails=OrderPartDetails.objects.filter(order=order)#,created_date__month=month,created_date__year=year)
             if top_qty_dict[orderpartdetails.part_number.part_number]:
                 top_qty_dict[orderpartdetails.part_number.part_number]+=orderpartdetails.quantity
             else:
@@ -516,7 +567,7 @@ def get_dsr_reports(request,dsr_id,month,year):
                 top_val_dict[orderpartdetails.part_number.part_number]+=orderpartdetails.line_total
             else:
                 top_val_dict[orderpartdetails.part_number.part_number]=0
-            new_parts_billed += orderpartdetails_count
+            #new_parts_billed += orderpartdetails_count
         top_qty_list=[]
         for no in top_qty_dict:
             top_qty_list.append((top_qty_dict[no],no))
@@ -533,8 +584,12 @@ def get_dsr_reports(request,dsr_id,month,year):
            total_order_value += retailer_report['order_value']
            report.append(retailer_report)
         report_type1={}
-        dsrtarget=DistributorSalesRepTarget.objects.filter(dsr_id=dsr_id,created_date__month=month,created_date__year=year)
-        report_type1["target"] = dsrtarget.target
+        dsrtarget=DistributorSalesRepTarget.objects.filter(dsr_id=dsr_id,month=month,year=year,active=1)
+        print dsrtarget
+        if dsrtarget:
+            report_type1["target"] = dsrtarget[0].target
+        else:
+            report_type1["target"] = 0
         report_type1["total_retailers"] = retailer_count
         #report_type1["number_of_new_parts_billed"] = new_parts_billed
         report_type1["number_of_new_retailers_registered"] = newretailers
@@ -551,7 +606,10 @@ def get_dsr_reports(request,dsr_id,month,year):
         #report_type1["number_of_new_parts_billed"]=0
         report_type1["number_of_new_retailers_registered"]=0
         report_type1["total_order_value"]=0
-    return Response(report)
+    if flag:
+        return Response(report)
+    else:
+        return report
 
     
 @api_view(['GET'])
@@ -626,29 +684,52 @@ def get_web_reports(request,accesstoken,month,year,state,actionlist):
     chart['data']=[]
     data_dict={}       
 
-    ##Authenticate accesstoken and get user
+    ##Authenticate accesstoken and get request.user objects
     if actionlist_dict[actionlist]==4:
+        #FIXME:uncomment after merging accesstoken changes
         #status=get_role(user) 
+        #FIXME:Remove this after testing
         status={}
         status['message']='pass'
-        status['role']=1
+        status['role']=2
         status['Id']=4
 
         charts_header['yAxisName']='Numbers'
         charts_header['caption']='Targets'
-        charts_header['description']='Targets'
+        charts_header['description']='Actuals vs Targets'
+        chart['data1']=[]
 
         if status['message'] == 'pass':
             if status['role']==1:
+                charts_header['xAxisName']='NSM'
+                if month in months:
+                    targets=NsmTarget.objects.filter(active=1,month=months[month],year=year)
+                    for nsm in targets:
+                        data_dict={}       
+                        data1_dict={}
+                        data_dict['label']=nsm.nsm.nsm_id#label
+                        data_dict['value']=nsm.target
+                        data1_dict['label']=nsm.nsm.nsm_id
+                        report=get_nsm_reports(nsm.nsm.nsm_id,months[month],year)
+                        print report[0]
+                        data1_dict['value']=report[0]['total_order_value']
+                        chart['data'].append(data_dict)
+                        chart['data1'].append(data1_dict)
+            if status['role']==2:
                 charts_header['xAxisName']='ASM'
                 if month in months:
                     targets=AsmTarget.objects.filter(asm__nsm_id=status['Id'],active=1,month=months[month],year=year)
                     for asm in targets:
                         data_dict={}       
+                        data1_dict={}
                         data_dict['label']=asm.asm.asm_id#label
                         data_dict['value']=asm.target
+                        data1_dict['label']=asm.asm.asm_id
+                        report=get_asm_reports(asm.asm.asm_id,months[month],year)
+                        print report[0]
+                        data1_dict['value']=report[0]['total_order_value']
                         chart['data'].append(data_dict)
-
+                        chart['data1'].append(data1_dict)
                 else:
                     chart={
                         'status':0,
@@ -661,13 +742,18 @@ def get_web_reports(request,accesstoken,month,year,state,actionlist):
                         data_dict['value']=targets.target
                         chart['data'].append(data_dict)
                     '''
-            if status['role']==2:
+            if status['role']==3:
                 if month in months:
                     targets=DistributorTarget.objects.filter(distributor__asm_id=status['Id'],active=1,month=months[month],year=year)
                     for dstr in targets:
                         data_dict={}       
+                        data1_dict={}
                         data_dict['label']=dstr.distributor.distributor_id#label
                         data_dict['value']=dstr.target
+                        data1_dict['label']=dstr.distributor.distributor_id#label
+                        report=get_distributor_reports(dstr.distributor.distributor_id,months[month],year)
+                        print report[0]
+                        data1_dict['value']=report[0]['total_order_value']
                         chart['data'].append(data_dict)
                 else:
                     chart={
@@ -681,7 +767,7 @@ def get_web_reports(request,accesstoken,month,year,state,actionlist):
                         data_dict['value']=targets.target
                         chart['data'].append(data_dict)
                     '''
-            if status['role']==3:
+            if status['role']==4:
                 if month in months:
                     targets=DistributorSalesRepTarget.objects.get(dsr__distributor_id=status['Id'],active=1,month=months[month],year=year)
                     for dsr in targets:
@@ -725,17 +811,21 @@ def get_role(user):
     Pass a user object
     '''
     status={'message':'fail','Id':0,'role':0}
+    if user.groups.filter(name=Roles.SFAADMIN).exists() or user.groups.filter(name=Roles.SUPERADMINS).exists():
+        #Id = NationalSparesManager.objects.get(user_id=user.id).id
+        status={'message':'pass','Id':'','role':1}
+        return status
     if user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
         Id = NationalSparesManager.objects.get(user_id=user.id).id
-        status={'message':'pass','Id':Id,'role':1}
+        status={'message':'pass','Id':Id,'role':2}
         return status
     if user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
         Id = AreaSparesManager.objects.get(user_id=user.id).id
-        status={'message':'pass','Id':Id,'role':2}
+        status={'message':'pass','Id':Id,'role':3}
         return status
     if user.groups.filter(name=Roles.DISTRIBUTORS).exists():
         Id = Distributor.objects.get(user_id=user.id).id
-        status={'message':'pass','Id':Id,'role':3}
+        status={'message':'pass','Id':Id,'role':4}
         return status
     return status
 
@@ -750,7 +840,7 @@ def get_reports(request,month,year):
     if request.user.groups.filter(name=Roles.DISTRIBUTORSALESREP).exists():
         if request.user.is_authenticated():
             dsr_id = DistributorSalesRep.objects.get(user_id=request.user.id).id
-            return get_dsr_reports(request, dsr_id,month,year)
+            return get_dsr_reports(dsr_id,month,year,flag='api')
         else:
             return Response({'Error':'Not an authenticated user'})
 
@@ -758,7 +848,7 @@ def get_reports(request,month,year):
         try:
             if request.user.is_authenticated():
                 distributor_id = Distributor.objects.get(user_id=request.user.id).distributor_id
-                return get_distributor_reports(request, distributor_id,month,year)
+                return get_distributor_reports(distributor_id,month,year,flag='api')
             else:
                 return Response({'Error':'Not an authenticated user'})
         except:
@@ -766,21 +856,21 @@ def get_reports(request,month,year):
 
     if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
         if request.user.is_authenticated():
-            dsr_id = AreaSparesManager.objects.get(user_id=request.user.id).asm_id
-            return get_asm_reports(request, asm_id,month,year)
+            asm_id = AreaSparesManager.objects.get(user_id=request.user.id).asm_id
+            return get_asm_reports(asm_id,month,year,flag='api')
         else:
             return Response({'Error':'Not an authenticated user'})
 
     if request.user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
         if request.user.is_authenticated():
             nsm_id = NationalSparesManager.objects.get(user_id=request.user.id).nsm_id
-            return get_nsm_reports(request, nsm_id,month,year)
+            return get_nsm_reports(nsm_id,month,year,flag='api')
         else:
             return Response({'Error':'Not an authenticated user'})
     #FIXME: Admin Reports visibility should be removed??
     if request.user.groups.filter(name=Roles.SFAADMIN).exists() or request.user.groups.filter(name=Roles.SUPERADMINS).exists():
         if request.user.is_authenticated():
-            return get_admin_reports(request,month,year)
+            return get_admin_reports(month,year,flag='api')
         else:
             return Response({'Error':'Not an authenticated user'})
     return Response({'Error':'Not an authorized user'})
