@@ -1471,6 +1471,9 @@ def get_retailers_actual(request):
         retailer_dict['userid'] = retailer.retailer_code
         retailer_dict['firstname'] = retailer.user.user.first_name
         retailer_dict['lastname'] = retailer.user.user.last_name
+        retailer_dict['shopname'] = retailer.retailer_name
+        retailer_dict['contact'] = retailer.mobile
+        retailer_dict['outstanding'] = 0#outstanding
         if retailer.latitude and retailer.longitude:
             retailer_dict['latitude'] = retailer.latitude
             retailer_dict['longitude'] = retailer.longitude

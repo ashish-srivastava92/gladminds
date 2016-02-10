@@ -268,6 +268,10 @@ urlpatterns = patterns('',
     url(r'^cv/get_focused_parts/', 'gladminds.core.views.apis.get_focused_parts'),
  
     ##Reports API
+    url(r'^mc/get_user_reports/(?P<month>\d+)/(?P<year>\d+)/$','gladminds.core.apis.user_report_apis.get_reports', name='get_user_reports'),
+    url(r'^save_targets/$', 'gladminds.core.apis.user_report_apis.save_targets', name='save_targets'),
+    url(r'^add_targets/$', 'gladminds.core.apis.user_report_apis.add_targets', name='add_targets'),
+    url(r'^get_web_reports/(?P<accesstoken>[a-zA-Z0-9]+)/(?P<actionlist>[a-zA-Z0-9_]+)/(?P<state>[a-zA-Z0-9]+)/(?P<month>[a-zA-Z]+)/(?P<year>[0-9]+)/$', 'gladminds.core.apis.user_report_apis.get_web_reports', name='get_web_reports'),
 
     ##Collection 
     url(r'^mc/get_collection/$','gladminds.bajaj.views.apis.get_collection'),

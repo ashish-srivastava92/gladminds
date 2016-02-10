@@ -93,7 +93,11 @@
 
 <div class="row-fluid">
 	<div class="span6" style="text-align: right">
+        {%if status%}
 		<b>Done</b> 
+        {%else%}
+        <b> Error, Please Try again </b>
+        {%endif%}
 	</div>
 </div>
 

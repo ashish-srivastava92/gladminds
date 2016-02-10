@@ -16,7 +16,8 @@ from gladminds.bajaj.models import Distributor, DistributorStaff, DistributorSal
                         Retailer, UserProfile, District, \
                          SparePartPoint, State, AreaSparesManager, City, OrderPartDetails, OrderDeliveredHistory, \
                           Collection, PartsStock, OrderPart, NationalSparesManager, DSRLocationDetails, CollectionDetails,\
-                          Invoices,DoDetails, PermanentJourneyPlan, PartIndexDetails
+                          Invoices,DoDetails, PermanentJourneyPlan, PartIndexDetails, SFAReports,SFAHighlights,\
+                          NsmTarget,AsmTarget,DistributorTarget,DistributorSalesRepTarget,RetailerTarget
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
@@ -36,8 +37,10 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext, loader
 from django.db.models import Sum, Count
 from django.contrib import messages
-
-
+from rest_framework.response import Response
+from django.forms import ModelForm
+from suit.widgets import SuitDateWidget
+from django.http import HttpResponseRedirect
 
 logger = logging.getLogger('gladminds')
 global district_list
@@ -1664,6 +1667,285 @@ class AverageLocationSalesHistoryAdmin(GmModelAdmin):
     get_locality_name.short_description = "Locality Name"
     get_part.short_description = "Part Number"
 
+class SFAReportsAdmin(GmModelAdmin):
+    def has_change_permission(request,obj=None):
+        return True
+    def changelist_view(self, request, extra_context={}):
+        #FIXME: No SFATargetReports
+        #FIXME: Redirect to Charts-application
+        return HttpResponseRedirect('https://www.google.com/') 
+        #opts = SFATargets._meta
+        #context={'objs':objs,'month':month,'year':year,'opts':opts,'app_label':opts.app_label, 'type':"1",'target':'Null'}
+        #template = ''
+        #form_url = ''
+        #return super(SFAReportsAdmin, self).changelist_view(request, context)
+    
+class SFAHighlightsAdmin(GmModelAdmin):
+    def has_change_permission(self,request):
+        return True
+    def changelist_view(self, request, extra_context={}):
+        #FIXME: No SFATargetreports
+        opts = SFAHighlights._meta
+        extra_context={'type':'1'}
+        GmModelAdmin.add_form_template='admin/bajaj/reports/month-year.html'
+        context = {"opts":opts, "app_label":opts.app_label}
+        #template = ''
+        #form_url = ''
+        return super(SFAHighlightsAdmin, self).changelist_view(request, context)
+
+'''
+class DistributorSalesRepTargetAdmin(GmModelAdmin):
+        pass #form = DistributorSalesRepTargetAdminForm
+'''
+class NsmTargetAdmin(GmModelAdmin):
+    pass #form = RetailerTargetAdminForm
+    search_fields = ('month', 'year')
+    list_display = ('nsm','month', 'year', 'target')
+    list_per_page=50
+    list_filter=('year','month')
+
+    def add_view(self, request, form_url='', extra_context={}):
+        extra_context={'type':'1'}
+        GmModelAdmin.add_form_template='admin/bajaj/reports/month-year.html'
+        return super(NsmTargetAdmin, self).add_view(request, extra_context=extra_context)
+
+    def has_add_permission(self,request):
+        if request.user.is_authenticated():
+            if request.user.groups.filter(name=Roles.SFAADMIN).exists() or request.user.groups.filter(name=Roles.SUPERADMINS).exists():
+                return True
+        return False
+
+    def get_queryset(self,request):
+        if request.user.is_authenticated():
+            #targets=super(NsmTargetAdmin,self).queryset(request)
+            if request.user.groups.filter(name=Roles.SFAADMIN).exists() or request.user.groups.filter(name=Roles.SUPERADMINS).exists():
+                targets=NsmTarget.objects.filter(active=1)
+            return targets
+        else:
+            return HttpResponse({'Error':'User not authenticated'})
+
+class AsmTargetAdmin(GmModelAdmin):
+    pass #form = RetailerTargetAdminForm
+    search_fields = ('month', 'year')
+    list_display = ('asm','month', 'year', 'target')
+    list_per_page=50
+    list_filter=('year','month')
+
+    def add_view(self, request, form_url='', extra_context={}):
+        extra_context={'type':'2'}
+        GmModelAdmin.add_form_template='admin/bajaj/reports/month-year.html'
+        return super(AsmTargetAdmin, self).add_view(request, extra_context=extra_context)
+
+    def has_add_permission(self,request):
+        if request.user.is_authenticated():
+            if request.user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
+                return True
+        return False
+
+    def has_change_permission(self,request,obj=None):
+        if request.user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists() or request.user.groups.filter(name=Roles.SFAADMIN).exists() or request.user.groups.filter(name=Roles.SUPERADMINS).exists():
+            return True
+        return False
+    '''
+    def changelist_view(self,request, extra_context=None):
+        return super(AsmTargetAdmin,self).changelist_view(request)
+    '''
+    def get_queryset(self,request):
+        if request.user.is_authenticated():
+            targets=AsmTarget.objects.none()
+            #targets=super(AsmTargetAdmin,self).queryset(request)
+            if request.user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
+                try:
+                    Id = NationalSparesManager.objects.get(user_id=request.user.id).id
+                    targets=AsmTarget.objects.filter(asm__nsm_id=Id,active=1)
+                except:
+                    return targets
+            if request.user.groups.filter(name=Roles.SFAADMIN).exists() or request.user.groups.filter(name=Roles.SUPERADMINS).exists():
+                targets=AsmTarget.objects.filter(active=1)
+            return targets
+        else:
+            return Response({'error':'error'})
+
+class DistributorTargetAdmin(GmModelAdmin):
+    pass #form = RetailerTargetAdminForm
+    search_fields = ('month', 'year')
+    list_display = ('distributor','month', 'year', 'target')
+    list_per_page=50
+    list_filter=('year','month')
+
+    def add_view(self, request, form_url='', extra_context={}):
+        extra_context={'type':'3'}
+        GmModelAdmin.add_form_template='admin/bajaj/reports/month-year.html'
+        return super(DistributorTargetAdmin, self).add_view(request, extra_context=extra_context)
+
+    def has_add_permission(self,request):
+        if request.user.is_authenticated():
+            #FIXME: Add permission available to only ASM (remove admin)
+            if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+                return True
+        return False
+
+    def has_change_permission(self,request,obj=None):
+        if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists() or request.user.groups.filter(name=Roles.SFAADMIN).exists() or request.user.groups.filter(name=Roles.SUPERADMINS).exists():
+            return True
+        return False
+
+    def get_queryset(self,request):
+        if request.user.is_authenticated():
+            #targets=super(DistributorTargetAdmin,self).queryset(request)
+            targets=AsmTarget.objects.none()
+            if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+                try:
+                    Id = AreaSparesManager.objects.get(user_id=request.user.id).id
+                except:
+                    return Response({'error':'error'})
+                targets=DistributorTarget.objects.filter(distributor__asm_id=Id,active=1)
+            #if request.user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
+            #    try:
+            #        Id = NationalSparesManager.objects.get(user_id=request.user.id).id
+            #    except:
+            #        return Response({'error':'error'})
+            #    targets=DistributorTarget.objects.filter(asm__nsm_id=Id,active=1)
+            if request.user.groups.filter(name=Roles.SFAADMIN).exists() or request.user.groups.filter(name=Roles.SUPERADMINS).exists():
+                targets=DistributorTarget.objects.filter(active=1)
+                print 'Admin for distributor-----'
+            return targets
+        else:
+            return Response({'error':'error'})
+
+
+class DistributorSalesRepTargetAdmin(GmModelAdmin):
+    pass #form = RetailerTargetAdminForm
+    search_fields = ('month', 'year')
+    list_display = ('dsr','month', 'year', 'target')
+    list_per_page=50
+    list_filter=('year','month')
+
+    def add_view(self, request, form_url='', extra_context={}):
+        extra_context={'type':'4'}
+        GmModelAdmin.add_form_template='admin/bajaj/reports/month-year.html'
+        return super(DistributorSalesRepTargetAdmin, self).add_view(request, extra_context=extra_context)
+
+    def has_add_permission(self,request):
+        if request.user.is_authenticated():
+            #FIXME: Add permission available to only Distributor (remove admin)
+            if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+                return True
+        return False
+
+    def has_change_permission(self,request,obj=None):
+        if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists() or request.user.groups.filter(name=Roles.SFAADMIN).exists() or request.user.groups.filter(name=Roles.SUPERADMINS).exists():
+            return True
+        return False
+
+    def get_queryset(self,request):
+        if request.user.is_authenticated():
+            #targets=super(DistributorSalesRepTargetAdmin,self).queryset(request)
+            targets=AsmTarget.objects.none()
+            if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+                try:
+                    Id = Distributor.objects.get(user_id=request.user.id).id
+                except:
+                    return Response({'error':'error'})
+                targets=DistributorSalesRepTarget.objects.filter(dsr__distributor_id=Id,active=1)
+            '''
+            if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+                try:
+                    Id = AreaSparesManager.objects.get(user_id=request.user.id).id
+                except:
+                    return Response({'error':'error'})
+                targets=DistributorSalesRepTarget.objects.filter(distributor__asm_id=Id,active=1)
+            if request.user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
+                try:
+                    Id = NationalSparesManager.objects.get(user_id=request.user.id).id
+                except:
+                    return Response({'error':'error'})
+                targets=DistributorSalesRepTarget.objects.filter(distributor__asm__nsm_id=Id,active=1)
+            '''
+            if request.user.groups.filter(name=Roles.SFAADMIN).exists() or request.user.groups.filter(name=Roles.SUPERADMINS).exists():
+                targets=DistributorSalesRepTarget.objects.filter(active=1)
+            return targets
+        else:
+            return Response({'error':'error'})
+
+class RetailerTargetAdminForm(ModelForm):
+    class Meta:
+        widgets={
+                'year':SuitDateWidget,
+        }
+
+class RetailerTargetAdmin(GmModelAdmin):
+    form=RetailerTargetAdminForm
+    search_fields = ('month', 'year')
+    list_display = ('retailer','month', 'year', 'target')
+    #suit_form_tabs = (('dsr', 'Distributor Sales Rep'), ('retailer', 'Retailer'))
+    list_per_page=50
+    #ModelAdmin.date_hierarchy='year'
+    #list_select_related=True
+    list_filter=('year','month')
+
+    def add_view(self, request, form_url='', extra_context={}):
+        extra_context={'type':'5'}
+        GmModelAdmin.add_form_template='admin/bajaj/reports/month-year.html'
+        return super(RetailerTargetAdmin, self).add_view(request, extra_context=extra_context)
+    '''
+    def has_delete_permission(self, request,obj=None):
+        if request.user.is_authenticated():
+            if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+                try:
+                    Distributor.objects.get(user_id=request.user.id)
+                except:
+                        return Response({'error':'error'})
+                return True
+        return False
+    '''
+    def has_add_permission(self,request):
+        if request.user.is_authenticated():
+            #FIXME: Add permission available to only Distributor (remove admin)
+            if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+                #try:
+                #    Distributor.objects.get(user_id=request.user.id)
+                #except:
+                #        return Response({'error':'error'})
+                return True
+        return False
+
+    def has_change_permission(self,request,obj=None):
+        if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists() or request.user.groups.filter(name=Roles.SFAADMIN).exists() or request.user.groups.filter(name=Roles.SUPERADMINS).exists():
+            return True
+        return False
+
+    def get_queryset(self,request):
+        if request.user.is_authenticated():
+            #targets=super(RetailerTargetAdmin,self).queryset(request)
+            targets=AsmTarget.objects.none()
+            if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+                try:
+                    Id = Distributor.objects.get(user_id=request.user.id).id
+                except:
+                    return Response({'error':'error'})
+                targets=RetailerTarget.objects.filter(retailer__distributor_id=Id,active=1)
+            '''
+            if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+                try:
+                    Id = AreaSparesManager.objects.get(user_id=request.user.id).id
+                except:
+                    return Response({'error':'error'})
+                targets=RetailerTarget.objects.filter(retailer__distributor__asm_id=Id,active=1)
+            if request.user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
+                try:
+                    Id = NationalSparesManager.objects.get(user_id=request.user.id).id
+                except:
+                    return Response({'error':'error'})
+                targets=RetailerTarget.objects.filter(retailer__distributor__asm__nsm_id=Id,active=1)
+            '''
+            if request.user.groups.filter(name=Roles.SFAADMIN).exists() or request.user.groups.filter(name=Roles.SUPERADMINS).exists():
+                targets=RetailerTarget.objects.filter(active=1)
+            return targets
+        else:
+            return Response({'error':'error'})
+ 
+
 import json
 class DSRLocationDetailsAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -2643,7 +2925,16 @@ def get_admin_site_custom(brand):
 
     # Disable the delete action throughout the admin site
     brand_admin.disable_action('delete_selected')
-   
+    
+
+    brand_admin.register(get_model("SFAReports", brand), SFAReportsAdmin)
+    #brand_admin.register(get_model("SFAHighlights", brand), SFAHighlightsAdmin)
+    #brand_admin.register(get_model("SetTarget", brand), SetTargetAdmin)
+    brand_admin.register(get_model("NsmTarget", brand), NsmTargetAdmin)
+    brand_admin.register(get_model("AsmTarget", brand), AsmTargetAdmin)
+    brand_admin.register(get_model("DistributorTarget", brand), DistributorTargetAdmin)
+    brand_admin.register(get_model("DistributorSalesRepTarget", brand), DistributorSalesRepTargetAdmin)
+    brand_admin.register(get_model("RetailerTarget", brand), RetailerTargetAdmin)
     return brand_admin
 
 brand_admin = get_admin_site_custom(GmApps.BAJAJ)

@@ -100,7 +100,9 @@
 <hr/>
 <form action="{% url 'save_targets' %}" method="POST" enctyype="multipart/form-data" onsubmit="return validator()">
     <input type ="hidden" name="target1" id="target1" value="{{target}}"/>
-
+    <input type ="hidden" name="type1" id="type1" value="{{type}}"/>
+    <input type ="hidden" name="month1" id="month1" value="{{month}}"/>
+    <input type ="hidden" name="year1" id="year1" value="{{year}}"/>
 	<table class="table table-striped table-bordered table-responsive" id="showParts">
 		<thead>
 			<tr>
@@ -129,6 +131,8 @@
                 <td class="text-center" type="text" style="text-align:left"required="true" name="name">{{each.name}}</td>
                 <td class="text-center" type="text" style="text-align:center"required="true" name="code">{{each.code}}</td>
                 <td style="text-align:center">
+                    <input type ="hidden" name="name1" id="name1" value="{{each.name}}"/>
+                    <input type ="hidden" name="code1" id="code1" value="{{each.code}}"/>
                     <input type ="text" required="true"  autocomplete="off" style="width:50px;" class="target-class" name="targets" value="0"/>
                 </td>
 			</tr>
