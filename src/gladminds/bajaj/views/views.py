@@ -875,7 +875,8 @@ def download_order_parts(request, order_id, order_status, retailer_id):
      'order_number': order_number,
      'order_total_value': orders['total_value']}
     response = HttpResponse(content_type='text/excel')
-    response['Content-Disposition'] = 'attachment; filename="Orderparts.xls"'
+    attachment = 'filename=' + retailer_name + order_number
+    response['Content-Disposition'] = 'attachment;' + attachment
     c = Context(context)
     template = loader.get_template('admin/bajaj/orderpart/download_order_parts.html')
     response.write(template.render(c))
@@ -1348,21 +1349,29 @@ def upload_average_part_history(request):
         for each_part_history in all_average_part_history:
             retailer_code =  each_part_history['Retailer Code']
             part_number = each_part_history['Part Number']
-            part_quantity = each_part_history['Parts Qunatity']
-            month = int(each_part_history['Month'])
-            year = int(each_part_history['Year'])
+            part_quantity = each_part_history['Part Qunatity']
+            selling_date_str = each_part_history['Date (YYYY-MM-DD)']
+            # month = int(each_part_history['Month'])
+            # year = int(each_part_history['Year'])
+            selling_date = datetime.datetime.strptime(selling_date_str, '%Y-%m-%d')
+            selling_month = selling_date.month
+            selling_year = salling_date.year
             retailer_obj = Retailer.objects.get(retailer_code=retailer_code)
             part_obj = PartPricing.objects.get(part_number=part_number)
-            avg_parts_sales_history = AveragePartSalesHistory(retailer=retailer_obj, part=part_obj, month=month, year=year, sale_value=part_quantity)
+            try:
+                avg_parts_sales_history = AveragePartSalesHistory.get(retailer=retailer_obj, part=part_obj, month=selling_month, year=selling_year)
+                avg_parts_sales_history.sale_value = (int(avg_parts_sales_history) + int(part_quantity)) / 2
+            except:
+                avg_parts_sales_history = AveragePartSalesHistory(retailer=retailer_obj, part=part_obj, month=month, year=year, sale_value=part_quantity)
             avg_parts_sales_history.save()
-        try:
-            transaction.commit()
-        except:
-            messages.error(request, 'Average Retailer History upload failed')
-            return HttpResponseRedirect('/admin/bajaj/averagepartsaleshistory/')
-
-        messages.success(request, 'Average Retailer History successfully')
+    try:
+        transaction.commit()
+    except:
+        messages.error(request, 'Average Retailer History upload failed')
         return HttpResponseRedirect('/admin/bajaj/averagepartsaleshistory/')
+
+    messages.success(request, 'Average Retailer History successfully')
+    return HttpResponseRedirect('/admin/bajaj/averagepartsaleshistory/')
 
 
 def download_sample_average_part_history(request):
@@ -1445,19 +1454,22 @@ def upload_order_invoice(request):
                 else:
                     grand_total = (mrp * part_quantity) + service_tax_abs + other_taxes_abs + vat_abs - discount_abs                 
                 try:
-                    invoice_obj = Invoices.objects.get(retailer_id=retailer_id, invoice_id=invoice_number)
-                    invoice_obj.invoice_amount = invoice_obj.invoice_amount + grand_total
-                    invoice_obj.save(update_fields=['invoice_amount'])
-                except:
-                    invoice_obj = Invoices(retailer_id=retailer_id, invoice_id=invoice_number, invoice_date=invoice_date, invoice_amount=grand_total)
-                    invoice_obj.save(using=settings.BRAND)
-
-                try:
                     part_obj = PartPricing.objects.get(part_number=part_number)
                     order_delivery_history_obj = OrderDeliveredHistory.objects.filter(part_number=part_obj, order=order_part_obj)[0]
                 except:
                     messages.error(request, 'HistoryUploadError: Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
                     return HttpResponseRedirect('/admin/bajaj/orderpart/')
+
+                try:
+                    invoice_obj = Invoices.objects.get(retailer_id=retailer_id, invoice_id=invoice_number)
+                    if order_delivery_history_obj.line_total:  
+                        invoice_obj.invoice_amount = invoice_obj.invoice_amount + grand_total - order_delivery_history_obj.line_total
+                    else:
+                        invoice_obj.invoice_amount = invoice_obj.invoice_amount + grand_total
+                    invoice_obj.save(update_fields=['invoice_amount'])
+                except:
+                    invoice_obj = Invoices(retailer_id=retailer_id, invoice_id=invoice_number, invoice_date=invoice_date, invoice_amount=grand_total)
+                    invoice_obj.save(using=settings.BRAND)
                 order_delivery_history_obj.discount = discount_per
                 order_delivery_history_obj.service_tax = service_tax_per
                 order_delivery_history_obj.vat = vat_per
@@ -1466,7 +1478,7 @@ def upload_order_invoice(request):
                 order_delivery_history_obj.transporter_name = transporter_name
                 order_delivery_history_obj.shipping_date = shipping_date
                 order_delivery_history_obj.lr_number = lr_number
-
+                order_delivery_history_obj.line_total = grand_total
                 order_delivery_history_obj.save(update_fields=['discount',
                  'service_tax',
                  'vat',
@@ -1490,6 +1502,7 @@ def upload_order_invoice(request):
         try:
             transaction.commit()
         except:
+            transaction.rollback()
             messages.error(request, 'Invoice upload failed')
             return HttpResponseRedirect('/admin/bajaj/orderpart/')
 

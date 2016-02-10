@@ -29,7 +29,7 @@
           {% if app.label == "DSRs Orders" %}
  <a href="{{app.url}}" {{ app.blank|yesno:' target=_blank,' }}><i class="{% firstof app.icon 'icon-chevron-right' %}"></i>{% trans app.label|capfirst %}</a>
                   {% else %}
-                     <a href="{% url 'dsr_orders' %}" {{ app.blank|yesno:' target=_blank,' }}><i class="{% firstof app.icon 'icon-chevron-right' %}"></i>{% trans app.label|capfirst %}</a>
+                     <a href="{{ app.url }}" {{ app.blank|yesno:' target=_blank,' }}><i class="{% firstof app.icon 'icon-chevron-right' %}"></i>{% trans app.label|capfirst %}</a>
                   {% endif %}
           
         
