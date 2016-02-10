@@ -7,6 +7,7 @@ from django.contrib.admin.views.main import ChangeList, ORDER_VAR
 from django.contrib.admin import DateFieldListFilter
 from django import forms
 from django.utils.html import mark_safe
+from operator import itemgetter
 
 from django.contrib.auth.forms import (UserCreationForm, UserChangeForm,
     AdminPasswordChangeForm)
@@ -1951,6 +1952,8 @@ class OrderPartAdmin(GmModelAdmin):
 
             order_details.append(order_details_dict.copy()) 
             order_details = filter(lambda x: self.role_based_filter_data(x, request.user), order_details)
+
+        order_details = sorted(order_details, key=itemgetter('ret_name'))
 
         context = {"order_details":order_details}
         template = 'admin/bajaj/orderpart/change_list.html'  # = Your new template
