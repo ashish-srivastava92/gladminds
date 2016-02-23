@@ -5,7 +5,7 @@ from gladminds.sqs_tasks import _tasks_map
 
 from tastypie.api import Api
 from django.conf import settings
-from gladminds.core.apis import user_apis, preferences_apis, coupon_apis, product_apis,\
+from gladminds.core.apis import user_apis, user_report_apis, preferences_apis, coupon_apis, product_apis,\
     audit_apis, dashboard_apis, service_desk_apis, loyalty_apis, part_change_apis,\
     service_circular
 from gladminds.core.managers.sms_handler import SMSResources
@@ -44,6 +44,18 @@ api_v1.register(user_apis.ServiceDeskUserResource())
 
 api_v1.register(user_apis.TransporterResource())
 api_v1.register(user_apis.SupervisorResource())
+
+###########################USER REPORT APIS######################################
+api_v1.register(user_report_apis.NsmTargetResource())
+api_v1.register(user_report_apis.AsmTargetResource())
+api_v1.register(user_report_apis.DistributorTargetResource())
+api_v1.register(user_report_apis.DistributorSalesRepTargetResource())
+api_v1.register(user_report_apis.RetailerTargetResource())
+api_v1.register(user_report_apis.AsmHighlightsResource())
+api_v1.register(user_report_apis.NsmHighlightsResource())
+api_v1.register(user_report_apis.DistributorHighlightsResource())
+api_v1.register(user_report_apis.DistributorSalesRepHighlightsResource())
+api_v1.register(user_report_apis.RetailerHighlightsResource())
 
 api_v1.register(product_apis.ProductTypeResource())
 api_v1.register(product_apis.ProductResource())
@@ -164,8 +176,8 @@ urlpatterns = patterns('',
                         'gladminds.bajaj.views.apis.uploadcollection'),
     url(r'^cv/get_distributor_for_retailer/retailer_id/(?P<retailer_id>\d+)/$',
                         'gladminds.bajaj.views.apis.get_distributor_for_retailer'),
-    url(r'^cv/get_schedule/dsr_id/(?P<dsr_id>\d+)/date/(?P<date>[-\d]+)/$',
-                       'gladminds.bajaj.views.apis.get_schedule'),
+    url(r'^cv/get_schedule/dsr_id/(?P<dsr_id>\d+)/$',
+                       'gladminds.core.views.apis.get_schedule'),
     url(r'^cv/place_order/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.core.views.apis.place_order'),
     url(r'^cv/retailer_place_order/retailer_id/(?P<retailer_id>\d+)/$',
@@ -254,6 +266,15 @@ urlpatterns = patterns('',
     url(r'^getretailers_acutal/$', 'gladminds.bajaj.views.apis.get_retailers_actual', name='getretailers_actual'),
     url(r'^getusers/$', 'gladminds.bajaj.views.apis.get_users', name='getusers'),
     url(r'^cv/get_focused_parts/', 'gladminds.core.views.apis.get_focused_parts'),
+ 
+    ##Reports API
+    url(r'^mc/get_user_reports/(?P<month>\d+)/(?P<year>\d+)/$','gladminds.core.apis.user_report_apis.get_reports', name='get_user_reports'),
+    url(r'^save_targets/$', 'gladminds.core.apis.user_report_apis.save_targets', name='save_targets'),
+    url(r'^add_targets/$', 'gladminds.core.apis.user_report_apis.add_targets', name='add_targets'),
+    url(r'^get_web_reports/(?P<accesstoken>[a-zA-Z0-9]+)/(?P<actionlist>[a-zA-Z0-9_]+)/(?P<state>[a-zA-Z0-9]+)/(?P<month>[a-zA-Z]+)/(?P<year>[0-9]+)/$', 'gladminds.core.apis.user_report_apis.get_web_reports', name='get_web_reports'),
+
+    ##Collection 
+    url(r'^mc/get_collection/$','gladminds.bajaj.views.apis.get_collection'),
  
 )
 

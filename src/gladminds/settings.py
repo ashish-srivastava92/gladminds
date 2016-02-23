@@ -247,7 +247,25 @@ SUIT_CONFIG = {
                     )
                     },
      
-          
+        {'app': 'bajaj', 'label': 'SFA Reports', 'icon': ' icon-folder-open',
+          'models':({'model': 'sfareports',
+                      'label': 'Reports'},
+                    {'model': 'sfahighlights',
+                      'label': 'Highlights'},
+                   )},
+
+        {'app': 'bajaj', 'label': 'SFA Add Targets', 'icon': ' icon-folder-open',
+                'models':({'model': 'nsmtarget',
+                    'label': 'NSM Targets'},
+                    {'model': 'asmtarget',
+                        'label': 'ASM Targets'},
+                    {'model': 'distributortarget',
+                        'label': 'Distributor Targets'},
+                    {'model': 'distributorsalesreptarget',
+                        'label': 'DSR Targets'},
+                    {'model': 'retailertarget',
+                        'label': 'Retailer Targets'},
+                    )}, 
         {'app': 'bajaj', 'label': 'Collections', 'icon': ' icon-folder-open',
          'models':(
                   

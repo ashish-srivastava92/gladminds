@@ -2204,3 +2204,23 @@ class PartSalesDetails(BaseModel):
         abstract = True
         db_table = "gm_part_sales_details"
         verbose_name_plural = "Part Sales Details"
+
+#FIXME: Can be sub-class of models.Model only
+class SFAReports(BaseModel):
+    class Meta:
+        abstract = True
+        db_table = "gm_sfa_target_reports"
+        verbose_name_plural = "SFA Targets"
+
+class SFAHighlights(BaseModel):
+    class Meta:
+        abstract = True
+        db_table = "gm_sfa_highlight_reports"
+        verbose_name_plural = "SFA Highlights"
+
+class SetTarget(BaseModel):
+    class Meta:
+        abstract = True
+        db_table = "gm_sfa_set_target"
+        verbose_name_plural = "Set Targets"
+

@@ -122,8 +122,11 @@ def get_retailers(request, dsr_id):
             retailer_dict.update({"city":''})
             retailer_dict.update({"state":''})
             retailer_dict.update({"locality_id":''})
-        retailer_dict.update({"latitude":retailer.latitude})
-        retailer_dict.update({"longitude":retailer.longitude})
+        if not retailer.latitude or not retailer.longitude:
+            retailer.latitude=''
+            retailer.longitude=''
+        retailer_dict.update({"latitude":str(retailer.latitude)})
+        retailer_dict.update({"longitude":str(retailer.longitude)})
         retailer_list.append(retailer_dict)
     return Response(retailer_list)
 
@@ -314,12 +317,12 @@ def get_schedule(request, dsr_id):
         for schedule in schedules:
             schedule_dict = {}
             schedule_dict['locality_id'] = schedule.locality_id
+            schedule_dict['pjp_day'] = schedule.pjp_day
             try:
                 if schedule.locality:
                     schedule_dict['locality_name'] = schedule.locality.name
             except:
                 schedule_dict['locality_name'] = 'Locality missing'
-                schedule_dict['pjp_day'] = schedule.pjp_day
             #schedule_dict.update({"retailer_code" : schedule.retailer.retailer_code})
             #schedule_dict.update({"retailer_name" : schedule.retailer.retailer_name})
             #tm = time.strptime(str(schedule.date.time()), "%H:%M:%S")
@@ -349,14 +352,14 @@ def get_stock(request,dsr_id):
     stock_list =[]
     for part in stocks:
         parts_dict = {}
-    try:
-        parts_dict["part_number"]=part.part_number.part_number
-        parts_dict["part_available_quantity"]=part.available_quantity
-        parts_dict["mrp"]=part.part_number.mrp
-        stock_list.append(parts_dict)
-    except:
-        # FIXME: Remove try except from here and confirm if exceptions are due to curropt data
-        pass
+        try:
+            parts_dict["part_number"]=part.part_number.part_number
+            parts_dict["part_available_quantity"]=part.available_quantity
+            parts_dict["mrp"]=part.part_number.mrp
+            stock_list.append(parts_dict)
+        except:
+            # FIXME: Remove try except from here and confirm if exceptions are due to curropt data
+            pass
     return Response(stock_list)
 
 
