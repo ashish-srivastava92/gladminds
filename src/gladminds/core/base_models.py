@@ -2198,3 +2198,22 @@ class AverageLocationSalesHistory(BaseModel):
         db_table = "gm_average_location_sales_history"
         verbose_name_plural = "Average Location Sales History"
 
+#FIXME: Can be sub-class of models.Model only
+class SFAReports(BaseModel):
+    class Meta:
+        abstract = True
+        db_table = "gm_sfa_target_reports"
+        verbose_name_plural = "SFA Targets"
+
+class SFAHighlights(BaseModel):
+    class Meta:
+        abstract = True
+        db_table = "gm_sfa_highlight_reports"
+        verbose_name_plural = "SFA Highlights"
+
+class SetTarget(BaseModel):
+    class Meta:
+        abstract = True
+        db_table = "gm_sfa_set_target"
+        verbose_name_plural = "Set Targets"
+

@@ -1,0 +1,188 @@
+{% extends "admin/change_form.html" %}
+
+{% load i18n admin_static admin_modify suit_tags admin_urls %}
+{% load url from future %}
+{% block extrahead %}
+{#{block.super}#}
+<!-- <link href="/static/css/portal.css" rel="stylesheet"> -->
+
+<script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+
+<link rel="stylesheet" type="text/css" href="/static/suit/css/suit.css" media="all">
+<script src="/static/suit/js/jquery-1.8.3.min.js"></script>
+
+<script type="text/javascript">
+	var Suit = {
+		$ : $.noConflict()
+	};
+	if (!$)
+		$ = Suit.$;
+</script>
+
+<script src="https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.10/js/dataTables.bootstrap.min.js"></script>
+<script>
+	$(document).ready(function() {
+		//$('#showParts').DataTable();
+		inputObjs = $("input[type=text]");
+		if($(inputObjs).length==0)
+			$("#_place_order_submit").remove();
+	});
+
+</script>
+<!-- <link rel="stylesheet" type="text/css" href="/static/suit/css/suit.css" media="all"> -->
+<!-- <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.10/css/dataTables.bootstrap.min.css" />
+-->
+<style>
+	.table-data {
+		position: absolute;
+	}
+	.pagination {
+		float: right;
+		margin-bottom: 3% !important;
+	}
+</style>
+<script>
+	$(function() {
+		$("#showParts").DataTable();
+		$(".datepick").datepicker();
+
+		// add multiple select / deselect functionality
+		$("#selectall").click(function() {
+			$('.case').attr('checked', this.checked);
+		});
+
+		// if all checkbox are selected, check the selectall checkbox
+		// and viceversa
+		$(".case").click(function() {
+
+			if ($(".case").length == $(".case:checked").length) {
+				$("#selectall").attr("checked", "checked");
+			} else {
+				$("#selectall").removeAttr("checked");
+			}
+
+		});
+	}); 
+	
+	function validator(){
+		// alert("in");
+//        if($(".target").val()=="Null"){
+//                return true;
+            }    /* 
+        if($(".target").val() < sum_of_all_targets){
+            alert("Set Targets are insufficent")
+            return false;
+        }*/
+    alert("Invalid")
+    return false; 
+    };
+</script>
+<style>
+	.text-center {
+		text-align: center;
+	}
+</style>
+{% endblock %}
+{% block content %}
+
+<div class="row-fluid">
+	<div class="span6" style="text-align:right">
+		<b>Year</b> {{year}}
+		<br/>
+		<b>Month</b> {{month}}
+	</div>
+</div>
+<div class="suit-tab suit-tab-retailer">
+
+<hr/>
+<form action="{% url 'save_targets' %}" method="POST" enctyype="multipart/form-data" onsubmit="return validator()">
+    <input type ="hidden" name="target1" id="target1" value="{{target}}"/>
+    <input type ="hidden" name="type1" id="type1" value="{{type}}"/>
+    <input type ="hidden" name="month1" id="month1" value="{{month}}"/>
+    <input type ="hidden" name="year1" id="year1" value="{{year}}"/>
+	<table class="table table-striped table-bordered table-responsive" id="showParts">
+		<thead>
+			<tr>
+                {% ifequal type "1" %}
+				<th class="text-left">National Spares Manager</th>
+                {% endifequal %}
+                {% ifequal type "2" %}
+				<th class="text-left">Area Spares Manager</th>
+                {% endifequal %}
+                {% ifequal type "3" %}
+				<th class="text-left">Distributor</th>
+                {% endifequal %}
+                {% ifequal type "4" %}
+				<th class="text-left">Distributor Sales Rep</th>
+                {% endifequal %}
+                {% ifequal type "5" %}
+				<th class="text-left">Retailer</th>
+                {% endifequal %}
+                <th class="text-center">Sales Code</th>
+				<th class="text-center">Target</th>
+			</tr>
+		</thead>
+			{% for each in objs %}
+		<tbody>
+			<tr>
+                <td class="text-center" type="text" style="text-align:left"required="true" name="name">{{each.name}}</td>
+                <td class="text-center" type="text" style="text-align:center"required="true" name="code">{{each.code}}</td>
+                <td style="text-align:center">
+                    <input type ="hidden" name="name1" id="name1" value="{{each.name}}"/>
+                    <input type ="hidden" name="code1" id="code1" value="{{each.code}}"/>
+                    <input type ="text" required="true"  autocomplete="off" style="width:50px;" class="target-class" name="targets" value="0"/>
+                </td>
+			</tr>
+		</tbody>
+			{% endfor %}
+	</table>
+	<div style="text-align: right;display: block">
+		<button type="submit" class="btn btn-primary" name="save_targets" id="_place_order_submit">
+			Set Targets
+		</button>
+        <button type="button" class="btn btn-default" onclick="javascript:clearTargetList();">
+            Reset Targets
+        </button>
+	</div>
+</form>
+</div>
+<div class="suit-tab suit-tab-dsr">
+</div>
+<script>
+	$(document).ready(function() {
+		$('.chk-box').change(function(e) {
+			if ($(this).is(":checked")) {
+				$(e.target).parents('tr').find('input.delivered-stock').attr('disabled', false).focus();
+				$(e.target).parents('tr').find('input.datepick').attr('disabled', false);
+				$(e.target).parents('tr>td').append("<input type='hidden' name='part_number' class='hiddentxt' value='" + $(this).attr("rel") + "'>")
+				// $(e.target).parents('tr>td').append("<input type='hidden' name='part_number_ids' class='hiddentxt' value='"+$(this).attr("rel")+"'>")
+			} else {
+				$(e.target).parents('tr').find('input.delivered-stock').attr('disabled', true);
+				$(e.target).parents('tr').find('input.datepick').attr('disabled', true);
+				$(e.target).parents('tr>td').find(".hiddentxt").remove();
+			}
+		});
+
+	});
+
+	function loadOrderDetails(url, partNum, partDesc) {
+
+		$("#part_numberHead").html(partNum);
+		$("#part_desc").html(partDesc)
+		$("#loadParts").attr("src", url);
+	}
+        function clearTargetList(){
+            var x = $(".target-class").val(0);
+        }
+
+
+</script>
+<style>
+	tr.red td {
+		background-color: #F5D0A9 !important;
+	}
+</style>
+{% endblock content  %}
