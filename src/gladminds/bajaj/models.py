@@ -1246,9 +1246,20 @@ class AveragePartSalesHistory(base_models.AveragePartSalesHistory):
 class AverageLocationSalesHistory(base_models.AverageLocationSalesHistory):
     location = models.ForeignKey(Locality)
     part = models.ForeignKey(PartPricing)
-    start_month = models.IntegerField(null=True, blank=True)
-    end_month = models.IntegerField(null=True, blank=True)
+    month = models.IntegerField(null=True, blank=True)
     year = models.IntegerField(null=True, blank=True)
 
     class Meta(base_models.AverageLocationSalesHistory.Meta):
+        app_label = _APP_NAME
+
+
+class PartSalesDetails(base_models.PartSalesDetails):
+    retailer = models.ForeignKey(Retailer)
+    part = models.ForeignKey(PartPricing)
+    month = models.IntegerField(null=True, blank=True)
+    year = models.IntegerField(null=True, blank=True)    
+    state = models.CharField(max_length=100,null=True, blank=True)
+    city = models.CharField(max_length=100,null=True, blank=True)
+    locality = models.CharField(max_length=100,null=True, blank=True)
+    class Meta(base_models.PartSalesDetails.Meta):
         app_label = _APP_NAME

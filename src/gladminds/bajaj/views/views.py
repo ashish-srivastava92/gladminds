@@ -875,7 +875,7 @@ def download_order_parts(request, order_id, order_status, retailer_id):
      'order_number': order_number,
      'order_total_value': orders['total_value']}
     response = HttpResponse(content_type='text/excel')
-    attachment = 'filename=' + retailer_name + order_number
+    attachment = 'filename=' + retailer_name + order_number + '.xls'
     response['Content-Disposition'] = 'attachment;' + attachment
     c = Context(context)
     template = loader.get_template('admin/bajaj/orderpart/download_order_parts.html')
@@ -1344,26 +1344,36 @@ def upload_average_part_history(request):
     full_path = handle_uploaded_file(request.FILES['upload_average_retailer_sales_history'])
     msg = ''
     retailer_obj = None
+    part_month_dict = {}
     with open(full_path) as csvfile:
         all_average_part_history = csv.DictReader(csvfile)
         for each_part_history in all_average_part_history:
             retailer_code =  each_part_history['Retailer Code']
             part_number = each_part_history['Part Number']
-            part_quantity = each_part_history['Part Qunatity']
+            part_quantity = int(each_part_history['Part Quantity'])
             selling_date_str = each_part_history['Date (YYYY-MM-DD)']
-            # month = int(each_part_history['Month'])
-            # year = int(each_part_history['Year'])
             selling_date = datetime.datetime.strptime(selling_date_str, '%Y-%m-%d')
             selling_month = selling_date.month
-            selling_year = salling_date.year
-            retailer_obj = Retailer.objects.get(retailer_code=retailer_code)
-            part_obj = PartPricing.objects.get(part_number=part_number)
-            try:
-                avg_parts_sales_history = AveragePartSalesHistory.get(retailer=retailer_obj, part=part_obj, month=selling_month, year=selling_year)
-                avg_parts_sales_history.sale_value = (int(avg_parts_sales_history) + int(part_quantity)) / 2
-            except:
-                avg_parts_sales_history = AveragePartSalesHistory(retailer=retailer_obj, part=part_obj, month=month, year=year, sale_value=part_quantity)
-            avg_parts_sales_history.save()
+            selling_year = selling_date.year
+            selling_month_year = str(selling_month) + ',' + str(selling_year)
+            if not part_month_dict.get(retailer_code):
+                part_month_dict[retailer_code] = {}
+            if not part_month_dict[retailer_code].get(part_number):
+                part_month_dict[retailer_code][part_number] = {}
+            if not part_month_dict[retailer_code][part_number].get(selling_month_year):
+                part_month_dict[retailer_code][part_number][selling_month_year] = part_quantity
+            else:
+                part_month_dict[retailer_code][part_number][selling_month_year] = \
+                    part_month_dict[retailer_code][part_number][selling_month_year] + part_quantity
+    for retailer in part_month_dict:
+        retailer_obj = Retailer.objects.get(retailer_code=retailer)
+        for part in part_month_dict[retailer]:
+            part_obj = PartPricing.objects.get(part_number=part)
+            for month_year in part_month_dict[retailer][part]:
+                part_quantity = part_month_dict[retailer][part][month_year]
+                selling_month, selling_year = month_year.split(',')
+                avg_parts_sales_history = AveragePartSalesHistory(retailer=retailer_obj, part=part_obj, month=selling_month, year=selling_year, sale_value=part_quantity)    
+                avg_parts_sales_history.save()
     try:
         transaction.commit()
     except:

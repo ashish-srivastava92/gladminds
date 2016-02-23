@@ -2593,8 +2593,7 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("PartModel", brand), PartModelAdmin)
     brand_admin.register(get_model("Categories", brand), CategoriesAdmin)
     brand_admin.register(get_model("AveragePartSalesHistory", brand), AveragePartSalesHistoryAdmin)
-    brand_admin.register(get_model("AverageLocationSalesHistory", brand), AverageLocationSalesHistoryAdmin
-)
+    #brand_admin.register(get_model("AverageLocationSalesHistory", brand), AverageLocationSalesHistoryAdmin)
 
     # brand_admin.register(get_model("SubCategories", brand), SubCategoriesAdmin)
 #     brand_admin.register(get_model("PartMasterCv", brand), PartListAdmin)

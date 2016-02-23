@@ -191,16 +191,15 @@ def get_focused_parts(request):
     retailer_code = request.GET.get('retailer_code')
     dsr_code = request.GET.get('dsr_code')
     if retailer_code:
-	locality = Retailer.objects.get(retailer_code=retailer_code).locality
-	all_focused_parts = FocusedPart.objects.filter(locality=locality)
+	   locality = Retailer.objects.get(retailer_code=retailer_code).locality
+	   all_focused_parts = FocusedPart.objects.filter(locality=locality)
     elif dsr_code:
-	retailer_objs = Retailer.objects.filter(dsr__distributor_sales_code=dsr_code)
-	localities = [i.locality for i in retailer_objs]
-	all_focused_parts = FocusedPart.objects.filter(locality__in=localities)
+	   retailer_objs = Retailer.objects.filter(dsr__distributor_sales_code=dsr_code)
+	   localities = [i.locality for i in retailer_objs]
+	   all_focused_parts = FocusedPart.objects.filter(locality__in=localities)
     else:
     	all_focused_parts = FocusedPart.objects.all()
 
-    all_focused_parts = FocusedPart.objects.all()
     parts_list = []
     for focused_part in all_focused_parts:
         parts_dict = {}
@@ -219,10 +218,10 @@ def get_focused_parts(request):
             parts_dict.update({"part_available_quantity":available_quantity.available_quantity})
         parts_dict.update({"part_products":focused_part.part.products})
         parts_dict.update({"mrp":focused_part.part.mrp})
-	parts_dict.update({"locality_id": focused_part.locality_id})
-	parts_dict.update({"city": focused_part.locality.city.city})
+        parts_dict.update({"locality_id": focused_part.locality_id})
+        parts_dict.update({"city": focused_part.locality.city.city})
         parts_dict.update({"state": focused_part.locality.city.state.state_name})
-	parts_dict.update({"locality": focused_part.locality.name})
+        parts_dict.update({"locality": focused_part.locality.name})
         parts_list.append(parts_dict)
     return Response(parts_list)	
 

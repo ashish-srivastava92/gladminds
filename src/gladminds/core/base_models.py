@@ -2198,3 +2198,9 @@ class AverageLocationSalesHistory(BaseModel):
         db_table = "gm_average_location_sales_history"
         verbose_name_plural = "Average Location Sales History"
 
+class PartSalesDetails(BaseModel):
+    part_quantity = models.IntegerField(default=0)
+    class Meta:
+        abstract = True
+        db_table = "gm_part_sales_details"
+        verbose_name_plural = "Part Sales Details"
