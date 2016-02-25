@@ -601,10 +601,6 @@ class DistributorSalesRep(base_models.DistributorSalesRep):
                                 ' ' + self.user.user.last_name
 
 
-
-
-
-
 class Retailer(base_models.Retailer):
     '''details of retailer'''
     user = models.ForeignKey(UserProfile)
@@ -1464,24 +1460,31 @@ class PermanentJourneyPlan(base_models.PermanentJourneyPlan):
         app_label = _APP_NAME
 
 
-class AveragePartSalesHistory(base_models.AveragePartSalesHistory):
+class MonthlyPartSalesHistory(base_models.MonthlyPartSalesHistory):
     retailer = models.ForeignKey(Retailer)
     part = models.ForeignKey(PartPricing)
     month = models.IntegerField(null=True, blank=True)
     year = models.IntegerField(null=True, blank=True)
 
-    class Meta(base_models.AveragePartSalesHistory.Meta):
+    class Meta(base_models.MonthlyPartSalesHistory.Meta):
+        app_label = _APP_NAME
+
+
+class AverageRetailerSalesHistory(base_models.AverageRetailerSalesHistory):
+    retailer = models.ForeignKey(Retailer)
+    part = models.ForeignKey(PartPricing)
+
+    class Meta(base_models.AverageRetailerSalesHistory.Meta):
         app_label = _APP_NAME
 
 
 class AverageLocationSalesHistory(base_models.AverageLocationSalesHistory):
     location = models.ForeignKey(Locality)
     part = models.ForeignKey(PartPricing)
-    month = models.IntegerField(null=True, blank=True)
-    year = models.IntegerField(null=True, blank=True)
 
     class Meta(base_models.AverageLocationSalesHistory.Meta):
         app_label = _APP_NAME
+
 
 class SFAReports(base_models.SFAReports):
     pass
@@ -1489,16 +1492,16 @@ class SFAReports(base_models.SFAReports):
     class Meta(base_models.SFAReports.Meta):
         app_label = _APP_NAME
 
-class PartSalesDetails(base_models.PartSalesDetails):
-    retailer = models.ForeignKey(Retailer)
-    part = models.ForeignKey(PartPricing)
-    month = models.IntegerField(null=True, blank=True)
-    year = models.IntegerField(null=True, blank=True)    
-    state = models.CharField(max_length=100,null=True, blank=True)
-    city = models.CharField(max_length=100,null=True, blank=True)
-    locality = models.CharField(max_length=100,null=True, blank=True)
-    class Meta(base_models.PartSalesDetails.Meta):
-        app_label = _APP_NAME
+# class PartSalesDetails(base_models.PartSalesDetails):
+#     retailer = models.ForeignKey(Retailer)
+#     part = models.ForeignKey(PartPricing)
+#     month = models.IntegerField(null=True, blank=True)
+#     year = models.IntegerField(null=True, blank=True)    
+#     state = models.CharField(max_length=100,null=True, blank=True)
+#     city = models.CharField(max_length=100,null=True, blank=True)
+#     locality = models.CharField(max_length=100,null=True, blank=True)
+#     class Meta(base_models.PartSalesDetails.Meta):
+#         app_label = _APP_NAME
 
 class SFAHighlights(base_models.SFAHighlights):
     pass

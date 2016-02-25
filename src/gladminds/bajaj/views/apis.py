@@ -1571,4 +1571,36 @@ def get_collection(request):
 
     return HttpResponse(json.dumps(collection_details), content_type='application/json')
 
+@api_view(['GET'])
+def update_six_months_retailer_history(request):
+    prev_month_list = []
+    prev_year_list = []
+    for i in range(6):
+        prev_date = (datetime.date.today() - datetime.timedelta(i*365/12))
+        prev_month_list.appned(prev_date.month)
+        prev_year_list.append(prev_date.year)
+    last_six_months_parts_hist = MonthlyPartSalesHistory.objects.filter\
+                            (month__in=prev_month_list, year__in=prev_year_list)
+    retailer_part_wise_history = {}
+    for obj in last_six_months_parts_hist:
+        if not retailer_part_wise_history.get(obj.retailer_id):
+            retailer_part_wise_history[obj.retailer_id] = {}
+        if retailer_part_wise_history[obj.retailer_id].get(obj.part_id):
+            retailer_part_wise_history[obj.retailer_id][obj.part_id] = \
+                    retailer_part_wise_history[obj.retailer_id][obj.part_id] + obj.sale_value
+        else:
+            retailer_part_wise_history[obj.retailer_id][obj.part_id] = obj.sale_value
+    for hist_retailer in retailer_part_wise_history;
+        for hist_part in retailer_part_wise_history[hist_retailer]:
+            avg_quantity = retailer_part_wise_history[hist_retailer][hist_part] / 6
+            avg_retailer_sales_history_obj = \
+                AverageRetailerSalesHistory(part_id=hist_part, quantity=avg_quantity, \
+                                                        retailer_id=hist_retailer)
 
+@api_view(['GET'])
+def update_six_months_retailer_history(request):
+    retailer_avg_part_hist = AverageRetailerSalesHistory.objects.all()
+    locality_part_wise_history = {}
+    for hist_obj in retailer_avg_part_hist:
+        locality_id = hist_obj.retailer.locality_id
+        if locality_part_wise_history.get(hist_obj.locality)
