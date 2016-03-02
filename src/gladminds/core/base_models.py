@@ -2185,17 +2185,17 @@ class PermanentJourneyPlan(BaseModel):
         verbose_name_plural = "Permanent Journey Plan"
 
 class MonthlyPartSalesHistory(BaseModel):
-    sale_value = models.IntegerField(default=0)
+    quantity = models.IntegerField(default=0)
     class Meta:
         abstract = True
         db_table = "gm_monthly_part_sales_history"
         verbose_name_plural = "Average Part Sales History"
 
-class AverageLocationSalesHistory(BaseModel):
+class AverageLocalitySalesHistory(BaseModel):
     quantity = models.IntegerField(default=0)
     class Meta:
         abstract = True
-        db_table = "gm_average_location_sales_history"
+        db_table = "gm_average_locality_sales_history"
         verbose_name_plural = "Average Location Sales History"
 
 class AverageRetailerSalesHistory(BaseModel):
@@ -2205,12 +2205,6 @@ class AverageRetailerSalesHistory(BaseModel):
         db_table = "gm_average_retailer_sales_history"
         verbose_name_plural = "Average Retailer Sales History"
 
-# class PartSalesDetails(BaseModel):
-#     part_quantity = models.IntegerField(default=0)
-#     class Meta:
-#         abstract = True
-#         db_table = "gm_part_sales_details"
-#         verbose_name_plural = "Part Sales Details"
 
 #FIXME: Can be sub-class of models.Model only
 class SFAReports(BaseModel):

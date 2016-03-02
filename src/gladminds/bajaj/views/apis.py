@@ -21,9 +21,10 @@ from rest_framework_jwt.settings import api_settings
 from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
                             PartPricing, Distributor,  Invoices, \
                             Collection,CollectionDetails,PartsStock,DSRWorkAllocation,DSRLocationDetails, \
-			    NationalSparesManager,AreaSparesManager,OrderDeliveredHistory
+			    NationalSparesManager,AreaSparesManager,OrderDeliveredHistory, MonthlyPartSalesHistory
 from gladminds.bajaj.models import OrderPart,OrderPartDetails, \
-                        PartIndexDetails, PartIndexPlates, FocusedPart
+                        PartIndexDetails, PartIndexPlates, FocusedPart, \
+                        AverageRetailerSalesHistory, AverageLocalitySalesHistory
 from gladminds.core.auth_helper import Roles
 from django.db.models import Sum
 
@@ -1572,35 +1573,57 @@ def get_collection(request):
     return HttpResponse(json.dumps(collection_details), content_type='application/json')
 
 @api_view(['GET'])
+@transaction.commit_manually
 def update_six_months_retailer_history(request):
     prev_month_list = []
     prev_year_list = []
     for i in range(6):
         prev_date = (datetime.date.today() - datetime.timedelta(i*365/12))
-        prev_month_list.appned(prev_date.month)
+        prev_month_list.append(prev_date.month)
         prev_year_list.append(prev_date.year)
     last_six_months_parts_hist = MonthlyPartSalesHistory.objects.filter\
                             (month__in=prev_month_list, year__in=prev_year_list)
     retailer_part_wise_history = {}
+    print "thsi is last_six_months_parts_hist...", last_six_months_parts_hist
     for obj in last_six_months_parts_hist:
         if not retailer_part_wise_history.get(obj.retailer_id):
             retailer_part_wise_history[obj.retailer_id] = {}
         if retailer_part_wise_history[obj.retailer_id].get(obj.part_id):
             retailer_part_wise_history[obj.retailer_id][obj.part_id] = \
-                    retailer_part_wise_history[obj.retailer_id][obj.part_id] + obj.sale_value
+                    retailer_part_wise_history[obj.retailer_id][obj.part_id] + obj.quantity
         else:
-            retailer_part_wise_history[obj.retailer_id][obj.part_id] = obj.sale_value
-    for hist_retailer in retailer_part_wise_history;
+            retailer_part_wise_history[obj.retailer_id][obj.part_id] = obj.quantity
+    for hist_retailer in retailer_part_wise_history:
         for hist_part in retailer_part_wise_history[hist_retailer]:
             avg_quantity = retailer_part_wise_history[hist_retailer][hist_part] / 6
             avg_retailer_sales_history_obj = \
                 AverageRetailerSalesHistory(part_id=hist_part, quantity=avg_quantity, \
                                                         retailer_id=hist_retailer)
+            avg_retailer_sales_history_obj.save()
+    transaction.commit()
+    return HttpResponse(json.dumps({'status': 'completed'}), content_type='application/json')
+
 
 @api_view(['GET'])
-def update_six_months_retailer_history(request):
+@transaction.commit_manually
+def update_six_months_location_history(request):
     retailer_avg_part_hist = AverageRetailerSalesHistory.objects.all()
     locality_part_wise_history = {}
     for hist_obj in retailer_avg_part_hist:
         locality_id = hist_obj.retailer.locality_id
-        if locality_part_wise_history.get(hist_obj.locality)
+        if not locality_part_wise_history.get(locality_id):
+            locality_part_wise_history[locality_id] = {}
+        if locality_part_wise_history[locality_id].get(hist_obj.part_id):
+            locality_part_wise_history[locality_id][hist_obj.part_id] = \
+                    locality_part_wise_history[locality_id][hist_obj.part_id] + hist_obj.quantity
+        else:
+            locality_part_wise_history[locality_id][hist_obj.part_id] = hist_obj.quantity
+    for hist_locality in locality_part_wise_history:
+        for hist_part in locality_part_wise_history[hist_locality]:
+            avg_quantity = locality_part_wise_history[hist_locality][hist_part]
+            average_locality_sales_history = \
+                AverageLocalitySalesHistory(part_id=hist_part, quantity=avg_quantity, \
+                                                        locality_id=hist_locality)
+            average_locality_sales_history.save()
+    transaction.commit()
+    return HttpResponse(json.dumps({'status': 'completed'}), content_type='application/json')

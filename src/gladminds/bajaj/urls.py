@@ -162,5 +162,7 @@ urlpatterns = patterns('',
     url(r'^order_allocated_details/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$','gladminds.bajaj.views.views.pending_order_details' , name='pending_order_details'),
     url(r'^save_order/$','gladminds.bajaj.views.views.generate_picklist_save_order' , name='generate_picklist_save_order'),
     url(r'^mc/get_focused_parts/', 'gladminds.bajaj.views.apis.get_focused_parts'),
+    url(r'^update_six_months_retailer_history/', 'gladminds.bajaj.views.apis.update_six_months_retailer_history'),
+    url(r'^update_six_months_location_history/', 'gladminds.bajaj.views.apis.update_six_months_location_history'),
 
 )

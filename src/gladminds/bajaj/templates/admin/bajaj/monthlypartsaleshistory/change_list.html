@@ -1,0 +1,32 @@
+{% extends "admin/change_list.html" %}
+{% load i18n %}
+{% block object-tools %}
+    <div class="span6">
+            <form action="{% url 'upload_average_part_history' %}" method="POST" enctype="multipart/form-data" >
+            <table width>
+                    <tr>
+                        <td>
+                            <input type="file" name="upload_average_retailer_sales_history" required="true">
+
+                        <button type="button" class="btn btn-default" onclick="javascript:downloadSampleRetailerSalesHistoryCsv();">
+                        Download Sample CSV
+                        </button>
+
+                                </td>
+
+                        <td>
+                                <input class="btn btn-info" id="uploadExcel" type="submit" value="Upload Retailer Sales History">
+                        </td>
+                    </tr>	
+            </table>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        function downloadSampleRetailerSalesHistoryCsv(){
+            url = "{% url 'download_sample_average_part_history' %}"
+            location.href= url;
+        }
+    </script>
+
+{% endblock %}

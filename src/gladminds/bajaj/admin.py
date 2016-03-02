@@ -1634,9 +1634,9 @@ class PermanentJourneyPlanAdmin(GmModelAdmin):
         super(PermanentJourneyPlanAdmin, self).save_model(request, obj, form, change)
 
 
-class AveragePartSalesHistoryAdmin(GmModelAdmin):
+class MonthlyPartSalesHistoryAdmin(GmModelAdmin):
     search_fields = ('month', 'year')
-    list_display = ('get_retailer_code', 'get_retailer_name', 'get_part', 'sale_value', 'month', 'year')
+    list_display = ('get_retailer_code', 'get_retailer_name', 'get_part', 'quantity', 'month', 'year')
 
     def get_retailer_name(self, obj):
         return obj.retailer.retailer_name
@@ -2874,7 +2874,7 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("Retailer", brand), RetailerAdmin)
     brand_admin.register(get_model("PartModel", brand), PartModelAdmin)
     brand_admin.register(get_model("Categories", brand), CategoriesAdmin)
-    brand_admin.register(get_model("AveragePartSalesHistory", brand), AveragePartSalesHistoryAdmin)
+    brand_admin.register(get_model("MonthlyPartSalesHistory", brand), MonthlyPartSalesHistoryAdmin)
     #brand_admin.register(get_model("AverageLocationSalesHistory", brand), AverageLocationSalesHistoryAdmin)
 
     # brand_admin.register(get_model("SubCategories", brand), SubCategoriesAdmin)

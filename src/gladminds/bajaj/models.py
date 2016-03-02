@@ -1478,11 +1478,11 @@ class AverageRetailerSalesHistory(base_models.AverageRetailerSalesHistory):
         app_label = _APP_NAME
 
 
-class AverageLocationSalesHistory(base_models.AverageLocationSalesHistory):
-    location = models.ForeignKey(Locality)
+class AverageLocalitySalesHistory(base_models.AverageLocalitySalesHistory):
+    locality = models.ForeignKey(Locality)
     part = models.ForeignKey(PartPricing)
 
-    class Meta(base_models.AverageLocationSalesHistory.Meta):
+    class Meta(base_models.AverageLocalitySalesHistory.Meta):
         app_label = _APP_NAME
 
 
@@ -1491,17 +1491,6 @@ class SFAReports(base_models.SFAReports):
 
     class Meta(base_models.SFAReports.Meta):
         app_label = _APP_NAME
-
-# class PartSalesDetails(base_models.PartSalesDetails):
-#     retailer = models.ForeignKey(Retailer)
-#     part = models.ForeignKey(PartPricing)
-#     month = models.IntegerField(null=True, blank=True)
-#     year = models.IntegerField(null=True, blank=True)    
-#     state = models.CharField(max_length=100,null=True, blank=True)
-#     city = models.CharField(max_length=100,null=True, blank=True)
-#     locality = models.CharField(max_length=100,null=True, blank=True)
-#     class Meta(base_models.PartSalesDetails.Meta):
-#         app_label = _APP_NAME
 
 class SFAHighlights(base_models.SFAHighlights):
     pass

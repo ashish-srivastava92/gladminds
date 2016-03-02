@@ -47,7 +47,7 @@ from gladminds.core.auth import otp_handler
 from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor, District, State, OrderPartDetails, \
 PartPricing, OrderDeliveredHistory, DoDetails, PartsStock, OrderPart, OrderPartDetails, DistributorSalesRep, DSRWorkAllocation, \
 BackOrders, DSRLocationDetails, OrderTempDeliveredHistory, Collection, CollectionDetails, DoDetails,\
-AreaSparesManager, PartsRackLocation, OrderTempDetails, Invoices, PartsRackLocation, AveragePartSalesHistory
+AreaSparesManager, PartsRackLocation, OrderTempDetails, Invoices, PartsRackLocation, MonthlyPartSalesHistory
 
 
 from django.core.serializers.json import DjangoJSONEncoder
@@ -1372,16 +1372,16 @@ def upload_average_part_history(request):
             for month_year in part_month_dict[retailer][part]:
                 part_quantity = part_month_dict[retailer][part][month_year]
                 selling_month, selling_year = month_year.split(',')
-                avg_parts_sales_history = AveragePartSalesHistory(retailer=retailer_obj, part=part_obj, month=selling_month, year=selling_year, sale_value=part_quantity)    
+                avg_parts_sales_history = MonthlyPartSalesHistory(retailer=retailer_obj, part=part_obj, month=selling_month, year=selling_year, quantity=part_quantity)    
                 avg_parts_sales_history.save()
     try:
         transaction.commit()
     except:
         messages.error(request, 'Average Retailer History upload failed')
-        return HttpResponseRedirect('/admin/bajaj/averagepartsaleshistory/')
+        return HttpResponseRedirect('/admin/bajaj/monthlypartsaleshistory/')
 
     messages.success(request, 'Average Retailer History successfully')
-    return HttpResponseRedirect('/admin/bajaj/averagepartsaleshistory/')
+    return HttpResponseRedirect('/admin/bajaj/monthlypartsaleshistory/')
 
 
 def download_sample_average_part_history(request):
