@@ -163,6 +163,7 @@ urlpatterns = patterns('',
     url(r'^save_order/$','gladminds.bajaj.views.views.generate_picklist_save_order' , name='generate_picklist_save_order'),
     url(r'^mc/get_focused_parts/', 'gladminds.bajaj.views.apis.get_focused_parts'),
     url(r'^update_six_months_retailer_history/', 'gladminds.bajaj.views.apis.update_six_months_retailer_history'),
-    url(r'^update_six_months_location_history/', 'gladminds.bajaj.views.apis.update_six_months_location_history'),
+    url(r'^update_six_months_locality_history/', 'gladminds.bajaj.views.apis.update_six_months_location_history'),
+    url(r'^dsr_average_orders/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.bajaj.views.apis.dsr_average_orders'),
 
 )

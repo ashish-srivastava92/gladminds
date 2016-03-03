@@ -1641,7 +1641,17 @@ def dsr_average_orders(request, dsr_id):
     retailers_list = []
     # get the retailer objects for this distributor
     retailers = Retailer.objects.filter(distributor = distributor)
-    average_retailer_history = AverageRetailerSalesHistory.bojects.filter(retailer__in=retailers)
-    all_locality_id = [retailer.locality_id for retailer in retailers]
-    average_locality_history = AverageLocalitySalesHistory.bojects.filter(retailer__in=retailers)
-    return Response(retailer_parts_list)
+    average_retailer_history = AverageRetailerSalesHistory.objects.filter(retailer__in=retailers)
+    part_wise_average_dict = []
+    for retailer_hist in average_retailer_history:
+        average_dict = {}
+        average_dict['retailer_id'] = retailer_hist.retailer_id
+        average_dict['part_number'] = retailer_hist.part.part_number
+        average_dict['retailer_average'] = retailer_hist.quantity
+        locality_avg = AverageLocalitySalesHistory.objects.filter(locality=retailer_hist.retailer.locality)
+        if locality_avg:
+            average_dict['locality_average'] = locality_avg[0].quantity
+        else:
+            average_dict['locality_average'] = 0
+        part_wise_average_dict.append(average_dict)
+    return Response(part_wise_average_dict)
