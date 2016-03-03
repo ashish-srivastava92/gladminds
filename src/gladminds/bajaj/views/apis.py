@@ -1584,7 +1584,6 @@ def update_six_months_retailer_history(request):
     last_six_months_parts_hist = MonthlyPartSalesHistory.objects.filter\
                             (month__in=prev_month_list, year__in=prev_year_list)
     retailer_part_wise_history = {}
-    print "thsi is last_six_months_parts_hist...", last_six_months_parts_hist
     for obj in last_six_months_parts_hist:
         if not retailer_part_wise_history.get(obj.retailer_id):
             retailer_part_wise_history[obj.retailer_id] = {}
@@ -1627,3 +1626,22 @@ def update_six_months_location_history(request):
             average_locality_sales_history.save()
     transaction.commit()
     return HttpResponse(json.dumps({'status': 'completed'}), content_type='application/json')
+
+
+@api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def dsr_average_orders(request, dsr_id):
+    '''
+    This method returns the sale average of last 6 months as well as the previous month
+    retailer wise
+    '''
+    dsr =  DistributorSalesRep.objects.select_related('distributor').get(distributor_sales_code = dsr_id)
+    distributor = dsr.distributor
+    retailers_list = []
+    # get the retailer objects for this distributor
+    retailers = Retailer.objects.filter(distributor = distributor)
+    average_retailer_history = AverageRetailerSalesHistory.bojects.filter(retailer__in=retailers)
+    all_locality_id = [retailer.locality_id for retailer in retailers]
+    average_locality_history = AverageLocalitySalesHistory.bojects.filter(retailer__in=retailers)
+    return Response(retailer_parts_list)
