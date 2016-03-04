@@ -1231,10 +1231,35 @@ class FocusedPart(base_models.FocusedPart):
     def __unicode__(self):
         return self.part.part_number + "-" + self.locality.name
 
+class PartIndexPlates(base_models.PartIndexPlates):
+    ''' details of part index '''
+    plate_name = models.CharField(max_length = 255)
+    model = models.ForeignKey(PartModels)
+    active = models.BooleanField(default = 1)
+    
+    class Meta(base_models.PartIndexPlates.Meta):
+        app_label = _APP_NAME
+    
+class PartIndexDetails(base_models.PartIndexDetails):
+    plate = models.ForeignKey(PartIndexPlates)
+    part_number = models.CharField(max_length=255, null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    quantity_variant1 = models.IntegerField()
+    quantity_variant2 = models.IntegerField()
+    mrp = models.CharField(max_length=8, null=True, blank=True)
+    
+    class Meta(base_models.PartIndexDetails.Meta):
+        app_label = _APP_NAME
+
+    def __unicode__(self):
+        return self.part_number + ' ' + self.description 
+
+
 
 class PartsStock(base_models.PartsStock):
     ''' details of parts '''
     part_number = models.ForeignKey(PartPricing)
+    catalog_part_number = models.ForeignKey(PartIndexDetails, null=True, blank=True)
     available_quantity = models.IntegerField(null=True, blank=True)
     distributor = models.ForeignKey(Distributor, null=True, blank=True)
     active = models.BooleanField(default=True)
@@ -1391,30 +1416,6 @@ class DSRLocationDetails(base_models.DSRLocationDetails):
     last_sync = models.DateTimeField()
     class Meta(base_models.DSRLocationDetails.Meta):
         app_label = _APP_NAME
-        
-class PartIndexPlates(base_models.PartIndexPlates):
-    ''' details of part index '''
-    plate_name = models.CharField(max_length = 255)
-    model = models.ForeignKey(PartModels)
-    active = models.BooleanField(default = 1)
-    
-    class Meta(base_models.PartIndexPlates.Meta):
-        app_label = _APP_NAME
-    
-class PartIndexDetails(base_models.PartIndexDetails):
-    plate = models.ForeignKey(PartIndexPlates)
-    part_number = models.CharField(max_length=255, null=True, blank=True)
-    description = models.CharField(max_length=255, null=True, blank=True)
-    quantity_variant1 = models.IntegerField()
-    quantity_variant2 = models.IntegerField()
-    mrp = models.CharField(max_length=8, null=True, blank=True)
-    
-    class Meta(base_models.PartIndexDetails.Meta):
-        app_label = _APP_NAME
-
-    def __unicode__(self):
-        return self.part_number + ' ' + self.description 
-
 
         
 class PartsRackLocation(base_models.PartsRackLocation):

@@ -1458,6 +1458,9 @@ class PartCategoryAdmin(GmModelAdmin):
                     
         if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
             extra_context["show_upload_stock"] = True
+        if request.user.groups.filter(name=Roles.SFAADMIN).exists():
+            extra_context["show_upload_part_list"] = True
+
         return super(PartCategoryAdmin, self).changelist_view(request, extra_context=extra_context)
 
 
