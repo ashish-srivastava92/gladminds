@@ -1434,50 +1434,65 @@ def download_sample_part_list(request):
 def upload_part_list(request):
     full_path = handle_uploaded_file(request.FILES['upload_part_list'])
     msg = ''
+    flag = 0
     with open(full_path) as csvfile:
         all_part_list = csv.DictReader(csvfile)
         for each_part in all_part_list:
-            part_number =  each_part['Part Number']
-            mrp = each_part['MRP']
-            applicable_models = each_part['Applicable Models (Comma Separated)']
-            remarks = each_part['Remarks']
-            description = each_part['Description']
-            category_name = each_part['Category Name']
-            moq = each_part['Minimum Order Quantity']
-            is_active = each_part['Active (0/1)']
-            print "this is category name..", category_name.strip()
-            subcategory_obj = SubCategories.objects.get(name=category_name.strip())
-            print subcategory_obj
+            part_number =  each_part.get('Part Number')
+            mrp = each_part.get('MRP', 0)
+            applicable_models = each_part.get('Applicable Models (Comma Separated)')
+            remarks = each_part.get('Remarks')
+            description = each_part.get('Description')
+            category_name = each_part.get('Category Name')
+            moq = each_part.get('Minimum Order Quantity', 0)
+            is_active = each_part.get('Active (0/1)', 0)
+            if not is_active:
+                is_active = 0
+            else:
+                is_active = int(is_active)
+            if not moq:
+                moq = 0
+            else:
+                moq = int(moq)
             try:
                 subcategory_obj = SubCategories.objects.get(name=category_name.strip())
             except:
                 subcategory_obj = None
             try:
-                existing_part = PartPricing.objects.get(part_number=part_number)
-                existing_part.products = applicable_models
-                existing_part.remarks = remarks
-                existing_part.mrp = mrp
-                existing_part.description = description
-                existing_part.subcategory = subcategory_obj
-                existing_part.moq = moq
-                existing_part.active = is_active
-                existing_part.save()
+                try:
+                    existing_part = PartPricing.objects.get(part_number=part_number)
+                    existing_part.products = applicable_models
+                    existing_part.remarks = remarks
+                    existing_part.mrp = mrp
+                    existing_part.description = description
+                    existing_part.subcategory = subcategory_obj
+                    existing_part.moq = moq
+                    existing_part.active = is_active
+                    existing_part.save()
+                except:
+                    new_part = PartPricing(part_number=part_number,
+                        mrp=mrp,
+                        description=description,
+                        remarks=remarks,
+                        active=is_active,
+                        products=applicable_models,
+                        moq=moq,
+                        subcategory=subcategory_obj)
+                    new_part.save()
             except:
-                new_part = PartPricing(part_number=part_number,
-                    mrp=mrp,
-                    description=description,
-                    remarks=remarks,
-                    active=is_active,
-                    products=applicable_models,
-                    moq=moq,
-                    subcategory=subcategory_obj)
-                new_part.save()
+                flag = 1
+                msg = msg + part_number + ','
+        if flag == 1:
+            msg = msg[:-1]
+            messages.error(request, 'Part Number {0} has wrong data'.format(msg))
     try:
         transaction.commit()
+        if flag == 0:
+            messages.success(request, 'Uploaded Part successfully')        
     except:
-        messages.error(request, 'Part Upload upload failed')
+        messages.error(request, 'Part Upload failed')
 
-    messages.success(request, 'Uploaded Part successfully')
+
     return HttpResponseRedirect('/admin/bajaj/partpricing/')
 
 

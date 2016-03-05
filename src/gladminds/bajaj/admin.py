@@ -1366,7 +1366,7 @@ class StartNullFilterSpec(NullFilterSpec):
 class PartCategoryAdmin(GmModelAdmin):
     class Media:
         js = ['js/uploadExcel.js']
-    list_filter = ('subcategory', 'products',StartNullFilterSpec )    
+    list_filter = ('subcategory', 'products' )    
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.DISTRIBUTORSALESREP, Roles.RETAILERS]
     search_fields = ('part_number', 'description')
     list_display = ('part_no', 'Part_Description', 'Applicable_Model', 'Category',
@@ -1455,7 +1455,8 @@ class PartCategoryAdmin(GmModelAdmin):
             self.list_display = ('part_no', 'Part_Description', 'Applicable_Model', 'Category',
                     'Price', 'Available', 'active'
                    )
-                    
+        extra_context["show_upload_stock"] = False
+        extra_context["show_upload_part_list"] = False
         if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
             extra_context["show_upload_stock"] = True
         if request.user.groups.filter(name=Roles.SFAADMIN).exists():
