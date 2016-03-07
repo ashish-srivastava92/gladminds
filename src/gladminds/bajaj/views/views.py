@@ -1578,31 +1578,33 @@ def upload_order_invoice(request):
                         do_obj.save(using=settings.BRAND)
                         do_obj.order.add(order_part_obj)
                         order_delivery_history_obj.do = do_obj
-                    order_delivery_history_obj.delivered_quantity = part_quantity                    
-                    order_delivery_history_obj.discount = discount_per
-                    order_delivery_history_obj.service_tax = service_tax_per
-                    order_delivery_history_obj.vat = vat_per
-                    order_delivery_history_obj.other_taxes = other_taxes_per
-                    order_delivery_history_obj.transporter_id = transporter_id
-                    order_delivery_history_obj.transporter_name = transporter_name
-                    order_delivery_history_obj.shipping_date = shipping_date
-                    order_delivery_history_obj.lr_number = lr_number
-                    order_delivery_history_obj.line_total = grand_total
-                    order_delivery_history_obj.save()
                 except:
                     messages.error(request, 'HistoryUploadError: Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
                     return HttpResponseRedirect('/admin/bajaj/orderpart/')
 
                 try:
                     invoice_obj = Invoices.objects.get(retailer_id=retailer_id, invoice_id=invoice_number)
-                    if order_delivery_history_obj.line_total:  
-                        invoice_obj.invoice_amount = invoice_obj.invoice_amount + grand_total - order_delivery_history_obj.line_total
+                    if order_delivery_history_obj.line_total:
+                        invoice_obj.invoice_amount = float(invoice_obj.invoice_amount) + grand_total - float(order_delivery_history_obj.line_total)
                     else:
                         invoice_obj.invoice_amount = invoice_obj.invoice_amount + grand_total
                     invoice_obj.save(update_fields=['invoice_amount'])
                 except:
                     invoice_obj = Invoices(retailer_id=retailer_id, invoice_id=invoice_number, invoice_date=invoice_date, invoice_amount=grand_total)
                     invoice_obj.save(using=settings.BRAND)
+                # Saving order_delivery_history_obj after invoice for getting previous line total
+                order_delivery_history_obj.delivered_quantity = part_quantity                    
+                order_delivery_history_obj.discount = discount_per
+                order_delivery_history_obj.service_tax = service_tax_per
+                order_delivery_history_obj.vat = vat_per
+                order_delivery_history_obj.other_taxes = other_taxes_per
+                order_delivery_history_obj.transporter_id = transporter_id
+                order_delivery_history_obj.transporter_name = transporter_name
+                order_delivery_history_obj.shipping_date = shipping_date
+                order_delivery_history_obj.lr_number = lr_number
+                order_delivery_history_obj.line_total = grand_total
+                order_delivery_history_obj.save()
+
                 delivery_order_details_id = order_delivery_history_obj.do_id
                 order_part_obj.order_status = 3
                 order_part_obj.save(update_fields=['order_status'])
