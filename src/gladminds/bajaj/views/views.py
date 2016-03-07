@@ -776,20 +776,19 @@ def get_parts(request, order_id, order_status, retailer_id):
             orders['order_id'] = each_order.order_id
             if part_obj.mrp == '#N/A':
                 part_obj.mrp = 0
-            orders['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
+            orders['line_total'] = float(part_obj.mrp) * float(each_order.quantity)
             orders['part_status'] = each_order.part_status
             orders['available_quantity'] = 0
             try:
                 try:
-                    available_quantity = PartsStock.objects.get(part_number=each_order.part_number.id, distributor_id=dist_id)
+                    available_quantity = PartsStock.objects.get(part_number=part_obj, distributor_id=dist_id)
                     orders['available_quantity'] = available_quantity.available_quantity
                 except:
-                    available_quantity = PartsStock.objects.get(part_number=each_order.catalog_part_number.id, distributor_id=dist_id)
+                    available_quantity = PartsStock.objects.get(catalog_part_number=part_obj, distributor_id=dist_id)
                     orders['available_quantity'] = available_quantity.available_quantity
             except:
                 orders['available_quantity'] = 0
             order_delivered_obj = OrderDeliveredHistory.objects.filter(part_number_id=each_order.part_number_id, order_id=each_order.order_id).aggregate(Sum('delivered_quantity'))
-            print order_delivered_obj, 'del'
             if order_delivered_obj['delivered_quantity__sum'] != None:
                 orders['delivered_quantity'] = int(order_delivered_obj['delivered_quantity__sum'])
                 orders['pending'] = each_order.quantity - int(order_delivered_obj['delivered_quantity__sum'])
@@ -853,20 +852,19 @@ def download_order_parts(request, order_id, order_status, retailer_id):
             orders['order_id'] = each_order.order_id
             if part_obj.mrp == '#N/A':
                 part_obj.mrp = 0
-            orders['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
+            orders['line_total'] = float(part_obj.mrp) * float(each_order.quantity)
             orders['part_status'] = each_order.part_status
             try:
                 try:
-                    available_quantity = PartsStock.objects.get(part_number=each_order.part_number.id, distributor_id=dist_id)
+                    available_quantity = PartsStock.objects.get(part_number=part_obj, distributor_id=dist_id)
                     orders['available_quantity'] = available_quantity.available_quantity
                 except:
-                    available_quantity = PartsStock.objects.get(part_number=each_order.catalog_part_number.id, distributor_id=dist_id)
+                    available_quantity = PartsStock.objects.get(catalog_part_number=part_obj, distributor_id=dist_id)
                     orders['available_quantity'] = available_quantity.available_quantity
             except:
                 orders['available_quantity'] = 0
 
             order_delivered_obj = OrderDeliveredHistory.objects.filter(part_number_id=each_order.part_number_id, order_id=each_order.order_id).aggregate(Sum('delivered_quantity'))
-            print order_delivered_obj, 'del'
             if order_delivered_obj['delivered_quantity__sum'] != None:
                 orders['delivered_quantity'] = int(order_delivered_obj['delivered_quantity__sum'])
                 orders['pending'] = each_order.quantity - int(order_delivered_obj['delivered_quantity__sum'])
@@ -1563,38 +1561,37 @@ def upload_order_invoice(request):
                     grand_total = float(line_grand_total)
                 else:
                     grand_total = (mrp * part_quantity) + service_tax_abs + other_taxes_abs + vat_abs - discount_abs                 
-                # try:
-                part_obj = PartPricing.objects.get(part_number=part_number)
-                order_delivery_history_obj_list = OrderDeliveredHistory.objects.filter(\
-                                part_number=part_obj, order=order_part_obj)
-                # Unique part number per order. Would pick first item if 
-                # multiple parts with same part number
-                if order_delivery_history_obj_list:
-                    order_delivery_history_obj = order_delivery_history_obj_list[0]
-                else:
-                    order_delivery_history_obj = OrderDeliveredHistory(\
-                        delivered_date=invoice_date, order=order_part_obj, \
-                        part_number=part_obj)
-                    # Creating a new delivery order if doesnt exist already
-                    do_obj = DoDetails(distributor=order_part_obj.distributor)
-                    do_obj.save(using=settings.BRAND)
-                    do_obj.order.add(order_part_obj)
-                    order_delivery_history_obj.do = do_obj
-                order_delivery_history_obj.delivered_quantity = part_quantity                    
-                order_delivery_history_obj.discount = discount_per
-                order_delivery_history_obj.service_tax = service_tax_per
-                order_delivery_history_obj.vat = vat_per
-                order_delivery_history_obj.other_taxes = other_taxes_per
-                order_delivery_history_obj.transporter_id = transporter_id
-                order_delivery_history_obj.transporter_name = transporter_name
-                order_delivery_history_obj.shipping_date = shipping_date
-                order_delivery_history_obj.lr_number = lr_number
-                order_delivery_history_obj.line_total = grand_total
-                order_delivery_history_obj.save()
-                # except:
-                #     print "inside except"
-                #     messages.error(request, 'HistoryUploadError: Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
-                #     return HttpResponseRedirect('/admin/bajaj/orderpart/')
+                try:
+                    part_obj = PartPricing.objects.get(part_number=part_number)
+                    order_delivery_history_obj_list = OrderDeliveredHistory.objects.filter(\
+                                    part_number=part_obj, order=order_part_obj)
+                    # Unique part number per order. Would pick first item if 
+                    # multiple parts with same part number
+                    if order_delivery_history_obj_list:
+                        order_delivery_history_obj = order_delivery_history_obj_list[0]
+                    else:
+                        order_delivery_history_obj = OrderDeliveredHistory(\
+                            delivered_date=invoice_date, order=order_part_obj, \
+                            part_number=part_obj)
+                        # Creating a new delivery order if doesnt exist already
+                        do_obj = DoDetails(distributor=order_part_obj.distributor)
+                        do_obj.save(using=settings.BRAND)
+                        do_obj.order.add(order_part_obj)
+                        order_delivery_history_obj.do = do_obj
+                    order_delivery_history_obj.delivered_quantity = part_quantity                    
+                    order_delivery_history_obj.discount = discount_per
+                    order_delivery_history_obj.service_tax = service_tax_per
+                    order_delivery_history_obj.vat = vat_per
+                    order_delivery_history_obj.other_taxes = other_taxes_per
+                    order_delivery_history_obj.transporter_id = transporter_id
+                    order_delivery_history_obj.transporter_name = transporter_name
+                    order_delivery_history_obj.shipping_date = shipping_date
+                    order_delivery_history_obj.lr_number = lr_number
+                    order_delivery_history_obj.line_total = grand_total
+                    order_delivery_history_obj.save()
+                except:
+                    messages.error(request, 'HistoryUploadError: Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
+                    return HttpResponseRedirect('/admin/bajaj/orderpart/')
 
                 try:
                     invoice_obj = Invoices.objects.get(retailer_id=retailer_id, invoice_id=invoice_number)
