@@ -329,29 +329,30 @@ def place_order(request, dsr_id):
             #push all the items into the orderpart details
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
-                try:
-                    if item['part_type'] == 1:
-                        '''Get the part details from Catalog Table'''
-                        orderpart_details.part_number_catalog = PartIndexDetails.objects.\
-                                                 get(part_number=item['part_number'], plate_id=item.get("plate_id"))
-                    elif item['part_type'] == 2:
-                        '''Get the part detailes from PartPricing Table'''
-                        orderpart_details.part_number = PartPricing.objects.\
-                                                 get(part_number=item['part_number'])
-                except:
-		    try:
-			orderpart_details.part_number_catalog = PartIndexDetails.objects.\
-                                                 get(part_number=item['part_number'])
-		    except:
-                        orderpart_details.part_number = PartPricing.objects.\
-                                                 get(part_number=item['part_number'])
+                item_part_type = item.get('part_type')
+                part_category = None
+                part_number_catalog = None
+                if item_part_type == 1:
+                    '''Get the part details from Catalog Table'''
+                    part_catalog = PartIndexDetails.objects.\
+                                             get(part_number=item['part_number'], plate_id=item.get("plate_id"))
+                    orderpart_details.part_number_catalog = part_catalog
+                     
+                else:
+                    '''Get the part detailes from PartPricing Table'''
+                    part_category = PartPricing.objects.\
+                                             get(part_number=item['part_number'])
+                    orderpart_details.part_number = part_category
 
-                    #return Response({'error': 'Part '+ item['part_number'] +' not found'})
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
                 orderpart_details.save()
-	    transaction.commit()
+
+        try:
+            transaction.commit()
+        except:
+            transaction.rollback()
     send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
     return Response({'message': 'Order updated successfully', 'status':1})
 

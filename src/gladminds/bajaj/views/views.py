@@ -1517,8 +1517,14 @@ def upload_order_invoice(request):
                     associated_distributor_id = retailer_obj.distributor_id
                     retailer_id = retailer_obj.id
                 invoice_number = each_invoice.get('Invoice No.').strip()
-                mrp = float(each_invoice.get('MRP', 0))
-                vat_per = float(each_invoice.get('VAT in %ge', 0))
+                try:
+                    mrp = float(each_invoice.get('MRP', 0))
+                except:
+                    mrp = 0
+                try:
+                    vat_per = float(each_invoice.get('VAT in %ge', 0))
+                except:
+                    vat_per = 0
                 vat_abs = (vat_per * mrp) / 100
                 try:
                     service_tax_per = float(each_invoice.get('Service Tax in %ge', 0))
@@ -1541,7 +1547,7 @@ def upload_order_invoice(request):
                 except:
                     invoice_date_str = each_invoice.get('Invoice Date(YYYY-MM-DD)')
                 part_number = each_invoice.get('Part Number')
-                part_quantity = float(each_invoice.get('Billed Part Quantity'))
+                part_quantity = int(each_invoice.get('Billed Part Quantity'))
                 transporter_id = each_invoice.get('Transporter ID')
                 transporter_name = each_invoice.get('Transporter/Courier Name')
                 try:
@@ -1550,7 +1556,6 @@ def upload_order_invoice(request):
                     shipping_date_str = each_invoice.get('Shipping Date(YYYY-MM-DD)')
                 lr_number = each_invoice.get('LR Number')
 
-                #delivery_order_details_id = each_invoice.get('Delivery Order Number')
                 invoice_date = datetime.datetime.strptime(invoice_date_str, '%Y-%m-%d').date()
                 shipping_date = datetime.datetime.strptime(shipping_date_str, '%Y-%m-%d').date()
                 line_grand_total = each_invoice.get('Line Grand Total')
@@ -1558,12 +1563,38 @@ def upload_order_invoice(request):
                     grand_total = float(line_grand_total)
                 else:
                     grand_total = (mrp * part_quantity) + service_tax_abs + other_taxes_abs + vat_abs - discount_abs                 
-                try:
-                    part_obj = PartPricing.objects.get(part_number=part_number)
-                    order_delivery_history_obj = OrderDeliveredHistory.objects.filter(part_number=part_obj, order=order_part_obj)[0]
-                except:
-                    messages.error(request, 'HistoryUploadError: Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
-                    return HttpResponseRedirect('/admin/bajaj/orderpart/')
+                # try:
+                part_obj = PartPricing.objects.get(part_number=part_number)
+                order_delivery_history_obj_list = OrderDeliveredHistory.objects.filter(\
+                                part_number=part_obj, order=order_part_obj)
+                # Unique part number per order. Would pick first item if 
+                # multiple parts with same part number
+                if order_delivery_history_obj_list:
+                    order_delivery_history_obj = order_delivery_history_obj_list[0]
+                else:
+                    order_delivery_history_obj = OrderDeliveredHistory(\
+                        delivered_date=invoice_date, order=order_part_obj, \
+                        part_number=part_obj)
+                    # Creating a new delivery order if doesnt exist already
+                    do_obj = DoDetails(distributor=order_part_obj.distributor)
+                    do_obj.save(using=settings.BRAND)
+                    do_obj.order.add(order_part_obj)
+                    order_delivery_history_obj.do = do_obj
+                order_delivery_history_obj.delivered_quantity = part_quantity                    
+                order_delivery_history_obj.discount = discount_per
+                order_delivery_history_obj.service_tax = service_tax_per
+                order_delivery_history_obj.vat = vat_per
+                order_delivery_history_obj.other_taxes = other_taxes_per
+                order_delivery_history_obj.transporter_id = transporter_id
+                order_delivery_history_obj.transporter_name = transporter_name
+                order_delivery_history_obj.shipping_date = shipping_date
+                order_delivery_history_obj.lr_number = lr_number
+                order_delivery_history_obj.line_total = grand_total
+                order_delivery_history_obj.save()
+                # except:
+                #     print "inside except"
+                #     messages.error(request, 'HistoryUploadError: Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
+                #     return HttpResponseRedirect('/admin/bajaj/orderpart/')
 
                 try:
                     invoice_obj = Invoices.objects.get(retailer_id=retailer_id, invoice_id=invoice_number)
@@ -1575,34 +1606,18 @@ def upload_order_invoice(request):
                 except:
                     invoice_obj = Invoices(retailer_id=retailer_id, invoice_id=invoice_number, invoice_date=invoice_date, invoice_amount=grand_total)
                     invoice_obj.save(using=settings.BRAND)
-                order_delivery_history_obj.discount = discount_per
-                order_delivery_history_obj.service_tax = service_tax_per
-                order_delivery_history_obj.vat = vat_per
-                order_delivery_history_obj.other_taxes = other_taxes_per
-                order_delivery_history_obj.transporter_id = transporter_id
-                order_delivery_history_obj.transporter_name = transporter_name
-                order_delivery_history_obj.shipping_date = shipping_date
-                order_delivery_history_obj.lr_number = lr_number
-                order_delivery_history_obj.line_total = grand_total
-                order_delivery_history_obj.save(update_fields=['discount',
-                 'service_tax',
-                 'vat',
-                 'other_taxes'])
                 delivery_order_details_id = order_delivery_history_obj.do_id
                 order_part_obj.order_status = 3
-                order_part_obj.do_id = delivery_order_details_id
-                order_part_obj.save(update_fields=['order_status', 'do_id'])
+                order_part_obj.save(update_fields=['order_status'])
                 try:
                     do_details_obj = DoDetails.objects.get(id=delivery_order_details_id)
+                    do_details_obj.invoice = invoice_obj
+                    do_details_obj.save(update_fields=['invoice'])
                 except:
-                    messages.error(request, 'Invoice upload failed, Please correct Delivery order id for order number - ' + order_number)
-                    return HttpResponseRedirect('/admin/bajaj/orderpart/')
-
-                do_details_obj.invoice = invoice_obj
-                do_details_obj.save(update_fields=['invoice'])
+                    pass
             except:
                 messages.error(request, 'Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
-                return HttpResponseRedirect('/admin/bajaj/orderpart/')
+                return HttpResponseRedirect('/admin/order_details/open/45/')
 
         try:
             transaction.commit()

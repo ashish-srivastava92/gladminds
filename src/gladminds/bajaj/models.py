@@ -1323,7 +1323,7 @@ class OrderDeliveredHistory(base_models.OrderDeliveredHistory):
     active = models.IntegerField(null=True, blank=True, default=1)
     order = models.ForeignKey(OrderPart)
     delivered_date = models.DateTimeField(null=True, blank=True)
-    do = models.ForeignKey(DoDetails)
+    do = models.ForeignKey(DoDetails, null=True, blank=True)
     vat = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     service_tax = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     other_taxes = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
