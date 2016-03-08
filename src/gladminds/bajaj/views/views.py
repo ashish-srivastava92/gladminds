@@ -1616,7 +1616,7 @@ def upload_order_invoice(request):
                     pass
             except:
                 messages.error(request, 'Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
-                return HttpResponseRedirect('/admin/order_details/open/45/')
+                return HttpResponseRedirect('/admin/bajaj/orderpart/')
 
         try:
             transaction.commit()
