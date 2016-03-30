@@ -218,6 +218,88 @@ def download_picklist(request, retailer_id):
     return response
 
 
+def get_order_picklist(request):
+    order_id = request.GET.get('order_id')
+    order_obj = OrderPart.objects.get(id=order_id)
+    retailer_obj = order_obj.retailer
+    retailer_name = retailer_obj.retailer_name
+    retailer_code = retailer_obj.retailer_code
+    order_part_details = OrderPartDetails.objects.filter(order_id=order_id)
+    picklist_details = []
+    for order_item in order_part_details:
+        picklist_details_dict = {}
+        if order_item.part_number:
+            part_obj = order_item.part_number
+        else:
+            part_obj = order_item.part_number_catalog
+        picklist_details_dict['part_number'] = part_obj.part_number
+        picklist_details_dict['part_description'] = part_obj.description
+
+        picklist_details_dict['allocated'] = order_item.quantity
+        picklist_details_dict['order_id'] = order_item.order.order_number
+        try:
+            location = PartsRackLocation.objects.get(part_number_id=part_obj.id)
+            picklist_details_dict['location'] = location.rack_location
+        except Exception as ex:
+            picklist_details_dict['location'] = 'NA'
+
+        picklist_details_dict['mrp'] = part_obj.mrp
+
+        if picklist_details_dict['mrp'] == '#N/A':
+            picklist_details_dict['mrp'] = 0
+        if picklist_details_dict['allocated'] != 0:
+            picklist_details.append(picklist_details_dict.copy())
+    
+    new_picklist_details = sorted(picklist_details, key=itemgetter('location'))
+    context = {'picklist_details': new_picklist_details,
+     'retailer_name': retailer_name}
+    template = 'admin/bajaj/orderpart/invoice.html'
+    return render(request, template, context)
+
+
+def download_order_picklist(request, order_id):
+    order_obj = OrderPart.objects.get(id=order_id)
+    retailer_obj = order_obj.retailer
+    retailer_name = retailer_obj.retailer_name
+    retailer_code = retailer_obj.retailer_code
+    order_part_details = OrderPartDetails.objects.filter(order_id=order_id)
+    picklist_details = []
+    for order_item in order_part_details:
+        picklist_details_dict = {}
+        if order_item.part_number:
+            part_obj = order_item.part_number
+        else:
+            part_obj = order_item.part_number_catalog
+        picklist_details_dict['part_number'] = part_obj.part_number
+        picklist_details_dict['part_description'] = part_obj.description
+
+        picklist_details_dict['allocated'] = order_item.quantity
+        picklist_details_dict['order_id'] = order_item.order.order_number
+        try:
+            location = PartsRackLocation.objects.get(part_number_id=part_obj.id)
+            picklist_details_dict['location'] = location.rack_location
+        except Exception as ex:
+            picklist_details_dict['location'] = 'NA'
+
+        picklist_details_dict['mrp'] = part_obj.mrp
+
+        if picklist_details_dict['mrp'] == '#N/A':
+            picklist_details_dict['mrp'] = 0
+        if picklist_details_dict['allocated'] != 0:
+            picklist_details.append(picklist_details_dict.copy())
+    
+    new_picklist_details = sorted(picklist_details, key=itemgetter('location'))
+    response = HttpResponse(content_type='text/excel')
+    response['Content-Disposition'] = 'attachment; filename="PickList.xls"'
+    c = Context({'data': new_picklist_details,
+     'retailer_name': retailer_name,
+     'retailer_code': retailer_code})
+    template = loader.get_template('admin/bajaj/orderpart/download_picklist.html')
+    response.write(template.render(c))
+    return response
+
+
+
 def download_sample_stock_list_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="SampleStockFile.csv"'
@@ -318,9 +400,7 @@ def save_order_history(request):
         # else:
         #     outstanding = 0
         #     order_details_dict['outstanding'] = 'NA'
-
         order_details.append(order_details_dict.copy())
-
     context = {'order_status': order_status,
      'order_details': order_details,
      'app_label': opts.app_label,

@@ -453,15 +453,40 @@ class AreaSparesManager(base_models.AreaSparesManager):
     class Meta(base_models.AreaSparesManager.Meta):
         app_label = _APP_NAME
 
+class District(base_models.District):
+    ''' List of districts mapped to states'''
+    state = models.ForeignKey(State, null=True, blank=True)
+        
+#     distibutor_id= 
+    class Meta(base_models.District.Meta):
+        app_label = _APP_NAME
+
+
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
-    user = models.ForeignKey(UserProfile)
-    mobile = models.CharField(max_length=15)
-    profile = models.CharField(max_length=15)
-    language = models.CharField(max_length=10, null=True, blank=True)
-    territory = models.CharField(max_length=10, null=True, blank=True) 
+    user = models.ForeignKey(UserProfile, null=True, blank=True)
+    asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
+    state = models.ForeignKey(State,null=True, blank=True)
+    territory = models.CharField(max_length=15)
     mobile1 = models.CharField(max_length=15)
     mobile2 = models.CharField(max_length=15)
+    email_bajaj = models.EmailField(max_length=50, null=True, blank=True)
+    address_line_2 = models.CharField(max_length=40, null=True, blank=True)
+    address_line_3 = models.CharField(max_length=40, null=True, blank=True)
+    address_line_4 = models.CharField(max_length=40, null=True, blank=True)
+    profile = models.CharField(max_length=15)
+    language = models.CharField(max_length=10, null=True, blank=True)
+    territory = models.CharField(max_length=10, null=True, blank=True)
+    image_url = models.FileField(upload_to="image",
+                                   max_length=200, null=True, blank=True)
+    tin = models.IntegerField( null=True, blank=True)
+    cst = models.IntegerField( null=True, blank=True)
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=11, decimal_places=6, null=True, blank=True)
+    
+#     district = models.ForeignKey(District)
+    district = models.ManyToManyField(District)
+
     class Meta(base_models.Distributor.Meta):
         app_label = _APP_NAME
 

@@ -114,6 +114,8 @@ urlpatterns = patterns('',
     
     url(r'^admin/get_parts/(?P<order_id>\d+)/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$','gladminds.bajaj.views.views.get_parts', name='get_parts'),
     url(r'^download_order_parts/(?P<order_id>\d+)/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$','gladminds.bajaj.views.views.download_order_parts', name='download_order_parts'),
+    url(r'^order_picklist/$','gladminds.bajaj.views.views.get_order_picklist', name='get_order_picklist'),
+    url(r'^download_order_picklist/(?P<order_id>\d+)/$','gladminds.bajaj.views.views.download_order_picklist', name='download_order_picklist'),
 
 
 

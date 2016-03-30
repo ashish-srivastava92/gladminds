@@ -327,6 +327,7 @@ def place_order(request, dsr_id):
             orderpart.longitude = order['longitude']
             orderpart.save()
             #push all the items into the orderpart details
+            orderpart_details_list =  []
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
                 item_part_type = item.get('part_type')
@@ -347,13 +348,18 @@ def place_order(request, dsr_id):
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
+                orderpart_details_list.append(orderpart_details)
                 orderpart_details.save()
 
         try:
             transaction.commit()
         except:
             transaction.rollback()
-    send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
+    try:
+        send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
+        send_email_to_retailer_on_place_order(orderpart, orderpart_details_list)
+    except:
+        pass
     return Response({'message': 'Order updated successfully', 'status':1})
 
 @api_view(['POST'])
@@ -376,34 +382,39 @@ def retailer_place_order(request, retailer_id):
             orderpart.order_placed_by = order['order_placed_by']
             orderpart.save()
             #push all the items into the orderpart details
+            orderpart_details_list =  []
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
-		try:
-                    if item['part_type'] == 1:
-                        '''Get the part details from Catalog Table'''
-                        orderpart_details.part_number_catalog = PartIndexDetails.objects.\
-                                                 get(part_number = item['part_number'], plate_id=item.get('plate_id'))
-                    elif item['part_type'] == 2:
-                        '''Get the part detailes from PartPricing Table'''
-                        orderpart_details.part_number = PartPricing.objects.\
-                                                 get(part_number = item['part_number'])
-                except:
-                    #return Response({'error': 'Part '+ item['part_number'] +' not found'})
-                    try:
-                        orderpart_details.part_number_catalog = PartIndexDetails.objects.\
-                                                 get(part_number=item['part_number'])
-                    except:
-                        orderpart_details.part_number = PartPricing.objects.\
-                                                 get(part_number=item['part_number'])
-
+                item_part_type = item.get('part_type')
+                part_category = None
+                part_number_catalog = None
+                if item_part_type == 1:
+                    '''Get the part details from Catalog Table'''
+                    part_catalog = PartIndexDetails.objects.\
+                                             get(part_number=item['part_number'], plate_id=item.get("plate_id"))
+                    orderpart_details.part_number_catalog = part_catalog
+                     
+                else:
+                    '''Get the part detailes from PartPricing Table'''
+                    part_category = PartPricing.objects.\
+                                             get(part_number=item['part_number'])
+                    orderpart_details.part_number = part_category
 
 
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
+                orderpart_details_list.append(orderpart_details)
                 orderpart_details.save()
-	    transaction.commit()
-            send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
+    try:
+        transaction.commit()
+    except:
+        transaction.rollback()
+    try:
+        send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
+        send_email_to_retailer_on_place_order(orderpart, orderpart_details_list)
+    except:
+        pass
     return Response({'message': 'Order updated successfully', 'status':1})
 
 
@@ -1222,11 +1233,9 @@ from gladminds.core.services.message_template import get_template
 from gladminds.core import utils
 from gladminds.core.managers.audit_manager import sms_log
 AUDIT_ACTION = 'SEND TO QUEUE'
-from gladminds.sqs_tasks import send_loyalty_sms
+from gladminds.sqs_tasks import send_loyalty_sms, send_mail_for_sfa_order_placed, send_sfa_order_placed_sms
 def send_msg_to_retailer_on_adding(request,retailer_id,username,password):
-
     retailer_obj = Retailer.objects.get(id=retailer_id)
-    print retailer_obj.mobile
     phone_number=utils.get_phone_number_format(retailer_obj.mobile)
     message=get_template('SEND_RETAILER_REGISTRATION').format(
                         retailer_name=retailer_obj.user.user.first_name,username=username,password=password)
@@ -1236,18 +1245,27 @@ def send_msg_to_retailer_on_adding(request,retailer_id,username,password):
 
 
 def send_msg_to_retailer_on_place_order(request,retailer_id,order_id):
-#     print retailer
-
-    print request
     retailer_obj = Retailer.objects.get(id=retailer_id)
-    print retailer_obj.mobile
-    print order_id,"order"
     phone_number=utils.get_phone_number_format(retailer_obj.mobile)
     message=get_template('SEND_RETAILER_ON_ORDER_PLACEMENT').format(
                         retailer_name=retailer_obj.user.user.first_name,order_id=order_id)
     sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
-    send_job_to_queue(send_loyalty_sms, {'phone_number': phone_number,
+    send_job_to_queue(send_sfa_order_placed_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
+
+
+def send_email_to_retailer_on_place_order(orderpart, orderpart_details_list):
+    retailer_obj = orderpart.retailer
+    retailer_id = retailer_obj.retailer_code
+    retailer_name = orderpart.retailer.retailer_name
+    order_number = orderpart.order_number
+    distributor_email = retailer_obj.distributor.email_bajaj
+    send_job_to_queue(send_mail_for_sfa_order_placed, {'retailer_code': retailer_id,
+                        'retailer_name': retailer_name,
+                        'order_number': order_number,
+                        'distributor_email': distributor_email,
+                        'orderpart_details': orderpart_details_list
+                    })
 
 
 def send_msg_to_retailer_on_collection(request,retailer_id):

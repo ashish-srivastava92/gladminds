@@ -6,6 +6,52 @@
 {{block.super}}
 <!-- <link href="/static/css/portal.css" rel="stylesheet"> -->
 
+<style>
+	iframe body {
+		margin: 0;
+	}
+
+	body #myModal1.modal {
+		/* new custom width */
+		width: 1000px;
+		margin-left: 120px;
+		/* must be half of the width, minus scrollbar on the left (30px) */
+	}
+
+	#loading {
+		display: none;
+	}
+	#loading, #loading div.bg {
+		position: fixed;
+		width: 100%;
+		height: 100%;
+		text-align: center;
+		top: 0px;
+		left: 0px;
+		z-index: 500000;
+	}
+
+	#loading div.txt {
+		position: absolute;
+		top: 50%;
+		padding: 23px 0;
+		width: 100%;
+		height: 12px;
+		font-size: 12px;
+		z-index: 500001;
+		background: url(/static/img/loading.gif) no-repeat 50%;
+		margin-top: -46px;
+	}
+
+	#loading div.bg {
+		background: #fff;
+		opacity: 0.7;
+		filter: alpha(opacity=70); /* For IE8 and earlier */
+	}
+
+</style>
+
+
 <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
 
 <link rel="stylesheet" type="text/css" href="/static/suit/css/suit.css" media="all">
@@ -46,8 +92,8 @@
 </style>
 <script>
 	$(function() {
-		$("#showParts").DataTable();
-		$(".datepick").datepicker();
+		// $("#showParts").DataTable();
+		// $(".datepick").datepicker();
 
 		// add multiple select / deselect functionality
 		$("#selectall").click(function() {
@@ -185,6 +231,11 @@
                 <button type="button" class="btn btn-default" onclick="javascript:downloadOrderList();">
                     Download Order List
                 </button>
+		<button type="button" tabindex="2" class="btn btn-primary" name="submit" id="btnPreviewPicklist">
+			Preview Pick list
+		</button>
+
+
 
 	</div>
 </form>
@@ -250,6 +301,75 @@
 	<!-- /.modal-dialog -->
 </div>
 <!-- /.modal -->
+<div class="modal" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			<!-- Modal content-->
+			
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">
+						&times;
+					</button>
+					<h4 class="modal-title">Picklist Preview</h4>
+				</div>
+				<div class="modal-body">
+					<iframe width="100%" frameborder="0" id="invFrame" name="invFrame"></iframe>
+				</div>
+				<div class="modal-footer" style="padding: 2px; !important">
+					<button type="button" class="btn btn-default" onclick="javascript:window.frames['invFrame'].print();">
+						Print
+					</button>
+                <button type="button" class="btn btn-default" onclick="javascript:downloadOrderPickList();">
+                        Download Pick List
+                </button>
+
+
+				</div>
+		
+	</div>
+
+<div id="loading">
+	<div class="txt"></div>
+	<div class="bg"></div>
+</div>
+
+
+<script type="text/javascript">
+	function hideLoading() {
+		$("#loading").hide();
+	}
+
+	function showLoading() {
+		$("#loading").show();
+	}
+
+		function rescale() {
+			var size = {
+				width : $(window).width(),
+				height :600
+			}
+			/*CALCULATE SIZE*/
+			var offset = 100;
+			var offsetBody = 150;
+			$("#invFrame").css("height", size.height - offset);
+
+			$('#myModal1').css('height', size.height - offset);
+			$('.modal-body').css('height', size.height);
+			$('#myModal1').css('top', 10);
+		}
+
+		function downloadOrderPickList(){
+		    url = "{% url 'download_order_picklist' order_id %}"
+		    location.href= url;
+		}
+
+		$("#btnPreviewPicklist").click(function(e) {
+				showLoading();
+			$("#myModal1").modal("show");
+			rescale();
+			var $iframe = $('#invFrame');
+			$iframe.attr("src","{% url 'get_order_picklist'  %}?order_id={{order_id}}");
+			hideLoading();
+				});
+</script>
 
 <style>
 	tr.red td {

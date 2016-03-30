@@ -7,6 +7,7 @@
                 <td><strong>Part Number</strong></td>
                 <td><strong>Part Description</strong></td>
                 <td><strong>Allocated Quantity</strong></td>
+                <td><strong>Rack Location</strong></td>
                 <td><strong>MRP</strong></td>
 
         </tr>
@@ -16,6 +17,7 @@
                 <td>{{record.part_number|default_if_none:""}}</td>
                 <td>{{record.part_description|default_if_none:""}}</td>
                 <td>{{record.allocated|default_if_none:""}}</td>
+                <td>{{record.location|default_if_none:""}}</td>
                 <td>{{record.mrp|default_if_none:""}}</td>
         </tr>
         {% endfor %}

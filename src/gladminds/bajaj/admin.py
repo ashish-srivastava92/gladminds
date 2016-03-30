@@ -1374,6 +1374,11 @@ class PartCategoryAdmin(GmModelAdmin):
                    )
     exclude = ['category', ] 
 
+    def queryset(self, request):
+        qs = super(PartCategoryAdmin, self).queryset(request)
+        self.request = request
+        return qs
+
     def part_no(self, obj):
         return obj.part_number
     
@@ -1409,10 +1414,19 @@ class PartCategoryAdmin(GmModelAdmin):
 
     def Available(self, obj):
         try:
-            available_qty = PartsStock.objects.get(part_number = obj.id)
-            return available_qty.available_quantity
+            if self.request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+                distributor_id = Distributor.objects.get(user_id=self.request.user).id
+                partstock_obj = PartsStock.objects.get(part_number_id=obj.id, distributor_id=distributor_id)    
+                available_qty = partstock_obj.available_quantity
+                return available_qty
+            else:
+                available_qty = 0
+                partstock_obj = PartsStock.objects.filter(part_number=obj.id)    
+                for stock_obj in partstock_obj:
+                    available_qty = int(stock_obj.available_qty) + int(available_qty)
+                return available_qty
         except Exception as ex:
-            return '0'
+            return 0
     Available.short_description = 'Available Qty.'
     
 #     def Pending(self, obj):
