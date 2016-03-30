@@ -588,7 +588,7 @@ def discrepant_manufacture_data(csv_file, brand=None):
 def sfa_order_received_data(csv_file, brand=None, receivers=None):
     try:
         yesterday = datetime.now().date() - timedelta(days=1)
-        mail_detail = {"sender":"prashant.kumar@gladminds.co",
+        mail_detail = {"sender":"bajaj.cv.test@gmail.com",
                     "subject": "Order Recieved",
                     "body": "Thanks for ordering. Find attached the order details."
         }

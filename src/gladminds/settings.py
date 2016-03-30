@@ -636,7 +636,15 @@ LOGGING = {
     }
 }
 
-MAIL_SERVER = 'localhost'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com' 
+EMAIL_HOST_PASSWORD = 'sfa@admin'
+EMAIL_HOST_USER = 'bajaj.cv.test@gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
     "sender": "feed-report@gladminds.co",
     "receiver": ["gladminds@hashedin.com", "naveen.shankar@gladminds.co"],
