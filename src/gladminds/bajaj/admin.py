@@ -1205,7 +1205,7 @@ class RecentOrderAdmin(GmModelAdmin):
     
     def get_actions(self, request):
         # in case of administrator only, grant him the approve retailer option
-        print "in action function"
+        
         self.actions.append('process')
         actions = super(RecentOrderAdmin, self).get_actions(request)
         return actions
@@ -1226,8 +1226,8 @@ class RecentOrderAdmin(GmModelAdmin):
         
     
     def process(self, request, queryset):
-        print "in process function", queryset
-        print queryset[0].order_number
+        queryset
+        queryset[0].order_number
         pass
      
 class InvoiceAdmin(GmModelAdmin):
@@ -2934,7 +2934,7 @@ def get_admin_site_custom(brand):
     # brand_admin.register(get_model("SubCategories", brand), SubCategoriesAdmin)
 #     brand_admin.register(get_model("PartMasterCv", brand), PartListAdmin)
     brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
-    brand_admin.register(get_model("OrderPartDetails", brand), OrderPartDetailsAdmin)
+#     brand_admin.register(get_model("OrderPartDetails", brand), OrderPartDetailsAdmin)
     brand_admin.register(get_model("PartPricing", brand), PartCategoryAdmin)
     brand_admin.register(get_model("FocusedPart", brand), FocusedPartAdmin)
     brand_admin.register(get_model("NationalSparesManager", brand), NSMAdmin)
