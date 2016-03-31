@@ -100,7 +100,7 @@ urlpatterns = patterns('',
     
     
     
-  url(r'^admin/upload-part-sfa/$', 'gladminds.bajaj.views.upload_part_pricing',name="upload_part_pricing"),
+    url(r'^admin/upload-part-sfa/$', 'gladminds.bajaj.views.upload_part_pricing',name="upload_part_pricing"),
     url(r'^upload_order_invoice/$', 'gladminds.bajaj.views.upload_order_invoice',name="upload_order_invoice"),
     url(r'^admin/upload-rack-location/$', 'gladminds.bajaj.views.upload_rack_location',name="upload_rack_location"),
     url(r'^upload_collection_details/$', 'gladminds.bajaj.views.upload_collection_details',name="upload_collection_details"),
@@ -157,7 +157,7 @@ urlpatterns = patterns('',
                        
     url(r'^admin/delete_temp_details','gladminds.bajaj.views.views.clear_order_temp', name='clear_order_temp'),
               
-     url(r'^admin/get_location/(?P<dist_id>\d+)/$','gladminds.bajaj.views.views.get_distributor_location', name='get_distributor_location'),         
+    url(r'^admin/get_location/(?P<dist_id>\d+)/$','gladminds.bajaj.views.views.get_distributor_location', name='get_distributor_location'),         
               
     url(r'^order_allocated_details/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$','gladminds.bajaj.views.views.pending_order_details' , name='pending_order_details'),
     url(r'^save_order/$','gladminds.bajaj.views.views.generate_picklist_save_order' , name='generate_picklist_save_order'),

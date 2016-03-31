@@ -2055,9 +2055,6 @@ class OrderDeliveredHistory(BaseModel):
         verbose_name_plural = "Order Delivered History"
       
 
-
-
-
 class District(BaseModel):
     '''Districts under a brand'''
     name = models.CharField(max_length=50, unique = True)

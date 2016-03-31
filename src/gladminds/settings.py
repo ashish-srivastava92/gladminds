@@ -233,6 +233,8 @@ SUIT_CONFIG = {
                       'label': 'Orders'},
                                 {'model': 'invoices',
                       'label': 'Upload invoices'},
+                    {'model': 'recentorder',
+                     'label': 'Recent Order Details'},
                     
                      
                     )

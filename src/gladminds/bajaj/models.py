@@ -979,7 +979,7 @@ class PartPricing(base_models.PartPricing):
     description = models.CharField(max_length=255, null=True, blank=True)
     subcategory = models.ForeignKey(SubCategories)
     category = models.ForeignKey(Categories)
-  #  applicable_model = models.CharField(max_length=255, null=True, blank=True)
+#  applicable_model = models.CharField(max_length=255, null=True, blank=True)
     current_month_should = models.IntegerField()
     active = models.BooleanField(default=True)
     moq = models.IntegerField(null=True, blank=True)
@@ -1000,7 +1000,8 @@ class FocusedPart(base_models.FocusedPart):
     locality = models.ForeignKey(Locality, null=True, blank=True)
 
     class Meta(base_models.FocusedPart.Meta):
-	   app_label = _APP_NAME
+        app_label = _APP_NAME
+        
     def __unicode__(self):
         return self.part.part_number + "-" + self.locality.name
 
@@ -1035,10 +1036,17 @@ class OrderPart(base_models.OrderPart):
     
     class Meta(base_models.OrderPart.Meta):
         app_label = _APP_NAME
+
+class RecentOrder(OrderPart):
+       
+    class Meta(base_models.OrderPart.Meta):
+        proxy = True
+        app_label = _APP_NAME
+        verbose_name_plural = "RecentOrder"
         
-#     def __unicode__(self):
-#         
-#         return self.retailer.retailer_code
+    def __unicode__(self):
+         
+        return self.retailer.retailer_name
 
 
 
