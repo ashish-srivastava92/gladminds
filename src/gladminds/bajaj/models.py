@@ -6,6 +6,14 @@ from gladminds.core.auth_helper import GmApps
 from django import forms
 import datetime
 
+from django.db import models
+from gladminds.core.models import NationalSparesManager, AreaSparesManager, Distributor, Retailer
+from gladminds.core.base_models import SparePartUPC
+from django.core.validators import MinValueValidator, MaxValueValidator
+ 
+
+
+
 _APP_NAME = GmApps.BAJAJ
 
 try:
@@ -593,10 +601,6 @@ class DistributorSalesRep(base_models.DistributorSalesRep):
                                 ' ' + self.user.user.last_name
 
 
-
-
-
-
 class Retailer(base_models.Retailer):
     '''details of retailer'''
     user = models.ForeignKey(UserProfile)
@@ -966,6 +970,229 @@ class ManufacturingData(base_models.ManufacturingData):
     class Meta(base_models.ManufacturingData.Meta):
         app_label = _APP_NAME
 
+
+###################################SFA-REPORTS#####ADDED-BY-NEELESH##################################
+
+
+
+
+
+class SfaReportNames(models.Model):
+    #Add validator for custom report name
+    name = models.CharField(max_length=50,blank=True,null=True)
+
+    class Meta:
+        db_table = "gm_sfa_reportnames"
+        verbose_name = "Reports"
+
+    def __unicode__(self):
+        return self.name
+
+
+class SfaHighlights(models.Model):
+    #Add validator for custom report name
+    name = models.CharField(max_length=50,blank=True,null=True)
+
+    class Meta:
+        db_table = "gm_sfa_highlights"
+        verbose_name = "Highlights"
+
+    def __unicode__(self):
+        return self.name
+
+class NsmTarget(models.Model):
+    created_date = models.DateTimeField(auto_now_add=True)
+    modified_date = models.DateTimeField(auto_now=True)
+    nsm = models.ForeignKey(NationalSparesManager, on_delete=models.CASCADE)
+    month = models.IntegerField(validators=[MinValueValidator(1),MaxValueValidator(12)], null=True)
+    year =  models.IntegerField(validators=[MinValueValidator(2014)], null=True)
+    reportnames = models.ForeignKey(SfaReportNames, null=True, blank=True)
+    target = models.DecimalField(max_digits=65, decimal_places=0, null=True)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = "gm_sfa_nsm_target"
+        verbose_name = "National Spares Manager Target"
+
+#     def __unicode__(self):
+#         return self.name
+
+class AsmTarget(models.Model):
+    created_date = models.DateTimeField(auto_now_add=True)
+    modified_date = models.DateTimeField(auto_now=True)
+    asm = models.ForeignKey(AreaSparesManager, on_delete=models.CASCADE)
+    month = models.IntegerField(validators=[MinValueValidator(1),MaxValueValidator(12)], null=True)
+    year =  models.IntegerField(validators=[MinValueValidator(2014)], null=True)
+    reportnames = models.ForeignKey(SfaReportNames, null=True, blank=True)
+    target = models.DecimalField(max_digits=65, decimal_places=0, null=True)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = "gm_sfa_asm_target"
+        verbose_name = "Area Spares Manager Target"
+
+ #   def __unicode__(self):
+ #       return self.name
+
+class DistributorTarget(models.Model):
+    created_date = models.DateTimeField(auto_now_add=True)
+    modified_date = models.DateTimeField(auto_now=True)
+    distributor = models.ForeignKey(Distributor, on_delete=models.CASCADE)
+    month = models.IntegerField(validators=[MinValueValidator(1),MaxValueValidator(12)], null=True)
+    year =  models.IntegerField(validators=[MinValueValidator(2014)], null=True)
+    reportnames = models.ForeignKey(SfaReportNames, null=True, blank=True)
+    target = models.DecimalField(max_digits=65, decimal_places=0, null=True)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = "gm_sfa_distributor_target"
+        verbose_name = "Distributor Target"
+
+ #   def __unicode__(self):
+ #       return self.name
+
+class DistributorSalesRepTarget(models.Model):
+    created_date = models.DateTimeField(auto_now_add=True)
+    modified_date = models.DateTimeField(auto_now=True)
+    dsr = models.ForeignKey(DistributorSalesRep, on_delete=models.CASCADE)
+    month = models.IntegerField(validators=[MinValueValidator(1),MaxValueValidator(12)], null=True)
+    year =  models.IntegerField(validators=[MinValueValidator(2014)], null=True)
+    reportnames = models.ForeignKey(SfaReportNames, null=True, blank=True)
+    target = models.DecimalField(max_digits=65, decimal_places=0, null=True)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = "gm_sfa_dsr_target"
+        verbose_name = "DistributorSalesRep Target"
+
+ #   def __unicode__(self):
+ #       return self.name
+
+
+class RetailerTarget(models.Model):
+    created_date = models.DateTimeField(auto_now_add=True)
+    modified_date = models.DateTimeField(auto_now=True)
+    retailer = models.ForeignKey(Retailer, on_delete=models.CASCADE)
+    month = models.IntegerField(validators=[MinValueValidator(1),MaxValueValidator(12)], null=True)
+    year =  models.IntegerField(validators=[MinValueValidator(2014)], null=True)
+    reportnames = models.ForeignKey(SfaReportNames, null=True, blank=True)
+    target = models.DecimalField(max_digits=65, decimal_places=0, null=True)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = "gm_sfa_retailer_target"
+        verbose_name = "Retailer Target"
+        app_label = _APP_NAME
+
+ #   def __unicode__(self):
+ #       return self.name
+
+class NsmHighlights(models.Model):
+    sfahighlight = models.ForeignKey(SfaHighlights, null=True, blank=True)
+    nsm = models.ForeignKey(NationalSparesManager, on_delete=models.CASCADE)
+    month = models.DateTimeField(null=True,blank=True)
+    year = models.DateTimeField(null=True,blank=True)
+
+    class Meta:
+        db_table = "gm_sfa_nsm_highlights"
+        verbose_name = "National Spares Manager Highlight"
+
+#    def __unicode__(self):
+#        return self.name
+
+class AsmHighlights(models.Model):
+    sfahighlight = models.ForeignKey(SfaHighlights, null=True, blank=True)
+    asm = models.ForeignKey(AreaSparesManager, on_delete=models.CASCADE)
+    month = models.DateTimeField(null=True,blank=True)
+    year = models.DateTimeField(null=True,blank=True)
+
+    class Meta:
+        db_table = "gm_sfa_asm_highlights"
+        verbose_name = "Area Spares Manager Highlight"
+
+#    def __unicode__(self):
+#        return self.name
+
+class DistributorHighlights(models.Model):
+    sfahighlight = models.ForeignKey(SfaHighlights, null=True, blank=True)
+    distributor = models.ForeignKey(Distributor, on_delete=models.CASCADE)
+    month = models.DateTimeField(null=True,blank=True)
+    year = models.DateTimeField(null=True,blank=True)
+
+    class Meta:
+        db_table = "gm_sfa_distributor_highlights"
+        verbose_name = "Distributor Highlight"
+
+#    def __unicode__(self):
+#        return self.name
+
+class DistributorSalesRepHighlights(models.Model):
+    sfahighlight = models.ForeignKey(SfaHighlights, null=True, blank=True)
+    distributor = models.ForeignKey(DistributorSalesRep, on_delete=models.CASCADE)
+    month = models.DateTimeField(null=True,blank=True)
+    year = models.DateTimeField(null=True,blank=True)
+
+    class Meta:
+        db_table = "gm_sfa_dsr_highlights"
+        verbose_name = "Distributor Sales Rep Highlight"
+
+#    def __unicode__(self):
+#        return self.name
+
+
+class RetailerHighlights(models.Model):
+    sfahighlight = models.ForeignKey(SfaHighlights, null=True, blank=True)
+    retailer = models.ForeignKey(Retailer, on_delete=models.CASCADE)
+    month = models.DateTimeField(null=True,blank=True)
+    year = models.DateTimeField(null=True,blank=True)
+
+    class Meta:
+        db_table = "gm_sfa_retailer_highlights"
+        verbose_name = "Retailer Highlight"
+
+    def __unicode__(self):
+        return self.name
+
+
+def generate_asm_reports(request):
+    #Get the asm targets
+    asm_target=models.AsmTarget.objects.filter(asm_id=id,month=month)
+    '''
+    check for asm_target exception condition
+    '''
+    #if asm_target.count > 1:
+    #   LOG.error("".format(ex))
+    #   message 
+    target=asm_target.get(target)
+    #Get the number of unique parts which are created for this month
+    #upc=SparePartUPC.unique_part_code.get() && 
+    #month=SparePartUPC.created_date.get().get_month()
+    #if (part_id == upc && month == month):
+    models.SparePartUPC
+    
+class SfaReportNames(models.Model):
+    #Add validator for custom report name
+    name = models.CharField(max_length=50,blank=True,null=True)
+
+    class Meta:
+        db_table = "gm_sfareportnames"
+        verbose_name = "Reports"
+
+    def __unicode__(self):
+        return self.name
+
+
+class SfaHighlights(models.Model):
+    #Add validator for custom report name
+    name = models.CharField(max_length=50,blank=True,null=True)
+
+    class Meta:
+        db_table = "gm_sfahighlights"
+        verbose_name = "Highlights"
+
+    def __unicode__(self):
+        return self.name
+
 ##########################     SFA Models  #########################################3
 
 
@@ -1005,10 +1232,35 @@ class FocusedPart(base_models.FocusedPart):
     def __unicode__(self):
         return self.part.part_number + "-" + self.locality.name
 
+class PartIndexPlates(base_models.PartIndexPlates):
+    ''' details of part index '''
+    plate_name = models.CharField(max_length = 255)
+    model = models.ForeignKey(PartModels)
+    active = models.BooleanField(default = 1)
+    
+    class Meta(base_models.PartIndexPlates.Meta):
+        app_label = _APP_NAME
+    
+class PartIndexDetails(base_models.PartIndexDetails):
+    plate = models.ForeignKey(PartIndexPlates)
+    part_number = models.CharField(max_length=255, null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    quantity_variant1 = models.IntegerField()
+    quantity_variant2 = models.IntegerField()
+    mrp = models.CharField(max_length=8, null=True, blank=True)
+    
+    class Meta(base_models.PartIndexDetails.Meta):
+        app_label = _APP_NAME
+
+    def __unicode__(self):
+        return self.part_number + ' ' + self.description 
+
+
 
 class PartsStock(base_models.PartsStock):
     ''' details of parts '''
     part_number = models.ForeignKey(PartPricing)
+    catalog_part_number = models.ForeignKey(PartIndexDetails, null=True, blank=True)
     available_quantity = models.IntegerField(null=True, blank=True)
     distributor = models.ForeignKey(Distributor, null=True, blank=True)
     active = models.BooleanField(default=True)
@@ -1079,7 +1331,7 @@ class OrderDeliveredHistory(base_models.OrderDeliveredHistory):
     active = models.IntegerField(null=True, blank=True, default=1)
     order = models.ForeignKey(OrderPart)
     delivered_date = models.DateTimeField(null=True, blank=True)
-    do = models.ForeignKey(DoDetails)
+    do = models.ForeignKey(DoDetails, null=True, blank=True)
     vat = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     service_tax = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     other_taxes = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
@@ -1172,30 +1424,6 @@ class DSRLocationDetails(base_models.DSRLocationDetails):
     last_sync = models.DateTimeField()
     class Meta(base_models.DSRLocationDetails.Meta):
         app_label = _APP_NAME
-        
-class PartIndexPlates(base_models.PartIndexPlates):
-    ''' details of part index '''
-    plate_name = models.CharField(max_length = 255)
-    model = models.ForeignKey(PartModels)
-    active = models.BooleanField(default = 1)
-    
-    class Meta(base_models.PartIndexPlates.Meta):
-        app_label = _APP_NAME
-    
-class PartIndexDetails(base_models.PartIndexDetails):
-    plate = models.ForeignKey(PartIndexPlates)
-    part_number = models.CharField(max_length=255, null=True, blank=True)
-    description = models.CharField(max_length=255, null=True, blank=True)
-    quantity_variant1 = models.IntegerField()
-    quantity_variant2 = models.IntegerField()
-    mrp = models.CharField(max_length=8, null=True, blank=True)
-    
-    class Meta(base_models.PartIndexDetails.Meta):
-        app_label = _APP_NAME
-
-    def __unicode__(self):
-        return self.part_number + ' ' + self.description 
-
 
         
 class PartsRackLocation(base_models.PartsRackLocation):
@@ -1241,22 +1469,47 @@ class PermanentJourneyPlan(base_models.PermanentJourneyPlan):
         app_label = _APP_NAME
 
 
-class AveragePartSalesHistory(base_models.AveragePartSalesHistory):
+class MonthlyPartSalesHistory(base_models.MonthlyPartSalesHistory):
     retailer = models.ForeignKey(Retailer)
     part = models.ForeignKey(PartPricing)
     month = models.IntegerField(null=True, blank=True)
     year = models.IntegerField(null=True, blank=True)
 
-    class Meta(base_models.AveragePartSalesHistory.Meta):
+    class Meta(base_models.MonthlyPartSalesHistory.Meta):
         app_label = _APP_NAME
 
 
-class AverageLocationSalesHistory(base_models.AverageLocationSalesHistory):
-    location = models.ForeignKey(Locality)
+class AverageRetailerSalesHistory(base_models.AverageRetailerSalesHistory):
+    retailer = models.ForeignKey(Retailer)
     part = models.ForeignKey(PartPricing)
-    start_month = models.IntegerField(null=True, blank=True)
-    end_month = models.IntegerField(null=True, blank=True)
-    year = models.IntegerField(null=True, blank=True)
 
-    class Meta(base_models.AverageLocationSalesHistory.Meta):
+    class Meta(base_models.AverageRetailerSalesHistory.Meta):
         app_label = _APP_NAME
+
+
+class AverageLocalitySalesHistory(base_models.AverageLocalitySalesHistory):
+    locality = models.ForeignKey(Locality)
+    part = models.ForeignKey(PartPricing)
+
+    class Meta(base_models.AverageLocalitySalesHistory.Meta):
+        app_label = _APP_NAME
+
+
+class SFAReports(base_models.SFAReports):
+    pass
+
+    class Meta(base_models.SFAReports.Meta):
+        app_label = _APP_NAME
+
+class SFAHighlights(base_models.SFAHighlights):
+    pass
+
+    class Meta(base_models.SFAHighlights.Meta):
+        app_label = _APP_NAME
+
+class SetTarget(base_models.SetTarget):
+    pass
+
+    class Meta(base_models.SetTarget.Meta):
+        app_label = _APP_NAME
+

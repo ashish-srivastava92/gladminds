@@ -117,7 +117,33 @@
 		
 		{% endif %}
 		
-	
+{% if show_upload_part_list %}
+          {% ifequal cl.opts.verbose_name 'part pricing'  %}
+
+        <div class="span6">
+        <form action="{% url 'upload_part_list' %}" method="POST" enctype="multipart/form-data" >
+              <table width>
+                <tr> 
+                  <td>
+                <input type="file" name="upload_part_list" required="true"> 
+              
+                                          <button type="button" class="btn btn-default" onclick="javascript:downloadSamplePartCsvList();">
+                                                Download Sample CSV 
+                                          </button>
+ 
+                                                        </td>
+
+                  <td> 
+                    <input class="btn btn-info" id="uploadExcel" type="submit" value="Upload Part List"> 
+                  </td>
+                </tr>
+              </table>
+          </form>
+      </div>
+    {% endifequal %}
+    
+    {% endif %}
+
 {% if show_upload_rack_location %}
           {% ifequal cl.opts.verbose_name 'parts rack location'  %}
 
@@ -272,7 +298,10 @@ var Msg = document.getElementById("popup");
             url = "{% url 'download_sample_rack_location_csv' %}"
             location.href= url;
         }
-
+    function downloadSamplePartCsvList(){
+            url = "{% url 'download_sample_part_list' %}"
+            location.href= url;
+        }
 
 
 		  </script>

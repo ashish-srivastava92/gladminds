@@ -378,6 +378,24 @@ def send_loyalty_sms(*args, **kwargs):
         sms_log(brand,status=status, receiver=phone_number, message=message)
 
 @shared_task
+def send_sfa_order_placed_sms(*args, **kwargs):
+    """
+    Send loyalty sms
+    """
+    status = "success"
+    brand= kwargs.get('brand', None)
+    try:
+        phone_number = kwargs.get('phone_number', None)
+        message = kwargs.get('message', None)
+        set_gateway(**kwargs)
+    except (Exception, MessageSentFailed) as ex:
+        status = "failed"
+        send_sfa_order_placed_sms.retry(exc=ex, countdown=10, kwargs=kwargs, max_retries=5)
+    finally:
+        sms_log(brand,status=status, receiver=phone_number, message=message)
+
+
+@shared_task
 def send_reminder(*args, **kwargs):
     """
     send reminder sms to customer 
@@ -822,6 +840,25 @@ def send_mail_for_manufacture_data_discrepancy(*args, **kwargs):
             csvwriter.writerow([data.product_id, data.material_number, data.plant, data.engine, data.vehicle_off_line_date])
         mail.discrepant_manufacture_data(csv_file=csvfile, brand=brand)
         discrepant_entries.update(sent_to_sap=True)
+    else:
+        logger.info("[manufacture_data_discrepancy]: No discrepancy were update on {0}".format(datetime.now()))
+
+
+@shared_task
+def send_mail_for_sfa_order_placed(*args, **kwargs):
+    ''' send mail for manufacture_data_discrepency'''
+    brand= kwargs.get('brand', None)
+    if kwargs.get('order_number'):
+        csvfile = StringIO.StringIO()
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(["Retailer Name - " + kwargs.get('retailer_name')])
+        csvwriter.writerow(["Retailer Id - " + kwargs.get('retailer_code')])
+        csvwriter.writerow(["Order Reference Number - ", kwargs.get('order_number')])
+        csvwriter.writerow(["Part Nuumber", "Order Quantity", "Allocated Quantity"])
+        orderpart_details = kwargs.get('orderpart_details')
+        for data in orderpart_details:
+            csvwriter.writerow([data.part_number, data.quantity, data.quantity])
+        mail.sfa_order_received_data(csv_file=csvfile, brand=brand, receivers=[kwargs.get('distributor_email')])
     else:
         logger.info("[manufacture_data_discrepancy]: No discrepancy were update on {0}".format(datetime.now()))
 

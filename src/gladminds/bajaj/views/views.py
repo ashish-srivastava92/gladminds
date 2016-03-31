@@ -47,7 +47,8 @@ from gladminds.core.auth import otp_handler
 from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Distributor, District, State, OrderPartDetails, \
 PartPricing, OrderDeliveredHistory, DoDetails, PartsStock, OrderPart, OrderPartDetails, DistributorSalesRep, DSRWorkAllocation, \
 BackOrders, DSRLocationDetails, OrderTempDeliveredHistory, Collection, CollectionDetails, DoDetails,\
-AreaSparesManager, PartsRackLocation, OrderTempDetails, Invoices, PartsRackLocation, AveragePartSalesHistory
+AreaSparesManager, PartsRackLocation, OrderTempDetails, Invoices, PartsRackLocation, MonthlyPartSalesHistory,\
+SubCategories
 
 
 from django.core.serializers.json import DjangoJSONEncoder
@@ -217,6 +218,88 @@ def download_picklist(request, retailer_id):
     return response
 
 
+def get_order_picklist(request):
+    order_id = request.GET.get('order_id')
+    order_obj = OrderPart.objects.get(id=order_id)
+    retailer_obj = order_obj.retailer
+    retailer_name = retailer_obj.retailer_name
+    retailer_code = retailer_obj.retailer_code
+    order_part_details = OrderPartDetails.objects.filter(order_id=order_id)
+    picklist_details = []
+    for order_item in order_part_details:
+        picklist_details_dict = {}
+        if order_item.part_number:
+            part_obj = order_item.part_number
+        else:
+            part_obj = order_item.part_number_catalog
+        picklist_details_dict['part_number'] = part_obj.part_number
+        picklist_details_dict['part_description'] = part_obj.description
+
+        picklist_details_dict['allocated'] = order_item.quantity
+        picklist_details_dict['order_id'] = order_item.order.order_number
+        try:
+            location = PartsRackLocation.objects.get(part_number_id=part_obj.id)
+            picklist_details_dict['location'] = location.rack_location
+        except Exception as ex:
+            picklist_details_dict['location'] = 'NA'
+
+        picklist_details_dict['mrp'] = part_obj.mrp
+
+        if picklist_details_dict['mrp'] == '#N/A':
+            picklist_details_dict['mrp'] = 0
+        if picklist_details_dict['allocated'] != 0:
+            picklist_details.append(picklist_details_dict.copy())
+    
+    new_picklist_details = sorted(picklist_details, key=itemgetter('location'))
+    context = {'picklist_details': new_picklist_details,
+     'retailer_name': retailer_name}
+    template = 'admin/bajaj/orderpart/invoice.html'
+    return render(request, template, context)
+
+
+def download_order_picklist(request, order_id):
+    order_obj = OrderPart.objects.get(id=order_id)
+    retailer_obj = order_obj.retailer
+    retailer_name = retailer_obj.retailer_name
+    retailer_code = retailer_obj.retailer_code
+    order_part_details = OrderPartDetails.objects.filter(order_id=order_id)
+    picklist_details = []
+    for order_item in order_part_details:
+        picklist_details_dict = {}
+        if order_item.part_number:
+            part_obj = order_item.part_number
+        else:
+            part_obj = order_item.part_number_catalog
+        picklist_details_dict['part_number'] = part_obj.part_number
+        picklist_details_dict['part_description'] = part_obj.description
+
+        picklist_details_dict['allocated'] = order_item.quantity
+        picklist_details_dict['order_id'] = order_item.order.order_number
+        try:
+            location = PartsRackLocation.objects.get(part_number_id=part_obj.id)
+            picklist_details_dict['location'] = location.rack_location
+        except Exception as ex:
+            picklist_details_dict['location'] = 'NA'
+
+        picklist_details_dict['mrp'] = part_obj.mrp
+
+        if picklist_details_dict['mrp'] == '#N/A':
+            picklist_details_dict['mrp'] = 0
+        if picklist_details_dict['allocated'] != 0:
+            picklist_details.append(picklist_details_dict.copy())
+    
+    new_picklist_details = sorted(picklist_details, key=itemgetter('location'))
+    response = HttpResponse(content_type='text/excel')
+    response['Content-Disposition'] = 'attachment; filename="PickList.xls"'
+    c = Context({'data': new_picklist_details,
+     'retailer_name': retailer_name,
+     'retailer_code': retailer_code})
+    template = loader.get_template('admin/bajaj/orderpart/download_picklist.html')
+    response.write(template.render(c))
+    return response
+
+
+
 def download_sample_stock_list_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="SampleStockFile.csv"'
@@ -317,9 +400,7 @@ def save_order_history(request):
         # else:
         #     outstanding = 0
         #     order_details_dict['outstanding'] = 'NA'
-
         order_details.append(order_details_dict.copy())
-
     context = {'order_status': order_status,
      'order_details': order_details,
      'app_label': opts.app_label,
@@ -764,24 +845,30 @@ def get_parts(request, order_id, order_status, retailer_id):
         orderparts_obj = OrderPartDetails.objects.select_related('part_number', 'order').filter(order_id=each.id)
         print orderparts_obj, 'obj'
         for each_order in orderparts_obj:
-            print each_order.part_number, 'part'
-            orders['mrp'] = each_order.part_number.mrp
-            orders['part_number'] = each_order.part_number.part_number
-            orders['part_description'] = each_order.part_number.description
+            if each_order.part_number:
+                part_obj = each_order.part_number
+            elif each_order.part_number_catalog:
+                part_obj = each_order.part_number_catalog
+            orders['mrp'] = part_obj.mrp
+            orders['part_number'] = part_obj.part_number
+            orders['part_description'] = part_obj.description
             orders['quantity'] = each_order.quantity
             orders['order_id'] = each_order.order_id
-            if each_order.part_number.mrp == '#N/A':
-                each_order.part_number.mrp = 0
-            orders['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
+            if part_obj.mrp == '#N/A':
+                part_obj.mrp = 0
+            orders['line_total'] = float(part_obj.mrp) * float(each_order.quantity)
             orders['part_status'] = each_order.part_status
-            available_quantity = PartsStock.objects.filter(part_number=each_order.part_number.id, distributor_id=dist_id)
-            if available_quantity:
-                available_quantity[0].available_quantity
-                orders['available_quantity'] = available_quantity[0].available_quantity
-            else:
+            orders['available_quantity'] = 0
+            try:
+                try:
+                    available_quantity = PartsStock.objects.get(part_number=part_obj, distributor_id=dist_id)
+                    orders['available_quantity'] = available_quantity.available_quantity
+                except:
+                    available_quantity = PartsStock.objects.get(catalog_part_number=part_obj, distributor_id=dist_id)
+                    orders['available_quantity'] = available_quantity.available_quantity
+            except:
                 orders['available_quantity'] = 0
             order_delivered_obj = OrderDeliveredHistory.objects.filter(part_number_id=each_order.part_number_id, order_id=each_order.order_id).aggregate(Sum('delivered_quantity'))
-            print order_delivered_obj, 'del'
             if order_delivered_obj['delivered_quantity__sum'] != None:
                 orders['delivered_quantity'] = int(order_delivered_obj['delivered_quantity__sum'])
                 orders['pending'] = each_order.quantity - int(order_delivered_obj['delivered_quantity__sum'])
@@ -834,23 +921,30 @@ def download_order_parts(request, order_id, order_status, retailer_id):
         orderparts_obj = OrderPartDetails.objects.select_related('part_number', 'order').filter(order_id=each.id)
         for each_order in orderparts_obj:
             print each_order.part_number, 'part'
-            orders['mrp'] = each_order.part_number.mrp
-            orders['part_number'] = each_order.part_number.part_number
-            orders['part_description'] = each_order.part_number.description
+            if each_order.part_number:
+                part_obj = each_order.part_number
+            elif each_order.part_number_catalog:
+                part_obj = each_order.part_number_catalog
+            orders['mrp'] = part_obj.mrp
+            orders['part_number'] = part_obj.part_number
+            orders['part_description'] = part_obj.description
             orders['quantity'] = each_order.quantity
             orders['order_id'] = each_order.order_id
-            if each_order.part_number.mrp == '#N/A':
-                each_order.part_number.mrp = 0
-            orders['line_total'] = float(each_order.part_number.mrp) * float(each_order.quantity)
+            if part_obj.mrp == '#N/A':
+                part_obj.mrp = 0
+            orders['line_total'] = float(part_obj.mrp) * float(each_order.quantity)
             orders['part_status'] = each_order.part_status
-            available_quantity = PartsStock.objects.filter(part_number=each_order.part_number.id, distributor_id=dist_id)
-            if available_quantity:
-                available_quantity[0].available_quantity
-                orders['available_quantity'] = available_quantity[0].available_quantity
-            else:
+            try:
+                try:
+                    available_quantity = PartsStock.objects.get(part_number=part_obj, distributor_id=dist_id)
+                    orders['available_quantity'] = available_quantity.available_quantity
+                except:
+                    available_quantity = PartsStock.objects.get(catalog_part_number=part_obj, distributor_id=dist_id)
+                    orders['available_quantity'] = available_quantity.available_quantity
+            except:
                 orders['available_quantity'] = 0
+
             order_delivered_obj = OrderDeliveredHistory.objects.filter(part_number_id=each_order.part_number_id, order_id=each_order.order_id).aggregate(Sum('delivered_quantity'))
-            print order_delivered_obj, 'del'
             if order_delivered_obj['delivered_quantity__sum'] != None:
                 orders['delivered_quantity'] = int(order_delivered_obj['delivered_quantity__sum'])
                 orders['pending'] = each_order.quantity - int(order_delivered_obj['delivered_quantity__sum'])
@@ -875,13 +969,12 @@ def download_order_parts(request, order_id, order_status, retailer_id):
      'order_number': order_number,
      'order_total_value': orders['total_value']}
     response = HttpResponse(content_type='text/excel')
-    attachment = 'filename=' + retailer_name + order_number
+    attachment = 'filename=' + retailer_name + order_number + '.xls'
     response['Content-Disposition'] = 'attachment;' + attachment
     c = Context(context)
     template = loader.get_template('admin/bajaj/orderpart/download_order_parts.html')
     response.write(template.render(c))
     return response
-
 
 def accept_order(request, order_id, action):
     opts = OrderPart._meta
@@ -1344,34 +1437,44 @@ def upload_average_part_history(request):
     full_path = handle_uploaded_file(request.FILES['upload_average_retailer_sales_history'])
     msg = ''
     retailer_obj = None
+    part_month_dict = {}
     with open(full_path) as csvfile:
         all_average_part_history = csv.DictReader(csvfile)
         for each_part_history in all_average_part_history:
             retailer_code =  each_part_history['Retailer Code']
             part_number = each_part_history['Part Number']
-            part_quantity = each_part_history['Part Qunatity']
+            part_quantity = int(each_part_history['Part Quantity'])
             selling_date_str = each_part_history['Date (YYYY-MM-DD)']
-            # month = int(each_part_history['Month'])
-            # year = int(each_part_history['Year'])
             selling_date = datetime.datetime.strptime(selling_date_str, '%Y-%m-%d')
             selling_month = selling_date.month
-            selling_year = salling_date.year
-            retailer_obj = Retailer.objects.get(retailer_code=retailer_code)
-            part_obj = PartPricing.objects.get(part_number=part_number)
-            try:
-                avg_parts_sales_history = AveragePartSalesHistory.get(retailer=retailer_obj, part=part_obj, month=selling_month, year=selling_year)
-                avg_parts_sales_history.sale_value = (int(avg_parts_sales_history) + int(part_quantity)) / 2
-            except:
-                avg_parts_sales_history = AveragePartSalesHistory(retailer=retailer_obj, part=part_obj, month=month, year=year, sale_value=part_quantity)
-            avg_parts_sales_history.save()
+            selling_year = selling_date.year
+            selling_month_year = str(selling_month) + ',' + str(selling_year)
+            if not part_month_dict.get(retailer_code):
+                part_month_dict[retailer_code] = {}
+            if not part_month_dict[retailer_code].get(part_number):
+                part_month_dict[retailer_code][part_number] = {}
+            if not part_month_dict[retailer_code][part_number].get(selling_month_year):
+                part_month_dict[retailer_code][part_number][selling_month_year] = part_quantity
+            else:
+                part_month_dict[retailer_code][part_number][selling_month_year] = \
+                    part_month_dict[retailer_code][part_number][selling_month_year] + part_quantity
+    for retailer in part_month_dict:
+        retailer_obj = Retailer.objects.get(retailer_code=retailer)
+        for part in part_month_dict[retailer]:
+            part_obj = PartPricing.objects.get(part_number=part)
+            for month_year in part_month_dict[retailer][part]:
+                part_quantity = part_month_dict[retailer][part][month_year]
+                selling_month, selling_year = month_year.split(',')
+                avg_parts_sales_history = MonthlyPartSalesHistory(retailer=retailer_obj, part=part_obj, month=selling_month, year=selling_year, quantity=part_quantity)    
+                avg_parts_sales_history.save()
     try:
         transaction.commit()
     except:
         messages.error(request, 'Average Retailer History upload failed')
-        return HttpResponseRedirect('/admin/bajaj/averagepartsaleshistory/')
+        return HttpResponseRedirect('/admin/bajaj/monthlypartsaleshistory/')
 
     messages.success(request, 'Average Retailer History successfully')
-    return HttpResponseRedirect('/admin/bajaj/averagepartsaleshistory/')
+    return HttpResponseRedirect('/admin/bajaj/monthlypartsaleshistory/')
 
 
 def download_sample_average_part_history(request):
@@ -1389,6 +1492,86 @@ def download_sample_average_part_history(request):
         ])
     return response
 
+
+def download_sample_part_list(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="SamplePartList.csv"'
+    writer = csv.writer(response, dialect=csv.excel)
+    writer.writerow(['Part Number',
+        'MRP',
+        'Category Name',
+        'Applicable Models (Comma Separated)',
+        'Description',
+        'Remarks',
+        'Minimum Order Quantity',
+        'Active (0/1)'
+        ])
+    return response
+
+@transaction.commit_manually
+def upload_part_list(request):
+    full_path = handle_uploaded_file(request.FILES['upload_part_list'])
+    msg = ''
+    flag = 0
+    with open(full_path) as csvfile:
+        all_part_list = csv.DictReader(csvfile)
+        for each_part in all_part_list:
+            part_number =  each_part.get('Part Number')
+            mrp = each_part.get('MRP', 0)
+            applicable_models = each_part.get('Applicable Models (Comma Separated)')
+            remarks = each_part.get('Remarks')
+            description = each_part.get('Description')
+            category_name = each_part.get('Category Name')
+            moq = each_part.get('Minimum Order Quantity', 0)
+            is_active = each_part.get('Active (0/1)', 0)
+            if not is_active:
+                is_active = 0
+            else:
+                is_active = int(is_active)
+            if not moq:
+                moq = 0
+            else:
+                moq = int(moq)
+            try:
+                subcategory_obj = SubCategories.objects.get(name=category_name.strip())
+            except:
+                subcategory_obj = None
+            try:
+                try:
+                    existing_part = PartPricing.objects.get(part_number=part_number)
+                    existing_part.products = applicable_models
+                    existing_part.remarks = remarks
+                    existing_part.mrp = mrp
+                    existing_part.description = description
+                    existing_part.subcategory = subcategory_obj
+                    existing_part.moq = moq
+                    existing_part.active = is_active
+                    existing_part.save()
+                except:
+                    new_part = PartPricing(part_number=part_number,
+                        mrp=mrp,
+                        description=description,
+                        remarks=remarks,
+                        active=is_active,
+                        products=applicable_models,
+                        moq=moq,
+                        subcategory=subcategory_obj)
+                    new_part.save()
+            except:
+                flag = 1
+                msg = msg + part_number + ','
+        if flag == 1:
+            msg = msg[:-1]
+            messages.error(request, 'Part Number {0} has wrong data'.format(msg))
+    try:
+        transaction.commit()
+        if flag == 0:
+            messages.success(request, 'Uploaded Part successfully')        
+    except:
+        messages.error(request, 'Part Upload failed')
+
+
+    return HttpResponseRedirect('/admin/bajaj/partpricing/')
 
 
 @transaction.commit_manually
@@ -1412,8 +1595,14 @@ def upload_order_invoice(request):
                     associated_distributor_id = retailer_obj.distributor_id
                     retailer_id = retailer_obj.id
                 invoice_number = each_invoice.get('Invoice No.').strip()
-                mrp = float(each_invoice.get('MRP', 0))
-                vat_per = float(each_invoice.get('VAT in %ge', 0))
+                try:
+                    mrp = float(each_invoice.get('MRP', 0))
+                except:
+                    mrp = 0
+                try:
+                    vat_per = float(each_invoice.get('VAT in %ge', 0))
+                except:
+                    vat_per = 0
                 vat_abs = (vat_per * mrp) / 100
                 try:
                     service_tax_per = float(each_invoice.get('Service Tax in %ge', 0))
@@ -1436,7 +1625,7 @@ def upload_order_invoice(request):
                 except:
                     invoice_date_str = each_invoice.get('Invoice Date(YYYY-MM-DD)')
                 part_number = each_invoice.get('Part Number')
-                part_quantity = float(each_invoice.get('Billed Part Quantity'))
+                part_quantity = int(each_invoice.get('Billed Part Quantity'))
                 transporter_id = each_invoice.get('Transporter ID')
                 transporter_name = each_invoice.get('Transporter/Courier Name')
                 try:
@@ -1445,7 +1634,6 @@ def upload_order_invoice(request):
                     shipping_date_str = each_invoice.get('Shipping Date(YYYY-MM-DD)')
                 lr_number = each_invoice.get('LR Number')
 
-                #delivery_order_details_id = each_invoice.get('Delivery Order Number')
                 invoice_date = datetime.datetime.strptime(invoice_date_str, '%Y-%m-%d').date()
                 shipping_date = datetime.datetime.strptime(shipping_date_str, '%Y-%m-%d').date()
                 line_grand_total = each_invoice.get('Line Grand Total')
@@ -1455,21 +1643,37 @@ def upload_order_invoice(request):
                     grand_total = (mrp * part_quantity) + service_tax_abs + other_taxes_abs + vat_abs - discount_abs                 
                 try:
                     part_obj = PartPricing.objects.get(part_number=part_number)
-                    order_delivery_history_obj = OrderDeliveredHistory.objects.filter(part_number=part_obj, order=order_part_obj)[0]
+                    order_delivery_history_obj_list = OrderDeliveredHistory.objects.filter(\
+                                    part_number=part_obj, order=order_part_obj)
+                    # Unique part number per order. Would pick first item if 
+                    # multiple parts with same part number
+                    if order_delivery_history_obj_list:
+                        order_delivery_history_obj = order_delivery_history_obj_list[0]
+                    else:
+                        order_delivery_history_obj = OrderDeliveredHistory(\
+                            delivered_date=invoice_date, order=order_part_obj, \
+                            part_number=part_obj)
+                        # Creating a new delivery order if doesnt exist already
+                        do_obj = DoDetails(distributor=order_part_obj.distributor)
+                        do_obj.save(using=settings.BRAND)
+                        do_obj.order.add(order_part_obj)
+                        order_delivery_history_obj.do = do_obj
                 except:
                     messages.error(request, 'HistoryUploadError: Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
                     return HttpResponseRedirect('/admin/bajaj/orderpart/')
 
                 try:
                     invoice_obj = Invoices.objects.get(retailer_id=retailer_id, invoice_id=invoice_number)
-                    if order_delivery_history_obj.line_total:  
-                        invoice_obj.invoice_amount = invoice_obj.invoice_amount + grand_total - order_delivery_history_obj.line_total
+                    if order_delivery_history_obj.line_total:
+                        invoice_obj.invoice_amount = float(invoice_obj.invoice_amount) + grand_total - float(order_delivery_history_obj.line_total)
                     else:
                         invoice_obj.invoice_amount = invoice_obj.invoice_amount + grand_total
                     invoice_obj.save(update_fields=['invoice_amount'])
                 except:
                     invoice_obj = Invoices(retailer_id=retailer_id, invoice_id=invoice_number, invoice_date=invoice_date, invoice_amount=grand_total)
                     invoice_obj.save(using=settings.BRAND)
+                # Saving order_delivery_history_obj after invoice for getting previous line total
+                order_delivery_history_obj.delivered_quantity = part_quantity                    
                 order_delivery_history_obj.discount = discount_per
                 order_delivery_history_obj.service_tax = service_tax_per
                 order_delivery_history_obj.vat = vat_per
@@ -1479,22 +1683,17 @@ def upload_order_invoice(request):
                 order_delivery_history_obj.shipping_date = shipping_date
                 order_delivery_history_obj.lr_number = lr_number
                 order_delivery_history_obj.line_total = grand_total
-                order_delivery_history_obj.save(update_fields=['discount',
-                 'service_tax',
-                 'vat',
-                 'other_taxes'])
+                order_delivery_history_obj.save()
+
                 delivery_order_details_id = order_delivery_history_obj.do_id
                 order_part_obj.order_status = 3
-                order_part_obj.do_id = delivery_order_details_id
-                order_part_obj.save(update_fields=['order_status', 'do_id'])
+                order_part_obj.save(update_fields=['order_status'])
                 try:
                     do_details_obj = DoDetails.objects.get(id=delivery_order_details_id)
+                    do_details_obj.invoice = invoice_obj
+                    do_details_obj.save(update_fields=['invoice'])
                 except:
-                    messages.error(request, 'Invoice upload failed, Please correct Delivery order id for order number - ' + order_number)
-                    return HttpResponseRedirect('/admin/bajaj/orderpart/')
-
-                do_details_obj.invoice = invoice_obj
-                do_details_obj.save(update_fields=['invoice'])
+                    pass
             except:
                 messages.error(request, 'Invoice upload failed, Please recheck the data for invoice number - ' + invoice_number)
                 return HttpResponseRedirect('/admin/bajaj/orderpart/')

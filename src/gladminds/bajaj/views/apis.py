@@ -21,13 +21,15 @@ from rest_framework_jwt.settings import api_settings
 from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
                             PartPricing, Distributor,  Invoices, \
                             Collection,CollectionDetails,PartsStock,DSRWorkAllocation,DSRLocationDetails, \
-			    NationalSparesManager,AreaSparesManager
+			    NationalSparesManager,AreaSparesManager,OrderDeliveredHistory, MonthlyPartSalesHistory
 from gladminds.bajaj.models import OrderPart,OrderPartDetails, \
-                        PartIndexDetails, PartIndexPlates, FocusedPart
+                        PartIndexDetails, PartIndexPlates, FocusedPart, \
+                        AverageRetailerSalesHistory, AverageLocalitySalesHistory
 from gladminds.core.auth_helper import Roles
-
+from django.db.models import Sum
 
 from gladminds.core import constants
+import pytz
 
 today = datetime.datetime.now()
 
@@ -191,16 +193,15 @@ def get_focused_parts(request):
     retailer_code = request.GET.get('retailer_code')
     dsr_code = request.GET.get('dsr_code')
     if retailer_code:
-	locality = Retailer.objects.get(retailer_code=retailer_code).locality
-	all_focused_parts = FocusedPart.objects.filter(locality=locality)
+	   locality = Retailer.objects.get(retailer_code=retailer_code).locality
+	   all_focused_parts = FocusedPart.objects.filter(locality=locality)
     elif dsr_code:
-	retailer_objs = Retailer.objects.filter(dsr__distributor_sales_code=dsr_code)
-	localities = [i.locality for i in retailer_objs]
-	all_focused_parts = FocusedPart.objects.filter(locality__in=localities)
+	   retailer_objs = Retailer.objects.filter(dsr__distributor_sales_code=dsr_code)
+	   localities = [i.locality for i in retailer_objs]
+	   all_focused_parts = FocusedPart.objects.filter(locality__in=localities)
     else:
     	all_focused_parts = FocusedPart.objects.all()
 
-    all_focused_parts = FocusedPart.objects.all()
     parts_list = []
     for focused_part in all_focused_parts:
         parts_dict = {}
@@ -219,10 +220,10 @@ def get_focused_parts(request):
             parts_dict.update({"part_available_quantity":available_quantity.available_quantity})
         parts_dict.update({"part_products":focused_part.part.products})
         parts_dict.update({"mrp":focused_part.part.mrp})
-	parts_dict.update({"locality_id": focused_part.locality_id})
-	parts_dict.update({"city": focused_part.locality.city.city})
+        parts_dict.update({"locality_id": focused_part.locality_id})
+        parts_dict.update({"city": focused_part.locality.city.city})
         parts_dict.update({"state": focused_part.locality.city.state.state_name})
-	parts_dict.update({"locality": focused_part.locality.name})
+        parts_dict.update({"locality": focused_part.locality.name})
         parts_list.append(parts_dict)
     return Response(parts_list)	
 
@@ -326,32 +327,39 @@ def place_order(request, dsr_id):
             orderpart.longitude = order['longitude']
             orderpart.save()
             #push all the items into the orderpart details
+            orderpart_details_list =  []
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
-                try:
-                    if item['part_type'] == 1:
-                        '''Get the part details from Catalog Table'''
-                        orderpart_details.part_number_catalog = PartIndexDetails.objects.\
-                                                 get(part_number=item['part_number'], plate_id=item.get("plate_id"))
-                    elif item['part_type'] == 2:
-                        '''Get the part detailes from PartPricing Table'''
-                        orderpart_details.part_number = PartPricing.objects.\
-                                                 get(part_number=item['part_number'])
-                except:
-		    try:
-			orderpart_details.part_number_catalog = PartIndexDetails.objects.\
-                                                 get(part_number=item['part_number'])
-		    except:
-                        orderpart_details.part_number = PartPricing.objects.\
-                                                 get(part_number=item['part_number'])
+                item_part_type = item.get('part_type')
+                part_category = None
+                part_number_catalog = None
+                if item_part_type == 1:
+                    '''Get the part details from Catalog Table'''
+                    part_catalog = PartIndexDetails.objects.\
+                                             get(part_number=item['part_number'], plate_id=item.get("plate_id"))
+                    orderpart_details.part_number_catalog = part_catalog
+                     
+                else:
+                    '''Get the part detailes from PartPricing Table'''
+                    part_category = PartPricing.objects.\
+                                             get(part_number=item['part_number'])
+                    orderpart_details.part_number = part_category
 
-                    #return Response({'error': 'Part '+ item['part_number'] +' not found'})
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
+                orderpart_details_list.append(orderpart_details)
                 orderpart_details.save()
-	    transaction.commit()
-    send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
+
+        try:
+            transaction.commit()
+        except:
+            transaction.rollback()
+    try:
+        send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
+        send_email_to_retailer_on_place_order(orderpart, orderpart_details_list)
+    except:
+        pass
     return Response({'message': 'Order updated successfully', 'status':1})
 
 @api_view(['POST'])
@@ -374,34 +382,39 @@ def retailer_place_order(request, retailer_id):
             orderpart.order_placed_by = order['order_placed_by']
             orderpart.save()
             #push all the items into the orderpart details
+            orderpart_details_list =  []
             for item in order['order_items']:
                 orderpart_details = OrderPartDetails()
-		try:
-                    if item['part_type'] == 1:
-                        '''Get the part details from Catalog Table'''
-                        orderpart_details.part_number_catalog = PartIndexDetails.objects.\
-                                                 get(part_number = item['part_number'], plate_id=item.get('plate_id'))
-                    elif item['part_type'] == 2:
-                        '''Get the part detailes from PartPricing Table'''
-                        orderpart_details.part_number = PartPricing.objects.\
-                                                 get(part_number = item['part_number'])
-                except:
-                    #return Response({'error': 'Part '+ item['part_number'] +' not found'})
-                    try:
-                        orderpart_details.part_number_catalog = PartIndexDetails.objects.\
-                                                 get(part_number=item['part_number'])
-                    except:
-                        orderpart_details.part_number = PartPricing.objects.\
-                                                 get(part_number=item['part_number'])
-
+                item_part_type = item.get('part_type')
+                part_category = None
+                part_number_catalog = None
+                if item_part_type == 1:
+                    '''Get the part details from Catalog Table'''
+                    part_catalog = PartIndexDetails.objects.\
+                                             get(part_number=item['part_number'], plate_id=item.get("plate_id"))
+                    orderpart_details.part_number_catalog = part_catalog
+                     
+                else:
+                    '''Get the part detailes from PartPricing Table'''
+                    part_category = PartPricing.objects.\
+                                             get(part_number=item['part_number'])
+                    orderpart_details.part_number = part_category
 
 
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
+                orderpart_details_list.append(orderpart_details)
                 orderpart_details.save()
-	    transaction.commit()
-            send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
+    try:
+        transaction.commit()
+    except:
+        transaction.rollback()
+    try:
+        send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
+        send_email_to_retailer_on_place_order(orderpart, orderpart_details_list)
+    except:
+        pass
     return Response({'message': 'Order updated successfully', 'status':1})
 
 
@@ -1136,9 +1149,9 @@ def get_orders(request, dsr_id):
     orders_list = []
     for order in order_details:
         order_dict = OrderedDict()
-        order_dict['order_id'] = order.id
+        order_dict['order_id'] = order.order_number
         order_dict['retailer_id'] = order.retailer.retailer_code
-        order_dict['order_date'] = order.order_date.date()
+        order_dict['order_date'] = order.order_date.strftime('%d-%m-%Y')
         # check the status of the order and get it from the constants
         for k,v in constants.ORDER_STATUS.iteritems():
             if v == order.order_status:
@@ -1155,10 +1168,15 @@ def get_orders(request, dsr_id):
             # order details dict
             order_details_list = []
             for each in order_detail:
+                order_delivered_obj = OrderDeliveredHistory.objects.filter(part_number=each.part_number, order=each.order).aggregate(Sum('delivered_quantity'))
                 order_details_dict = OrderedDict()
                 order_details_dict['part_id'] = each.part_number.part_number
                 order_details_dict['part_name'] = each.part_number.description
                 order_details_dict['quantity'] = each.quantity
+                if order_delivered_obj.get('delivered_quantity__sum') == None:
+                    order_details_dict['delivered_quantity'] = 0
+                else:
+                    order_details_dict['delivered_quantity'] = order_delivered_obj.get('delivered_quantity__sum')
                 order_details_dict['mrp'] = each.part_number.mrp
                 order_details_dict['line_total'] = each.line_total
                 order_details_list.append(order_details_dict)
@@ -1215,11 +1233,9 @@ from gladminds.core.services.message_template import get_template
 from gladminds.core import utils
 from gladminds.core.managers.audit_manager import sms_log
 AUDIT_ACTION = 'SEND TO QUEUE'
-from gladminds.sqs_tasks import send_loyalty_sms
+from gladminds.sqs_tasks import send_loyalty_sms, send_mail_for_sfa_order_placed, send_sfa_order_placed_sms
 def send_msg_to_retailer_on_adding(request,retailer_id,username,password):
-
     retailer_obj = Retailer.objects.get(id=retailer_id)
-    print retailer_obj.mobile
     phone_number=utils.get_phone_number_format(retailer_obj.mobile)
     message=get_template('SEND_RETAILER_REGISTRATION').format(
                         retailer_name=retailer_obj.user.user.first_name,username=username,password=password)
@@ -1229,18 +1245,27 @@ def send_msg_to_retailer_on_adding(request,retailer_id,username,password):
 
 
 def send_msg_to_retailer_on_place_order(request,retailer_id,order_id):
-#     print retailer
-
-    print request
     retailer_obj = Retailer.objects.get(id=retailer_id)
-    print retailer_obj.mobile
-    print order_id,"order"
     phone_number=utils.get_phone_number_format(retailer_obj.mobile)
     message=get_template('SEND_RETAILER_ON_ORDER_PLACEMENT').format(
                         retailer_name=retailer_obj.user.user.first_name,order_id=order_id)
     sms_log(settings.BRAND, receiver=phone_number, action=AUDIT_ACTION, message=message)
-    send_job_to_queue(send_loyalty_sms, {'phone_number': phone_number,
+    send_job_to_queue(send_sfa_order_placed_sms, {'phone_number': phone_number,
                     'message': message, "sms_client": settings.SMS_CLIENT})
+
+
+def send_email_to_retailer_on_place_order(orderpart, orderpart_details_list):
+    retailer_obj = orderpart.retailer
+    retailer_id = retailer_obj.retailer_code
+    retailer_name = orderpart.retailer.retailer_name
+    order_number = orderpart.order_number
+    distributor_email = retailer_obj.distributor.email_bajaj
+    send_job_to_queue(send_mail_for_sfa_order_placed, {'retailer_code': retailer_id,
+                        'retailer_name': retailer_name,
+                        'order_number': order_number,
+                        'distributor_email': distributor_email,
+                        'orderpart_details': orderpart_details_list
+                    })
 
 
 def send_msg_to_retailer_on_collection(request,retailer_id):
@@ -1272,24 +1297,27 @@ def get_retailer_dict(retailer):
                 retailer_dict = {}
                 outstanding = 0
                 collection = 0
-                outstanding = outstanding + invoice.invoice_amount
+                outstanding = outstanding + (invoice.invoice_amount - invoice.paid_amount)
                 #get the collections for that invoice
-                collection_objs = Collection.objects.filter(invoice_id = invoice.id)
-                for each in collection_objs:
-                    collections = CollectionDetails.objects.filter(collection_id = each.id)
-                    if collections:
-                        for each_collections in collections:
-                            collection = collection + each_collections.collected_amount
+                #collection_objs = Collection.objects.filter(invoice_id = invoice.id)
+                #for each in collection_objs:
+                #    collections = CollectionDetails.objects.filter(collection_id = each.id)
+                #    if collections:
+                #        for each_collections in collections:
+                #            collection = collection + each_collections.collected_amount
 	    retailer_dict['outstanding'] = outstanding
 	else:
 	    retailer_dict['outstanding'] = 0
 	if last_order_date:
-	    retailer_dict['lastorderdate'] = last_order_date[0].order_date
+	    retailer_dict['lastorderdate'] = last_order_date[0].order_date.date()
+        else:
+            retailer_dict['lastorderdate'] = ''
 	retailer_dict['contact'] = retailer.mobile
-	dsr_work_allocation = DSRWorkAllocation.objects.filter(retailer=retailer).order_by('-date')
+	#dsr_work_allocation = DSRWorkAllocation.objects.filter(retailer__dsr_id=retailer.dsr_id).order_by('-date')
+	dsr_work_allocation = DSRWorkAllocation.objects.filter(dsr=retailer.dsr).order_by('-date')
 	##FIXME: Add for all days
 	if dsr_work_allocation:
-            retailer_dict['day'] = dsr_work_allocation[0].pjp_day
+            retailer_dict['day'] = str(dsr_work_allocation[0].pjp_day).lower()
 	else:
 	    retailer_dict['day'] = 0 
 	return retailer_dict
@@ -1438,57 +1466,64 @@ def get_associated_dsrs(request,distributor_id=None):
 @api_view(['GET'])
 def get_retailers_actual(request):
     dsr_id = request.GET.__getitem__('dsr_id')
-    date = request.GET.__getitem__('date')
-    retailers = Retailer.objects.filter(dsr_id=dsr_id)#.count()
+    date_string = request.GET.__getitem__('date')
+    date=datetime.datetime.strptime(date_string,'%m-%d-%Y')
+    print date
+    start_datetime=datetime.datetime(date.year,date.month,date.day,0,0,0,0,pytz.timezone('UTC'))
+    retailers=set()
+    dsr=DistributorSalesRep.objects.get(distributor_sales_code=dsr_id)
+    end_datetime=start_datetime+timedelta(days=1)
+    #FIXME:update end_datetime.seconds by -1 second since it is inclusive
+    orders=OrderPart.objects.filter(dsr__distributor_sales_code=dsr_id,created_date__range=(start_datetime,end_datetime))
+    collections=Collection.objects.filter(dsr__distributor_sales_code=dsr_id,payment_date__range=(start_datetime,end_datetime))
+    for each in orders:
+        retailers.add(each.retailer)
+    for each in collections:
+        retailers.add(each.retailer)
     response_dict = {}
-    response_dict['date'] = date #FIXME: Confirm the field
+    response_dict['date'] = date.date()
     response_dict['users'] = []
     for retailer in retailers:
-        last_order_date = OrderPart.objects.filter(retailer=retailer).order_by('-order_date')
-	retailer_dict = {}
-	retailer_dict['userid'] = retailer.id #FIXME: Could be retailer_id
+        #FIXME:Try with order_date and instead of 2 queries use group_by in one query
+        last_orders = OrderPart.objects.filter(retailer=retailer,dsr__distributor_sales_code=dsr_id,created_date__range=(start_datetime,end_datetime)).order_by('-created_date')
+        retailer_dict = {}
+        retailer_dict['userid'] = retailer.retailer_code
         retailer_dict['firstname'] = retailer.user.user.first_name
         retailer_dict['lastname'] = retailer.user.user.last_name
-	if retailer.latitude and retailer.longitude:
-	    retailer_dict['latitude'] = str(retailer.latitude)
-	    retailer_dict['longitude'] = str(retailer.longitude)
-	else:
-	    #Do not send the retailers if the retailer's gps-coordinates is not available
-	    continue
-	retailer_dict['data1'] = []
-	###Get the retailer name 
-        invoices = Invoices.objects.filter(retailer__retailer_code = retailer.id)
-        if invoices:
-            for invoice in invoices:
-                retailer_dict = {}
-                outstanding = 0
-                collection = 0
-                outstanding = outstanding + invoice.invoice_amount
-                #get the collections for that invoice
-                collection_objs = Collection.objects.filter(invoice_id = invoice.id)
-                for each in collection_objs:
-                    collections = CollectionDetails.objects.filter(collection_id = each.id)
-                    if collections:
-                        for each_collections in collections:
-                            collection = collection + each_collections.collected_amount
-		collection_dict={}
-		collection_dict['type1'] = "collection"
-		collection_dict['amount'] = collection
-		collection_dict['accepttime'] = ""
-		retailer_dict['data1'].append(collection_dict)
-	    retailer_dict['outstanding'] = outstanding
-	else:
-	    retailer_dict['outstanding'] = 0
-	if last_order_date:
-	    retailer_dict['lastorderdate'] = last_order_date[0].order_date
+        retailer_dict['shopname'] = retailer.retailer_name
         retailer_dict['contact'] = retailer.mobile
-        dsr_work_allocation = DSRWorkAllocation.objects.filter(retailer=retailer).order_by('-date')
-	##FIXME: Add for all days
-	if dsr_work_allocation:
-	    retailer_dict['day'] = dsr_work_allocation[0].pjp_day
-	else:
-	    retailer_dict['day'] = 0
-    	response_dict['retailers'].append(retailer_dict)
+        retailer_dict['outstanding'] = 0#outstanding
+        if retailer.latitude and retailer.longitude:
+            retailer_dict['latitude'] = retailer.latitude
+            retailer_dict['longitude'] = retailer.longitude
+        else:
+            continue
+        retailer_dict['data1'] = []
+        order_dict={}
+        order_dict['type1']='order'
+        total_order=0
+        if last_orders:
+            order_dict['accepttime']='%s:%s'%(last_orders[0].created_date.hour,last_orders[0].created_date.minute)
+            print order_dict['accepttime']
+        for order in last_orders:
+            order_detail=OrderPartDetails.objects.filter(order=order)
+            for each in order_detail:
+                total_order+=each.line_total
+        order_dict['amount']=total_order
+        retailer_dict['data1'].append(order_dict)
+        #FIXME:Instead of 2 queries use group_by in one query
+        collections_list=Collection.objects.filter(retailer=retailer,dsr__distributor_sales_code=dsr_id,payment_date__range=(start_datetime,end_datetime)).order_by('-payment_date')
+        collection_dict={}
+        collection_dict['type1'] = "collection"
+        collection_value=0
+        #FIXME:Displaying only the collected_amount column
+        for collection in collections_list:
+            collection_value+=collection.collected_amount
+        if collections_list:
+            collection_dict['accepttime'] = '%s:%s'%(collections_list[0].payment_date.hour,collections_list[0].payment_date.minute)
+        collection_dict['amount'] = collection_value 
+        retailer_dict['data1'].append(collection_dict)
+        response_dict['users'].append(retailer_dict)
     return Response(response_dict)
 
 
@@ -1497,22 +1532,145 @@ def get_users(request):
 # FIXME: Return false other than all the known user roles
 # FIXME: Move this method to a more generic location, may be auth_helper
     print request.user.groups.all()
+    print request.user.id
     if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
-	try:
-	    distributor_id = Distributor.objects.get(user_id=request.user.id).distributor_id
-	    return get_associated_dsrs(request, distributor_id)
-	except:
-	    return Response({'error':'Distributor object error'})
+        distributor_id = Distributor.objects.get(user_id=request.user.id).distributor_id
+        return get_associated_dsrs(request, distributor_id)
     if request.user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
 	asm_id = AreaSparesManager.objects.get(user_id=request.user.id).asm_id
         return get_associated_distributors(request, asm_id)
     if request.user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
 	nsm_id = NationalSparesManager.objects.get(user_id=request.user.id).nsm_id
     	return get_associated_asms(request,nsm_id)
-    if request.user.groups.filter(name=Roles.SFAADMIN).exists():
+    if request.user.groups.filter(name=Roles.SFAADMIN).exists() or request.user.groups.filter(name=Roles.SUPERADMINS).exists():
         return get_associated_nsms(request)
     else:
-	##FIXME: Added this to test with 
-	return get_associated_nsms(request)
-    return Response({'error':'error'}) 
+        return Response({'error':'Not an authorized user'}) 
 
+@api_view(['GET'])
+def get_collection(request):
+    try:
+        dsr_id = request.GET.get('dsr_id')
+        date = request.GET.get('date')
+    except:
+        return Response({'error':'parameters missing'})
+    collection_details = []
+    if date:
+        #FIXME:make >(current date-5months)
+        collection_obj = Collection.objects.filter(dsr__distributor_sales_code=dsr_id,payment_date__gt=date)
+    else:
+        collection_obj = Collection.objects.filter(dsr__distributor_sales_code=dsr_id)#,payment_date__gt=datetime.datetime.now())
+    for each in collection_obj:
+        collection_details_dict = {}
+        collection_details_dict['retailer_id'] = each.retailer_id
+        collection_details_dict['collection_id'] = each.id
+        collection_details_dict['invoice_id'] = each.invoice_id
+        collection_details_dict['collected_amount'] = each.collected_amount
+        collection_details_dict['date'] = str(each.payment_date)
+        collection_details_dict['collection_details'] = []
+        more_details_obj = CollectionDetails.objects.filter(collection_id=each.id)
+        collected_by_cash=0
+        for each_obj in more_details_obj:
+            more_details_dict={}
+            if each_obj.mode == 1:
+                collection_details_dict['mode'] = 1 #'Cash'
+                collection_details_dict['collected_by_cash'] = each_obj.collected_cash
+                break
+            elif each_obj.mode == 2:
+                collection_details_dict['mode'] = 2  #'Cheque'
+            elif each_obj.mode == 3:
+                collection_details_dict['mode'] = 3  #'Cash/Cheque'
+                #FIXME: Confirm if the collected_cash is same for all the filtered records
+                collection_details_dict['collected_by_cash'] = each_obj.collected_cash
+            more_details_dict['cheque_number'] = each_obj.cheque_number
+            more_details_dict['cheque_bank'] = each_obj.cheque_bank
+            more_details_dict['cheque_img_url'] = str(each_obj.img_url)
+            more_details_dict['cheque_amount'] = each_obj.cheque_amount
+            collection_details_dict['collection_details'].append(more_details_dict)
+        collection_details.append(collection_details_dict)
+
+    return HttpResponse(json.dumps(collection_details), content_type='application/json')
+
+@api_view(['GET'])
+@transaction.commit_manually
+def update_six_months_retailer_history(request):
+    prev_month_list = []
+    prev_year_list = []
+    for i in range(6):
+        prev_date = (datetime.date.today() - datetime.timedelta(i*365/12))
+        prev_month_list.append(prev_date.month)
+        prev_year_list.append(prev_date.year)
+    last_six_months_parts_hist = MonthlyPartSalesHistory.objects.filter\
+                            (month__in=prev_month_list, year__in=prev_year_list)
+    retailer_part_wise_history = {}
+    for obj in last_six_months_parts_hist:
+        if not retailer_part_wise_history.get(obj.retailer_id):
+            retailer_part_wise_history[obj.retailer_id] = {}
+        if retailer_part_wise_history[obj.retailer_id].get(obj.part_id):
+            retailer_part_wise_history[obj.retailer_id][obj.part_id] = \
+                    retailer_part_wise_history[obj.retailer_id][obj.part_id] + obj.quantity
+        else:
+            retailer_part_wise_history[obj.retailer_id][obj.part_id] = obj.quantity
+    for hist_retailer in retailer_part_wise_history:
+        for hist_part in retailer_part_wise_history[hist_retailer]:
+            avg_quantity = retailer_part_wise_history[hist_retailer][hist_part] / 6
+            avg_retailer_sales_history_obj = \
+                AverageRetailerSalesHistory(part_id=hist_part, quantity=avg_quantity, \
+                                                        retailer_id=hist_retailer)
+            avg_retailer_sales_history_obj.save()
+    transaction.commit()
+    return HttpResponse(json.dumps({'status': 'completed'}), content_type='application/json')
+
+
+@api_view(['GET'])
+@transaction.commit_manually
+def update_six_months_location_history(request):
+    retailer_avg_part_hist = AverageRetailerSalesHistory.objects.all()
+    locality_part_wise_history = {}
+    for hist_obj in retailer_avg_part_hist:
+        locality_id = hist_obj.retailer.locality_id
+        if not locality_part_wise_history.get(locality_id):
+            locality_part_wise_history[locality_id] = {}
+        if locality_part_wise_history[locality_id].get(hist_obj.part_id):
+            locality_part_wise_history[locality_id][hist_obj.part_id] = \
+                    locality_part_wise_history[locality_id][hist_obj.part_id] + hist_obj.quantity
+        else:
+            locality_part_wise_history[locality_id][hist_obj.part_id] = hist_obj.quantity
+    for hist_locality in locality_part_wise_history:
+        for hist_part in locality_part_wise_history[hist_locality]:
+            avg_quantity = locality_part_wise_history[hist_locality][hist_part]
+            average_locality_sales_history = \
+                AverageLocalitySalesHistory(part_id=hist_part, quantity=avg_quantity, \
+                                                        locality_id=hist_locality)
+            average_locality_sales_history.save()
+    transaction.commit()
+    return HttpResponse(json.dumps({'status': 'completed'}), content_type='application/json')
+
+
+@api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def dsr_average_orders(request, dsr_id):
+    '''
+    This method returns the sale average of last 6 months as well as the previous month
+    retailer wise
+    '''
+    dsr =  DistributorSalesRep.objects.select_related('distributor').get(distributor_sales_code = dsr_id)
+    distributor = dsr.distributor
+    retailers_list = []
+    # get the retailer objects for this distributor
+    retailers = Retailer.objects.filter(distributor = distributor)
+    average_retailer_history = AverageRetailerSalesHistory.objects.filter(retailer__in=retailers)
+    part_wise_average_dict = []
+    for retailer_hist in average_retailer_history:
+        average_dict = {}
+        average_dict['retailer_id'] = retailer_hist.retailer_id
+        average_dict['part_number'] = retailer_hist.part.part_number
+        average_dict['retailer_average'] = retailer_hist.quantity
+        locality_avg = AverageLocalitySalesHistory.objects.filter(locality=retailer_hist.retailer.locality)
+        if locality_avg:
+            average_dict['locality_average'] = locality_avg[0].quantity
+        else:
+            average_dict['locality_average'] = 0
+        part_wise_average_dict.append(average_dict)
+    return Response(part_wise_average_dict)

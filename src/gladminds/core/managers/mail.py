@@ -584,3 +584,17 @@ def discrepant_manufacture_data(csv_file, brand=None):
         logger.info("Sending out discrepant manufacture data emails")
     except Exception as ex:
         logger.info("[Exception discrepant manufacture data while sending mail]: {0}".format(ex))
+
+def sfa_order_received_data(csv_file, brand=None, receivers=None):
+    try:
+        yesterday = datetime.now().date() - timedelta(days=1)
+        mail_detail = {"sender":"bajaj.cv.test@gmail.com",
+                    "subject": "Order Recieved",
+                    "body": "Thanks for ordering. Find attached the order details."
+        }
+        send_email_with_file_attachment(mail_detail['sender'], receivers, mail_detail['subject'],
+                                          mail_detail['body'].format(date=yesterday.strftime("%b %d %Y")), 
+                                          'sfa_order_received_', csv_file)
+        logger.info("Sending out sfa order received data emails")
+    except Exception as ex:
+        logger.info("[Exception sfa order details data while sending mail]: {0}".format(ex))

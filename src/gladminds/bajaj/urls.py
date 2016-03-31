@@ -105,9 +105,8 @@ urlpatterns = patterns('',
     url(r'^admin/upload-rack-location/$', 'gladminds.bajaj.views.upload_rack_location',name="upload_rack_location"),
     url(r'^upload_collection_details/$', 'gladminds.bajaj.views.upload_collection_details',name="upload_collection_details"),
     url(r'^admin/upload-invoices/$', 'gladminds.bajaj.views.upload_invoices',name="upload_invoices"),
-    
-    
-    
+  url(r'^upload_part_list/$', 'gladminds.bajaj.views.upload_part_list',name="upload_part_list"),
+
     url(r'^admin/retailer/orders/$','gladminds.bajaj.views.views.dsr_orders', name='dsr_orders'),
     url(r'^admin/retailer/approve_retailer/retailer_id/(?P<retailer_id>\d+)/$', 'gladminds.bajaj.views.views.approve_retailer', name='approve_retailer'),
 #     url(r'^admin/bajaj/view_orders/(?P<order_id>\d+)$', 'gladminds.bajaj.views.views.list_orders', name='list_orders'),
@@ -115,6 +114,8 @@ urlpatterns = patterns('',
     
     url(r'^admin/get_parts/(?P<order_id>\d+)/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$','gladminds.bajaj.views.views.get_parts', name='get_parts'),
     url(r'^download_order_parts/(?P<order_id>\d+)/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$','gladminds.bajaj.views.views.download_order_parts', name='download_order_parts'),
+    url(r'^order_picklist/$','gladminds.bajaj.views.views.get_order_picklist', name='get_order_picklist'),
+    url(r'^download_order_picklist/(?P<order_id>\d+)/$','gladminds.bajaj.views.views.download_order_picklist', name='download_order_picklist'),
 
 
 
@@ -149,6 +150,9 @@ urlpatterns = patterns('',
                    name='download_sample_Collection_upload_csv'),
     url(r'^download_sample_average_part_history/', 'gladminds.bajaj.views.views.download_sample_average_part_history',
                    name='download_sample_average_part_history'),
+    url(r'^download_sample_part_list/', 'gladminds.bajaj.views.views.download_sample_part_list',
+                   name='download_sample_part_list'),
+
 
     url(r'^download_delivery_list/', 'gladminds.bajaj.views.views.download_delivery_list', name='download_delivery_list'),
                        
@@ -162,5 +166,8 @@ urlpatterns = patterns('',
     url(r'^order_allocated_details/(?P<order_status>\w+)/(?P<retailer_id>\d+)/$','gladminds.bajaj.views.views.pending_order_details' , name='pending_order_details'),
     url(r'^save_order/$','gladminds.bajaj.views.views.generate_picklist_save_order' , name='generate_picklist_save_order'),
     url(r'^mc/get_focused_parts/', 'gladminds.bajaj.views.apis.get_focused_parts'),
+    url(r'^update_six_months_retailer_history/', 'gladminds.bajaj.views.apis.update_six_months_retailer_history'),
+    url(r'^update_six_months_locality_history/', 'gladminds.bajaj.views.apis.update_six_months_location_history'),
+    url(r'^dsr_average_orders/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.bajaj.views.apis.dsr_average_orders'),
 
 )

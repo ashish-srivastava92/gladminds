@@ -2181,17 +2181,44 @@ class PermanentJourneyPlan(BaseModel):
         db_table = "gm_permanent_journey_plan"
         verbose_name_plural = "Permanent Journey Plan"
 
-class AveragePartSalesHistory(BaseModel):
-    sale_value = models.IntegerField(default=0)
+class MonthlyPartSalesHistory(BaseModel):
+    quantity = models.IntegerField(default=0)
     class Meta:
         abstract = True
-        db_table = "gm_average_part_sales_history"
+        db_table = "gm_monthly_part_sales_history"
         verbose_name_plural = "Average Part Sales History"
 
-class AverageLocationSalesHistory(BaseModel):
-    sale_value = models.IntegerField(default=0)
+class AverageLocalitySalesHistory(BaseModel):
+    quantity = models.IntegerField(default=0)
     class Meta:
         abstract = True
-        db_table = "gm_average_location_sales_history"
+        db_table = "gm_average_locality_sales_history"
         verbose_name_plural = "Average Location Sales History"
+
+class AverageRetailerSalesHistory(BaseModel):
+    quantity = models.IntegerField(default=0)
+    class Meta:
+        abstract = True
+        db_table = "gm_average_retailer_sales_history"
+        verbose_name_plural = "Average Retailer Sales History"
+
+
+#FIXME: Can be sub-class of models.Model only
+class SFAReports(BaseModel):
+    class Meta:
+        abstract = True
+        db_table = "gm_sfa_target_reports"
+        verbose_name_plural = "SFA Targets"
+
+class SFAHighlights(BaseModel):
+    class Meta:
+        abstract = True
+        db_table = "gm_sfa_highlight_reports"
+        verbose_name_plural = "SFA Highlights"
+
+class SetTarget(BaseModel):
+    class Meta:
+        abstract = True
+        db_table = "gm_sfa_set_target"
+        verbose_name_plural = "Set Targets"
 

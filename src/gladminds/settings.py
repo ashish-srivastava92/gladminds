@@ -249,7 +249,25 @@ SUIT_CONFIG = {
                     )
                     },
      
-          
+        {'app': 'bajaj', 'label': 'SFA Reports', 'icon': ' icon-folder-open',
+          'models':({'model': 'sfareports',
+                      'label': 'Reports'},
+                    {'model': 'sfahighlights',
+                      'label': 'Highlights'},
+                   )},
+
+        {'app': 'bajaj', 'label': 'SFA Add Targets', 'icon': ' icon-folder-open',
+                'models':({'model': 'nsmtarget',
+                    'label': 'NSM Targets'},
+                    {'model': 'asmtarget',
+                        'label': 'ASM Targets'},
+                    {'model': 'distributortarget',
+                        'label': 'Distributor Targets'},
+                    {'model': 'distributorsalesreptarget',
+                        'label': 'DSR Targets'},
+                    {'model': 'retailertarget',
+                        'label': 'Retailer Targets'},
+                    )}, 
         {'app': 'bajaj', 'label': 'Collections', 'icon': ' icon-folder-open',
          'models':(
                   
@@ -620,7 +638,15 @@ LOGGING = {
     }
 }
 
-MAIL_SERVER = 'localhost'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com' 
+EMAIL_HOST_PASSWORD = 'sfa@admin'
+EMAIL_HOST_USER = 'bajaj.cv.test@gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# MAIL_SERVER = 'localhost'
 MAIL_DETAIL = {
     "sender": "feed-report@gladminds.co",
     "receiver": ["gladminds@hashedin.com", "naveen.shankar@gladminds.co"],
