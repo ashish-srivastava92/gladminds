@@ -1217,7 +1217,7 @@ class RecentOrderAdmin(GmModelAdmin):
             logged_in_dist_id = Distributor.objects.get(user_id=request.user).id
         
 #             asm_state_list = models.AreaSparesManager.objects.get(user__user=request.user).state.all()
-            query_set = query_set.filter(approved=2, distributor_id=logged_in_dist_id)
+            query_set = query_set.filter(distributor_id=logged_in_dist_id)
         return query_set
 
     def changelist_view(self, request, extra_context=None):
