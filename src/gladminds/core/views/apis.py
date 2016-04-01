@@ -199,12 +199,13 @@ def place_order(request, dsr_id):
                     part_catalog = PartIndexDetails.objects.\
                                              get(part_number=item['part_number'], plate_id=item.get("plate_id"))
                     orderpart_details.part_number_catalog = part_catalog
-                     
+                    orderpart_details.order_part_number = orderpart_details.part_number_catalog.part_number
                 else:
                     '''Get the part detailes from PartPricing Table'''
                     part_category = PartPricing.objects.\
                                              get(part_number=item['part_number'])
                     orderpart_details.part_number = part_category
+                    orderpart_details.order_part_number = orderpart_details.part_number.part_number
 
                     #return Response({'error': 'Part '+ item['part_number'] +' not found'})
                 orderpart_details.quantity = item['qty']
@@ -417,12 +418,13 @@ def retailer_place_order(request, retailer_id):
                     part_catalog = PartIndexDetails.objects.\
                                              get(part_number=item['part_number'], plate_id=item.get("plate_id"))
                     orderpart_details.part_number_catalog = part_catalog
-                     
+                    orderpart_details.order_part_number = orderpart_details.part_number_catalog.part_number
                 else:
                     '''Get the part detailes from PartPricing Table'''
                     part_category = PartPricing.objects.\
                                              get(part_number=item['part_number'])
                     orderpart_details.part_number = part_category
+                    orderpart_details.order_part_number = orderpart_details.part_number.part_number
 
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart

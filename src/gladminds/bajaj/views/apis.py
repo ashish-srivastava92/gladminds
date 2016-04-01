@@ -338,12 +338,13 @@ def place_order(request, dsr_id):
                     part_catalog = PartIndexDetails.objects.\
                                              get(part_number=item['part_number'], plate_id=item.get("plate_id"))
                     orderpart_details.part_number_catalog = part_catalog
-                     
+                    orderpart_details.order_part_number = orderpart_details.part_number_catalog.part_number
                 else:
                     '''Get the part detailes from PartPricing Table'''
                     part_category = PartPricing.objects.\
                                              get(part_number=item['part_number'])
                     orderpart_details.part_number = part_category
+                    orderpart_details.order_part_number = orderpart_details.part_number.part_number
 
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
@@ -393,12 +394,13 @@ def retailer_place_order(request, retailer_id):
                     part_catalog = PartIndexDetails.objects.\
                                              get(part_number=item['part_number'], plate_id=item.get("plate_id"))
                     orderpart_details.part_number_catalog = part_catalog
-                     
+                    orderpart_details.order_part_number = orderpart_details.part_number_catalog.part_number
                 else:
                     '''Get the part detailes from PartPricing Table'''
                     part_category = PartPricing.objects.\
                                              get(part_number=item['part_number'])
                     orderpart_details.part_number = part_category
+                    orderpart_details.order_part_number = orderpart_details.part_number.part_number
 
 
                 orderpart_details.quantity = item['qty']
@@ -1674,3 +1676,23 @@ def dsr_average_orders(request, dsr_id):
             average_dict['locality_average'] = 0
         part_wise_average_dict.append(average_dict)
     return Response(part_wise_average_dict)
+
+# @api_view(['GET'])
+# # # @authentication_classes((JSONWebTokenAuthentication,))
+# # # @permission_classes((IsAuthenticated,))
+# def pending_orders(request):
+#     retailer_code = request.GET.get('retailer_id')
+#     dsr_code = request.GET.get('dsr_id')
+#     distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_code)
+#     retailers = Retailer.objects.filter(distributor = distributor.distributor, \
+#                                 approved = constants.STATUS['APPROVED'] )
+#     orderpart_obj_list = OrderPart.objects.filter(retailer__in=retailers)
+#     orderpart_details_obj_list = OrderPArtDetails.objects.filter(order__in=orderpart_obj_list)
+#     delivered_order_obj_list = OrderDeliveredHistory.objects.filter(orderpart_obj_list)
+#     pending_orders_list = []
+#     for delivered_order_obj in delivered_order_obj_list:
+
+#         pending_order_dict = {}
+#         # order_qty = delivered_order_obj.order.order_number.
+#     for orderpart_obj in orderpart_obj_list:
+#         orderpart_obj

@@ -857,7 +857,7 @@ def send_mail_for_sfa_order_placed(*args, **kwargs):
         csvwriter.writerow(["Part Nuumber", "Order Quantity", "Allocated Quantity"])
         orderpart_details = kwargs.get('orderpart_details')
         for data in orderpart_details:
-            csvwriter.writerow([data.part_number, data.quantity, data.quantity])
+            csvwriter.writerow([data.order_part_number, data.quantity, data.quantity])
         mail.sfa_order_received_data(csv_file=csvfile, brand=brand, receivers=[kwargs.get('distributor_email')])
     else:
         logger.info("[manufacture_data_discrepancy]: No discrepancy were update on {0}".format(datetime.now()))
