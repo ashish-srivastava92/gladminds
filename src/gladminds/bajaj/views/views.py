@@ -1465,7 +1465,12 @@ def upload_average_part_history(request):
             for month_year in part_month_dict[retailer][part]:
                 part_quantity = part_month_dict[retailer][part][month_year]
                 selling_month, selling_year = month_year.split(',')
-                avg_parts_sales_history = MonthlyPartSalesHistory(retailer=retailer_obj, part=part_obj, month=selling_month, year=selling_year, quantity=part_quantity)    
+                avg_parts_sales_history_list = MonthlyPartSalesHistory.objects.filter(retailer=retailer_obj, part=part_obj, month=selling_month, year=selling_year)
+                if avg_parts_sales_history_list:
+                    avg_parts_sales_history = avg_parts_sales_history_list[0]
+                    avg_parts_sales_history.quantity = part_quantity
+                else:
+                    avg_parts_sales_history = MonthlyPartSalesHistory(retailer=retailer_obj, part=part_obj, month=selling_month, year=selling_year, quantity=part_quantity)
                 avg_parts_sales_history.save()
     try:
         transaction.commit()
