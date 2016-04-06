@@ -1648,9 +1648,15 @@ def update_six_months_location_history(request):
     for hist_locality in locality_part_wise_history:
         for hist_part in locality_part_wise_history[hist_locality]:
             avg_quantity = locality_part_wise_history[hist_locality][hist_part]
-            average_locality_sales_history = \
-                AverageLocalitySalesHistory(part_id=hist_part, quantity=avg_quantity, \
-                                                        locality_id=hist_locality)
+            average_locality_sales_history_list = \
+                AverageLocalitySalesHistory.objects.filter(locality_id=hist_locality, part_id=hist_part)
+            if average_locality_sales_history_list:
+                average_locality_sales_history = average_locality_sales_history_list[0]
+                average_locality_sales_history.quantity = avg_quantity
+            else:
+                average_locality_sales_history = \
+                    AverageLocalitySalesHistory(part_id=hist_part, quantity=avg_quantity, \
+                                                            locality_id=hist_locality)
             average_locality_sales_history.save()
     transaction.commit()
     return HttpResponse(json.dumps({'status': 'completed'}), content_type='application/json')
