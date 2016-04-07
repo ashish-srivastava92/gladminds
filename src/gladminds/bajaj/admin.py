@@ -38,6 +38,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext, loader
 from django.db.models import Sum, Count
 from django.contrib import messages
+from src.gladminds.bajaj.models import RecentOrder
 from rest_framework.response import Response
 from django.forms import ModelForm
 from suit.widgets import SuitDateWidget
@@ -1186,7 +1187,49 @@ class RetailerAdmin(GmModelAdmin):
                     rejected_reason = "<input type=\"button\" value=\"Rejected Reason\" onclick=\"popup_rejected_reason(\'" + str(obj.id) + "\',\'" + obj.retailer_name + "\',\'" + obj.rejected_reason + "\'); return false;\">"
                     return mark_safe(rejected_reason)
     status.allow_tags = True
- 
+
+
+class RecentOrderAdmin(GmModelAdmin):
+    
+    
+    search_fields =('order_number','dsr','order_date','retailer_name')
+    list_display = ('order_number','dsr','retailer','order_date',)
+    
+    change_form_template = 'admin/bajaj/orderpart/change_list.html'
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.DISTRIBUTORSALESREP, Roles.RETAILERS]
+    
+    exclude = ['so_id', 'po_id', 'do_id']    
+    list_filter = ['order_status','retailer','dsr', ]
+    
+    
+    
+    def get_actions(self, request):
+        # in case of administrator only, grant him the approve retailer option
+        
+        self.actions.append('process')
+        actions = super(RecentOrderAdmin, self).get_actions(request)
+        return actions
+        
+    
+    def queryset(self, request):
+        query_set = self.model._default_manager.get_query_set()
+        if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+            logged_in_dist_id = Distributor.objects.get(user_id=request.user).id
+        
+#             asm_state_list = models.AreaSparesManager.objects.get(user__user=request.user).state.all()
+            query_set = query_set.filter(distributor_id=logged_in_dist_id)
+        return query_set
+
+    def changelist_view(self, request, extra_context=None):
+        self.param = request.user
+        return super(RecentOrderAdmin, self).changelist_view(request)
+        
+    
+    def process(self, request, queryset):
+        queryset
+        queryset[0].order_number
+        pass
+     
 class InvoiceAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
 
@@ -1217,10 +1260,7 @@ class InvoiceAdmin(GmModelAdmin):
         template = 'admin/bajaj/invoices/change_list.html'  # = Your new template
         form_url = ''
         return super(InvoiceAdmin, self).changelist_view(request, context)
-
-
-     
-
+   
  
 class CollectionAdminForm(forms.ModelForm):
     class Meta:
@@ -1241,11 +1281,6 @@ class CollectionAdmin(GmModelAdmin):
         super(CollectionAdmin, self).__init__(*args, **kwargs)
         self.list_display_links = (None, )
 
-
-
-
-
-
     def changelist_view(self, request, extra_context={}):
         self.param = request.user
         ret_details = []
@@ -1254,8 +1289,8 @@ class CollectionAdmin(GmModelAdmin):
                                     ['SuperAdmins', 'Admins', 'NationalSparesManagers', 'AreaSparesManagers', 'SFAAdmins']).exists():
             ret_objs = Retailer.objects.all()
         elif  self.param.groups.filter(name__in=['Distributors']).exists():
-             dist_id = Distributor.objects.get(user_id=request.user).id
-             ret_objs = Retailer.objects.filter(distributor=dist_id)        
+            dist_id = Distributor.objects.get(user_id=request.user).id
+            ret_objs = Retailer.objects.filter(distributor=dist_id)        
         for each in ret_objs :
             ret_details_dict["retailer_name"] = each.retailer_name
             # order_objs = OrderPart.objects.filter(retailer_id = each.id).values_list("id",flat=True)
@@ -1366,7 +1401,7 @@ class StartNullFilterSpec(NullFilterSpec):
 class PartCategoryAdmin(GmModelAdmin):
     class Media:
         js = ['js/uploadExcel.js']
-    list_filter = ('subcategory', 'products' )    
+    list_filter = ('subcategory', 'products',StartNullFilterSpec )    
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.DISTRIBUTORSALESREP, Roles.RETAILERS]
     search_fields = ('part_number', 'description')
     list_display = ('part_no', 'Part_Description', 'Applicable_Model', 'Category',
@@ -2060,7 +2095,7 @@ class OrderPartAdmin(GmModelAdmin):
                     if order_delivered_obj["delivered_quantity__sum"] != None:
                         
                         if each_order.quantity == int(order_delivered_obj["delivered_quantity__sum"]):
-                          order_status = "shipped"
+                            order_status = "shipped"
                         else:
                             order_status = "allocated"  
                         
@@ -2848,6 +2883,7 @@ class ContainerIndentAdmin(GmModelAdmin):
             return {'class': css_class}
 
 
+
 class ContainerLRAdmin(GmModelAdmin):
     search_fields = ('zib_indent_num__indent_num',)
     list_display = ('lr_number', 'zib_indent_num',
@@ -2898,6 +2934,7 @@ def get_admin_site_custom(brand):
     # brand_admin.register(get_model("SubCategories", brand), SubCategoriesAdmin)
 #     brand_admin.register(get_model("PartMasterCv", brand), PartListAdmin)
     brand_admin.register(get_model("OrderPart", brand), OrderPartAdmin)
+#     brand_admin.register(get_model("OrderPartDetails", brand), OrderPartDetailsAdmin)
     brand_admin.register(get_model("PartPricing", brand), PartCategoryAdmin)
     brand_admin.register(get_model("FocusedPart", brand), FocusedPartAdmin)
     brand_admin.register(get_model("NationalSparesManager", brand), NSMAdmin)
@@ -2946,7 +2983,7 @@ def get_admin_site_custom(brand):
     # Disable the delete action throughout the admin site
     brand_admin.disable_action('delete_selected')
     
-
+    brand_admin.register(get_model("RecentOrder", brand), RecentOrderAdmin)
     brand_admin.register(get_model("SFAReports", brand), SFAReportsAdmin)
     #brand_admin.register(get_model("SFAHighlights", brand), SFAHighlightsAdmin)
     #brand_admin.register(get_model("SetTarget", brand), SetTargetAdmin)

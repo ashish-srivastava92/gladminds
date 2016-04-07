@@ -338,12 +338,13 @@ def place_order(request, dsr_id):
                     part_catalog = PartIndexDetails.objects.\
                                              get(part_number=item['part_number'], plate_id=item.get("plate_id"))
                     orderpart_details.part_number_catalog = part_catalog
-                     
+                    orderpart_details.order_part_number = orderpart_details.part_number_catalog.part_number
                 else:
                     '''Get the part detailes from PartPricing Table'''
                     part_category = PartPricing.objects.\
                                              get(part_number=item['part_number'])
                     orderpart_details.part_number = part_category
+                    orderpart_details.order_part_number = orderpart_details.part_number.part_number
 
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
@@ -393,12 +394,13 @@ def retailer_place_order(request, retailer_id):
                     part_catalog = PartIndexDetails.objects.\
                                              get(part_number=item['part_number'], plate_id=item.get("plate_id"))
                     orderpart_details.part_number_catalog = part_catalog
-                     
+                    orderpart_details.order_part_number = orderpart_details.part_number_catalog.part_number
                 else:
                     '''Get the part detailes from PartPricing Table'''
                     part_category = PartPricing.objects.\
                                              get(part_number=item['part_number'])
                     orderpart_details.part_number = part_category
+                    orderpart_details.order_part_number = orderpart_details.part_number.part_number
 
 
                 orderpart_details.quantity = item['qty']
@@ -1614,9 +1616,16 @@ def update_six_months_retailer_history(request):
     for hist_retailer in retailer_part_wise_history:
         for hist_part in retailer_part_wise_history[hist_retailer]:
             avg_quantity = retailer_part_wise_history[hist_retailer][hist_part] / 6
-            avg_retailer_sales_history_obj = \
-                AverageRetailerSalesHistory(part_id=hist_part, quantity=avg_quantity, \
+            avg_retailer_sales_history_obj_list = \
+                AverageRetailerSalesHistory.objects.filter(part_id=hist_part, \
                                                         retailer_id=hist_retailer)
+            if avg_retailer_sales_history_obj_list:
+                avg_retailer_sales_history_obj = avg_retailer_sales_history_obj_list[0]
+                avg_retailer_sales_history_obj.quantity = avg_quantity
+            else:
+                avg_retailer_sales_history_obj = \
+                    AverageRetailerSalesHistory(part_id=hist_part, quantity=avg_quantity, \
+                                                            retailer_id=hist_retailer)
             avg_retailer_sales_history_obj.save()
     transaction.commit()
     return HttpResponse(json.dumps({'status': 'completed'}), content_type='application/json')
@@ -1639,9 +1648,15 @@ def update_six_months_location_history(request):
     for hist_locality in locality_part_wise_history:
         for hist_part in locality_part_wise_history[hist_locality]:
             avg_quantity = locality_part_wise_history[hist_locality][hist_part]
-            average_locality_sales_history = \
-                AverageLocalitySalesHistory(part_id=hist_part, quantity=avg_quantity, \
-                                                        locality_id=hist_locality)
+            average_locality_sales_history_list = \
+                AverageLocalitySalesHistory.objects.filter(locality_id=hist_locality, part_id=hist_part)
+            if average_locality_sales_history_list:
+                average_locality_sales_history = average_locality_sales_history_list[0]
+                average_locality_sales_history.quantity = avg_quantity
+            else:
+                average_locality_sales_history = \
+                    AverageLocalitySalesHistory(part_id=hist_part, quantity=avg_quantity, \
+                                                            locality_id=hist_locality)
             average_locality_sales_history.save()
     transaction.commit()
     return HttpResponse(json.dumps({'status': 'completed'}), content_type='application/json')
@@ -1664,7 +1679,7 @@ def dsr_average_orders(request, dsr_id):
     part_wise_average_dict = []
     for retailer_hist in average_retailer_history:
         average_dict = {}
-        average_dict['retailer_id'] = retailer_hist.retailer_id
+        average_dict['retailer_id'] = retailer_hist.retailer.retailer_code
         average_dict['part_number'] = retailer_hist.part.part_number
         average_dict['retailer_average'] = retailer_hist.quantity
         locality_avg = AverageLocalitySalesHistory.objects.filter(locality=retailer_hist.retailer.locality)
@@ -1674,3 +1689,53 @@ def dsr_average_orders(request, dsr_id):
             average_dict['locality_average'] = 0
         part_wise_average_dict.append(average_dict)
     return Response(part_wise_average_dict)
+
+@api_view(['GET'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def pending_orders(request):
+    retailer_code = request.GET.get('retailer_id')
+    dsr_code = request.GET.get('dsr_id')
+    if dsr_code:
+        distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_code)
+        retailers = Retailer.objects.filter(distributor = distributor.distributor, \
+                                      approved = constants.STATUS['APPROVED'] )
+    else:
+        retailers = Retailer.objects.filter(retailer_code=retailer_code, \
+                                      approved = constants.STATUS['APPROVED'] )
+    orderpart_details_obj_list = OrderPartDetails.objects.filter\
+                        (order__retailer__in=retailers).order_by('-id')
+    delivered_order_obj_list = OrderDeliveredHistory.objects.filter\
+                        (order__retailer__in=retailers).order_by('-id')
+    pending_orders_list = []
+    counter = 0
+    # Iterating only first 1000 order detail records, way too old orders should not be relevant
+    iter_orderpart_details_obj_list = orderpart_details_obj_list[:1000]
+    for orderpart_detail_obj in iter_orderpart_details_obj_list:
+        # Tracking 20 back orders.
+        if counter > 20:
+            break
+        pending_order_dict = {}
+        order_obj = orderpart_detail_obj.order
+        part_number = orderpart_detail_obj.part_number
+        delivered_obj_list = delivered_order_obj_list.filter(order=order_obj, part_number=part_number)
+        if not delivered_obj_list:
+            pending_quantity = orderpart_detail_obj.quantity
+        else:
+            # Assuming unique part numbers per order. Take the first record in case of multiple values
+            delivered_obj = delivered_obj_list[0]
+            delivered_quantity = delivered_obj.delivered_quantity
+            ordered_quantity = orderpart_detail_obj.quantity
+            pending_quantity = int(ordered_quantity) - int(delivered_quantity)
+        if pending_quantity > 0:
+            pending_order_dict['retailer_id'] = order_obj.retailer.retailer_code
+            pending_order_dict['part_number'] = orderpart_detail_obj.part_number.part_number
+            pending_order_dict['part_quantity'] = orderpart_detail_obj.quantity
+            pending_order_dict['part_description'] = orderpart_detail_obj.part_number.description
+            ordered_date =  None
+            if orderpart_detail_obj.order.order_date:
+                ordered_date = orderpart_detail_obj.order.order_date.date()
+            pending_order_dict['order_date'] = ordered_date
+            pending_orders_list.append(pending_order_dict)
+            counter = counter + 1 
+    return Response(pending_orders_list)

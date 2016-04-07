@@ -233,6 +233,8 @@ SUIT_CONFIG = {
                       'label': 'Orders'},
                                 {'model': 'invoices',
                       'label': 'Upload invoices'},
+                    {'model': 'recentorder',
+                     'label': 'Recent Order Details'},
                     
                      
                     )
@@ -278,11 +280,14 @@ SUIT_CONFIG = {
         {'app': 'bajaj', 'label': 'Sales History', 'icon': ' icon-folder-open',
          'models':(
                   
-                    {'model': 'averagepartsaleshistory',
-                     'label': 'Average Part Sales History'},
+                    # {'model': 'averageretailersaleshistory',
+                    #  'label': 'Average Retailer Sales History'},
 
-                    {'model': 'averagelocationsaleshistory',
-                     'label': 'Average Location Sales History'},
+                    # {'model': 'averagelocalitysaleshistory',
+                    #  'label': 'Average Locality Sales History'},
+
+                    {'model': 'monthlypartsaleshistory',
+                     'label': 'Monthly Sales History'},
 
 )},
              

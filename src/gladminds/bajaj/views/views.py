@@ -1459,14 +1459,24 @@ def upload_average_part_history(request):
                 part_month_dict[retailer_code][part_number][selling_month_year] = \
                     part_month_dict[retailer_code][part_number][selling_month_year] + part_quantity
     for retailer in part_month_dict:
-        retailer_obj = Retailer.objects.get(retailer_code=retailer)
-        for part in part_month_dict[retailer]:
-            part_obj = PartPricing.objects.get(part_number=part)
-            for month_year in part_month_dict[retailer][part]:
-                part_quantity = part_month_dict[retailer][part][month_year]
-                selling_month, selling_year = month_year.split(',')
-                avg_parts_sales_history = MonthlyPartSalesHistory(retailer=retailer_obj, part=part_obj, month=selling_month, year=selling_year, quantity=part_quantity)    
-                avg_parts_sales_history.save()
+        retailer_obj_list = Retailer.objects.filter(retailer_code=retailer)
+        if retailer_obj_list:
+            # If multiple retailer codes, take the first one.
+            retailer_obj = retailer_obj_list[0]
+            for part in part_month_dict[retailer]:
+                part_obj_list = PartPricing.objects.filter(part_number=part)
+                if part_obj_list:
+                    part_obj = part_obj_list[0]
+                    for month_year in part_month_dict[retailer][part]:
+                        part_quantity = part_month_dict[retailer][part][month_year]
+                        selling_month, selling_year = month_year.split(',')
+                        avg_parts_sales_history_list = MonthlyPartSalesHistory.objects.filter(retailer=retailer_obj, part=part_obj, month=selling_month, year=selling_year)
+                        if avg_parts_sales_history_list:
+                            avg_parts_sales_history = avg_parts_sales_history_list[0]
+                            avg_parts_sales_history.quantity = part_quantity
+                        else:
+                            avg_parts_sales_history = MonthlyPartSalesHistory(retailer=retailer_obj, part=part_obj, month=selling_month, year=selling_year, quantity=part_quantity)
+                        avg_parts_sales_history.save()
     try:
         transaction.commit()
     except:
