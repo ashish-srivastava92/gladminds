@@ -2524,3 +2524,10 @@ def bulk_upload_retailer(request):
                         Distributor.objects.get(user__user=request.user)
             retailer.save()
     return HttpResponseRedirect('/admin/bajaj/retailer/')
+
+
+def user_add(request):
+    
+    template = 'bajaj_user/distributor.html'
+    return render(request, template)
+       

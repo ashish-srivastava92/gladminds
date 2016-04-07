@@ -1,0 +1,589 @@
+<!doctype html>
+<html>
+<head>
+
+<link rel="stylesheet" href="/static/css/bajaj_user/bootstrap.min.css">
+<!-- Optional theme -->
+<link rel="stylesheet" href="/static/css/bajaj_user/bootstrap-theme.min.css">
+<script src="/static/js/bajaj_user/jquery-1.12.0.min.js"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="/static/js/bajaj_user/bootstrap.min.js"></script>
+<link rel="stylesheet" href="/static/css/bajaj_user/mystyle.css">
+<link rel="stylesheet" href="/static/css/bajaj_user/style.css">
+</head>
+<body>
+	<div class="col-lg-12">
+				<div class="row main_header">
+					<div class="col-lg-2"></div>
+                    <div class="col-lg-8">
+
+                    <div class="col-lg-2"></div>	
+                        <div class="portlet portlet-default curve_border">
+	                            <div class="portlet-heading">
+	                                <div class="portlet-title">
+	                                    <h4 style="text-align:center;">User Management </h4>
+	                                </div>
+	                                <div class="clearfix"></div>
+	                            </div>
+                            <div class="portlet-body grey_bg_body">
+                                <div id="myTabContent" class="tab-content">     
+                              
+      <div class="col-lg-12">
+		<div class="row"> 
+			<div class="col-lg-3">
+				<ul id="myStacked" class="nav nav-pills nav-stacked">
+                                            <li class=""><a href="#stackedProfile_nsm" data-toggle="tab">NSM</a>
+                                            </li>
+                                            <li class=""><a href="#stackedProfile_asm" data-toggle="tab">ASM</a>
+                                            </li>
+                                            <li class=""><a href="#stackedProfile" data-toggle="tab">Distributor</a>
+                                            </li>
+                                            
+                                            <li class=""><a href="#stackedProfile_dsp" data-toggle="tab">Distributor Sales Representative</a>
+                                            </li>
+                                            <li class="active"><a href="#stackedHome" data-toggle="tab">Retailer</a>
+                                            </li>
+                                            
+                     	</ul>
+			</div>
+			<div class="col-lg-9">
+				<form id="UserDetails" autocomplete="on">
+				<!--action="/v1/gm-users/user_entry/" method="post"-->
+				<div id="user">
+					<!-- <h3 style="text-align:center;">User Management</h3> -->
+				  <div class="row">
+				  	
+					<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label >User Name :</label>
+					</div>
+					<div class="col-lg-8">
+						<input class="form-control" type="text" name="username" >
+					</div>
+				  </div>  	
+				   <div>&nbsp;</div>	
+				  <div class="row">
+					<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">			
+						<label>Password :</label>
+					</div>
+					<div class="col-lg-8">
+						<input class="form-control" type="password" autocomplete="off" placeholder="Password" name="password" id="password";>
+					</div>
+				  </div>	
+				  <div>&nbsp;</div>
+				  <div class="row">
+					<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Confirm Password :</label>
+					</div>
+					<div class="col-lg-8">
+						<input class="form-control" type="password" placeholder="Confirm password" name="cpassword" id="cpassword" onkeyup="checkPasswordMatch()";> 
+					</div>
+				   </div>	
+				   <div class="row">
+				   		<div class="col-lg-4"></div>
+				   		<div class="col-lg-8" id="passwordmatch"></div>
+				   </div>	
+				   <div>&nbsp;</div>					
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>First Name :</label>
+						</div>
+					<div class="col-lg-8">
+						<input class="form-control" type="text" name="firstname" maxlength="5">
+					</div>	
+				   </div>
+					<div>&nbsp;</div>						
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Last Name :</label>
+						</div>
+						<div class="col-lg-8">
+						<input size="10" class="form-control" type="text" name="lastname">
+						</div>
+					</div>	
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Email :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="email" name="email">
+						</div>
+					</div>
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Mobile :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="phonenumber">
+						</div>
+					</div>	
+					<!-- <div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Form Number:</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="formnumber">
+						</div>
+					</div>	 -->
+					
+                    <div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Address :</label>
+				    	</div>
+				    	<div class="col-lg-8">
+					    <input class="form-control" type="text" name="address">
+				    	</div>
+				    </div>					  
+				    <div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>State :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="state" >
+						</div>	
+					</div>	
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Country :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="country" >
+						</div>
+					</div>		
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Pincode :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="pincode" maxlength="6">
+						</div>	
+					</div>	
+					<!-- <div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Department:</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="department" >
+						</div>
+					</div>		 -->
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>DOB :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="date" name="dob" >
+						</div>
+					</div>			
+                    <div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Gender :</label>
+				    	</div>
+				    	<div class="col-lg-8">
+						<select name='gender' class="form-control">
+							<OPTION SELECTED VALUE="">Select...</OPTION>
+							<option value="M">M</option>
+							  <option value="F">F</option>
+							  <option value="OT">OT</option>
+						</select>
+						</div>
+					</div>	
+				<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Image :</label>
+						</div>
+						<div class="col-lg-8">
+						<input type="file" id="user_agreement"  class="form-control" value="Browse" name="src"class="required"/>
+						</div>
+					</div>	
+<!-- ----------------------------------------------------------------------------------------------------------------------- -->
+				
+
+					<div class="portlet-body grey_bg_body">
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div id="myStackedContent" class="tab-content">
+                                            <div class="tab-pane fade active in" id="stackedHome">
+                                            	<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Area:</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="area">
+						</div>	
+					</div>		
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Billing code :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="billing_code">
+						</div>
+					</div>
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Distributor :</label>
+						</div>
+						<div class="col-lg-8">
+							<select class="form-control">
+							<OPTION SELECTED VALUE="Select">Select...</OPTION>
+							<option value="Distributor1">Distributor 1</option>
+							  <option value="Distributor2">Distributor 2</option>
+							  <option value="Distributor3">Distributor 3</option>
+							  <option value="Distributor4">Distributor 4</option>
+							</select>
+						</div>
+					</div>
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Retailer District :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="retailer_district">
+						</div>
+					</div>
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Territory :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="territory">
+						</div>
+					</div>
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Plot Number :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="plot_no">
+						</div>
+					</div>
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Street Name :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="Street_naame">
+						</div>
+					</div>
+
+                                                
+                                            </div>
+                                           <div class="tab-pane fade" id="stackedProfile_dsp">
+                                           	<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Distributor :</label>
+						</div>
+					    <div class="col-lg-8">
+							<select class="form-control">
+							<OPTION SELECTED VALUE="Select">Select...</OPTION>
+							  <option value="Distributor1">Distributor1</option>
+							  <option value="Distributor2">Distributor2</option>
+							  <option value="Distributor3">Distributor3</option>
+							  <option value="Distributor4">Distributor4</option>
+							</select>
+						</div>	
+					</div>
+                                           </div> 
+                                            <div class="tab-pane fade" id="stackedProfile_asm">
+                                            	<div>&nbsp;</div>
+										
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>NSM :</label>
+						</div>
+				    	<div class="col-lg-8">
+						<select name='gender' class="form-control">
+							<OPTION SELECTED VALUE="">NSM...</OPTION>
+							<option value="nsm1">NSM1</option>
+							  <option value="nsm2">NSM2</option>
+							  <option value="nsm3">NSM3</option>
+						</select>
+						</div>
+					</div>	
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>ASM state :</label>
+				    	</div>
+				    	<div class="col-lg-8">
+						<select name='gender' class="form-control">
+							<OPTION SELECTED VALUE="">State...</OPTION>
+							<option value="asm_karnataka">Karnataka</option>
+							  <option value="asm_Kerela">kerela</option>
+							  <option value="asm_tamilnadu">Tamil Nadu</option>
+						</select>
+						</div>
+					</div>	
+                                            </div>
+                                            <div class="tab-pane fade" id="stackedProfile_nsm">
+                                            	<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Territory :</label>
+						</div>
+					    <div class="col-lg-8">
+							<select class="form-control">
+							<OPTION SELECTED  value=""required>Select...</OPTION>
+							  <option value="South">South</option>
+							  <option value="North">North</option>
+							  <option value="East">East</option>
+							  <option value="West">West</option>
+							</select>
+						</div>	
+					</div>
+                                            </div>
+                                            <div class="tab-pane fade" id="stackedProfile">
+                                            	<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Distributor ID :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="textbox" name="distributor_id" >
+						</div>
+				</div>		
+				<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Name of Distributorship</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="textbox" name="distributorship_name" >
+						</div>
+					</div>
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Mobile1 :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="mobile1">
+						</div>
+					</div>
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Mobile2 :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="mobile2">
+						</div>
+					</div>
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Bajaj Email :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="email" name="bajaj_email">
+						</div>
+					</div>	
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Profile :</label>
+				    	</div>
+				    	<div class="col-lg-8">
+						<select name='profile' class="form-control">
+							<OPTION SELECTED VALUE="">Profile...</OPTION>
+							<option value="wholesale_distributor">Wholesale distributor</option>
+							  
+						</select>
+						</div>
+					</div>
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Plot No :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="plot_no">
+						</div>
+					</div>	
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Locality :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="locality">
+						</div>
+					</div>	
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Phone(Landline) :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="landline_no">
+						</div>
+					</div>	
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Street Name :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="street_name">
+						</div>
+					</div>
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>City :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="city">
+						</div>
+					</div>
+				<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>District :</label>
+				    	</div>
+				    	<div class="col-lg-8">
+						<select name='gender' class="form-control">
+							<OPTION SELECTED VALUE="">District...</OPTION>
+							<option value="">District1</option>
+							  <option value="">District2</option>
+							  <option value="">District3</option>
+						</select>
+						</div>
+					</div>
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Tin :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="tin">
+						</div>
+					</div>		
+					<div>&nbsp;</div>
+					<div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+						<label>Cst :</label>
+						</div>
+						<div class="col-lg-8">
+						<input class="form-control" type="text" name="cst">
+						</div>
+					</div>
+
+					
+                            </div>
+                                
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>	
+
+				<div>&nbsp;</div>	
+					<div class="row"><div class="col-lg-8 col-sm-8 col-md-8"></div>		
+					<div class="col-lg-1 col-sm-1 col-md-1"><button type="submit" class="btn btn-primary" style="margin-top:20px;" disabled id="submit">Submit</button></div>
+					</div>                             
+                    </div>
+                            </div>
+                            <!-- /.portlet-body -->
+                        </div>
+                        <!-- /.portlet -->
+                    </div>
+                    <!-- /.col-lg-12 -->
+                </div>
+					
+<!-- ----------------------------------------------------------------------------------------------------------------------- -->
+
+
+					<div class="row"><div class="col-lg-8 col-sm-8 col-md-8"></div>
+						<div class="col-lg-1 col-sm-1 col-md-1"></div>
+					</div>
+              </div>
+              </form>
+			</div>
+		</div>
+	</div>
+			
+<script type= text/javascript>
+
+// ---------------------------------------begin-----------------js for password matching--------------------------
+		function checkPasswordMatch() {
+		    var password1 = $("#password").val();
+		    var cpassword1 = $("#cpassword").val();
+
+		    if (password1 != cpassword1)
+		    {
+		        $("#passwordmatch").html("Passwords do not match!");
+		    	$("#passwordmatch").css('color', 'red');
+		    	document.getElementById("submit").disabled = true;
+		    }
+		    else
+		    {
+		        $("#passwordmatch").html("Passwords match.");
+		        $("#passwordmatch").css('color', 'blue');
+		    	document.getElementById("submit").disabled = false;
+		    }
+		}
+
+
+
+$(document).on('submit','#UserDetails',function (e) {
+	//e.preventDefault();
+	
+	
+	var data1="{";
+	var other_data = $('#UserDetails').serializeArray();
+    $.each(other_data,function(key,input){
+        data1+="\""+input.name+"\":\""+input.value+"\"";
+        data1+=",";
+    });
+    var file=$("#user_agreement").val();
+    var file2=$("#user_agreement1").val();
+    data1+="\"user_agreement\":\""+file+"\"";
+    data1+=",";
+    data1+="\"user_agreement1\":\""+file2+"\"";
+    data1+="}";
+    data1 = JSON.stringify(data1);
+    var data2 = JSON.parse(data1);
+    console.info(data2);
+    return false;
+    
+	
+	
+
+	$.ajax({
+		url: '/v1/gm-users/user_entry/',
+		type: 'POST',
+  		contentType: "application/json",
+  		data:data2,
+  		
+  		success: function () {
+  		
+  		}
+  		
+  		
+	
+	})	
+})
+</script>
+</body>
+</html>
+
+
+
