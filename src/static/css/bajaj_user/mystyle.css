@@ -1,0 +1,49 @@
+@media only screen and (min-width: 1200px) {
+   .fieldname_right
+   {
+   	text-align: right;
+   	margin-top: 5px;
+   }
+}
+@media only screen and (max-width: 1200px) {
+   .username
+   {
+   	margin-right: 10px;
+   }
+}
+
+.main_header
+{
+	margin-top: 10px;
+   /*border-radius: 125px;*/
+}
+
+.grey_bg_body
+{
+   background-color: #F7F7F7 !important;
+}
+
+.curve_border
+{
+   border-top-left-radius: 10px;
+   border-top-right-radius: 10px;
+   
+}
+.portlet-body
+{
+   background-color: #F7F7F7;
+}
+
+ .portlet-heading
+ {
+   border-top-left-radius: 10px !important;
+   border-top-right-radius: 10px !important;
+   
+}
+.form-control{
+border-radius: 6px !important;
+}
+.header_center
+{
+   text-align: center !important;
+}

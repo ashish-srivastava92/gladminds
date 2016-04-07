@@ -170,5 +170,7 @@ urlpatterns = patterns('',
     url(r'^update_six_months_locality_history/', 'gladminds.bajaj.views.apis.update_six_months_location_history'),
     url(r'^dsr_average_orders/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.bajaj.views.apis.dsr_average_orders'),
     url(r'^pending_orders/$','gladminds.bajaj.views.apis.pending_orders' , name='pending_orders'),
+    url(r'^add_users/','gladminds.bajaj.views.views.user_add'),
+    
 
 )
