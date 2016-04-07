@@ -1247,7 +1247,7 @@ class RecentOrderAdmin(GmModelAdmin):
             writer.writerow([order_part_details.order.order_number,
                     order_part_details.order.retailer.retailer_name,
                     order_part_details.order.order_date,
-                    order_part_details.part_number,
+                    part_number,
                     order_part_details.quantity])
 
         return response
