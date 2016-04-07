@@ -854,7 +854,7 @@ def send_mail_for_sfa_order_placed(*args, **kwargs):
         csvwriter.writerow(["Retailer Name - " + kwargs.get('retailer_name')])
         csvwriter.writerow(["Retailer Id - " + kwargs.get('retailer_code')])
         csvwriter.writerow(["Order Reference Number - ", kwargs.get('order_number')])
-        csvwriter.writerow(["Part Nuumber", "Order Quantity", "Allocated Quantity"])
+        csvwriter.writerow(["Part Number", "Ordered Quantity", "Allocated Quantity"])
         orderpart_details = kwargs.get('orderpart_details')
         for data in orderpart_details:
             csvwriter.writerow([data.order_part_number, data.quantity, data.quantity])

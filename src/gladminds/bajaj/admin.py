@@ -1226,9 +1226,32 @@ class RecentOrderAdmin(GmModelAdmin):
         
     
     def process(self, request, queryset):
-        queryset
-        queryset[0].order_number
-        pass
+        from django.http.response import HttpResponse
+        import csv
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="SampleStockFile.csv"'
+        writer = csv.writer(response, dialect=csv.excel)
+        order_list = []
+        writer.writerow(["Order Number", "Retailer Name", "Ordered Date", "Part Number", \
+                            "Ordered Quantity"])
+
+        all_order_part_details_obj_list = OrderPartDetails.objects.filter(order__in=queryset)
+        for order_part_details in all_order_part_details_obj_list:
+            try:
+                try:
+                    part_number = order_part_details.part_number_catalog.part_number
+                except:
+                    part_number = order_part_details.part_number.part_number
+            except:
+                part_number = None
+            writer.writerow([order_part_details.order.order_number,
+                    order_part_details.order.retailer.retailer_name,
+                    order_part_details.order.order_date,
+                    order_part_details.part_number,
+                    order_part_details.quantity])
+
+        return response
+
      
 class InvoiceAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -1703,23 +1726,40 @@ class MonthlyPartSalesHistoryAdmin(GmModelAdmin):
     get_part.short_description = "Part Number"
 
 
-class AverageLocationSalesHistoryAdmin(GmModelAdmin):
-    search_fields = ('month', 'year')
-    list_display = ('get_state_name', 'get_city_name', 'get_locality_name', 'get_part', 'sale_value', 'start_month', 'end_month', 'year')
+# class AverageRetailerSalesHistoryAdmin(GmModelAdmin):
+#     list_display = ('get_retailer', 'get_part', 'quantity')
 
-    def get_state_name(self, obj):
-        return obj.location.city.state.state_name
-    def get_city_name(self, obj):
-        return obj.location.city.city
-    def get_locality_name(self, obj):
-        return obj.location.name
-    def get_part(self, obj):
-        return obj.part.part_number
+#     def get_retailer(self, obj):
+#         return obj.location.city.state.state_name
+#     def get_part(self, obj):
+#         return obj.location.city.city
+#     def get_quantity(self, obj):
+#         return obj.location.name
+#     def get_part(self, obj):
+#         return obj.part.part_number
 
-    get_state_name.short_description = "State Name"
-    get_city_name.short_description = "City Name"
-    get_locality_name.short_description = "Locality Name"
-    get_part.short_description = "Part Number"
+#     get_state_name.short_description = "State Name"
+#     get_city_name.short_description = "City Name"
+#     get_locality_name.short_description = "Locality Name"
+#     get_part.short_description = "Part Number"
+
+
+# class AverageLocationSalesHistoryAdmin(GmModelAdmin):
+#     list_display = ('get_locality', 'get_part', 'quantity')
+
+#     def get_state_name(self, obj):
+#         return obj.location.city.state.state_name
+#     def get_city_name(self, obj):
+#         return obj.location.city.city
+#     def get_locality_name(self, obj):
+#         return obj.location.name
+#     def get_part(self, obj):
+#         return obj.part.part_number
+
+#     get_state_name.short_description = "State Name"
+#     get_city_name.short_description = "City Name"
+#     get_locality_name.short_description = "Locality Name"
+#     get_part.short_description = "Part Number"
 
 class SFAReportsAdmin(GmModelAdmin):
     def has_change_permission(request,obj=None):
