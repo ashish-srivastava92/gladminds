@@ -106,13 +106,13 @@ def get_retailers(request, dsr_id):
     '''
     This method returns all the retailers of the distributor given the dsr id 
     '''
-    
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'
     distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-    print "this is diretibutor id==========", distributor.distributor.id
     retailers = Retailer.objects.filter(distributor = distributor.distributor, \
-                                approved = constants.STATUS['APPROVED'] )
+                                approved = constants.STATUS['APPROVED'], modified_date__gt=modified_since)
     retailer_list = []
-    print "thse a re retialers=====", retailers
     for retailer in retailers:
         retailer_dict = {}
         retailer_dict.update({"retailer_Id":retailer.retailer_code})
@@ -135,6 +135,7 @@ def get_retailers(request, dsr_id):
             retailer.longitude=''
         retailer_dict.update({"latitude":str(retailer.latitude)})
         retailer_dict.update({"longitude":str(retailer.longitude)})
+        retailer_dict.update({"datetime": datetime.datetime.now()})
         retailer_list.append(retailer_dict)
     return Response(retailer_list)
 
@@ -233,7 +234,10 @@ def get_parts(request):
     '''
     This method returns all the spare parts details
     '''
-    parts = PartPricing.objects.filter(active = True)
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'
+    parts = PartPricing.objects.filter(active = True, modified_date__gt=modified_since)[:10]
     parts_list =[]
     for part in parts:
         #available_quantity = PartsStock.objects.get(part_number_id = part.id ).available_quantity
@@ -254,6 +258,7 @@ def get_parts(request):
             parts_dict.update({"part_available_quantity":available_quantity.available_quantity})
         parts_dict.update({"part_products":part.products})
         parts_dict.update({"mrp":part.mrp})
+        parts_dict.update({"datetime": datetime.datetime.now()})
         parts_list.append(parts_dict)
     return Response(parts_list)
 
@@ -264,7 +269,10 @@ def get_associated_parts(request):
     '''
     This method returns all the spare parts details based on the catalog
     '''
-    parts = PartIndexDetails.objects.filter(plate__active = True)
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'
+    parts = PartIndexDetails.objects.filter(plate__active = True, modified_date__gt=modified_since)
     parts_list =[]
     for part in parts:
         parts_dict = {}
@@ -274,6 +282,7 @@ def get_associated_parts(request):
         parts_dict.update({"part_plate":part.plate.plate_name})
         parts_dict.update({"quantity":part.quantity})
         parts_dict.update({"mrp":part.mrp})
+        parts_dict.update({"datetime":datetime.datetime.now()})
         parts_list.append(parts_dict)
     return Response(parts_list)
 
@@ -360,12 +369,15 @@ def get_stock(request,dsr_id):
     This method returns all the stock details
     '''
     #get the disributor id
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'
     try:
         distributor_obj = DistributorSalesRep.objects.get(distributor_sales_code=dsr_id).distributor
     except:
        return Response([{"error":"Distributor not present"}])
     #get the parts with the distributor
-    stocks = PartsStock.objects.filter(distributor=distributor_obj)
+    stocks = PartsStock.objects.filter(distributor=distributor_obj,modified_date__gt=modified_since)
     stock_list =[]
     for part in stocks:
         parts_dict = {}
@@ -373,6 +385,7 @@ def get_stock(request,dsr_id):
             parts_dict["part_number"]=part.part_number.part_number
             parts_dict["part_available_quantity"]=part.available_quantity
             parts_dict["mrp"]=part.part_number.mrp
+            parts_dict["datetime"] = datetime.datetime.now()
             stock_list.append(parts_dict)
         except:
             # FIXME: Remove try except from here and confirm if exceptions are due to curropt data
@@ -574,17 +587,20 @@ def get_focused_parts(request):
     '''
     Returns all the focused parts along with locality
     '''
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'
     retailer_code = request.GET.get('retailer_code')
     dsr_code = request.GET.get('dsr_code')
     if retailer_code:
         locality = Retailer.objects.get(retailer_code=retailer_code).locality
-        all_focused_parts = FocusedPart.objects.filter(locality=locality)
+        all_focused_parts = FocusedPart.objects.filter(locality=locality, modified_date__gt=modified_since)
     elif dsr_code:
         retailer_objs = Retailer.objects.filter(dsr__distributor_sales_code=dsr_code)
         localities = [i.locality for i in retailer_objs]
-        all_focused_parts = FocusedPart.objects.filter(locality__in=localities)
+        all_focused_parts = FocusedPart.objects.filter(locality__in=localities, modified_date__gt=modified_since)
     else:
-        all_focused_parts = FocusedPart.objects.all()
+        all_focused_parts = FocusedPart.objects.filter(modified_date__gt=modified_since)
 
     parts_list = []
     for focused_part in all_focused_parts:
@@ -608,6 +624,7 @@ def get_focused_parts(request):
         parts_dict.update({"city": focused_part.locality.city.city})
         parts_dict.update({"state": focused_part.locality.city.state.state_name})
         parts_dict.update({"locality": focused_part.locality.name})
+        parts_dict.update({"datetime": datetime.datetime.now()})
         parts_list.append(parts_dict)
     return Response(parts_list) 
 
@@ -1187,7 +1204,11 @@ def dsr_dashboard_report(request, dsr_id):
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
 def get_orders(request, dsr_id):
-    order_details = OrderPart.objects.filter(dsr__distributor_sales_code = dsr_id)
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'
+    order_details = OrderPart.objects.filter(dsr__distributor_sales_code = dsr_id, \
+                                            modified_date__gt=modified_since)
     
     orders_list = []
     for order in order_details:
@@ -1195,6 +1216,7 @@ def get_orders(request, dsr_id):
         order_dict['order_id'] = order.id
         order_dict['retailer_id'] = order.retailer.retailer_code
         order_dict['order_date'] = order.order_date.date()
+        order_dict['datetime'] = datetime.datetime.now()
         # check the status of the order and get it from the constants
         for k,v in constants.ORDER_STATUS.iteritems():
             if v == order.order_status:
@@ -1226,7 +1248,11 @@ def get_orders(request, dsr_id):
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
 def get_retailer_orders(request, retailer_id):
-    order_details = OrderPart.objects.filter(retailer__retailer_code = retailer_id)
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'
+    order_details = OrderPart.objects.filter(retailer__retailer_code = retailer_id, \
+                                            modified_date__gt=modified_since)
     
     orders_list = []
     for order in order_details:
@@ -1235,6 +1261,7 @@ def get_retailer_orders(request, retailer_id):
         order_dict['retailer_id'] = order.retailer.retailer_code
         order_dict['order_date'] = order.order_date.date()
         order_dict['distributor_id'] = order.distributor.distributor_id
+        order_dict['datetime'] = datetime.datetime.now()
         # check the status of the order and get it from the constants
         for k,v in constants.ORDER_STATUS.iteritems():
             if v == order.order_status:

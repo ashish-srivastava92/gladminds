@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework_jwt.settings import api_settings
 
-from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
+from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModel, Categories, \
                             PartPricing, Distributor,  Invoices, \
                             Collection,CollectionDetails,PartsStock,DSRWorkAllocation,DSRLocationDetails, \
 			    NationalSparesManager,AreaSparesManager,OrderDeliveredHistory, MonthlyPartSalesHistory
@@ -78,10 +78,12 @@ def get_retailers(request, dsr_id):
     '''
     This method returns all the retailers of the distributor given the dsr id 
     '''
-    
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'
     distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
     retailers = Retailer.objects.filter(distributor = distributor.distributor, \
-                                approved = constants.STATUS['APPROVED'] )
+                                approved = constants.STATUS['APPROVED'], modified_date__gt=modified_since)
     retailer_list = []
     
     for retailer in retailers:
@@ -92,6 +94,7 @@ def get_retailers(request, dsr_id):
         retailer_dict.update({"retailer_email":retailer.email})
         retailer_dict.update({"retailer_address":retailer.user.address})
         retailer_dict.update({"locality":retailer.address_line_4})
+        retailer_dict.update({"datetime":datetime.datetime.now()})
         if retailer.locality:
             retailer_dict["locality"] = retailer.locality.name
             retailer_dict.update({"city":retailer.locality.city.city})
@@ -132,13 +135,16 @@ def get_stock(request,dsr_id):
     '''
     This method returns all the stock details
     '''
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'
     #get the disributor id
     try:
         distributor_obj = DistributorSalesRep.objects.get(distributor_sales_code=dsr_id).distributor
     except:
        return Response([{"error":"Distributor not present"}])
     #get the parts with the distributor
-    stocks = PartsStock.objects.filter(distributor=distributor_obj)
+    stocks = PartsStock.objects.filter(distributor=distributor_obj,modified_date__gt=modified_since)
     stock_list =[]
     for part in stocks:
         parts_dict = {}
@@ -146,6 +152,7 @@ def get_stock(request,dsr_id):
             parts_dict["part_number"]=part.part_number.part_number
             parts_dict["part_available_quantity"]=part.available_quantity
             parts_dict["mrp"]=part.part_number.mrp
+            parts_dict["datetime"] = datetime.datetime.now()
 	    stock_list.append(parts_dict)
 	except:
 	    # FIXME: Remove try except from here and confirm if exceptions are due to curropt data
@@ -159,10 +166,13 @@ def get_parts(request):
     '''
     This method returns all the spare parts details
     ''' 
-    parts = PartPricing.objects.filter(active = True)
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'    
+    parts = PartPricing.objects.filter(active = True, modified_date__gt=modified_since)
     parts_list =[]
     for part in parts:
-        available_quantity = PartsStock.objects.get(part_number_id = part.id ).available_quantity
+        available_quantity = PartsStock.objects.get(part_number_id = part.id).available_quantity
         parts_dict = {}
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
@@ -179,6 +189,7 @@ def get_parts(request):
             parts_dict.update({"part_available_quantity":available_quantity.available_quantity})
         parts_dict.update({"part_products":part.products})
         parts_dict.update({"mrp":part.mrp})
+        parts_dict.update({"datetime": datetime.datetime.now()})        
         parts_list.append(parts_dict)
     return Response(parts_list)
 
@@ -190,17 +201,20 @@ def get_focused_parts(request):
     '''
     Returns all the focused parts along with locality
     '''
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'
     retailer_code = request.GET.get('retailer_code')
     dsr_code = request.GET.get('dsr_code')
     if retailer_code:
 	   locality = Retailer.objects.get(retailer_code=retailer_code).locality
-	   all_focused_parts = FocusedPart.objects.filter(locality=locality)
+	   all_focused_parts = FocusedPart.objects.filter(locality=locality, modified_date__gt=modified_since)
     elif dsr_code:
 	   retailer_objs = Retailer.objects.filter(dsr__distributor_sales_code=dsr_code)
 	   localities = [i.locality for i in retailer_objs]
-	   all_focused_parts = FocusedPart.objects.filter(locality__in=localities)
+	   all_focused_parts = FocusedPart.objects.filter(locality__in=localities, modified_date__gt=modified_since)
     else:
-    	all_focused_parts = FocusedPart.objects.all()
+    	all_focused_parts = FocusedPart.objects.filter(modified_date__gt=modified_since)
 
     parts_list = []
     for focused_part in all_focused_parts:
@@ -224,6 +238,7 @@ def get_focused_parts(request):
         parts_dict.update({"city": focused_part.locality.city.city})
         parts_dict.update({"state": focused_part.locality.city.state.state_name})
         parts_dict.update({"locality": focused_part.locality.name})
+        parts_dict.update({"datetime": datetime.datetime.now()})
         parts_list.append(parts_dict)
     return Response(parts_list)	
 
@@ -236,7 +251,10 @@ def get_parts_catalog(request):
     '''
     This method returns all the spare parts details based on the catalog
     '''
-    parts = PartIndexDetails.objects.filter(plate__active = True)
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'    
+    parts = PartIndexDetails.objects.filter(plate__active = True, modified_date__gt=modified_since)
     parts_list =[]
     for part in parts:
         parts_dict = {}
@@ -248,6 +266,7 @@ def get_parts_catalog(request):
         parts_dict.update({"part_plate":part.plate.plate_name})
         parts_dict.update({"plate_id":part.plate_id})
         parts_dict.update({"mrp":part.mrp})
+        parts_dict.update({"datetime":datetime.datetime.now()})
         parts_list.append(parts_dict)
     return Response(parts_list)
 
@@ -465,15 +484,17 @@ def get_outstanding(request, dsr_id):
 def get_dsr_outstanding(request, dsr_id):
     '''
     This method returns the outstanding amount of all the retailers under the distributor
-    pertaining to the dsr '''
-    
+    pertaining to the dsr '''    
     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'    
     retailers = Retailer.objects.filter(distributor = dsr.distributor, \
                                         approved = constants.STATUS['APPROVED'])
     retailer_list = []
     #for a particular retailer, get all the invoices and total the invoice amount
     for retailer in retailers:
-        invoices = Invoices.objects.filter(retailer = retailer)
+        invoices = Invoices.objects.filter(retailer = retailer, modified_date__gt=modified_since)
         if invoices:
             for invoice in invoices:
                 if not invoice.invoice_amount:
@@ -501,6 +522,7 @@ def get_dsr_outstanding(request, dsr_id):
                     collection = collection + each.collected_amount
                 retailer_dict.update({'collected_amount': collection})
                 retailer_dict.update({'period': diff.days})
+                retailer_dict.update({'datetime': datetime.datetime.now()})
                 retailer_list.append(retailer_dict)
         # else:
         #     retailer_dict = {}
@@ -518,8 +540,11 @@ def get_retailer_outstanding(request, retailer_id):
     This method returns the outstanding amount of particular retailer
     '''
     retailer = Retailer.objects.get(retailer_code = retailer_id)
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'
     #for the particular retailer, get all the invoices and total the invoice amount
-    invoices = Invoices.objects.filter(retailer__retailer_code = retailer_id)
+    invoices = Invoices.objects.filter(retailer__retailer_code = retailer_id, modified_date__gt=modified_since)
     retailer_list = []
     if invoices:
         for invoice in invoices:
@@ -539,6 +564,7 @@ def get_retailer_outstanding(request, retailer_id):
                         collection = collection + each_collections.collected_amount
                     
             retailer_dict.update({'outstanding':outstanding})
+            retailer_dict.update({'datetime':datetime.datetime.now()})
             retailer_list.append(retailer_dict)
     return Response(retailer_list)
 
@@ -1146,7 +1172,11 @@ def dsr_dashboard_report(request, dsr_id):
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
 def get_orders(request, dsr_id):
-    order_details = OrderPart.objects.filter(dsr__distributor_sales_code = dsr_id)
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'    
+    order_details = OrderPart.objects.filter(dsr__distributor_sales_code = dsr_id, \
+                                            modified_date__gt=modified_since)
     
     orders_list = []
     for order in order_details:
@@ -1154,6 +1184,7 @@ def get_orders(request, dsr_id):
         order_dict['order_id'] = order.order_number
         order_dict['retailer_id'] = order.retailer.retailer_code
         order_dict['order_date'] = order.order_date.strftime('%d-%m-%Y')
+        order_dict['datetime'] = datetime.datetime.now()
         # check the status of the order and get it from the constants
         for k,v in constants.ORDER_STATUS.iteritems():
             if v == order.order_status:
@@ -1190,8 +1221,11 @@ def get_orders(request, dsr_id):
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
 def get_retailer_orders(request, retailer_id):
-    order_details = OrderPart.objects.filter(retailer__retailer_code = retailer_id)
-    
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'    
+    order_details = OrderPart.objects.filter(retailer__retailer_code = retailer_id, \
+                                            modified_date__gt=modified_since)
     orders_list = []
     for order in order_details:
         order_dict = OrderedDict()
@@ -1199,6 +1233,7 @@ def get_retailer_orders(request, retailer_id):
         order_dict['retailer_id'] = order.retailer.retailer_code
         order_dict['order_date'] = order.order_date.date()
        	order_dict['distributor_id'] = order.distributor.distributor_id
+        order_dict['datetime'] = datetime.datetime.now()
 	for k,v in constants.ORDER_STATUS.iteritems():
             if v == order.order_status:
                 order_dict['status'] = k
@@ -1696,6 +1731,9 @@ def dsr_average_orders(request, dsr_id):
 def pending_orders(request):
     retailer_code = request.GET.get('retailer_id')
     dsr_code = request.GET.get('dsr_id')
+    modified_since = request.GET.get('modified_since', '1970-01-01')
+    if not modified_since:
+        modified_since = '1970-01-01'    
     if dsr_code:
         distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_code)
         retailers = Retailer.objects.filter(distributor = distributor.distributor, \
@@ -1703,10 +1741,10 @@ def pending_orders(request):
     else:
         retailers = Retailer.objects.filter(retailer_code=retailer_code, \
                                       approved = constants.STATUS['APPROVED'] )
-    orderpart_details_obj_list = OrderPartDetails.objects.filter\
-                        (order__retailer__in=retailers).order_by('-id')
-    delivered_order_obj_list = OrderDeliveredHistory.objects.filter\
-                        (order__retailer__in=retailers).order_by('-id')
+    orderpart_details_obj_list = OrderPartDetails.objects.filter(\
+                    order__retailer__in=retailers, modified_date__gt=modified_since).order_by('-id')
+    delivered_order_obj_list = OrderDeliveredHistory.objects.filter(\
+                    order__retailer__in=retailers, modified_date__gt=modified_since).order_by('-id')
     pending_orders_list = []
     counter = 0
     # Iterating only first 1000 order detail records, way too old orders should not be relevant
@@ -1732,6 +1770,7 @@ def pending_orders(request):
             pending_order_dict['part_number'] = orderpart_detail_obj.part_number.part_number
             pending_order_dict['part_quantity'] = orderpart_detail_obj.quantity
             pending_order_dict['part_description'] = orderpart_detail_obj.part_number.description
+            pending_order_dict['datetime'] = datetime.datetime.now()
             ordered_date =  None
             if orderpart_detail_obj.order.order_date:
                 ordered_date = orderpart_detail_obj.order.order_date.date()
