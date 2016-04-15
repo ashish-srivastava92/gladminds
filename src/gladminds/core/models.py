@@ -620,22 +620,26 @@ class RetailerScorecardReport(base_models.RetailerScorecardReport):
         
 
         
-class PartModels(base_models.PartModels):
-    ''' details of parts models'''
-    
-    class Meta(base_models.PartModels.Meta):
-        app_label = _APP_NAME
-
 class PartModel(base_models.PartModel):
-    ''' details of model categories '''
-    name = models.CharField(max_length=50)
+    ''' details of parts models'''
+    model_name = models.CharField(max_length=255)
+    image_url = models.CharField(max_length=255, null=True, blank=True)
     active = models.BooleanField(default=True)
     
     class Meta(base_models.PartModel.Meta):
         app_label = _APP_NAME
         
-    def __unicode__(self):
-        return self.name
+
+# class PartModel(base_models.PartModel):
+#     ''' details of model categories '''
+#     name = models.CharField(max_length=50)
+#     active = models.BooleanField(default=True)
+    
+#     class Meta(base_models.PartModel.Meta):
+#         app_label = _APP_NAME
+        
+#     def __unicode__(self):
+#         return self.name
 
 class Categories(base_models.Categories):
     ''' details of model categories '''
@@ -643,7 +647,7 @@ class Categories(base_models.Categories):
     
     image_url = models.CharField(max_length=255, null=True, blank=True)
     
-    model = models.ForeignKey(PartModels)
+    model = models.ForeignKey(PartModel)
 
     active = models.BooleanField(default=True)
     
@@ -1115,7 +1119,7 @@ class ManufacturingData(base_models.ManufacturingData):
 class PartIndexPlates(base_models.PartIndexPlates):
     ''' details of part index '''
     plate_name = models.CharField(max_length = 255)
-    model = models.ForeignKey(PartModels)
+    model = models.ForeignKey(PartModel)
     active = models.BooleanField(default = 1)
     
     class Meta(base_models.PartIndexPlates.Meta):

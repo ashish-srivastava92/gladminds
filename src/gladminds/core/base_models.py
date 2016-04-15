@@ -1222,14 +1222,14 @@ class RetailerScorecardReport(BaseModel):
         db_table = "gm_retailerscorecardreport"
         verbose_name_plural = "Retailer Scorecard Report"
         
-class PartModels(BaseModel):
+class PartModel(BaseModel):
     ''' details of parts model '''
     
     class Meta:
         abstract = True
         db_table = "gm_partmodels"
         verbose_name_plural = "Part Models"
-        
+
 class Categories(BaseModel):
     ''' details of categories '''
     
@@ -1246,14 +1246,14 @@ class SubCategories(BaseModel):
         db_table = "gm_subcategories"
         verbose_name_plural = "subcategories"
         
-class PartModel(BaseModel):
-    ''' details of mc model '''
+# class PartModel(BaseModel):
+#     ''' details of mc model '''
     
-    class Meta:
-        abstract = True
-        db_table = "gm_partmodel"
-        verbose_name_plural = "Part Model"
-        
+#     class Meta:
+#         abstract = True
+#         db_table = "gm_partmodel"
+#         verbose_name_plural = "Part Model"
+
 class PartPricing(BaseModel):
     ''' details of spare parts and pricing'''
     

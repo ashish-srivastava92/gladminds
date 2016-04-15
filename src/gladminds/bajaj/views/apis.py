@@ -1702,15 +1702,18 @@ def update_six_months_location_history(request):
 # # @permission_classes((IsAuthenticated,))
 def dsr_average_orders(request, dsr_id):
     '''
-    This method returns the sale average of last 6 months as well as the previous month
+    This method returns the sale average of last 6 months
     retailer wise
     '''
+    limit = request.GET.get('limit', 20)
+    offset = request.GET.get('offset', 0)
+    limit = limit + offset
     dsr =  DistributorSalesRep.objects.select_related('distributor').get(distributor_sales_code = dsr_id)
     distributor = dsr.distributor
     retailers_list = []
     # get the retailer objects for this distributor
     retailers = Retailer.objects.filter(distributor = distributor)
-    average_retailer_history = AverageRetailerSalesHistory.objects.filter(retailer__in=retailers)
+    average_retailer_history = AverageRetailerSalesHistory.objects.filter(retailer__in=retailers)[offset:limit]
     part_wise_average_dict = []
     for retailer_hist in average_retailer_history:
         average_dict = {}
