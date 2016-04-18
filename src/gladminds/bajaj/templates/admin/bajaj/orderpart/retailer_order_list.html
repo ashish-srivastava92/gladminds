@@ -259,7 +259,6 @@
 	<div class="txt"></div>
 	<div class="bg"></div>
 </div>
-
 <form  method="POST" id="orderForm" action="{% url 'download_delivery_list' %}" onsubmit="return check(this)">{% csrf_token %}
 	{% for each in order_display %}
 <input type="hidden" value="{{retailer_id}}" name="retailer_id"/>
