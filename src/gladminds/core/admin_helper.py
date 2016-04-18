@@ -26,8 +26,7 @@ class GmModelAdmin(ModelAdmin):
 #         
 #         extra_context = extra_context or {}
 #         extra_context['some_var'] = 'This is what I want to show'
-#         return super(GmModelAdmin, self).changelist_view(request, extra_context=extra_context)
-#         
+#         return super(GmModelAdmin, self).changelist_view(request, extra_context=extra_context)   
         
         model = self.model
         opts = model._meta

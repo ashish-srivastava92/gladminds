@@ -1,4 +1,4 @@
-{% load admin_static %}{% load suit_tags %}{% load url from future %}<!DOCTYPE html>
+{% load admin_static %}{% load suit_tags %}{% load filter %}{% load url from future %}<!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
 <head>
   <title>{% block title %}{{ title }} | {{ 'ADMIN_NAME'|suit_conf }}{% endblock %}</title>
@@ -201,6 +201,7 @@
 {% endblock %}
 
   <script src="{% static 'suit/js/suit.js' %}"></script>
+  {% include 'RBAC/restrict_view.html' %}
   {% block extrajs %}{% endblock %}
 
 </body>
