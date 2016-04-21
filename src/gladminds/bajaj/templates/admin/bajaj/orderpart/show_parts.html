@@ -1,7 +1,7 @@
-{% extends "admin/change_form.html" %}
-
-{% load i18n admin_static admin_modify suit_tags admin_urls %}
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static admin_list admin_urls suit_list suit_tags %}
 {% load url from future %}
+{% load filter %}
 {% block extrahead %}
 {{block.super}}
 <!-- <link href="/static/css/portal.css" rel="stylesheet"> -->
@@ -377,3 +377,17 @@
 	}
 </style>
 {% endblock content  %}
+
+{% block extrajs %}
+	<script type="text/javascript">
+		var role = {{ request.user|rbac }}
+
+		if( role == 1 ){
+			var w = $('#suit-left');
+			w[0].style.marginLeft = "-96%";
+			w[0].style.fontSize = "12px";
+			w.empty();
+			w.append( DISTRIBUTOR_MENU );
+		}
+	</script>
+{% endblock %}
