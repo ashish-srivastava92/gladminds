@@ -2569,16 +2569,32 @@ class ProductCatalogAdmin(GmModelAdmin):
     
 
 class TransitStockAdmin(GmModelAdmin):
-#     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.DISTRIBUTORS]
-#     form = TransitStockAdminForm()
+    class Media:
+        js = ['js/uploadExcel.js']
+
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
 #     search_fields = ('part_number',)
     list_display = ('get_part_number', 'shipped_quantity','shipped_date','expected_date_of_arrival')
-#     print "AAAAAAAAAAA"
-#     
+
     def get_part_number(self, obj):
         return obj.part_number.part_number
     get_part_number.short_description = "Part Number"
     
+    def changelist_view(self, request, extra_context={}):
+#                     
+        if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+            extra_context["show_upload_transit_stock"] = True
+        return super(TransitStockAdmin, self).changelist_view(request, extra_context=extra_context)
+        template = 'admin/bajaj/transitstock/change_list.html'  # = Your new template
+        form_url = ''
+        return super(InvoiceAdmin, self).changelist_view(request)
+  
+    def queryset(self, request):
+        query_set = self.model._default_manager.get_query_set()
+        if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+            logged_in_dist_id = Distributor.objects.get(user_id=request.user).id
+            query_set = query_set.filter(distributor_id=logged_in_dist_id)
+        return query_set
     
 class PartnerAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
