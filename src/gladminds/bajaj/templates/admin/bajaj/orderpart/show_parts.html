@@ -1,6 +1,5 @@
 {% extends "admin/base_site.html" %}
 {% load i18n admin_static admin_list admin_urls suit_list suit_tags %}
-<!--{% load i18n admin_static admin_modify suit_tags admin_urls  suit_list %}-->
 {% load url from future %}
 {% load filter %}
 {% block extrahead %}
@@ -386,6 +385,7 @@
 		if( role == 1 ){
 			var w = $('#suit-left');
 			w[0].style.marginLeft = "-96%";
+			w[0].style.fontSize = "12px";
 			w.empty();
 			w.append( DISTRIBUTOR_MENU );
 		}

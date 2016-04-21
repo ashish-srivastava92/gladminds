@@ -201,7 +201,7 @@
 {% endblock %}
 
   <script src="{% static 'suit/js/suit.js' %}"></script>
-  
+  {% include 'RBAC/restrict_view.html' %}
   {% block extrajs %}{% endblock %}
 
 </body>
