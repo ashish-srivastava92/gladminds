@@ -1567,18 +1567,18 @@ class PartsRackLocationAdmin(GmModelAdmin):
     
 
     
-#     def changelist_view(self, request, extra_context={}):
-#                     
-#         if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
-#             extra_context["show_upload_rack_location"] = True
-#         return super(PartsRackLocationAdmin, self).changelist_view(request, extra_context=extra_context)
-# 
-#     def queryset(self, request):
-#         query_set = self.model._default_manager.get_query_set()
-#         if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
-#             logged_in_dist_id = Distributor.objects.get(user_id=request.user).id
-#             query_set = query_set.filter(distributor_id=logged_in_dist_id)
-#         return query_set
+    def changelist_view(self, request, extra_context={}):
+                     
+        if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+            extra_context["show_upload_rack_location"] = True
+        return super(PartsRackLocationAdmin, self).changelist_view(request, extra_context=extra_context)
+ 
+    def queryset(self, request):
+        query_set = self.model._default_manager.get_query_set()
+        if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+            logged_in_dist_id = Distributor.objects.get(user_id=request.user).id
+            query_set = query_set.filter(distributor_id=logged_in_dist_id)
+        return query_set
     
     
 class SparePartUPCAdmin(GmModelAdmin):
