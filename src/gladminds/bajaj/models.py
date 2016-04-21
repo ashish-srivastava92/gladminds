@@ -1202,6 +1202,7 @@ class PartPricing(base_models.PartPricing):
     products = models.CharField(max_length=255, null=True, blank=True)
     applicable_models = models.ManyToManyField(PartModel, null=True)
     remarks = models.CharField(max_length=255, null=True, blank=True)
+    
     mrp = models.CharField(max_length=8, null=True, blank=True)
     description = models.CharField(max_length=255, null=True, blank=True)
     subcategory = models.ForeignKey(SubCategories)
@@ -1267,7 +1268,17 @@ class PartsStock(base_models.PartsStock):
     class Meta(base_models.PartsStock.Meta):
         app_label = _APP_NAME
 
-
+class TransitStock(base_models.TransitStock):
+    '''detailes of transit stock'''
+    part_number = models.ForeignKey(PartPricing)
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    shipped_quantity = models.IntegerField()
+    shipped_date = models.DateTimeField()
+    expected_date_of_arrival=models.DateTimeField()
+    
+    class Meta(base_models.TransitStock.Meta):
+        app_label = _APP_NAME 
+       
 class OrderPart(base_models.OrderPart):
     ''' details of orders placed by retailer '''
     order_date =models.DateTimeField(auto_now_add=True)
