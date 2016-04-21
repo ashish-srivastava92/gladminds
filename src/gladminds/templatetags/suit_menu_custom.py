@@ -62,4 +62,3 @@ class CustomMenu(Menu):
                 menu['app'] = settings.BRAND
             except:
                 menu['app'] = 'core'
-
