@@ -2,7 +2,7 @@
 
 {% load i18n admin_static admin_modify suit_tags admin_urls %}
 {% load url from future %}
-
+{% load filter %}
 {% block extrahead %}{{ block.super }}
 
 <script src="/static/js/bootbox.min.js"></script>
@@ -63,4 +63,17 @@
 	</table>
 
 {% endblock content %}
+
+{% block extrajs %}
+	<script type="text/javascript">
+		var role = {{ request.user|rbac }}
+
+		if( role == 1 ){
+			var w = $('#suit-left');
+			w[0].style.marginLeft=""
+			w.empty();
+			w.append( DISTRIBUTOR_MENU );
+		}
+	</script>
+{% endblock %}
 
