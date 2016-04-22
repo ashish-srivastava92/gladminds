@@ -675,13 +675,13 @@ class DSRWorkAllocation(base_models.DSRWorkAllocation):
 
 
 
-class PartModels(base_models.PartModels):
+class PartModel(base_models.PartModel):
     '''details of part models'''
     model_name = models.CharField(max_length=255)
     image_url = models.CharField(max_length=255, null=True, blank=True)
     active = models.BooleanField(default=True)
     
-    class Meta(base_models.PartModels.Meta):
+    class Meta(base_models.PartModel.Meta):
         app_label = _APP_NAME
         
     def __unicode__(self):
@@ -693,7 +693,7 @@ class Categories(base_models.Categories):
     
     image_url = models.CharField(max_length=255, null=True, blank=True)
     
-    model = models.ForeignKey(PartModels)
+    model = models.ForeignKey(PartModel)
 
     active = models.BooleanField(default=True)
     
@@ -703,16 +703,16 @@ class Categories(base_models.Categories):
     def __unicode__(self):
         return self.category_name
     
-class PartModel(base_models.PartModel):
-    ''' details of model categories '''
-    name = models.CharField(max_length=50)
-    active = models.BooleanField(default=True)
+# class PartModel(base_models.PartModel):
+#     ''' details of model categories '''
+#     name = models.CharField(max_length=50)
+#     active = models.BooleanField(default=True)
     
-    class Meta(base_models.PartModel.Meta):
-        app_label = _APP_NAME
+#     class Meta(base_models.PartModel.Meta):
+#         app_label = _APP_NAME
         
-    def __unicode__(self):
-        return self.name
+#     def __unicode__(self):
+#         return self.name
         
 class SubCategories(base_models.SubCategories):
     ''' details of model subcategories '''
@@ -1195,13 +1195,14 @@ class SfaHighlights(models.Model):
 
 ##########################     SFA Models  #########################################3
 
-
    
 class PartPricing(base_models.PartPricing):
     ''' details of parts '''
     part_number = models.CharField(max_length=255, null=True, blank=True)
     products = models.CharField(max_length=255, null=True, blank=True)
+    applicable_models = models.ManyToManyField(PartModel, null=True)
     remarks = models.CharField(max_length=255, null=True, blank=True)
+    
     mrp = models.CharField(max_length=8, null=True, blank=True)
     description = models.CharField(max_length=255, null=True, blank=True)
     subcategory = models.ForeignKey(SubCategories)
@@ -1235,7 +1236,7 @@ class FocusedPart(base_models.FocusedPart):
 class PartIndexPlates(base_models.PartIndexPlates):
     ''' details of part index '''
     plate_name = models.CharField(max_length = 255)
-    model = models.ForeignKey(PartModels)
+    model = models.ForeignKey(PartModel)
     active = models.BooleanField(default = 1)
     
     class Meta(base_models.PartIndexPlates.Meta):
@@ -1267,7 +1268,17 @@ class PartsStock(base_models.PartsStock):
     class Meta(base_models.PartsStock.Meta):
         app_label = _APP_NAME
 
-
+class TransitStock(base_models.TransitStock):
+    '''detailes of transit stock'''
+    part_number = models.ForeignKey(PartPricing)
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    shipped_quantity = models.IntegerField()
+    shipped_date = models.DateTimeField()
+    expected_date_of_arrival=models.DateTimeField()
+    
+    class Meta(base_models.TransitStock.Meta):
+        app_label = _APP_NAME 
+       
 class OrderPart(base_models.OrderPart):
     ''' details of orders placed by retailer '''
     order_date =models.DateTimeField(auto_now_add=True)

@@ -18,7 +18,7 @@ from gladminds.bajaj.models import Distributor, DistributorStaff, DistributorSal
                          SparePartPoint, State, AreaSparesManager, City, OrderPartDetails, OrderDeliveredHistory, \
                           Collection, PartsStock, OrderPart, NationalSparesManager, DSRLocationDetails, CollectionDetails,\
                           Invoices,DoDetails, PermanentJourneyPlan, PartIndexDetails, SFAReports,SFAHighlights,\
-                          NsmTarget,AsmTarget,DistributorTarget,DistributorSalesRepTarget,RetailerTarget
+                          NsmTarget,AsmTarget,DistributorTarget,DistributorSalesRepTarget,RetailerTarget,TransitStock
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
@@ -1193,8 +1193,12 @@ class RecentOrderAdmin(GmModelAdmin):
     
     
     search_fields =('order_number','dsr','order_date','retailer_name')
-    list_display = ('order_number','dsr','retailer','order_date',)
+    list_display = ('order_number_url', 'dsr','retailer','order_date',)
     
+    def order_number_url(self, obj):
+        return '<a href=%s/%s/open/%s>%s</a>' % ('/admin/get_parts', obj.id, obj.retailer_id, obj.order_number)
+    order_number_url.allow_tags = True
+
     change_form_template = 'admin/bajaj/orderpart/change_list.html'
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.DISTRIBUTORSALESREP, Roles.RETAILERS]
     
@@ -1367,8 +1371,8 @@ class SparePartMasterAdmin(GmModelAdmin):
     
 class PartModelAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
-    search_fields = ('name',)
-    list_display = ('name', 'active')
+    search_fields = ('model_name',)
+    list_display = ('model_name', 'active')
     
 class CategoriesAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
@@ -1380,7 +1384,7 @@ class CategoriesAdmin(GmModelAdmin):
 #     search_fields = ('subcategory_name', 'category')
 #     list_display = ('subcategory_name', 'category', 'active')
     
-    
+
 class FocusedPartAdmin(GmModelAdmin):
     list_display = ('part_number', 'description', 'start_date', 'end_date', 'get_locality')
 
@@ -1424,13 +1428,21 @@ class StartNullFilterSpec(NullFilterSpec):
 class PartCategoryAdmin(GmModelAdmin):
     class Media:
         js = ['js/uploadExcel.js']
-    list_filter = ('subcategory', 'products',StartNullFilterSpec )    
+
+    if settings.BRAND_VERTICLE == 'MC':
+        list_filter = ('subcategory', 'applicable_models__model_name' )
+        exclude = ['category', 'associated_parts']
+
+    else:
+        list_filter = ('subcategory', 'products',StartNullFilterSpec )
+        exclude = ['category', 'applicable_models']
+
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS, Roles.DISTRIBUTORSALESREP, Roles.RETAILERS]
     search_fields = ('part_number', 'description')
     list_display = ('part_no', 'Part_Description', 'Applicable_Model', 'Category',
                     'Price', 'Available', 'active'
                    )
-    exclude = ['category', ] 
+
 
     def queryset(self, request):
         qs = super(PartCategoryAdmin, self).queryset(request)
@@ -1453,9 +1465,12 @@ class PartCategoryAdmin(GmModelAdmin):
     Category.short_description = 'Category'
     
     def Applicable_Model(self, obj):
-        return obj.part_models
+        if settings.BRAND_VERTICLE == 'MC':
+            return obj.products
+        else:
+            return ", ".join([p.model_name for p in obj.applicable_models.all()])
+
         
-#         return obj.subcategory.part_model.name
     Applicable_Model.short_description='Applicable Model'
     
     def Price(self, obj):
@@ -1463,12 +1478,7 @@ class PartCategoryAdmin(GmModelAdmin):
     Price.short_description = 'MRP'
 
     Category.short_description = 'Category'
-    def Applicable_Model(self, obj): 
-         if obj.products:       
-            return obj.products
-         return "NA"
-    Applicable_Model.short_description = 'Applicable Model'
-
+  
 
     def Available(self, obj):
         try:
@@ -1558,11 +1568,11 @@ class PartsRackLocationAdmin(GmModelAdmin):
 
     
     def changelist_view(self, request, extra_context={}):
-                    
+                     
         if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
             extra_context["show_upload_rack_location"] = True
         return super(PartsRackLocationAdmin, self).changelist_view(request, extra_context=extra_context)
-
+ 
     def queryset(self, request):
         query_set = self.model._default_manager.get_query_set()
         if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
@@ -2556,7 +2566,36 @@ class ProductCatalogAdmin(GmModelAdmin):
         return obj.plate.plate_name
     get_plate.short_description = "Plates"
     get_plate.admin_order_field = 'plate_name'
+    
 
+class TransitStockAdmin(GmModelAdmin):
+    class Media:
+        js = ['js/uploadExcel.js']
+
+    groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
+#     search_fields = ('part_number',)
+    list_display = ('get_part_number', 'shipped_quantity','shipped_date','expected_date_of_arrival')
+
+    def get_part_number(self, obj):
+        return obj.part_number.part_number
+    get_part_number.short_description = "Part Number"
+    
+    def changelist_view(self, request, extra_context={}):
+#                     
+        if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+            extra_context["show_upload_transit_stock"] = True
+        return super(TransitStockAdmin, self).changelist_view(request, extra_context=extra_context)
+        template = 'admin/bajaj/transitstock/change_list.html'  # = Your new template
+        form_url = ''
+        return super(InvoiceAdmin, self).changelist_view(request)
+  
+    def queryset(self, request):
+        query_set = self.model._default_manager.get_query_set()
+        if request.user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+            logged_in_dist_id = Distributor.objects.get(user_id=request.user).id
+            query_set = query_set.filter(distributor_id=logged_in_dist_id)
+        return query_set
+    
 class PartnerAdmin(GmModelAdmin):
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
     list_filter = ('partner_type',)
@@ -3018,6 +3057,7 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("ContainerIndent", brand), ContainerIndentAdmin)
     brand_admin.register(get_model("ContainerLR", brand), ContainerLRAdmin)
     brand_admin.register(get_model("PartIndexDetails", brand), ProductCatalogAdmin)
+    brand_admin.register(get_model("TransitStock", brand), TransitStockAdmin)
 
 
     # Disable the delete action throughout the admin site

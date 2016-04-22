@@ -35,7 +35,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from gladminds.core.auth_helper import Roles
 from gladminds.core import constants
-from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModels, Categories, \
+from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModel, Categories, \
                             PartPricing, Distributor,  Invoices, \
                             Collection,CollectionDetails,PartsStock,DSRWorkAllocation,DSRLocationDetails, \
                             NationalSparesManager,AreaSparesManager
