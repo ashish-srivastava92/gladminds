@@ -41,7 +41,7 @@
 				   </tr>
 				   <tr>
 				     <th class="text-center" >Open Orders</th>
-				      <th class="text-center">Allocated Orders</th>
+				      <th class="text-center"  style="display: none;" >Allocated Orders</th>
 				      <th class="text-center" >Shipped Orders</th>
 				         
 				</tr>
@@ -59,7 +59,7 @@
 			<td class="text-center"><a href="{% url 'get_outstanding_details' each.ret_id  %}">{{each.outstanding}}</td>
         		
         			<td class="text-center">{% if each.open_orders_len != 0 %}<a href="{% url 'order_details' 'open' each.ret_id  %}">{{each.open_orders_len}}</a>{% else %}{{each.open_orders_len}}{%endif %}</td> 
-        		<td class="text-center">{% if each.pending_orders_len != 0 %}<a href="{% url 'pending_order_details' 'allocated' each.ret_id %}">{{each.pending_orders_len}}</a>{% else %}{{each.pending_orders_len}}{%endif %}</td>        		
+        		<td class="text-center"  style="display: none;">{% if each.pending_orders_len != 0 %}<a href="{% url 'pending_order_details' 'allocated' each.ret_id %}">{{each.pending_orders_len}}</a>{% else %}{{each.pending_orders_len}}{%endif %}</td>        		
         		<td class="text-center">{% if each.shipped_orders_len != 0 %}<a href="{% url 'shipped_order_details' 'shipped' each.ret_id %}">{{each.shipped_orders_len}}</a>{% else %}{{each.shipped_orders_len}}{%endif %}</td>
         		
      
