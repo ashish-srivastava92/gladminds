@@ -1705,8 +1705,8 @@ def dsr_average_orders(request, dsr_id):
     This method returns the sale average of last 6 months
     retailer wise
     '''
-    limit = request.GET.get('limit', 20)
-    offset = request.GET.get('offset', 0)
+    limit = int(request.GET.get('limit', 20))
+    offset = int(request.GET.get('offset', 0))
     limit = limit + offset
     dsr =  DistributorSalesRep.objects.select_related('distributor').get(distributor_sales_code = dsr_id)
     distributor = dsr.distributor
