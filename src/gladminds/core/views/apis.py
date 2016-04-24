@@ -237,7 +237,7 @@ def get_parts(request):
     modified_since = request.GET.get('modified_since', '1970-01-01')
     if not modified_since:
         modified_since = '1970-01-01'
-    parts = PartPricing.objects.filter(active = True, modified_date__gt=modified_since)[:10]
+    parts = PartPricing.objects.filter(active = True, modified_date__gt=modified_since)
     parts_list =[]
     for part in parts:
         #available_quantity = PartsStock.objects.get(part_number_id = part.id ).available_quantity
