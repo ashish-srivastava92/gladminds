@@ -1355,28 +1355,27 @@ def upload_transit_stock(request):
     with open(full_path) as csvfile:
         partreader = csv.DictReader(csvfile)
         for row_list in partreader:
-#             try:
-            distributor = Distributor.objects.get(user=request.user)
-            part_transit_stock_obj_list = TransitStock.objects.filter(\
-                                    part_number__part_number=row_list['Part Number'], distributor=distributor)
-            print "thi is found distributor", part_transit_stock_obj_list[0]
-            if not part_transit_stock_obj_list:
-                part_transit_stock_obj = TransitStock()
-                part_pricing_object = PartPricing.objects.get(part_number=row_list['Part Number']) 
-                part_transit_stock_obj.part_number = part_pricing_object
-                part_transit_stock_obj.distributor = distributor
-            else:
-                part_transit_stock_obj = part_transit_stock_obj_list[0]
-            part_transit_stock_obj.shipped_quantity = row_list['Shipped Quantity']
-            shipped_date_str = row_list['Shipped Date(YYYY-MM-DD)']
-            expected_arrival_date_str = row_list['Expected Date of Arrival(YYYY-MM-DD)']
-            part_transit_stock_obj.shipped_date = datetime.datetime.strptime(shipped_date_str, '%Y-%m-%d').date()
-            part_transit_stock_obj.expected_date_of_arrival = \
-                                    datetime.datetime.strptime(expected_arrival_date_str, '%Y-%m-%d').date()
-            part_transit_stock_obj.save(using=settings.BRAND)
-#             except Exception as ex:
-#                 flag =1
-#                 msg = msg + row_list['Part Number']+ ','
+            try:
+                distributor = Distributor.objects.get(user=request.user)
+                part_transit_stock_obj_list = TransitStock.objects.filter(\
+                                        part_number__part_number=row_list['Part Number'], distributor=distributor)
+                if not part_transit_stock_obj_list:
+                    part_transit_stock_obj = TransitStock()
+                    part_pricing_object = PartPricing.objects.get(part_number=row_list['Part Number']) 
+                    part_transit_stock_obj.part_number = part_pricing_object
+                    part_transit_stock_obj.distributor = distributor
+                else:
+                    part_transit_stock_obj = part_transit_stock_obj_list[0]
+                part_transit_stock_obj.shipped_quantity = row_list['Shipped Quantity']
+                shipped_date_str = row_list['Shipped Date(YYYY-MM-DD)']
+                expected_arrival_date_str = row_list['Expected Date of Arrival(YYYY-MM-DD)']
+                part_transit_stock_obj.shipped_date = datetime.datetime.strptime(shipped_date_str, '%Y-%m-%d').date()
+                part_transit_stock_obj.expected_date_of_arrival = \
+                                        datetime.datetime.strptime(expected_arrival_date_str, '%Y-%m-%d').date()
+                part_transit_stock_obj.save(using=settings.BRAND)
+            except Exception as ex:
+                flag =1
+                msg = msg + row_list['Part Number']+ ','
                     
         if flag == 1:
             msg = msg[:-1]
