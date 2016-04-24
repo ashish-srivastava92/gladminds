@@ -717,7 +717,7 @@ def add_retailer(request, dsr_id):
         retailer.signature_url = profile['signature_url']
         retailer.mechanic_1 = profile['mechanic_name_1']  + ' ' + profile['mechanic_number_1']
         retailer.mechanic_2 = profile['mechanic_name_2']  + ' ' + profile['mechanic_number_2']
-        retailer.approved = constants.STATUS['WAITING_FOR_APPROVAL']
+        retailer.approved = constants.STATUS['APPROVED']
         retailer.save()
         send_msg_to_retailer_on_adding(request,retailer,user.username,user.set_password) 
     return Response({'message': 'New retailer(s) added successfully', 'status':1})

@@ -2574,10 +2574,25 @@ class TransitStockAdmin(GmModelAdmin):
 
     groups_update_not_allowed = [Roles.AREASPARESMANAGERS, Roles.NATIONALSPARESMANAGERS]
 #     search_fields = ('part_number',)
-    list_display = ('get_part_number', 'shipped_quantity','shipped_date','expected_date_of_arrival')
+    list_display = ('get_part_number', 'shipped_quantity','get_shipped_date','get_expected_date_of_arrival')
 
     def get_part_number(self, obj):
         return obj.part_number.part_number
+
+    def get_shipped_date(self, obj):
+        if obj.shipped_date:
+            return obj.shipped_date.date()
+        else:
+            return "N/A"
+    
+    def get_expected_date_of_arrival(self, obj):
+        if obj.expected_date_of_arrival:
+            return obj.expected_date_of_arrival.date()
+        else:
+            return "N/A"
+    
+    get_shipped_date.short_description = "Shipped Date"
+    get_expected_date_of_arrival.short_description = "Expected Date of Arrival"    
     get_part_number.short_description = "Part Number"
     
     def changelist_view(self, request, extra_context={}):

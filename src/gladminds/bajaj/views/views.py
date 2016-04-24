@@ -1348,33 +1348,41 @@ def upload_part_pricing(request):
         return HttpResponseRedirect('/admin/bajaj/partpricing')
 
 def upload_transit_stock(request):
-    """this megthod uploads Transit Stock in TransitStock table"""
-#     dist_id = Distributor.objects.get(user__user=request.user)
-    transit_stock_list = []
+    """this method uploads Transit Stock in TransitStock table"""
     msg = ''
     flag = 0
     full_path = handle_uploaded_file(request.FILES['upload_transit_stock'])
     with open(full_path) as csvfile:
         partreader = csv.DictReader(csvfile)
         for row_list in partreader:
-            transit_stock_list.append(row_list)
-            try:
-                part_transit_stock_obj = TransitStock.objects.get(part_number=row_list['Part Number'])
-                part_transit_stock_obj.transit_stock = row_list['Transit Stock']
-                part_transit_stock_obj.save(using=settings.BRAND)
-            except Exception as  ex:
-                try:
-                    part_pricing_object = PartPricing.objects.get(part_number__part_number=row_list['Part Numaber']) 
-                    part_transit_obj = TransitStock(part_number_id=part_pricing_object.id, transit_stock=row_list['Transit Stock'])   
-                    part_transit_obj.save(using=settings.BRAND)
-                except Exception as ex:
-                    flag =1
-                    msg = msg + row_list['Part Number']+ ','
+#             try:
+            distributor = Distributor.objects.get(user=request.user)
+            part_transit_stock_obj_list = TransitStock.objects.filter(\
+                                    part_number__part_number=row_list['Part Number'], distributor=distributor)
+            print "thi is found distributor", part_transit_stock_obj_list[0]
+            if not part_transit_stock_obj_list:
+                part_transit_stock_obj = TransitStock()
+                part_pricing_object = PartPricing.objects.get(part_number=row_list['Part Number']) 
+                part_transit_stock_obj.part_number = part_pricing_object
+                part_transit_stock_obj.distributor = distributor
+            else:
+                part_transit_stock_obj = part_transit_stock_obj_list[0]
+            part_transit_stock_obj.shipped_quantity = row_list['Shipped Quantity']
+            shipped_date_str = row_list['Shipped Date(YYYY-MM-DD)']
+            expected_arrival_date_str = row_list['Expected Date of Arrival(YYYY-MM-DD)']
+            part_transit_stock_obj.shipped_date = datetime.datetime.strptime(shipped_date_str, '%Y-%m-%d').date()
+            part_transit_stock_obj.expected_date_of_arrival = \
+                                    datetime.datetime.strptime(expected_arrival_date_str, '%Y-%m-%d').date()
+            part_transit_stock_obj.save(using=settings.BRAND)
+#             except Exception as ex:
+#                 flag =1
+#                 msg = msg + row_list['Part Number']+ ','
                     
-        messages.success(request,'Added a transit for the parts')
         if flag == 1:
             msg = msg[:-1]
             messages.error(request, 'Part Number{0} are not valid'.format(msg))
+        else:
+            messages.success(request,'Uploaded transit stock')
         return HttpResponseRedirect('/admin/bajaj/transitstock')
                 
 def upload_rack_location(request):
@@ -1791,7 +1799,7 @@ def download_sample_transit_stock_csv(request):
      'Part Description',
      'Shipped Quantity',
      'Shipped Date(YYYY-MM-DD)',
-     'Expected date of Arrival(YYYY-MM-DD)'])
+     'Expected Date of Arrival(YYYY-MM-DD)'])
     return response
 
 
