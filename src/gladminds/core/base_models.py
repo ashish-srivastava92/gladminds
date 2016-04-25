@@ -2222,6 +2222,12 @@ class SetTarget(BaseModel):
         db_table = "gm_sfa_set_target"
         verbose_name_plural = "Set Targets"
 
+class TransitStock(BaseModel):
+    class Meta:
+        abstract = True
+        db_table = "gm_transit_stock"
+        verbose_name_plural = "Transit Stock"
+
 class AppInfo(base_models.AppInfo)
     '''Model for mobile app information
     '''

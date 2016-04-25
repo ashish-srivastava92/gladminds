@@ -2,7 +2,7 @@
 
 {% load i18n admin_static admin_modify suit_tags admin_urls %}
 {% load url from future %}
-
+{% load filter %}
 {% block extrahead %}{{ block.super }}
 
 <script src="/static/js/bootbox.min.js"></script>
@@ -41,15 +41,16 @@
 		<tbody>
 
 			{% for each in shipped_details %}
+			{% if each.invoice_no %}
 			<tr>
 				<!-- <td class="text-center"><a href="{% url 'get_parts' each.order_id order_status retailer_id  %}">{{each.order_id}}</a></td> -->
 				<!-- <td class="text-center">{{each.retailer_name}}</td> -->
 				<td class="text-center"><a href="{% url 'get_orders' retailer_id each.invoice_no %}">{{each.invoice_number}}</td>
-
 				<td class="text-center">{{each.invoice_amt}}</td>
-				<td class="text-center">{{each.shipped_date}}</td>
+				<td class="text-center">{{ each.shipped_date.date  }} {{ each.shipped_date.time }} </td>
 			
 			</tr>	
+			{% endif %}
 		</tbody>
 
 
@@ -131,3 +132,15 @@
 </div>
 <!-- /.modal -->
 {% endblock content %}
+
+{% block extrajs %}
+	<script type="text/javascript">
+		var role = {{ request.user|rbac }}
+
+		if( role == 1 ){
+			var w = $('#suit-left');
+			w.empty();
+			w.append( DISTRIBUTOR_MENU );
+		}
+	</script>
+{% endblock %}

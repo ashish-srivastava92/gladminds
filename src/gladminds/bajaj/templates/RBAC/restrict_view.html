@@ -1,0 +1,66 @@
+{% load filter %}
+
+<!--
+	the below script is used for Restiction based access controll based on the user fetched via the rbac templatetag it restricts the view accordingly hers a mapping of the user
+					1 : Distributors
+					2 : SFAAdmins
+					3 : AreaSparesManagers
+					4 : NationalSparesManagers
+					300 : Unknow user default return
+	based on the numeric code fetched the view is appropriately displayed
+-->
+
+<script type="text/javascript">
+	var DISTRIBUTOR_MENU = '<div class="left-nav" id="left-nav"><ul><li><a href="/admin/"><i class="icon-home"></i>Home</a></li><li><a href="/admin/bajaj/distributorsalesrep/"><i class=" icon-folder-open"></i>Users</a><ul><li><a href="/admin/bajaj/distributorsalesrep/">Distributor Sales Rep</a></li><li><a href="/admin/bajaj/retailer/">Retailer</a></li></ul></li><li><a href="/add_users" target="_blank"><i class="icon-folder-open"></i>Add Users</a></li><li><a href="/admin/bajaj/partpricing/"><i class=" icon-folder-open"></i>Parts</a><ul><li><a href="/admin/bajaj/partpricing/">Parts Category</a></li><li><a href="/admin/bajaj/partsracklocation/">Parts Rack Location</a></li><li><a href="/admin/bajaj/partindexdetails/">Product Catalogue</a></li></ul></li><li class="active"><a href="/admin/bajaj/orderpart/"><i class=" icon-folder-open"></i>Orders</a><ul><li><a href="/admin/bajaj/orderpart/">Orders</a></li><li><a href="/admin/bajaj/recentorder/">Recent Order Details</a></li></ul></li><li><a href="/admin/bajaj/collection/"><i class=" icon-folder-open"></i>Collections</a><ul><li><a href="/admin/bajaj/collection/">Distributor Collection</a></li></ul></li><li hidden=""><a href="/admin/bajaj/dsrlocationdetails/"><i class=" icon-folder-open"></i>Location Details</a><ul><li><a href="/admin/bajaj/dsrlocationdetails/">DSR Location Details</a></li></ul></li><li hidden=""><a><i class="icon-folder-open"></i>Reports</a><ul><li><a href="#" target="_blank"> DSRs Scorecard Report</a><a href="#" target="_blank">Retailers Scorecard Report</a><a href="#" target="_blank">PJP Report</a></li></ul></li><li><a href="/admin/bajaj/distributorsalesreptarget/"><i class=" icon-folder-open"></i>SFA Add Targets</a><ul><li><a href="/admin/bajaj/distributorsalesreptarget/">DSR Targets</a></li><li><a href="/admin/bajaj/retailertarget/">Retailer Targets</a></li></ul></li><li><a href="/admin/bajaj/sfareports/"><i class=" icon-folder-open"></i>SFA Reports</a><ul><li><a href="/admin/bajaj/sfareports/">Reports</a></li></ul></li></ul></div>';
+
+	var ASM_MENU = '<div class="left-nav" id="left-nav"><ul><li><a href="/admin/"><i class="icon-home"></i>Home</a></li><li><a href="/admin/bajaj/userprofile/"><i class=" icon-folder-open"></i>Users</a><ul><li><a href="/admin/bajaj/userprofile/">Brand Users</a></li><li><a href="/admin/bajaj/distributor/">Distributor</a></li><li><a href="/admin/bajaj/retailer/">Retailer</a></li></ul></li><li><a href="/add_users" target="_blank"><i class="icon-folder-open"></i>Add Users</a></li><li><a href="/admin/bajaj/partpricing/"><i class=" icon-folder-open"></i>Parts</a><ul><li><a href="/admin/bajaj/partpricing/">Parts Category</a></li></ul></li><li><a href="/admin/bajaj/sfareports/"><i class=" icon-folder-open"></i>SFA Reports</a><ul><li><a href="/admin/bajaj/sfareports/">Reports</a></li></ul></li><li class="active"><a href="/admin/bajaj/distributortarget/"><i class=" icon-folder-open"></i>SFA Add Targets</a><ul><li class="active"><a href="/admin/bajaj/distributortarget/">Distributor Targets</a></li></ul></li></ul></div>';
+
+	var NSM_MENU = '<div class="left-nav" id="left-nav"><ul><li><a href="/admin/"><i class="icon-home"></i>Home</a></li><li><a href="/admin/bajaj/areasparesmanager/"><i class=" icon-folder-open"></i>Users</a><ul><li><a href="/admin/bajaj/areasparesmanager/">Area Spares Manager</a></li><li><a href="/admin/bajaj/distributor/">Distributor</a></li><li><a href="/admin/bajaj/distributorsalesrep/">Distributor Sales Rep</a></li><li><a href="/admin/bajaj/retailer/">Retailer</a></li></ul></li><li><a href="/add_users" target="_blank"><i class="icon-folder-open"></i>Add Users</a></li><li><a href="/admin/bajaj/partpricing/"><i class=" icon-folder-open"></i>Parts</a><ul><li><a href="/admin/bajaj/partpricing/">Parts Category</a></li></ul></li><li hidden=""><a href="/admin/bajaj/dsrlocationdetails/"><i class=" icon-folder-open"></i>Location Details</a><ul><li><a href="/admin/bajaj/dsrlocationdetails/">DSR Location Details</a></li></ul></li><li><a href="/admin/bajaj/sfareports/"><i class=" icon-folder-open"></i>SFA Reports</a><ul><li><a href="/admin/bajaj/sfareports/">Reports</a></li></ul></li><li class="active"><a href="/admin/bajaj/asmtarget/"><i class=" icon-folder-open"></i>SFA Add Targets</a><ul><li class="active"><a href="/admin/bajaj/asmtarget/">ASM Targets</a></li></ul></li></ul></div>'
+	
+</script>
+
+<script type="text/javascript">
+
+		$('.left-nav > ul > li > a').each(function(){ 
+			if( $(this)[0].text.replace(/\s\s+/g, '').localeCompare('Reports') == 0 ){
+				$(this)[0].parentElement.hidden=true;
+			}
+		});
+
+		$('.left-nav > ul > li > a').each(function(){
+			if( $(this)[0].text.localeCompare( 'SFA Reports' ) == 0 ){
+				var ewc = $(this)[0];
+				var temp = ewc;
+				ewc.parentElement.parentElement.appendChild( temp.parentElement )
+			}
+		});
+
+		$('.left-nav > ul > li > a').each(function(){ 
+			if( $(this)[0].text.replace(/\s\s+/g, '').localeCompare('Add Users') == 0 ){ 
+				var ewc = $(this)[0];
+				var temp = ewc;
+				ewc.parentElement.parentElement.insertBefore( temp.parentElement, ewc.parentElement.parentElement.children[2] )
+			} 
+		});
+
+		$('.left-nav > ul > li > a').each(function(){ 
+			if( $(this)[0].text.localeCompare('SFA Add Targets') == 0 ){ 
+				var ewc = $(this)[0];
+				var temp = ewc;
+				ewc.parentElement.parentElement.insertBefore( temp.parentElement, ewc.parentElement.parentElement.children[9])
+			} 
+		});
+
+		$('.left-nav > ul > li > a').each(function(){  
+			if( $(this)[0].text == 'Location Details' )
+				$(this)[0].parentElement.hidden = true;
+		});
+
+
+</script>
+
+
+
+
+
+

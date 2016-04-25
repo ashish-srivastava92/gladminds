@@ -212,6 +212,8 @@ SUIT_CONFIG = {
                     'label': 'Parts Rack Location'},
              {'model': 'partindexdetails',
                     'label': 'Product Catalogue'},
+                     {'model': 'transitstock',
+                      'label': 'Transit Stock Details'},
                      )
                
           },

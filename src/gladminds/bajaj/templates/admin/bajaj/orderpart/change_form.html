@@ -3,6 +3,7 @@
 {% load admintags %}
 {% load url from future %}
 {% load admin_urls %}
+{% load filter %}
 {% block extrahead %}{{ block.super }}
 
 <script src="/static/js/bootbox.min.js"></script>
@@ -14,6 +15,8 @@
 
 
 {% block content %}
+
+
 
 
 {% if order_display %}
@@ -147,4 +150,18 @@
 	<!-- /.modal-dialog -->
 </div>
 <!-- /.modal -->
+
+
 {% endblock content %}
+
+{% block extrajs %}
+	<script type="text/javascript">
+		var role = {{ request.user|rbac }}
+
+		if( role == 1 ){
+			var w = $('#suit-left');
+			w.empty();
+			w.append( DISTRIBUTOR_MENU );
+		}
+	</script>
+{% endblock %}
