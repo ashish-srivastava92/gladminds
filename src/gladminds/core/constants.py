@@ -382,6 +382,6 @@ DSR_REPORT_MONTHS_DATA = 3
 #this variable is used to set the time period in the average api
 AVERAGE_API_TIME_MONTHS = 6
 
-SFA_MC_REPORT_URL = "http://reports.bajajcv.gladminds.co"
-SFA_CV_REPORT_URL = "http://reports.bajajmc.gladminds.co"
+SFA_MC_REPORT_URL = "http://reports.bajajmc.gladminds.co"
+SFA_CV_REPORT_URL = "http://reports.bajajcv.gladminds.co"
 
