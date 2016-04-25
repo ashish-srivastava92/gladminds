@@ -191,6 +191,13 @@
 {% block extrajs %}
 	<script type="text/javascript">
 		var role = {{ request.user|rbac }}
+
+		if( role == 1 ){
+			var w = $('#suit-left');
+			w.empty();
+			w.append( DISTRIBUTOR_MENU );
+		}
+
 		if( role == 3 ){
 			var w = $('#suit-left');
 			w.empty();
