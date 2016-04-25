@@ -2222,3 +2222,13 @@ class SetTarget(BaseModel):
         db_table = "gm_sfa_set_target"
         verbose_name_plural = "Set Targets"
 
+class AppInfo(base_models.AppInfo)
+    '''Model for mobile app information
+    '''
+    os_type = models.SmallIntegerField(choices=APP_OS_CHOICES, default=1)
+    registration_id = models.CharField(max_length=200, null=True)
+
+    class Meta:
+        abstract = True
+        db_table = "gm_appinfo"
+        verbose_name_plural = "App Info"

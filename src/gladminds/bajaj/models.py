@@ -1218,6 +1218,15 @@ class PartPricing(base_models.PartPricing):
         return self.part_number     
 
 
+class AppInfo(base_models.AppInfo)
+    '''Model for mobile app information
+    '''
+    user = models.ForeignKey(UserProfile, Null=True)
+
+    class Meta(base_models.AppInfo.Meta):
+        app_label = _APP_NAME
+
+
 class FocusedPart(base_models.FocusedPart):
     '''Focused parts during a duration'''
     start_date = models.DateTimeField()

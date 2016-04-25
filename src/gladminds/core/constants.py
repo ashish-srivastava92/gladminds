@@ -149,6 +149,11 @@ RATINGS = (
            ('3','Not Glad')
         )
 
+APP_OS_CHOICES = (
+           ('1','Android'),
+           ('2','iOS')
+        )
+
 SAVE_PLATE_PART_STATUS = (
                           ('Pending','Pending'),
                           ('Approved','Approved'),
