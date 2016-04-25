@@ -59,6 +59,10 @@
          </a>
       </li>
 
+       <li {{ model.is_active|yesno:' class=active,' }}><a href = "/sfa_reports" target="_blank"><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>SFA Reports
+         </a>
+      </li>
+
        {% for app in app_list %}
        {% if 'Products' in app.label and  app.models and request.user.username == "bajaj" %}
        <li {{ model.is_active|yesno:' class=active,' }}><a><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>DFSC Reports

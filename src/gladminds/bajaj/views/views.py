@@ -69,6 +69,10 @@ import StringIO
 import csv
 from gladminds.sqs_tasks import send_loyalty_sms
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
+from provider.oauth2.models import AccessToken
+from gladminds.core.auth.access_token_handler import create_access_token
+from src.gladminds.core.constants import SFA_MC_REPORT_URL, SFA_CV_REPORT_URL
+
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
@@ -2587,4 +2591,22 @@ def user_add(request):
     
     template = 'bajaj_user/distributor.html'
     return render(request, template)
+
+def sfa_reports(request):
+    http_host = request.META.get('HTTP_HOST', 'localhost')
+    access_token_list =  AccessToken.objects.using(settings.BRAND).filter(user=request.user)
+    if access_token_list:
+        # If multiple items pick the latest access token
+        access_token = access_token_list.order_by('-id')[0].token
+    else:
+        access_token = create_access_token(request.user, http_host)
+    
+    # TODO: Remove this logic once merged to main code branch
+    if settings.BRAND_VERTICLE == 'MC':
+        base_url = SFA_MC_REPORT_URL
+    else:
+        base_url = SFA_CV_REPORT_URL
+    redirect_url = base_url + '/login/' + access_token
+    print redirect_url
+    return HttpResponseRedirect(redirect_url)
        

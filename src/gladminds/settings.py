@@ -251,12 +251,12 @@ SUIT_CONFIG = {
                     )
                     },
      
-        {'app': 'bajaj', 'label': 'SFA Reports', 'icon': ' icon-folder-open',
-          'models':({'model': 'sfareports',
-                      'label': 'Reports'},
-                    {'model': 'sfahighlights',
-                      'label': 'Highlights'},
-                   )},
+#         {'app': 'bajaj', 'label': 'SFA Reports', 'icon': ' icon-folder-open',
+#           'models':({'model': 'sfareports',
+#                       'label': 'Reports'},
+#                     {'model': 'sfahighlights',
+#                       'label': 'Highlights'},
+#                    )},
 
         {'app': 'bajaj', 'label': 'SFA Add Targets', 'icon': ' icon-folder-open',
                 'models':({'model': 'nsmtarget',
