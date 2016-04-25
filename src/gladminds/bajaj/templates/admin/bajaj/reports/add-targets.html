@@ -2,6 +2,7 @@
 
 {% load i18n admin_static admin_modify suit_tags admin_urls %}
 {% load url from future %}
+{% load filter %}
 {% block extrahead %}
 {#{block.super}#}
 <!-- <link href="/static/css/portal.css" rel="stylesheet"> -->
@@ -186,3 +187,28 @@
 	}
 </style>
 {% endblock content  %}
+
+{% block extrajs %}
+	<script type="text/javascript">
+		var role = {{ request.user|rbac }}
+
+		if( role == 1 ){
+			var w = $('#suit-left');
+			w.empty();
+			w.append( DISTRIBUTOR_MENU );
+		}
+
+		if( role == 3 ){
+			var w = $('#suit-left');
+			w.empty();
+			w.append( ASM_MENU );
+
+		}
+
+		if( role == 4 ){
+			var w = $('#suit-left');
+			w.empty();
+			w.append( NSM_MENU );
+		}
+	</script>
+{% endblock %}

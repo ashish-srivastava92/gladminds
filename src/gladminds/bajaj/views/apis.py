@@ -172,7 +172,11 @@ def get_parts(request):
     parts = PartPricing.objects.filter(active = True, modified_date__gt=modified_since)
     parts_list =[]
     for part in parts:
-        available_quantity = PartsStock.objects.get(part_number_id = part.id).available_quantity
+        part_stock_obj_list = PartsStock.objects.filter(part_number_id = part.id)
+        if part_stock_obj_list:
+            available_quantity = part_stock_obj_list[0].available_quantity
+        else:
+            available_quantity = 0
         parts_dict = {}
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
@@ -460,6 +464,10 @@ def get_outstanding(request, dsr_id):
                 retailer_dict = {}
                 total_amount = 0
                 collection = 0
+                if invoice.invoice_amount is None:
+                    invoice.invoice_amount = 0.0
+                if invoice.paid_amount is None:
+                    invoice.paid_amount = 0.0
                 total_amount = total_amount + (invoice.invoice_amount - invoice.paid_amount)
                 retailer_dict.update({'retailer_id':retailer.retailer_code})
                 retailer_dict.update({'invoice_id': invoice.invoice_id})
