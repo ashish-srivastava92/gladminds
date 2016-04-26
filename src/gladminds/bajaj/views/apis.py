@@ -1211,14 +1211,19 @@ def get_orders(request, dsr_id):
             for each in order_detail:
                 order_delivered_obj = OrderDeliveredHistory.objects.filter(part_number=each.part_number, order=each.order).aggregate(Sum('delivered_quantity'))
                 order_details_dict = OrderedDict()
-                order_details_dict['part_id'] = each.part_number.part_number
-                order_details_dict['part_name'] = each.part_number.description
+                if each.part_number:
+                    part_obj = each.part_number
+                else:
+                    part_obj = each.part_number_catalog
+
+                order_details_dict['part_id'] = part_obj.part_number
+                order_details_dict['part_name'] = part_obj.description
                 order_details_dict['quantity'] = each.quantity
                 if order_delivered_obj.get('delivered_quantity__sum') == None:
                     order_details_dict['delivered_quantity'] = 0
                 else:
                     order_details_dict['delivered_quantity'] = order_delivered_obj.get('delivered_quantity__sum')
-                order_details_dict['mrp'] = each.part_number.mrp
+                order_details_dict['mrp'] = part_obj.mrp
                 order_details_dict['line_total'] = each.line_total
                 order_details_list.append(order_details_dict)
             order_dict['order_details'] = order_details_list
@@ -1258,17 +1263,20 @@ def get_retailer_orders(request, retailer_id):
             order_details_list = []
             for each in order_detail:
                 order_details_dict = OrderedDict()
-                order_details_dict['part_id'] = each.part_number.part_number
-                order_details_dict['part_name'] = each.part_number.description
+                if each.part_number:
+                    part_obj = each.part_number
+                else:
+                    part_obj = each.part_number_catalog
+                
+                order_details_dict['part_id'] = part_obj.part_number
+                order_details_dict['part_name'] = part_obj.description
                 order_details_dict['quantity'] = each.quantity
-                order_details_dict['mrp'] = each.part_number.mrp
+                order_details_dict['mrp'] = part_obj.mrp
                 order_details_dict['line_total'] = each.line_total
                 order_details_list.append(order_details_dict)
             order_dict['order_details'] = order_details_list
         orders_list.append(order_dict)
     return Response(orders_list)
-
-
 
 
 
