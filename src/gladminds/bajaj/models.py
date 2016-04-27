@@ -1219,7 +1219,7 @@ class PartPricing(base_models.PartPricing):
         return self.part_number     
 
 
-class AppInfo(base_models.AppInfo)
+class AppInfo(base_models.AppInfo):
     '''Model for mobile app information
     '''
     user = models.ForeignKey(UserProfile, Null=True)
