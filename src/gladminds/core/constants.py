@@ -149,6 +149,11 @@ RATINGS = (
            ('3','Not Glad')
         )
 
+APP_OS_CHOICES = (
+           ('1','Android'),
+           ('2','iOS')
+        )
+
 SAVE_PLATE_PART_STATUS = (
                           ('Pending','Pending'),
                           ('Approved','Approved'),
@@ -381,3 +386,7 @@ DSR_REPORT_MONTHS_DATA = 3
 
 #this variable is used to set the time period in the average api
 AVERAGE_API_TIME_MONTHS = 6
+
+SFA_MC_REPORT_URL = "http://reports.bajajmc.gladminds.co"
+SFA_CV_REPORT_URL = "http://reports.bajajcv.gladminds.co"
+

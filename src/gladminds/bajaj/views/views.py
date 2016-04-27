@@ -69,6 +69,10 @@ import StringIO
 import csv
 from gladminds.sqs_tasks import send_loyalty_sms
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
+from provider.oauth2.models import AccessToken
+from gladminds.core.auth.access_token_handler import create_access_token
+from src.gladminds.core.constants import SFA_MC_REPORT_URL, SFA_CV_REPORT_URL
+
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX
 TEMP_SA_ID_PREFIX = settings.TEMP_SA_ID_PREFIX
@@ -1348,33 +1352,40 @@ def upload_part_pricing(request):
         return HttpResponseRedirect('/admin/bajaj/partpricing')
 
 def upload_transit_stock(request):
-    """this megthod uploads Transit Stock in TransitStock table"""
-#     dist_id = Distributor.objects.get(user__user=request.user)
-    transit_stock_list = []
+    """this method uploads Transit Stock in TransitStock table"""
     msg = ''
     flag = 0
     full_path = handle_uploaded_file(request.FILES['upload_transit_stock'])
     with open(full_path) as csvfile:
         partreader = csv.DictReader(csvfile)
         for row_list in partreader:
-            transit_stock_list.append(row_list)
             try:
-                part_transit_stock_obj = TransitStock.objects.get(part_number=row_list['Part Number'])
-                part_transit_stock_obj.transit_stock = row_list['Transit Stock']
+                distributor = Distributor.objects.get(user=request.user)
+                part_transit_stock_obj_list = TransitStock.objects.filter(\
+                                        part_number__part_number=row_list['Part Number'], distributor=distributor)
+                if not part_transit_stock_obj_list:
+                    part_transit_stock_obj = TransitStock()
+                    part_pricing_object = PartPricing.objects.get(part_number=row_list['Part Number']) 
+                    part_transit_stock_obj.part_number = part_pricing_object
+                    part_transit_stock_obj.distributor = distributor
+                else:
+                    part_transit_stock_obj = part_transit_stock_obj_list[0]
+                part_transit_stock_obj.shipped_quantity = row_list['Shipped Quantity']
+                shipped_date_str = row_list['Shipped Date(YYYY-MM-DD)']
+                expected_arrival_date_str = row_list['Expected Date of Arrival(YYYY-MM-DD)']
+                part_transit_stock_obj.shipped_date = datetime.datetime.strptime(shipped_date_str, '%Y-%m-%d').date()
+                part_transit_stock_obj.expected_date_of_arrival = \
+                                        datetime.datetime.strptime(expected_arrival_date_str, '%Y-%m-%d').date()
                 part_transit_stock_obj.save(using=settings.BRAND)
-            except Exception as  ex:
-                try:
-                    part_pricing_object = PartPricing.objects.get(part_number__part_number=row_list['Part Numaber']) 
-                    part_transit_obj = TransitStock(part_number_id=part_pricing_object.id, transit_stock=row_list['Transit Stock'])   
-                    part_transit_obj.save(using=settings.BRAND)
-                except Exception as ex:
-                    flag =1
-                    msg = msg + row_list['Part Number']+ ','
+            except Exception as ex:
+                flag =1
+                msg = msg + row_list['Part Number']+ ','
                     
-        messages.success(request,'Added a transit for the parts')
         if flag == 1:
             msg = msg[:-1]
             messages.error(request, 'Part Number{0} are not valid'.format(msg))
+        else:
+            messages.success(request,'Uploaded transit stock')
         return HttpResponseRedirect('/admin/bajaj/transitstock')
                 
 def upload_rack_location(request):
@@ -1791,7 +1802,7 @@ def download_sample_transit_stock_csv(request):
      'Part Description',
      'Shipped Quantity',
      'Shipped Date(YYYY-MM-DD)',
-     'Expected date of Arrival(YYYY-MM-DD)'])
+     'Expected Date of Arrival(YYYY-MM-DD)'])
     return response
 
 
@@ -2580,4 +2591,22 @@ def user_add(request):
     
     template = 'bajaj_user/distributor.html'
     return render(request, template)
+
+def sfa_reports(request):
+    http_host = request.META.get('HTTP_HOST', 'localhost')
+    access_token_list =  AccessToken.objects.using(settings.BRAND).filter(user=request.user)
+    if access_token_list:
+        # If multiple items pick the latest access token
+        access_token = access_token_list.order_by('-id')[0].token
+    else:
+        access_token = create_access_token(request.user, http_host)
+    
+    # TODO: Remove this logic once merged to main code branch
+    if settings.BRAND_VERTICLE == 'MC':
+        base_url = SFA_MC_REPORT_URL
+    else:
+        base_url = SFA_CV_REPORT_URL
+    redirect_url = base_url + '/login/' + access_token
+    print redirect_url
+    return HttpResponseRedirect(redirect_url)
        

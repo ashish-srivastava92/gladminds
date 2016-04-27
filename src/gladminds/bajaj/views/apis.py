@@ -42,7 +42,7 @@ def authentication(request):
     #load the json input of username and password as json
     load = json.loads(request.body)
     user = authenticate(username = load.get("username"), password = load.get("password"))
-    
+    registration_id = load.get("registration_id ")
     if user:
         if user.is_active:
             #the user is active.He should be a dsr or retailer 
@@ -63,6 +63,13 @@ def authentication(request):
             jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
             jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
             payload = jwt_payload_handler(user)
+            if registration_id:
+                appinfo_obj = AppInfo.objects.filter(registration_id=registration_id)
+                if not registration_obj:
+                    app_obj = AppInfo(registration_id=registration_id, user_id=user.id)
+                else:
+                    appinfo_obj.user_id = user.id
+                appinfo_obj.save()
             data = {"Id": role_id,
                       "token": jwt_encode_handler(payload), "status":1, "login_type":login_type}
             return Response(data, content_type="application/json")
@@ -732,7 +739,7 @@ def add_retailer(request, dsr_id):
         retailer.signature_url = profile['signature_url']
         retailer.mechanic_1 = profile['mechanic_name_1']  + ' ' + profile['mechanic_number_1']
         retailer.mechanic_2 = profile['mechanic_name_2']  + ' ' + profile['mechanic_number_2']
-        retailer.approved = constants.STATUS['WAITING_FOR_APPROVAL']
+        retailer.approved = constants.STATUS['APPROVED']
         retailer.save()
         send_msg_to_retailer_on_adding(request,retailer,user.username,user.set_password) 
     return Response({'message': 'New retailer(s) added successfully', 'status':1})
@@ -1218,14 +1225,19 @@ def get_orders(request, dsr_id):
             for each in order_detail:
                 order_delivered_obj = OrderDeliveredHistory.objects.filter(part_number=each.part_number, order=each.order).aggregate(Sum('delivered_quantity'))
                 order_details_dict = OrderedDict()
-                order_details_dict['part_id'] = each.part_number.part_number
-                order_details_dict['part_name'] = each.part_number.description
+                if each.part_number:
+                    part_obj = each.part_number
+                else:
+                    part_obj = each.part_number_catalog
+
+                order_details_dict['part_id'] = part_obj.part_number
+                order_details_dict['part_name'] = part_obj.description
                 order_details_dict['quantity'] = each.quantity
                 if order_delivered_obj.get('delivered_quantity__sum') == None:
                     order_details_dict['delivered_quantity'] = 0
                 else:
                     order_details_dict['delivered_quantity'] = order_delivered_obj.get('delivered_quantity__sum')
-                order_details_dict['mrp'] = each.part_number.mrp
+                order_details_dict['mrp'] = part_obj.mrp
                 order_details_dict['line_total'] = each.line_total
                 order_details_list.append(order_details_dict)
             order_dict['order_details'] = order_details_list
@@ -1265,17 +1277,20 @@ def get_retailer_orders(request, retailer_id):
             order_details_list = []
             for each in order_detail:
                 order_details_dict = OrderedDict()
-                order_details_dict['part_id'] = each.part_number.part_number
-                order_details_dict['part_name'] = each.part_number.description
+                if each.part_number:
+                    part_obj = each.part_number
+                else:
+                    part_obj = each.part_number_catalog
+                
+                order_details_dict['part_id'] = part_obj.part_number
+                order_details_dict['part_name'] = part_obj.description
                 order_details_dict['quantity'] = each.quantity
-                order_details_dict['mrp'] = each.part_number.mrp
+                order_details_dict['mrp'] = part_obj.mrp
                 order_details_dict['line_total'] = each.line_total
                 order_details_list.append(order_details_dict)
             order_dict['order_details'] = order_details_list
         orders_list.append(order_dict)
     return Response(orders_list)
-
-
 
 
 
