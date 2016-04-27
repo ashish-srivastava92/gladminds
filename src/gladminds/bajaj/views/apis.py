@@ -42,7 +42,7 @@ def authentication(request):
     #load the json input of username and password as json
     load = json.loads(request.body)
     user = authenticate(username = load.get("username"), password = load.get("password"))
-    
+    registration_id = load.get("registration_id ")
     if user:
         if user.is_active:
             #the user is active.He should be a dsr or retailer 
@@ -63,6 +63,13 @@ def authentication(request):
             jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
             jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
             payload = jwt_payload_handler(user)
+            if registration_id:
+                appinfo_obj = AppInfo.objects.filter(registration_id=registration_id)
+                if not registration_obj:
+                    app_obj = AppInfo(registration_id=registration_id, user_id=user.id)
+                else:
+                    appinfo_obj.user_id = user.id
+                appinfo_obj.save()
             data = {"Id": role_id,
                       "token": jwt_encode_handler(payload), "status":1, "login_type":login_type}
             return Response(data, content_type="application/json")
