@@ -24,7 +24,7 @@ from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModel, Cate
 			    NationalSparesManager,AreaSparesManager,OrderDeliveredHistory, MonthlyPartSalesHistory
 from gladminds.bajaj.models import OrderPart,OrderPartDetails, \
                         PartIndexDetails, PartIndexPlates, FocusedPart, \
-                        AverageRetailerSalesHistory, AverageLocalitySalesHistory
+                        AverageRetailerSalesHistory, AverageLocalitySalesHistory, AppInfo
 from gladminds.core.auth_helper import Roles
 from django.db.models import Sum
 
@@ -65,8 +65,8 @@ def authentication(request):
             payload = jwt_payload_handler(user)
             if registration_id:
                 appinfo_obj = AppInfo.objects.filter(registration_id=registration_id)
-                if not registration_obj:
-                    app_obj = AppInfo(registration_id=registration_id, user_id=user.id)
+                if not appinfo_obj:
+                    appinfo_obj = AppInfo(registration_id=registration_id, user_id=user.id)
                 else:
                     appinfo_obj.user_id = user.id
                 appinfo_obj.save()
