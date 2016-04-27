@@ -153,6 +153,13 @@ def get_stock(request,dsr_id):
             parts_dict["part_available_quantity"]=part.available_quantity
             parts_dict["mrp"]=part.part_number.mrp
             parts_dict["datetime"] = datetime.datetime.now()
+
+            try:
+                transitStock = TransitStock.objects.filter(part_number=part.part_number)[0] # fetching the corresponding TransitStock based on part number
+                parts_dict["part_transit_quantity"] = transitStock.shipped_quantity # Added new field that shows the stock quantity available in transit
+            except:
+                parts_dict["part_transit_quantity"] = 'N/A' # if transit stock doesnt exists
+                  
 	    stock_list.append(parts_dict)
 	except:
 	    # FIXME: Remove try except from here and confirm if exceptions are due to curropt data
@@ -181,8 +188,8 @@ def get_parts(request):
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
         parts_dict.update({"part_category":part.subcategory.name})
-	associated_categories = part.associated_parts.all()
-	parts_dict.update({"associated_categories_str": [i.part_number for i in associated_categories]})
+        associated_categories = part.associated_parts.all()
+        parts_dict.update({"associated_categories_str": [i.part_number for i in associated_categories]})
         try:
             available_quantity = PartsStock.objects.get(part_number = part)
         except:
