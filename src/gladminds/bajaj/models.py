@@ -1275,6 +1275,7 @@ class TransitStock(base_models.TransitStock):
     shipped_quantity = models.IntegerField()
     shipped_date = models.DateTimeField()
     expected_date_of_arrival=models.DateTimeField()
+    active = models.BooleanField(default=True)
     
     class Meta(base_models.TransitStock.Meta):
         app_label = _APP_NAME 
