@@ -161,11 +161,13 @@ def get_stock(request,dsr_id):
             parts_dict["mrp"]=part.part_number.mrp
             parts_dict["datetime"] = datetime.datetime.now()
 
-            try:
-                transitStock = TransitStock.objects.filter(part_number=part.part_number)[0] # fetching the corresponding TransitStock based on part number
-                parts_dict["part_transit_quantity"] = transitStock.shipped_quantity # Added new field that shows the stock quantity available in transit
-            except:
+            transit_stock_list = TransitStock.objects.filter(part_number=part.part_number)
+            # Check if transit stock exists then if it exists add the shipped quantity to parts_dict
+            if not transit_stock_list:
                 parts_dict["part_transit_quantity"] = 'N/A' # if transit stock doesnt exists
+            else:
+                parts_dict["part_transit_quantity"] = transit_stock_list[0].shipped_quantity # Added new field that shows the stock quantity available in transit
+            
                   
 	    stock_list.append(parts_dict)
 	except:
