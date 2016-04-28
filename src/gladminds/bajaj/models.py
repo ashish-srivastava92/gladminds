@@ -1292,7 +1292,7 @@ class TransitStock(base_models.TransitStock):
 class OrderPart(base_models.OrderPart):
     ''' details of orders placed by retailer '''
     order_date =models.DateTimeField(auto_now_add=True)
-    order_number = models.CharField(max_length=100, null=True, blank=True, unique=True)
+    order_number = models.CharField(max_length=100, unique=True)
     retailer = models.ForeignKey(Retailer)
     dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
     distributor = models.ForeignKey(Distributor, null=True, blank=True)
