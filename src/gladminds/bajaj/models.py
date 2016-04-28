@@ -1222,7 +1222,7 @@ class PartPricing(base_models.PartPricing):
 class AppInfo(base_models.AppInfo):
     '''Model for mobile app information
     '''
-    user = models.ForeignKey(UserProfile, blank=True)
+    user = models.ForeignKey(UserProfile)
 
     class Meta(base_models.AppInfo.Meta):
         app_label = _APP_NAME
