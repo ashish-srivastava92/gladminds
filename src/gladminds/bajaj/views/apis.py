@@ -151,7 +151,7 @@ def get_stock(request,dsr_id):
     except:
        return Response([{"error":"Distributor not present"}])
     #get the parts with the distributor
-    stocks = PartsStock.objects.filter(distributor=distributor_obj,modified_date__gt=modified_since)[:10]
+    stocks = PartsStock.objects.filter(distributor=distributor_obj,modified_date__gt=modified_since)
     stock_list =[]
     for part in stocks:
         parts_dict = {}
@@ -581,7 +581,7 @@ def get_retailer_outstanding(request, retailer_id):
                 invoice.paid_amount = 0.0
             if invoice.invoice_amount is None:
                 invoice.invoice_amount = 0.0
-                
+
             outstanding = outstanding + (invoice.invoice_amount - invoice.paid_amount)
             retailer_dict.update({'retailer_id':retailer.retailer_code})
             retailer_dict.update({'invoice_id': invoice.id})
