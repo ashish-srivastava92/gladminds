@@ -1222,7 +1222,7 @@ class PartPricing(base_models.PartPricing):
 class AppInfo(base_models.AppInfo):
     '''Model for mobile app information
     '''
-    user = models.ForeignKey(UserProfile, Null=True)
+    user = models.ForeignKey(UserProfile, blank=True)
 
     class Meta(base_models.AppInfo.Meta):
         app_label = _APP_NAME
@@ -1292,7 +1292,7 @@ class TransitStock(base_models.TransitStock):
 class OrderPart(base_models.OrderPart):
     ''' details of orders placed by retailer '''
     order_date =models.DateTimeField(auto_now_add=True)
-    order_number = models.CharField(max_length=100, null=True, blank=True)
+    order_number = models.CharField(max_length=100, null=True, blank=True, unique=True)
     retailer = models.ForeignKey(Retailer)
     dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
     distributor = models.ForeignKey(Distributor, null=True, blank=True)
