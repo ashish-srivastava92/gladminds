@@ -530,6 +530,7 @@ ALL_APPS = (
     'django_otp',
     'django_otp.plugins.otp_totp',
     'rest_framework',
+    'push_notifications',
 #     'adminplus',
 
     # 'debug_toolbar',
@@ -544,6 +545,11 @@ SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 LOGIN_REDIRECT_URL = '/register/redirect'
 
 TASTYPIE_SWAGGER_API_MODULE = 'gladminds.urls.api_v1'
+
+PUSH_NOTIFICATIONS_SETTINGS = {
+        "GCM_API_KEY": "AIzaSyAR6fNBFbzbPh-YDfndIlJrY4ddWD6K19E",
+        "APNS_CERTIFICATE": "/path/to/your/certificate.pem",
+}
 
 # REST_FRAMEWORK = {
 #     'DEFAULT_PERMISSION_CLASSES': [
