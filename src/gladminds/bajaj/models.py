@@ -638,13 +638,7 @@ class Retailer(base_models.Retailer):
                                                 blank=True)
     actual = models.DecimalField(max_digits=20, decimal_places=4, null=True, \
                                                 blank=True)
-
-    def image_tag(self):
-        return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
-    image_tag.short_description = 'User Image'
-    image_tag.allow_tags = True
     tin = models.IntegerField( null=True, blank=True)
-    
     
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
@@ -973,9 +967,6 @@ class ManufacturingData(base_models.ManufacturingData):
 ###################################SFA-REPORTS#####ADDED-BY-NEELESH##################################
 
 
-
-
-
 class SfaReportNames(models.Model):
     #Add validator for custom report name
     name = models.CharField(max_length=50,blank=True,null=True)
@@ -1168,29 +1159,7 @@ def generate_asm_reports(request):
     #month=SparePartUPC.created_date.get().get_month()
     #if (part_id == upc && month == month):
     models.SparePartUPC
-    
-class SfaReportNames(models.Model):
-    #Add validator for custom report name
-    name = models.CharField(max_length=50,blank=True,null=True)
 
-    class Meta:
-        db_table = "gm_sfareportnames"
-        verbose_name = "Reports"
-
-    def __unicode__(self):
-        return self.name
-
-
-class SfaHighlights(models.Model):
-    #Add validator for custom report name
-    name = models.CharField(max_length=50,blank=True,null=True)
-
-    class Meta:
-        db_table = "gm_sfahighlights"
-        verbose_name = "Highlights"
-
-    def __unicode__(self):
-        return self.name
 
 ##########################     SFA Models  #########################################3
 
