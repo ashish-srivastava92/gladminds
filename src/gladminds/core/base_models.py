@@ -20,7 +20,7 @@ from gladminds.core.model_helpers import set_service_training_material_path,\
     set_welcome_kit_pod_path
 from gladminds.core.managers.mail import sent_password_reset_link,\
     send_email_activation
-from gladminds.core.constants import SBOM_STATUS
+from gladminds.core.constants import SBOM_STATUS, APP_OS_CHOICES
 from gladminds.core.managers.email_token_manager import EmailTokenManager
 
 image_upload_directory = os.path.join(settings.PROJECT_DIR, "static")
@@ -2097,9 +2097,9 @@ class DoDetails(BaseModel):
       
       
 class Invoices(BaseModel):
-   invoice_amount = models.DecimalField(max_digits = 20, decimal_places=4, null=True, blank=True)
+    invoice_amount = models.DecimalField(max_digits = 20, decimal_places=4, null=True, blank=True)
    
-   class Meta:
+    class Meta:
         abstract = True
         db_table = "gm_invoices"
         verbose_name_plural = "Invoice"
@@ -2228,7 +2228,7 @@ class TransitStock(BaseModel):
         db_table = "gm_transit_stock"
         verbose_name_plural = "Transit Stock"
 
-class AppInfo(base_models.AppInfo)
+class AppInfo(BaseModel):
     '''Model for mobile app information
     '''
     os_type = models.SmallIntegerField(choices=APP_OS_CHOICES, default=1)

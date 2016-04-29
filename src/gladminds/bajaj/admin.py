@@ -1461,14 +1461,14 @@ class PartCategoryAdmin(GmModelAdmin):
     Part_Description.allow_tags = True
     
     def Category(self, obj):
-         return obj.subcategory.name
+        return obj.subcategory.name
     Category.short_description = 'Category'
     
     def Applicable_Model(self, obj):
         if settings.BRAND_VERTICLE == 'MC':
-            return obj.products
-        else:
             return ", ".join([p.model_name for p in obj.applicable_models.all()])
+        else:
+            return obj.products
 
         
     Applicable_Model.short_description='Applicable Model'

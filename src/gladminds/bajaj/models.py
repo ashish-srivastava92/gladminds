@@ -1144,6 +1144,7 @@ class RetailerHighlights(models.Model):
         return self.name
 
 
+<<<<<<< HEAD
 def generate_asm_reports(request):
     #Get the asm targets
     asm_target=models.AsmTarget.objects.filter(asm_id=id,month=month)
@@ -1159,6 +1160,12 @@ def generate_asm_reports(request):
     #month=SparePartUPC.created_date.get().get_month()
     #if (part_id == upc && month == month):
     models.SparePartUPC
+=======
+    
+class SfaReportNames(models.Model):
+    #Add validator for custom report name
+    name = models.CharField(max_length=50,blank=True,null=True)
+>>>>>>> 5a924c7b60ae4e34bf7c648b2ce11fa38bf008ac
 
 
 ##########################     SFA Models  #########################################3
@@ -1288,7 +1295,6 @@ class RecentOrder(OrderPart):
     def __unicode__(self):
          
         return self.retailer.retailer_name
-
 
 
 
