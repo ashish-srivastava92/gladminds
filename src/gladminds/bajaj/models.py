@@ -1143,22 +1143,6 @@ class RetailerHighlights(models.Model):
     def __unicode__(self):
         return self.name
 
-
-def generate_asm_reports(request):
-    #Get the asm targets
-    asm_target=models.AsmTarget.objects.filter(asm_id=id,month=month)
-    '''
-    check for asm_target exception condition
-    '''
-    #if asm_target.count > 1:
-    #   LOG.error("".format(ex))
-    #   message 
-    target=asm_target.get(target)
-    #Get the number of unique parts which are created for this month
-    #upc=SparePartUPC.unique_part_code.get() && 
-    #month=SparePartUPC.created_date.get().get_month()
-    #if (part_id == upc && month == month):
-    models.SparePartUPC
     
 class SfaReportNames(models.Model):
     #Add validator for custom report name
