@@ -1249,7 +1249,11 @@ class RecentOrderAdmin(GmModelAdmin):
             except:
                 part_number = None
             retailer_obj = order_part_details.order.retailer
-            retailer_address = ', '.join([x for x in (retailer_obj.locality.name, retailer_obj.address_line_2,\
+            retailer_locality_obj = retailer_obj.locality
+            locality_name = None
+            if retailer_locality_obj:
+                locality_name = retailer_locality_obj.name
+            retailer_address = ', '.join([x for x in (locality_name, retailer_obj.address_line_2,\
                                             retailer_obj.address_line_3, retailer_obj.address_line_4,\
                                             retailer_obj.district) if x])
                 
@@ -1258,8 +1262,7 @@ class RecentOrderAdmin(GmModelAdmin):
                     order_part_details.order.order_date,
                     part_number,
                     order_part_details.quantity,
-                    order_part_details.order.retailer.mobile],
-                    retailer_address
+                    order_part_details.order.retailer.mobile, retailer_address]
                             )
 
         return response
