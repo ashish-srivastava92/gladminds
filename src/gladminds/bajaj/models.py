@@ -478,7 +478,7 @@ class AreaSparesManager(base_models.AreaSparesManager):
     '''details of Area Spares Manager'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
     state = models.ManyToManyField(State)
-    nsm = models.ForeignKey(NationalSparesManager, null=True, blank=True)
+    nsm = models.ForeignKey(NationalSparesManager)
 
     class Meta(base_models.AreaSparesManager.Meta):
         app_label = _APP_NAME
@@ -508,7 +508,7 @@ class District(base_models.District):
 class Distributor(base_models.Distributor):
     '''details of Distributor'''
     user = models.ForeignKey(UserProfile, null=True, blank=True)
-    asm = models.ForeignKey(AreaSparesManager, null=True, blank=True)
+    asm = models.ForeignKey(AreaSparesManager)
     state = models.ForeignKey(State,null=True, blank=True)
     territory = models.CharField(max_length=15)
     mobile1 = models.CharField(max_length=15)
@@ -638,14 +638,7 @@ class Retailer(base_models.Retailer):
                                                 blank=True)
     actual = models.DecimalField(max_digits=20, decimal_places=4, null=True, \
                                                 blank=True)
-    dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
-
-    def image_tag(self):
-        return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
-    image_tag.short_description = 'User Image'
-    image_tag.allow_tags = True
     tin = models.IntegerField( null=True, blank=True)
-    
     
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
@@ -974,9 +967,6 @@ class ManufacturingData(base_models.ManufacturingData):
 ###################################SFA-REPORTS#####ADDED-BY-NEELESH##################################
 
 
-
-
-
 class SfaReportNames(models.Model):
     #Add validator for custom report name
     name = models.CharField(max_length=50,blank=True,null=True)
@@ -1153,19 +1143,16 @@ class RetailerHighlights(models.Model):
     def __unicode__(self):
         return self.name
 
-
     
 class SfaReportNames(models.Model):
     #Add validator for custom report name
     name = models.CharField(max_length=50,blank=True,null=True)
-
     class Meta:
         db_table = "gm_sfareportnames"
         verbose_name = "Reports"
 
     def __unicode__(self):
         return self.name
-
 
 class SfaHighlights(models.Model):
     #Add validator for custom report name
@@ -1178,12 +1165,13 @@ class SfaHighlights(models.Model):
     def __unicode__(self):
         return self.name
 
+
 ##########################     SFA Models  #########################################3
 
    
 class PartPricing(base_models.PartPricing):
     ''' details of parts '''
-    part_number = models.CharField(max_length=255, null=True, blank=True)
+    part_number = models.CharField(max_length=255)
     products = models.CharField(max_length=255, null=True, blank=True)
     applicable_models = models.ManyToManyField(PartModel, null=True)
     remarks = models.CharField(max_length=255, null=True, blank=True)
@@ -1238,7 +1226,7 @@ class PartIndexPlates(base_models.PartIndexPlates):
     
 class PartIndexDetails(base_models.PartIndexDetails):
     plate = models.ForeignKey(PartIndexPlates)
-    part_number = models.CharField(max_length=255, null=True, blank=True)
+    part_number = models.CharField(max_length=255)
     description = models.CharField(max_length=255, null=True, blank=True)
     quantity_variant1 = models.IntegerField()
     quantity_variant2 = models.IntegerField()
