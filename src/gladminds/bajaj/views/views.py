@@ -923,7 +923,12 @@ def download_order_parts(request, order_id, order_status, retailer_id):
     retailer_name = retailer_obj.retailer_name
     retailer_code = retailer_obj.retailer_code
     retailer_phone_number = retailer_obj.mobile
-    retailer_address = ', '.join([x for x in (retailer_obj.locality.name, retailer_obj.address_line_2,\
+    locality_name = None
+    retailer_locality_obj = retailer_obj.locality
+    if retailer_locality_obj:
+        locality_name = retailer_locality_obj.name
+    
+    retailer_address = ', '.join([x for x in (locality_name, retailer_obj.address_line_2,\
                                     retailer_obj.address_line_3, retailer_obj.address_line_4,\
                                     retailer_obj.district) if x])
     for each in orders_obj:
