@@ -1634,8 +1634,11 @@ def upload_part_list(request):
     try:
         transaction.commit()
         if flag == 0:
-        messages.success(request, 'Uploaded Part successfully')
-        send_part_update_notification(parts_updated)
+            messages.success(request, 'Uploaded Part successfully')
+            try:
+                send_part_update_notification(parts_updated)
+            except:
+                pass
     except:
         messages.error(request, 'Part Upload failed')
     return HttpResponseRedirect('/admin/bajaj/partpricing/')
