@@ -175,6 +175,8 @@ urlpatterns = patterns('',
     url(r'^pending_orders/$','gladminds.bajaj.views.apis.pending_orders' , name='pending_orders'),
     url(r'^add_users/','gladminds.bajaj.views.views.user_add'),
     url(r'^sfa_reports/','gladminds.bajaj.views.views.sfa_reports'),
+#     url(r'^gcm_notif/','gladminds.bajaj.views.views.send_gcm_notification'),
+    
     
     
 

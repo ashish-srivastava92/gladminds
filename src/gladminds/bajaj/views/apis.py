@@ -21,7 +21,8 @@ from rest_framework_jwt.settings import api_settings
 from gladminds.bajaj.models import DistributorSalesRep, Retailer,PartModel, Categories, \
                             PartPricing, Distributor,  Invoices, \
                             Collection,CollectionDetails,PartsStock,DSRWorkAllocation,DSRLocationDetails, \
-			    NationalSparesManager,AreaSparesManager,OrderDeliveredHistory, MonthlyPartSalesHistory
+			    NationalSparesManager,AreaSparesManager,OrderDeliveredHistory, MonthlyPartSalesHistory,\
+    TransitStock
 from gladminds.bajaj.models import OrderPart,OrderPartDetails, \
                         PartIndexDetails, PartIndexPlates, FocusedPart, \
                         AverageRetailerSalesHistory, AverageLocalitySalesHistory, AppInfo
@@ -42,7 +43,7 @@ def authentication(request):
     #load the json input of username and password as json
     load = json.loads(request.body)
     user = authenticate(username = load.get("username"), password = load.get("password"))
-    registration_id = load.get("registration_id ")
+    registration_id = load.get("registration_id")
     if user:
         if user.is_active:
             #the user is active.He should be a dsr or retailer 
@@ -64,12 +65,13 @@ def authentication(request):
             jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
             payload = jwt_payload_handler(user)
             if registration_id:
-                appinfo_obj = AppInfo.objects.filter(registration_id=registration_id)
-                if not appinfo_obj:
-                    appinfo_obj = AppInfo(registration_id=registration_id, user_id=user.id)
+                from push_notifications.models import APNSDevice, GCMDevice
+                gcm_obj = GCMDevice.objects.filter(registration_id=registration_id)
+                if not gcm_obj:
+                    gcm_obj = GCMDevice(registration_id=registration_id, user_id=user.id)
                 else:
-                    appinfo_obj.user_id = user.id
-                appinfo_obj.save()
+                    gcm_obj.user_id = user.id
+                gcm_obj.save()
             data = {"Id": role_id,
                       "token": jwt_encode_handler(payload), "status":1, "login_type":login_type}
             return Response(data, content_type="application/json")

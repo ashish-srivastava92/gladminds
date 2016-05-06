@@ -2,18 +2,23 @@
         <tr><td>Retailer Name - {{retailer_name}}</td></tr>
         <tr><td>Retailer Id - {{retailer_code}}</td></tr>
 	<tr><td>Order Reference Number - </td> <td>{{order_number}}</td></tr>
+                <tr><td>Retailer Mobile Number - {{retailer_phone_number}}</td></tr>
+                <tr><td>Retailer Address - {{retailer_address}}</td></tr>
+
         <tr>
                 <td><strong>Part Number</strong></td>
                 <td><strong>Order Quantity</strong></td>
-		<td><strong>Allocated Quantity</strong></td>
 
+<!-- 		<td><strong>Allocated Quantity</strong></td>
+ -->
         </tr>
                 {% for record in order_display %}
         <tr>
                 <td>{{record.part_number|default_if_none:""}}</td>
                 <td>{{record.quantity|default_if_none:""}}</td>
-		<td>{{record.allocated_qty|default_if_none:""}}</td>
-        </tr>
+                
+<!-- 		<td>{{record.allocated_qty|default_if_none:""}}</td>
+ -->        </tr>
         {% endfor %}
 </table>
 

@@ -862,6 +862,19 @@ def send_mail_for_sfa_order_placed(*args, **kwargs):
     else:
         logger.info("[manufacture_data_discrepancy]: No discrepancy were update on {0}".format(datetime.now()))
 
+
+@shared_task
+def send_bulk_app_notification(*args, **kwargs):
+    data = {"data": {
+            "message": kwargs.get('notification_msg'),
+            "type": kwargs.get('notification_type'),
+            "data": kwargs.get('notification_data')
+                }
+            }
+    devices = kwargs.get('all_devices')
+    device = devices[0]
+    device.send_message("some data", extra={"foo": "bar"})
+
 @shared_task()
 def brand_sync_to_afterbuy(*args, **kwargs):
     '''Sync all the products from bajaj to afterbuy'''

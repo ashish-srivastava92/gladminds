@@ -1237,7 +1237,7 @@ class RecentOrderAdmin(GmModelAdmin):
         writer = csv.writer(response, dialect=csv.excel)
         order_list = []
         writer.writerow(["Order Number", "Retailer Name", "Ordered Date", "Part Number", \
-                            "Ordered Quantity"])
+                            "Ordered Quantity", "Retailer Phone Number", "Retailer Address"])
 
         all_order_part_details_obj_list = OrderPartDetails.objects.filter(order__in=queryset)
         for order_part_details in all_order_part_details_obj_list:
@@ -1248,11 +1248,19 @@ class RecentOrderAdmin(GmModelAdmin):
                     part_number = order_part_details.part_number.part_number
             except:
                 part_number = None
+            retailer_obj = order_part_details.order.retailer
+            retailer_address = ', '.join([x for x in (retailer_obj.locality.name, retailer_obj.address_line_2,\
+                                            retailer_obj.address_line_3, retailer_obj.address_line_4,\
+                                            retailer_obj.district) if x])
+                
             writer.writerow([order_part_details.order.order_number,
                     order_part_details.order.retailer.retailer_name,
                     order_part_details.order.order_date,
                     part_number,
-                    order_part_details.quantity])
+                    order_part_details.quantity,
+                    order_part_details.order.retailer.mobile],
+                    retailer_address
+                            )
 
         return response
 
@@ -1526,7 +1534,7 @@ class PartCategoryAdmin(GmModelAdmin):
     
     
     def changelist_view(self, request, extra_context={}):
-	self.params=request.user
+        self.params=request.user
         if request.user.is_superuser or request.user.groups.filter(name=Roles.SFAADMIN).exists():
 
             self. list_display = ('part_no', 'Part_Description', 'Applicable_Model', 'Category',

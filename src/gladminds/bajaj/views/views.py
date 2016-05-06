@@ -25,7 +25,8 @@ from gladminds.settings import BRAND_META
 from gladminds.bajaj import models
 from gladminds.core import utils, constants
 from gladminds.sqs_tasks import send_otp, send_customer_phone_number_update_message, \
-    send_mail_for_feed_failure, send_mail_customer_phone_number_update_exceeds
+    send_mail_for_feed_failure, send_mail_customer_phone_number_update_exceeds,\
+    send_bulk_app_notification
 from gladminds.core.managers.mail import sent_otp_email, \
     send_recovery_email_to_admin, send_mail_when_vin_does_not_exist
 from gladminds.bajaj.services.coupons.import_feed import SAPFeed
@@ -48,7 +49,7 @@ from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Dist
 PartPricing, OrderDeliveredHistory, DoDetails, PartsStock, OrderPart, OrderPartDetails, DistributorSalesRep, DSRWorkAllocation, \
 BackOrders, DSRLocationDetails, OrderTempDeliveredHistory, Collection, CollectionDetails, DoDetails,\
 AreaSparesManager, PartsRackLocation, OrderTempDetails, Invoices, PartsRackLocation, MonthlyPartSalesHistory,\
-SubCategories, TransitStock
+SubCategories, TransitStock, AppInfo
 
 
 from django.core.serializers.json import DjangoJSONEncoder
@@ -921,6 +922,10 @@ def download_order_parts(request, order_id, order_status, retailer_id):
     retailer_obj = Retailer.objects.get(id=retailer_id)
     retailer_name = retailer_obj.retailer_name
     retailer_code = retailer_obj.retailer_code
+    retailer_phone_number = retailer_obj.mobile
+    retailer_address = ', '.join([x for x in (retailer_obj.locality.name, retailer_obj.address_line_2,\
+                                    retailer_obj.address_line_3, retailer_obj.address_line_4,\
+                                    retailer_obj.district) if x])
     for each in orders_obj:
         orderparts_obj = OrderPartDetails.objects.select_related('part_number', 'order').filter(order_id=each.id)
         for each_order in orderparts_obj:
@@ -970,6 +975,8 @@ def download_order_parts(request, order_id, order_status, retailer_id):
      'retailer_id': retailer_id,
      'retailer_name': retailer_name,
      'retailer_code': retailer_code,
+     'retailer_phone_number': retailer_phone_number,
+     'retailer_address': retailer_address,
      'order_number': order_number,
      'order_total_value': orders['total_value']}
     response = HttpResponse(content_type='text/excel')
@@ -1563,6 +1570,7 @@ def upload_part_list(request):
     full_path = handle_uploaded_file(request.FILES['upload_part_list'])
     msg = ''
     flag = 0
+    parts_updated = []
     with open(full_path) as csvfile:
         all_part_list = csv.DictReader(csvfile)
         for each_part in all_part_list:
@@ -1586,6 +1594,7 @@ def upload_part_list(request):
                 subcategory_obj = SubCategories.objects.get(name=category_name.strip())
             except:
                 subcategory_obj = None
+            
             try:
                 try:
                     existing_part = PartPricing.objects.get(part_number=part_number)
@@ -1607,6 +1616,15 @@ def upload_part_list(request):
                         moq=moq,
                         subcategory=subcategory_obj)
                     new_part.save()
+                part_detail = {
+                                   "part_number": part_number,
+                                   "part_description": description,
+                                   "mrp": mrp,
+                                   "moq": moq,
+                                   "is_active": is_active,
+                                   "category_name": category_name,
+                                   }
+                parts_updated.append(part_detail)
             except:
                 flag = 1
                 msg = msg + part_number + ','
@@ -1616,12 +1634,20 @@ def upload_part_list(request):
     try:
         transaction.commit()
         if flag == 0:
-            messages.success(request, 'Uploaded Part successfully')        
+        messages.success(request, 'Uploaded Part successfully')
+        send_part_update_notification(parts_updated)
     except:
         messages.error(request, 'Part Upload failed')
-
-
     return HttpResponseRedirect('/admin/bajaj/partpricing/')
+
+def send_part_update_notification(notification_data):
+    from push_notifications.models import APNSDevice, GCMDevice
+    devices = GCMDevice.objects.all()
+    send_job_to_queue(send_bulk_app_notification, {"message": "Part Details Updated",
+            "type": "part_category",
+            "data": notification_data,
+            "all_devices": devices
+            })
 
 
 @transaction.commit_manually
