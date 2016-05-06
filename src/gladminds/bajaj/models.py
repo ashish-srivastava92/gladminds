@@ -1147,6 +1147,23 @@ class RetailerHighlights(models.Model):
 class SfaReportNames(models.Model):
     #Add validator for custom report name
     name = models.CharField(max_length=50,blank=True,null=True)
+    class Meta:
+        db_table = "gm_sfareportnames"
+        verbose_name = "Reports"
+
+    def __unicode__(self):
+        return self.name
+
+class SfaHighlights(models.Model):
+    #Add validator for custom report name
+    name = models.CharField(max_length=50,blank=True,null=True)
+
+    class Meta:
+        db_table = "gm_sfahighlights"
+        verbose_name = "Highlights"
+
+    def __unicode__(self):
+        return self.name
 
 
 ##########################     SFA Models  #########################################3
