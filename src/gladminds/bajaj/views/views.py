@@ -1124,6 +1124,7 @@ def cal_data(request):
 
 
 def get_collection_details(request, ret_id):
+    print 'Colection Details ..........'
     collection_details = []
     collection_details_dict = {}
     collection_obj = Collection.objects.filter(retailer_id=ret_id)
@@ -1142,7 +1143,10 @@ def get_collection_details(request, ret_id):
                 collection_details_dict['mode'] = 'Cash/Cheque'
             collection_details_dict['cheque_number'] = each_obj.cheque_number
             collection_details_dict['cheque_bank'] = each_obj.cheque_bank
-            #collection_details_dict['cheque_img_url'] = each_obj.img_url.path.replace('/var/www/demosfa/gladminds/src/static/','')
+            if( each_obj.img_url ):
+                collection_details_dict['cheque_img_url'] = each_obj.img_url.path.replace('/var/www/demosfa/gladminds/src/static/','')
+            else:
+                collection_details_dict['cheque_img_url'] = ''
             collection_details_dict['status'] = ''
             collection_details_dict['invoice_no'] = each_obj.collection.invoice.invoice_id
             collection_details.append(collection_details_dict.copy())
