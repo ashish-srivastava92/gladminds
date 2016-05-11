@@ -124,13 +124,12 @@ body .modal {
 				output.push("</tbody></table>");
 				$("#modalBody").html(output.join(""));
 				
-				
-				
 				$("#myModal .modal-title span").html("").html($(obj).attr("retName"))
 
 				$('#myModal').modal('show',function(){
 	
 				});
+				$("#modalBody").find("table").dataTable();
 		    },
 		    error: function(e){
 		        console.log(e);

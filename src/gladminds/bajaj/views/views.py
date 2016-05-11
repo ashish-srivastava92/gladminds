@@ -1124,7 +1124,6 @@ def cal_data(request):
 
 
 def get_collection_details(request, ret_id):
-    print 'Colection Details ..........'
     collection_details = []
     collection_details_dict = {}
     collection_obj = Collection.objects.filter(retailer_id=ret_id)
