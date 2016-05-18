@@ -107,7 +107,7 @@ body .modal {
 					output.push("</td><td align='center'>");
 					output.push(v.collected_by);
 					output.push("</td><td align='center'>");
-					if(v.mode=="Cheque"){
+					if(v.mode==2){
 					ahref=v.cheque_img_url;
                                         if(ahref!="")
 					output.push("<a id='chequehref' target='_blank' href='"+ahref+"'>");
@@ -123,6 +123,8 @@ body .modal {
 				});
 				output.push("</tbody></table>");
 				$("#modalBody").html(output.join(""));
+				//$("#modalBody").find("table").dataTable();
+				
 				
 				$("#myModal .modal-title span").html("").html($(obj).attr("retName"))
 
