@@ -1573,7 +1573,7 @@ def download_sample_part_list(request):
         ])
     return response
 
-@transaction.commit_manually
+#@transaction.commit_manually
 def upload_part_list(request):
     full_path = handle_uploaded_file(request.FILES['upload_part_list'])
     msg = ''
