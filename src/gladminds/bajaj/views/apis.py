@@ -66,10 +66,11 @@ def authentication(request):
             payload = jwt_payload_handler(user)
             if registration_id:
                 from push_notifications.models import APNSDevice, GCMDevice
-                gcm_obj = GCMDevice.objects.filter(registration_id=registration_id)
-                if not gcm_obj:
+                gcm_obj_list = GCMDevice.objects.filter(registration_id=registration_id)
+                if not gcm_obj_list:
                     gcm_obj = GCMDevice(registration_id=registration_id, user_id=user.id)
                 else:
+                    gcm_obj = gcm_obj_list[0]
                     gcm_obj.user_id = user.id
                 gcm_obj.save()
             data = {"Id": role_id,
