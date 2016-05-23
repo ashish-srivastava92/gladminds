@@ -49,7 +49,7 @@ from gladminds.bajaj.models import Retailer, UserProfile, DistributorStaff, Dist
 PartPricing, OrderDeliveredHistory, DoDetails, PartsStock, OrderPart, OrderPartDetails, DistributorSalesRep, DSRWorkAllocation, \
 BackOrders, DSRLocationDetails, OrderTempDeliveredHistory, Collection, CollectionDetails, DoDetails,\
 AreaSparesManager, PartsRackLocation, OrderTempDetails, Invoices, PartsRackLocation, MonthlyPartSalesHistory,\
-SubCategories, TransitStock, AppInfo
+SubCategories, TransitStock, AppInfo, SalesReturnHistory
 
 
 from django.core.serializers.json import DjangoJSONEncoder
@@ -72,7 +72,7 @@ from gladminds.sqs_tasks import send_loyalty_sms
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from provider.oauth2.models import AccessToken
 from gladminds.core.auth.access_token_handler import create_access_token
-from src.gladminds.core.constants import SFA_MC_REPORT_URL, SFA_CV_REPORT_URL
+from src.gladminds.core.constants import SFA_MC_REPORT_URL, SFA_CV_REPORT_URL, SALES_RETURN_DEFECTTYPE_MAP
 
 logger = logging.getLogger('gladminds')
 TEMP_ID_PREFIX = settings.TEMP_ID_PREFIX

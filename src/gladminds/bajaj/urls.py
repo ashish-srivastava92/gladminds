@@ -175,6 +175,12 @@ urlpatterns = patterns('',
     url(r'^pending_orders/$','gladminds.bajaj.views.apis.pending_orders' , name='pending_orders'),
     url(r'^add_users/','gladminds.bajaj.views.views.user_add'),
     url(r'^sfa_reports/','gladminds.bajaj.views.views.sfa_reports'),
+
+    url(r'^admin/salesreturn_history/(?P<invoice_id>\w+)/$','gladminds.bajaj.views.views.salesreturn_history', name='salesreturn_history'),
+    url(r'^admin/spare_warranty_claim/(?P<invoice_id>\w+)/$','gladminds.bajaj.views.views.spare_warranty_claim', name='spare_warranty_claim'),
+    url(r'^admin/transit_damage_claim/(?P<invoice_id>\w+)/$','gladminds.bajaj.views.views.transit_damage_claim', name='transit_damage_claim'),
+    url(r'^salesreturn_history_save/$','gladminds.bajaj.views.views.save_salesreturn', name='save_salesreturn'),
+
 #     url(r'^gcm_notif/','gladminds.bajaj.views.views.send_gcm_notification'),
     
     
