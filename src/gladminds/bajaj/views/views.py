@@ -2643,4 +2643,110 @@ def sfa_reports(request):
     redirect_url = base_url + '/login/' + access_token
     print redirect_url
     return HttpResponseRedirect(redirect_url)
-       
+
+def salesreturn_history(request, invoice_id):
+    opts = SalesReturnHistory._meta
+    salesreturn_objs = SalesReturnHistory.objects.get(invoice_number__invoice_id=invoice_id)
+
+    invoice_id=salesreturn_objs.invoice_number.invoice_id
+    part_number=salesreturn_objs.part_number
+    excess_part =salesreturn_objs.excess_part
+    short_part=salesreturn_objs.short_part
+    required_part=salesreturn_objs.required_part
+    settlement_status=salesreturn_objs.settlement_status
+    settlement_date =salesreturn_objs.settlement_date
+
+    context = {
+                "invoice_number":invoice_id,
+                "part_number":part_number,
+                "excess_part":excess_part,
+                "short_part":short_part,
+                "required_part":required_part,
+                "settlement_status":settlement_status,
+                "settlement_date":settlement_date,
+
+
+            'app_label': opts.app_label,
+            'opts': opts,
+        }
+    template = 'admin/bajaj/salesreturnhistory/salesreturn_history.html'
+    return render(request, template, context)
+
+def spare_warranty_claim(request, invoice_id):
+
+    opts = SalesReturnHistory._meta
+    salesreturn_objs = SalesReturnHistory.objects.get(invoice_number__invoice_id=invoice_id)
+
+    invoice_id=salesreturn_objs.invoice_number.invoice_id
+    part_number=salesreturn_objs.part_number
+    description=salesreturn_objs.description
+    quantity =salesreturn_objs.quantity
+    defect_type=SALES_RETURN_DEFECTTYPE_MAP.get(salesreturn_objs.defect_type)
+    invoice_date=salesreturn_objs.invoice_number.invoice_date
+    settlement_status=salesreturn_objs.settlement_status
+    settlement_date =salesreturn_objs.settlement_date
+
+    context = {
+                "invoice_number":invoice_id,
+                "part_number":part_number,
+                "description":description,
+                "quantity":quantity,
+                "defect_type":defect_type,
+                "invoice_date":invoice_date,
+                "settlement_status":settlement_status,
+                "settlement_date":settlement_date,
+
+            'app_label': opts.app_label,
+            'opts': opts,
+        }
+    template = 'admin/bajaj/sparewarrantyclaim/spare_warranty_claim.html'
+    return render(request, template, context)
+
+def transit_damage_claim(request, invoice_id):
+
+    opts = SalesReturnHistory._meta
+    salesreturn_objs = SalesReturnHistory.objects.get(invoice_number__invoice_id=invoice_id)
+
+    invoice_id=salesreturn_objs.invoice_number.invoice_id
+    part_number=salesreturn_objs.part_number
+    description=salesreturn_objs.description
+    quantity =salesreturn_objs.quantity
+    defect_type=SALES_RETURN_DEFECTTYPE_MAP.get(salesreturn_objs.defect_type)
+    invoice_date=salesreturn_objs.invoice_number.invoice_date
+    settlement_status=salesreturn_objs.settlement_status
+    settlement_date =salesreturn_objs.settlement_date
+    transit_details=salesreturn_objs.transit_details
+    context = {
+                "invoice_number":invoice_id,
+                "part_number":part_number,
+                "description":description,
+                "quantity":quantity,
+                "defect_type":defect_type,
+                "invoice_date":invoice_date,
+                "settlement_status":settlement_status,
+                "settlement_date":settlement_date,
+                "transit_details":transit_details,
+
+            'app_label': opts.app_label,
+            'opts': opts,
+        }
+    template = 'admin/bajaj/transitdamageclaim/transitdamage_claim.html'
+    return render(request, template, context)
+
+def save_salesreturn(request):
+    if (request.method=='POST'):
+        try:
+            invoice_id=request.POST.get('invoice')
+            settlement_status=request.POST.get('status')
+            settlement_date=request.POST.get('date')
+            transit_details=request.POST.get('transit_details')
+
+            salesreturnhistory=SalesReturnHistory.objects.get(invoice_number__invoice_id=invoice_id)
+            salesreturnhistory.settlement_status=settlement_status
+            salesreturnhistory.settlement_date=settlement_date
+            salesreturnhistory.transit_details=transit_details
+            salesreturnhistory.save()
+
+        except Exception as Ex:
+            logger.error('Details are not saved. Exception occurred', Ex)
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
