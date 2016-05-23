@@ -180,6 +180,8 @@ urlpatterns = patterns('',
     url(r'^admin/spare_warranty_claim/(?P<invoice_id>\w+)/$','gladminds.bajaj.views.views.spare_warranty_claim', name='spare_warranty_claim'),
     url(r'^admin/transit_damage_claim/(?P<invoice_id>\w+)/$','gladminds.bajaj.views.views.transit_damage_claim', name='transit_damage_claim'),
     url(r'^salesreturn_history_save/$','gladminds.bajaj.views.views.save_salesreturn', name='save_salesreturn'),
+    url(r'^spare_warranty_save/$','gladminds.bajaj.views.views.save_sparewarranty', name='save_sparewarranty'),
+    url(r'^transit_damage_save/$','gladminds.bajaj.views.views.save_transitdamage', name='save_transitdamage'),
 
 #     url(r'^gcm_notif/','gladminds.bajaj.views.views.send_gcm_notification'),
     

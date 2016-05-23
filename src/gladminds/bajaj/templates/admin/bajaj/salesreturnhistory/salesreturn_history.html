@@ -39,13 +39,13 @@
     <td class="text-center"></td>
     <td class="text-center"></td>
     <td class="text-center">{{required_part}}</td>
-    <td class="text-center">{{settlement_status}}</td>
-    <td class="text-center">{{settlement_date}}</td>
+    <td class="text-center" style="background-color:#ccffcc">{{settlement_status|default:""}}</td>
+    <td class="text-center" style="background-color:#e6f2ff">{{settlement_date|default:""}}</td>
   </tr>
   <tr>
     <td class="text-center">Excess</td>
-    <td class="text-center">{{part_number}}</td>
-    <td class="text-center">{{excess_part}}</td>
+    <td class="text-center">{{part_number|}}</td>
+    <td class="text-center">{{excess_part|default:""}}</td>
     <td class="text-center"></td>
     <td class="text-center"></td>
     <td class="text-center"></td>
@@ -55,7 +55,7 @@
     <td class="text-center">Short</td>
     <td class="text-center">{{part_number}}</td>
     <td class="text-center"></td>
-    <td class="text-center">{{short_part}}</td>
+    <td class="text-center">{{short_part|default:""}}</td>
     <td class="text-center"></td>
     <td class="text-center"></td>
     <td class="text-center"></td>
@@ -73,7 +73,7 @@
   			<input value="{{invoice_number}}" display:"None" type="hidden" name='invoice'></input>
 
   			<div class="form-group">
-    			<input type="text" class="form-control input-mini" id="status" name='status'>
+    			<input type="text" class="form-control input-small" id="status" name='status'>
   			</div>
 
 	<td class="text-center">
@@ -90,85 +90,5 @@
 
 </table>  
 
-		
-
-
-		<input type="hidden" id="order_id"  name="order_id" value='{{order_id}}' >
-		<input type="hidden" id="orders_length" value='{{order_status}}' name="orders_length"  >
-	</table>
-
-<script>
-	$(document).ready(function() {
-
-		$('.chk-box').change(function(e) {
-			if ($(this).is(":checked")) {
-				$(e.target).parents('tr').find('input.delivered-stock').attr('disabled', false).focus();
-				$(e.target).parents('tr').find('input.datepick').attr('disabled', false);
-				$(e.target).parents('tr>td').append("<input type='hidden' name='part_number' class='hiddentxt' value='" + $(this).attr("rel") + "'>")
-			} else {
-				$(e.target).parents('tr').find('input.delivered-stock').attr('disabled', true);
-				$(e.target).parents('tr').find('input.datepick').attr('disabled', true);
-				$(e.target).parents('tr>td').find(".hiddentxt").remove();
-			}
-		});
-
-	});
-
-	function confirmCancel(obj) {
-		bootbox.confirm("Are you sure you want to Cancel OrderID: " + $(obj).attr("ordID"), function(result) {
-			if (result)
-				location.href = $(obj).attr("data-url")
-		});
-	}
-
-	function confirmAccept(obj) {
-		bootbox.confirm("Are you sure you want to accept OrderID: " + $(obj).attr("ordID"), function(result) {
-			if (result)
-				location.href = $(obj).attr("data-url")
-		});
-	}
-
-	function loadOrderDetails(url, partNum, partDesc) {
-		$("#part_numberHead").html(partNum);
-		$("#part_desc").html(partDesc)
-		$("#loadParts").attr("src", url);
-	}
-
-	$('#button').on('click',function(){
-		alert('Settlement info updated');
-	});
-</script>
-<!-- Modal -->
-<div class="modal hide" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
-					&times;
-				</button>
-
-				<p class="modal-title">
-					<strong>Order ID:</strong><span>{{original.id}}</span>
-					<br/>
-					<strong>Part Number:</strong><span id="part_numberHead"></span>
-					<br/>
-					<strong>Part Description:</strong><span id="part_desc"></span></span>
-				</p>
-
-			</div>
-			<div class="modal-body">
-				<iframe src="" width="100%" id="loadParts" height="380" name= "part_details" frameborder="0" allowtransparency="true"></iframe>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">
-					Close
-				</button>
-			</div>
-		</div>
-		<!-- /.modal-content -->
-	</div>
-	<!-- /.modal-dialog -->
-</div>
-<!-- /.modal -->
 {% endblock content %}
 

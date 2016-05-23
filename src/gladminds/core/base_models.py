@@ -2253,7 +2253,10 @@ class SalesReturnHistory(BaseModel):
     defect_type = models.CharField(max_length=200,choices=constants.SALES_RETURN_DEFECTTYPE, default=1)
     description = models.CharField(max_length=200, null=True)
     transit_details = models.CharField(max_length=200, null=True)
-
+    settlement_status_sparewarranty = models.CharField(max_length=200, null=True)
+    settlement_date_sparewarranty = models.DateField()
+    settlement_status_transitdamage = models.CharField(max_length=200, null=True)
+    settlement_date_transitdamage = models.DateField()
     class Meta:
         abstract = True
         db_table = "gm_salesreturnhistory"

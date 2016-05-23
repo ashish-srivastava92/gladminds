@@ -2,7 +2,7 @@
 author: araskumar.a
 date: 31-08-2015
 '''
-import json, datetime, time, decimal
+import json, datetime, time, decimal,logging
 from datetime import timedelta
 from collections import OrderedDict
 from operator import itemgetter
@@ -23,7 +23,8 @@ from rest_framework_jwt.settings import api_settings
 from gladminds.core.models import Distributor, DistributorSalesRep, Retailer, CvCategories, \
             OrderPart, OrderPartDetails,DSRWorkAllocation, AlternateParts, Collection, \
             CollectionDetails,PartMasterCv,RetailerCollection,PartsStock, Invoices, \
-            UserProfile, PartIndexDetails, PartIndexPlates, PartPricing, FocusedPart
+            UserProfile, PartIndexDetails, PartIndexPlates, PartPricing, FocusedPart, \
+            SalesReturnHistory, Invoices
 from gladminds.core import constants
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from django.conf import settings
@@ -34,6 +35,7 @@ from gladminds.sqs_tasks import send_loyalty_sms, send_mail_for_sfa_order_placed
 
 AUDIT_ACTION = 'SEND TO QUEUE'
 
+logger = logging.getLogger("gladminds")
 
 today = datetime.datetime.now()
 @api_view(['POST'])
@@ -1355,11 +1357,52 @@ def dsr_average_orders(request, dsr_id):
         return Response(retailer_parts_list)
    
     
-    
-    
+@api_view(['POST'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def salesreturn(request):
+    ''' this method adds a retailer and his profile from the DSR. Adds data in three tables
+    user, userprofile and retailer'''
+    try:
+        load = json.loads(request.body)
 
+        invoice_id = load.get('invoice_id')
+        part_number= load.get('part_number')
+        description= load.get('part_description')
+        quantity= load.get('part_quantity')
+        reason= load.get('reason')
+        required_part= load.get('required_part')
+        excess_part= load.get('excess_quantity')
+        short_part= load.get('shortage_quantity')
 
-    
+        try:
+            invoice=Invoices.objects.get(invoice_id=invoice_id)
+            salesreturn_obj = SalesReturnHistory.objects.get(invoice_number__invoice_id=invoice_id)
+            salesreturn_obj.part_number=part_number
+            salesreturn_obj.description=description
+            salesreturn_obj.quantity=quantity
+            salesreturn_obj.reason=reason
+            salesreturn_obj.required_part=required_part
+            salesreturn_obj.short_part=short_part
+            salesreturn_obj.excess_part=excess_part
+            salesreturn_obj.save()
+
+            return Response({'message': 'Sales return request updated', 'status':1})
+
+        except Exception as ex:
+            invoice=Invoices.objects.get(invoice_id=invoice_id)
+            salesreturn_obj=SalesReturnHistory(invoice_number=invoice, part_number=part_number,
+                                                description=description, quantity=quantity,
+                                                reason=reason, required_part=required_part,
+                                                short_part=short_part, excess_part=excess_part)
+
+            salesreturn_obj.save()
+            return Response({'message': 'Sales return request made successfully', 'status':1})
+    except Exception as ex:
+        logger.error("Exception placing sales return request - {0}".format(ex))
+
+    return Response({'message': 'Save failed, Incorrect Details', 'status':0})
+
 
     
 
