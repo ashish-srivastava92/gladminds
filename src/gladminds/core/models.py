@@ -1151,7 +1151,10 @@ class OrderPartDetails(base_models.OrderPartDetails):
 class SalesReturnHistory(base_models.SalesReturnHistory):
 
     invoice_number = models.ForeignKey(Invoices)
-
+    retailer = models.ForeignKey(Retailer)
+    dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    
     class Meta(base_models.SalesReturnHistory.Meta):
         app_label = _APP_NAME
 

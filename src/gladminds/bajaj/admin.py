@@ -3019,7 +3019,7 @@ class ContainerLRAdmin(GmModelAdmin):
 class SalesReturnAdmin(GmModelAdmin):
 
     def has_add_permission(self, request):
-        return False
+        return True
 
     def role_based_filter_data(self, order_details_dict, user):
         # FIXME: Return false other than all the known user roles
@@ -3049,6 +3049,10 @@ class SalesReturnAdmin(GmModelAdmin):
         order_details_dict = {}
         data = SalesReturnHistory.objects.all()
         for each in data:
+
+            order_details_dict["retailer_id"] = each.retailer.id
+            order_details_dict["dsr_id"] = each.dsr.id
+
             order_details_dict["invoices"] = each.invoice_number.invoice_id
             order_details_dict["part_number"] = each.part_number
             order_details_dict["quantity"] = each.quantity
@@ -3059,7 +3063,7 @@ class SalesReturnAdmin(GmModelAdmin):
             order_details = filter(lambda x: self.role_based_filter_data(x, request.user), order_details)
 
         order_details = sorted(order_details)
-        context = {
+        context ={
                     'order_details':order_details
                 }
         template = 'admin/bajaj/salesreturnhistory/change_list.html'
@@ -3069,7 +3073,7 @@ class SalesReturnAdmin(GmModelAdmin):
 class SpareWarrantyClaimAdmin(GmModelAdmin):
 
     def has_add_permission(self, request):
-        return False
+        return True
 
     def role_based_filter_data(self, order_details_dict, user):
         # FIXME: Return false other than all the known user roles
@@ -3119,7 +3123,7 @@ class SpareWarrantyClaimAdmin(GmModelAdmin):
 class TransitDamageClaimAdmin(GmModelAdmin):
 
     def has_add_permission(self, request):
-        return False
+        return True
 
     def role_based_filter_data(self, order_details_dict, user):
         # FIXME: Return false other than all the known user roles

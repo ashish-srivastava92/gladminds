@@ -1360,7 +1360,7 @@ def dsr_average_orders(request, dsr_id):
 @api_view(['POST'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
-def salesreturn(request):
+def salesreturn(request, dsr_id):
     ''' this method adds a retailer and his profile from the DSR. Adds data in three tables
     user, userprofile and retailer'''
     try:
@@ -1374,10 +1374,17 @@ def salesreturn(request):
         required_part= load.get('required_part')
         excess_part= load.get('excess_quantity')
         short_part= load.get('shortage_quantity')
+        retailer_id= load.get('retailer_id')
 
         try:
+            dsr=DistributorSalesRep.objects.get(distributor_sales_code=dsr_id)
+            retailer=Retailer.objects.get(retailer_code=retailer_id)
             invoice=Invoices.objects.get(invoice_id=invoice_id)
             salesreturn_obj = SalesReturnHistory.objects.get(invoice_number__invoice_id=invoice_id)
+
+            salesreturn_obj.retailer=retailer
+            salesreturn_obj.dsr=dsr
+
             salesreturn_obj.part_number=part_number
             salesreturn_obj.description=description
             salesreturn_obj.quantity=quantity
