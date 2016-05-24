@@ -29,6 +29,8 @@
         <thead>
 				<tr>
 				    <th class="text-center" rowspan="2">Invoice Number</th>
+                    <th class="text-center" rowspan="2">Retailer ID</th>
+                    <th class="text-center" rowspan="2">DSR ID</th>
 				    <th class="text-center" rowspan="2">Part Number</th>
 				    <th class="text-center" rowspan="2">Quantity</th>
                     <th class="text-center" rowspan="2">Date</th>
@@ -47,7 +49,10 @@
         		
               <td class="text-center"><a href="{% url 'salesreturn_history' each.invoices %}">{{each.invoices}}</td>
 
-		      <td class="text-center">{{each.part_number}}</td>
+		      <td class="text-center">{{each.retailer_id}}</td>
+
+              <td class="text-center">{{each.dsr_id}}</td>
+              <td class="text-center">{{each.part_number}}</td>
 
 		      <td class="text-center">{{each.quantity}}</td>
 
