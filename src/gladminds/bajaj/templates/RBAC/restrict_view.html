@@ -60,15 +60,18 @@
 </script>
 
 <script type="text/javascript">
-	var e = $('a[href="/sfa_reports"]');
-	var report_tab = e.parent()[0];
-	var parent = report_tab.parentElement;
-	var length = report_tab.parentElement.children.length-1;
-	var add_target = parent.children[ length ];
-	parent.removeChild( parent.children[ length ] );
-	parent.removeChild( parent.children[ length-1 ] );
-	parent.appendChild( add_target );
-	parent.appendChild( report_tab );
+	var interchange_menu = function(){
+		var e = $('a[href="/sfa_reports"]');
+		var report_tab = e.parent()[0];
+		var parent = report_tab.parentElement;
+		var length = report_tab.parentElement.children.length-1;
+		var add_target = parent.children[ length ];
+		parent.removeChild( parent.children[ length ] );
+		parent.removeChild( parent.children[ length-1 ] );
+		parent.appendChild( add_target );
+		parent.appendChild( report_tab );
+	}
+	interchange_menu();
 </script>
 
 
