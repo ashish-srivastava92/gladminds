@@ -168,6 +168,7 @@ from django.conf import settings
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
+@transaction.commit_manually
 def place_order(request, dsr_id):
     '''
     This method gets the orders placed by the dsr on behalf of the retailer and puts
