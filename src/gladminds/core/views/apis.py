@@ -405,6 +405,7 @@ def split_date(date):
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
+@transaction.commit_manually
 def retailer_place_order(request, retailer_id):
     '''
     This method gets the orders placed by the retailer and puts
