@@ -275,6 +275,7 @@ urlpatterns = patterns('',
 
     ##Collection 
     url(r'^mc/get_collection/$','gladminds.bajaj.views.apis.get_collection'),
- 
+    ##SalesReturn
+    url(r'^cv/salesreturn/dsr_id/(?P<dsr_id>\d+)$','gladminds.core.views.apis.salesreturn',name='salesreturn'),
 )
 

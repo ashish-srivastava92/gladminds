@@ -154,6 +154,28 @@ APP_OS_CHOICES = (
            ('2','iOS')
         )
 
+SALES_RETURN_REASON = (
+           ('1','Wrong Part'),
+           ('2','Excess Part'),
+           ('3','Shortage')
+          )
+
+SALES_RETURN_DEFECTTYPE = (
+           ('1','Dusty'),
+           ('2','Broken'),
+           ('3','Rusty')
+        )
+
+SALES_RETURN_DEFECTTYPE_MAP = {
+            '1':'Dusty',
+            '2':'Broken',
+            '3':'Rusty'}
+
+SALES_RETURN_REASON_MAP = {
+            '1':'Wrong Part',
+            '2':'Excess Part',
+            '3':'Shortage'}
+
 SAVE_PLATE_PART_STATUS = (
                           ('Pending','Pending'),
                           ('Approved','Approved'),

@@ -2238,3 +2238,26 @@ class AppInfo(BaseModel):
         abstract = True
         db_table = "gm_appinfo"
         verbose_name_plural = "App Info"
+
+class SalesReturnHistory(BaseModel):
+    '''Model Sales Returns and Sales Return History'''
+
+    part_number = models.IntegerField(default=1)
+    reason = models.CharField(max_length=200,choices=constants.SALES_RETURN_REASON, default=1)
+    quantity = models.IntegerField(default=1)
+    excess_part = models.IntegerField(default=0)
+    short_part = models.IntegerField(default=0)
+    required_part = models.CharField(max_length=200, null=True)
+    settlement_status = models.CharField(max_length=200, null=True)
+    settlement_date = models.DateField()
+    defect_type = models.CharField(max_length=200,choices=constants.SALES_RETURN_DEFECTTYPE, default=1)
+    description = models.CharField(max_length=200, null=True)
+    transit_details = models.CharField(max_length=200, null=True)
+    settlement_status_sparewarranty = models.CharField(max_length=200, null=True)
+    settlement_date_sparewarranty = models.DateField()
+    settlement_status_transitdamage = models.CharField(max_length=200, null=True)
+    settlement_date_transitdamage = models.DateField()
+    class Meta:
+        abstract = True
+        db_table = "gm_salesreturnhistory"
+        verbose_name_plural = "Sales Return"

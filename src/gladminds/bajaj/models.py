@@ -1487,7 +1487,32 @@ class AverageLocalitySalesHistory(base_models.AverageLocalitySalesHistory):
     class Meta(base_models.AverageLocalitySalesHistory.Meta):
         app_label = _APP_NAME
 
+#####################SALES RETURN############################
+class SalesReturnHistory(base_models.SalesReturnHistory):
 
+    invoice_number = models.ForeignKey(Invoices)
+    retailer = models.ForeignKey(Retailer)
+    dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+
+    class Meta(base_models.SalesReturnHistory.Meta):
+        app_label = _APP_NAME
+
+class SpareWarrantyClaim(SalesReturnHistory):
+
+    class Meta(base_models.SalesReturnHistory.Meta):
+        proxy = True
+        app_label = _APP_NAME
+        verbose_name_plural = "Spare Warranty Claim"
+
+class TransitDamageClaim(SalesReturnHistory):
+
+    class Meta(base_models.SalesReturnHistory.Meta):
+        proxy = True
+        app_label = _APP_NAME
+        verbose_name_plural = "Transit Damage Claim"
+
+#####################SALES RETURN############################
 class SFAReports(base_models.SFAReports):
     pass
 
