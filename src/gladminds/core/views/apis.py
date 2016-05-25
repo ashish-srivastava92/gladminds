@@ -1355,61 +1355,60 @@ def dsr_average_orders(request, dsr_id):
                          'status': 0})
     else:
         return Response(retailer_parts_list)
-   
+
     
 @api_view(['POST'])
 # # @authentication_classes((JSONWebTokenAuthentication,))
 # # @permission_classes((IsAuthenticated,))
 def salesreturn(request, dsr_id):
-    ''' this method adds a retailer and his profile from the DSR. Adds data in three tables
-    user, userprofile and retailer'''
+    '''
+    This method gets the orders placed by the dsr on behalf of the retailer and puts
+    it in the database
+    '''
     try:
         load = json.loads(request.body)
+        dsr=DistributorSalesRep.objects.get(distributor_sales_code=dsr_id)
+        if dsr:
+            for order in load:
+                try:
+                    retailer=Retailer.objects.get(retailer_code=order['retailer_id'])
+                    invoice=Invoices.objects.get(invoice_id=order['invoice_id'])
 
-        invoice_id = load.get('invoice_id')
-        part_number= load.get('part_number')
-        description= load.get('part_description')
-        quantity= load.get('part_quantity')
-        reason= load.get('reason')
-        required_part= load.get('required_part')
-        excess_part= load.get('excess_quantity')
-        short_part= load.get('shortage_quantity')
-        retailer_id= load.get('retailer_id')
+                    salesreturn_obj = SalesReturnHistory.objects.get(invoice_number__invoice_id=str(invoice.invoice_id) \
+                                                                        and part_number==order['part_number'])
+                    if salesreturn_obj:
+                            salesreturn_obj.retailer=retailer
+                            salesreturn_obj.dsr=dsr
 
-        try:
-            dsr=DistributorSalesRep.objects.get(distributor_sales_code=dsr_id)
-            retailer=Retailer.objects.get(retailer_code=retailer_id)
-            invoice=Invoices.objects.get(invoice_id=invoice_id)
-            salesreturn_obj = SalesReturnHistory.objects.get(invoice_number__invoice_id=invoice_id)
+                            salesreturn_obj.part_number=order['part_number']
+                            salesreturn_obj.description=order['part_description']
+                            salesreturn_obj.quantity=order['part_quantity']
+                            salesreturn_obj.reason=order['reason']
+                            salesreturn_obj.required_part=order['required_part']
+                            salesreturn_obj.excess_part=order['excess_quantity']
+                            salesreturn_obj.short_part=order['shortage_quantity']
+                            salesreturn_obj.save()
 
-            salesreturn_obj.retailer=retailer
-            salesreturn_obj.dsr=dsr
+                except:
+                    salesreturn = SalesReturnHistory()
+                    retailer=Retailer.objects.get(retailer_code=order['retailer_id'])
+                    invoice=Invoices.objects.get(invoice_id=order['invoice_id'])
+                    salesreturn.dsr = dsr
+                    salesreturn.retailer = retailer
 
-            salesreturn_obj.part_number=part_number
-            salesreturn_obj.description=description
-            salesreturn_obj.quantity=quantity
-            salesreturn_obj.reason=reason
-            salesreturn_obj.required_part=required_part
-            salesreturn_obj.short_part=short_part
-            salesreturn_obj.excess_part=excess_part
-            salesreturn_obj.save()
+                    salesreturn.invoice_number=invoice
+                    salesreturn.part_number = order['part_number']
+                    salesreturn.description = order['part_description']
+                    salesreturn.quantity = order['part_quantity']
+                    salesreturn.reason = order['reason']
+                    salesreturn.required_part = order['required_part']
+                    salesreturn.short_part = order['excess_quantity']
+                    salesreturn.excess_part = order['shortage_quantity']
+                    salesreturn.save()
 
-            return Response({'message': 'Sales return request updated', 'status':1})
-
-        except Exception as ex:
-            invoice=Invoices.objects.get(invoice_id=invoice_id)
-            salesreturn_obj=SalesReturnHistory(invoice_number=invoice, part_number=part_number,
-                                                description=description, quantity=quantity,
-                                                reason=reason, required_part=required_part,
-                                                short_part=short_part, excess_part=excess_part)
-
-            salesreturn_obj.save()
             return Response({'message': 'Sales return request made successfully', 'status':1})
+
     except Exception as ex:
         logger.error("Exception placing sales return request - {0}".format(ex))
 
     return Response({'message': 'Save failed, Incorrect Details', 'status':0})
-
-
-    
-

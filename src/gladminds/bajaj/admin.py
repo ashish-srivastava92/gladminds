@@ -3033,8 +3033,8 @@ class SalesReturnAdmin(GmModelAdmin):
         data = SalesReturnHistory.objects.all()
         for each in data:
 
-            order_details_dict["retailer_id"] = each.retailer.id
-            order_details_dict["dsr_id"] = each.dsr.id
+            order_details_dict["retailer_id"] = each.retailer.retailer_code
+            order_details_dict["dsr_id"] = each.dsr.distributor_sales_code
 
             order_details_dict["invoices"] = each.invoice_number.invoice_id
             order_details_dict["part_number"] = each.part_number
