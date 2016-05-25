@@ -3021,23 +3021,6 @@ class SalesReturnAdmin(GmModelAdmin):
     def has_add_permission(self, request):
         return True
 
-    def role_based_filter_data(self, order_details_dict, user):
-        # FIXME: Return false other than all the known user roles
-        # FIXME: Move this method to a more generic location, may be auth_helper
-        if user.groups.filter(name=Roles.DISTRIBUTORS).exists():
-            associated_dist_id = retailer_obj.distributor_id
-            logged_in_dist = Distributor.objects.get(user=user.id).id
-            return logged_in_dist ==  associated_dist_id
-        if user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
-            logged_in_asm = AreaSparesManager.objects.get(user=user.id).id
-            associated_asm_id = retailer_obj.distributor.asm_id
-            return logged_in_asm ==  associated_asm_id
-        if user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
-            logged_in_nsm = NationalSparesManager.objects.get(user=user.id).id
-            associated_nsm_id = retailer_obj.distributor.asm.nsm_id
-            return logged_in_nsm ==  associated_nsm_id
-        return True
-
     def get_form(self,request, obj=None, **kwargs):
         form = super(SalesReturnAdmin,self).get_form(request, obj, **kwargs)
         invoice = form.base_fields['invoice_number']
@@ -3060,7 +3043,6 @@ class SalesReturnAdmin(GmModelAdmin):
             order_details_dict["reason"] = SALES_RETURN_REASON_MAP.get(each.reason)
 
             order_details.append(order_details_dict.copy())
-            order_details = filter(lambda x: self.role_based_filter_data(x, request.user), order_details)
 
         order_details = sorted(order_details)
         context ={
@@ -3110,7 +3092,6 @@ class SpareWarrantyClaimAdmin(GmModelAdmin):
             order_details_dict["reason"] = SALES_RETURN_REASON_MAP.get(each.reason)
 
             order_details.append(order_details_dict.copy())
-            order_details = filter(lambda x: self.role_based_filter_data(x, request.user), order_details)
 
         order_details = sorted(order_details)
         context = {
@@ -3160,7 +3141,6 @@ class TransitDamageClaimAdmin(GmModelAdmin):
             order_details_dict["reason"] = SALES_RETURN_REASON_MAP.get(each.reason)
 
             order_details.append(order_details_dict.copy())
-            order_details = filter(lambda x: self.role_based_filter_data(x, request.user), order_details)
 
         order_details = sorted(order_details)
         context = {
