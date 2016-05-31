@@ -98,7 +98,6 @@ def send_email_to_retailer_on_place_order(orderpart, orderpart_details_list):
                         'orderpart_details': orderpart_details_list
                     })
 
-
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
@@ -115,6 +114,28 @@ def get_retailers(request, dsr_id):
     retailer_list = []
     for retailer in retailers:
         retailer_dict = {}
+        
+        ########### MTD logic to get the number of parts ordered from 1 -> till date ##########
+        monthStart = datetime.datetime.now().replace(day=1).strftime("%Y-%m-%d")
+        monthCurrent = datetime.datetime.now().strftime("%Y-%m-%d")
+        orders = OrderPart.objects.filter(retailer__retailer_code=retailer.retailer_code, \
+                                        order_date__range=[monthStart, monthCurrent] )
+        mtd = {}
+        parts_mtd = 0
+        for order in orders:
+            for order_details in order.orderpartdetails_set.all():
+                try:
+                    if order_details.part_number.part_number in mtd:
+                        mtd[order_details.part_number.part_number] += order_details.quantity
+                    else:
+                        mtd[order_details.part_number.part_number] = order_details.quantity
+                    parts_mtd  += order_details.line_total
+                except:
+                    pass
+        retailer_dict.update({"retailer_mtd":mtd}) 
+        retailer_dict.update({"parts_mtd": '%.2f' % float(int(parts_mtd)) })  
+        ########### End of MTD logic #############
+
         retailer_dict.update({"retailer_Id":retailer.retailer_code})
         retailer_dict.update({"retailer_name":retailer.retailer_name})
         retailer_dict.update({"retailer_mobile":retailer.mobile})
