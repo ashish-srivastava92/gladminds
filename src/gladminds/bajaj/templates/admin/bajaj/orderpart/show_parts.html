@@ -163,6 +163,7 @@
 			<tr>
 
 				<th class="text-center">PartNumber</th>
+				<th class="text-center">Description</th>
 				<th class="text-center">Available Qty</th>
 				<th class="text-center">Ordered Qty</th>
 				<th class="text-center">MRP</th>
@@ -191,6 +192,7 @@
 				<td class="text-center"><a data-toggle="modal" data-target="#myModal" href="javascript:void(0)" onclick="loadOrderDetails('{% url 'ordered_part_details' each.part_number order_id %}','{{each.part_number}}','{{each.part_description}}')">{{each.part_number}}</a>
 				<input type="hidden" value="{{each.part_number}}" name="part_number">
 				</td>
+				<td class="text-center">{{each.part_description}}</td>
 
 				<td class="text-center">{{each.available_quantity}}</td>
 				<td class="text-center">

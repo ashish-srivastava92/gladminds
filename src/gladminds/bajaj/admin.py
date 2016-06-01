@@ -1196,8 +1196,11 @@ class RecentOrderAdmin(GmModelAdmin):
     
     
     search_fields =('order_number','dsr','order_date','retailer_name')
-    list_display = ('order_number_url', 'dsr','retailer','order_date',)
+    list_display = ('order_number_url', 'dsr','retailer_name','order_date',)
     
+    def retailer_name(self, obj):
+        return obj.retailer.retailer_name
+
     def order_number_url(self, obj):
         return '<a href=%s/%s/open/%s>%s</a>' % ('/admin/get_parts', obj.id, obj.retailer_id, obj.order_number)
     order_number_url.allow_tags = True
@@ -3016,7 +3019,6 @@ class ContainerLRAdmin(GmModelAdmin):
         if css_class:
             return {'class': css_class}
 
-<<<<<<< HEAD
 class BackOrdersAdmin(GmModelAdmin):
     list_display = ('qty',)
 
@@ -3074,7 +3076,7 @@ class BackOrdersAdmin(GmModelAdmin):
         template = 'admin/bajaj/orderpart/change_list.html'  # = Your new template
         form_url = ''
         return super(BackOrdersAdmin, self).changelist_view(request, context)
-=======
+
 class SalesReturnAdmin(GmModelAdmin):
 
     def has_add_permission(self, request):
@@ -3209,7 +3211,6 @@ class TransitDamageClaimAdmin(GmModelAdmin):
         form_url = ''
         return super(TransitDamageClaimAdmin, self).changelist_view(request, context)
 
->>>>>>> 6117b21dc24d6834576a688930271dbffa4ec966
 
 def get_admin_site_custom(brand):
     brand_admin = BajajAdminSite(name=brand)
