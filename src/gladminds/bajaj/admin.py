@@ -2406,11 +2406,8 @@ class OrderPartAdmin(GmModelAdmin):
         opts = model_admin.model._meta
         order_details=[]
         order_obj = OrderPart.objects.get(id=order_id)
-        #print order_obj.retailer,"retttt"
         order_objs = OrderPart.objects.filter(retailer=order_obj.retailer,accept=0)
-        #print order_objs,"objssssssssssssssssss"
         for each in order_objs:
-            #print each.id
             orderdetails_obj = OrderPartDetails.objects.filter(order_id=each.id).aggregate(Sum('line_total'))
             orderdetails_obj["line_total__sum"]
             order_dict={}
@@ -2418,7 +2415,6 @@ class OrderPartAdmin(GmModelAdmin):
             order_dict["order_id"] = each.id
             order_dict["order_date"] = order_obj.order_date
             order_details.append(order_dict)
-        #print order_details,"disppp"
         context = { 
                    'opts':opts,
                    'app_label' : opts.app_label,
@@ -3045,9 +3041,6 @@ class BackOrdersAdmin(GmModelAdmin):
             # Iterating only first 1000 order detail records, way too old orders should not be relevant
             iter_orderpart_details_obj_list = orderpart_details_obj_list[:1000]
             for orderpart_detail_obj in iter_orderpart_details_obj_list:
-                if counter > 20:
-                    # This Logic needs commenting -> Prashanth
-                    break
                 pending_order_dict = {}
                 order_obj = orderpart_detail_obj.order
                 part_number = orderpart_detail_obj.part_number

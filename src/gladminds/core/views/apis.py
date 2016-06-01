@@ -132,7 +132,7 @@ def get_retailers(request, dsr_id):
                     else:
                         mtd[order_details.part_number.part_number] = order_details.quantity
                     parts_mtd  += order_details.line_total
-                except:
+                except OrderPartDetails.DoesNotExist:
                     pass
         retailer_dict.update({"retailer_mtd":mtd}) 
         retailer_dict.update({"parts_mtd": '%.2f' % float(int(parts_mtd)) })  
