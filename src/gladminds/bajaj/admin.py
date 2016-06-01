@@ -18,7 +18,8 @@ from gladminds.bajaj.models import Distributor, DistributorStaff, DistributorSal
                          SparePartPoint, State, AreaSparesManager, City, OrderPartDetails, OrderDeliveredHistory, \
                           Collection, PartsStock, OrderPart, NationalSparesManager, DSRLocationDetails, CollectionDetails,\
                           Invoices,DoDetails, PermanentJourneyPlan, PartIndexDetails, SFAReports,SFAHighlights,\
-                          NsmTarget,AsmTarget,DistributorTarget,DistributorSalesRepTarget,RetailerTarget,TransitStock
+                          NsmTarget,AsmTarget,DistributorTarget,DistributorSalesRepTarget,RetailerTarget,TransitStock, \
+                          SalesReturnHistory
 from gladminds.core.model_fetcher import get_model
 from gladminds.core.services.loyalty.loyalty import loyalty
 from gladminds.core import utils
@@ -43,6 +44,8 @@ from rest_framework.response import Response
 from django.forms import ModelForm
 from suit.widgets import SuitDateWidget
 from django.http import HttpResponseRedirect
+from gladminds.core.constants import SALES_RETURN_REASON_MAP
+
 
 logger = logging.getLogger('gladminds')
 global district_list
@@ -3013,6 +3016,7 @@ class ContainerLRAdmin(GmModelAdmin):
         if css_class:
             return {'class': css_class}
 
+<<<<<<< HEAD
 class BackOrdersAdmin(GmModelAdmin):
     list_display = ('qty',)
 
@@ -3070,6 +3074,142 @@ class BackOrdersAdmin(GmModelAdmin):
         template = 'admin/bajaj/orderpart/change_list.html'  # = Your new template
         form_url = ''
         return super(BackOrdersAdmin, self).changelist_view(request, context)
+=======
+class SalesReturnAdmin(GmModelAdmin):
+
+    def has_add_permission(self, request):
+        return True
+
+    def get_form(self,request, obj=None, **kwargs):
+        form = super(SalesReturnAdmin,self).get_form(request, obj, **kwargs)
+        invoice = form.base_fields['invoice_number']
+        invoice.widget.can_add_related = False
+        return form
+
+    def changelist_view(self, request, extra_context={}):
+        order_details = []
+        order_details_dict = {}
+        data = SalesReturnHistory.objects.all()
+        for each in data:
+
+            order_details_dict["retailer_id"] = each.retailer.retailer_code
+            order_details_dict["dsr_id"] = each.dsr.distributor_sales_code
+
+            order_details_dict["invoices"] = each.invoice_number.invoice_id
+            order_details_dict["part_number"] = each.part_number
+            order_details_dict["quantity"] = each.quantity
+            order_details_dict["date"] = each.created_date
+            order_details_dict["reason"] = SALES_RETURN_REASON_MAP.get(each.reason)
+
+            order_details.append(order_details_dict.copy())
+
+        order_details = sorted(order_details)
+        context ={
+                    'order_details':order_details
+                }
+        template = 'admin/bajaj/salesreturnhistory/change_list.html'
+        form_url = ''
+        return super(SalesReturnAdmin, self).changelist_view(request, context)
+
+class SpareWarrantyClaimAdmin(GmModelAdmin):
+
+    def has_add_permission(self, request):
+        return True
+
+    def role_based_filter_data(self, order_details_dict, user):
+        # FIXME: Return false other than all the known user roles
+        # FIXME: Move this method to a more generic location, may be auth_helper
+        if user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+            associated_dist_id = retailer_obj.distributor_id
+            logged_in_dist = Distributor.objects.get(user=user.id).id
+            return logged_in_dist ==  associated_dist_id
+        if user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            logged_in_asm = AreaSparesManager.objects.get(user=user.id).id
+            associated_asm_id = retailer_obj.distributor.asm_id
+            return logged_in_asm ==  associated_asm_id
+        if user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
+            logged_in_nsm = NationalSparesManager.objects.get(user=user.id).id
+            associated_nsm_id = retailer_obj.distributor.asm.nsm_id
+            return logged_in_nsm ==  associated_nsm_id
+        return True
+
+    def get_form(self,request, obj=None, **kwargs):
+        form = super(SpareWarrantyClaimAdmin,self).get_form(request, obj, **kwargs)
+        invoice = form.base_fields['invoice_number']
+        invoice.widget.can_add_related = False
+        return form
+
+    def changelist_view(self, request, extra_context={}):
+        order_details = []
+        order_details_dict = {}
+        data = SalesReturnHistory.objects.all()
+        for each in data:
+            order_details_dict["invoices"] = each.invoice_number.invoice_id
+            order_details_dict["part_number"] = each.part_number
+            order_details_dict["quantity"] = each.quantity
+            order_details_dict["date"] = each.created_date
+            order_details_dict["reason"] = SALES_RETURN_REASON_MAP.get(each.reason)
+
+            order_details.append(order_details_dict.copy())
+
+        order_details = sorted(order_details)
+        context = {
+                    'order_details':order_details
+                }
+        template = 'admin/bajaj/sparewarrantyclaim/change_list.html'
+        form_url = ''
+        return super(SpareWarrantyClaimAdmin, self).changelist_view(request, context)
+
+class TransitDamageClaimAdmin(GmModelAdmin):
+
+    def has_add_permission(self, request):
+        return True
+
+    def role_based_filter_data(self, order_details_dict, user):
+        # FIXME: Return false other than all the known user roles
+        # FIXME: Move this method to a more generic location, may be auth_helper
+        if user.groups.filter(name=Roles.DISTRIBUTORS).exists():
+            associated_dist_id = retailer_obj.distributor_id
+            logged_in_dist = Distributor.objects.get(user=user.id).id
+            return logged_in_dist ==  associated_dist_id
+        if user.groups.filter(name=Roles.AREASPARESMANAGERS).exists():
+            logged_in_asm = AreaSparesManager.objects.get(user=user.id).id
+            associated_asm_id = retailer_obj.distributor.asm_id
+            return logged_in_asm ==  associated_asm_id
+        if user.groups.filter(name=Roles.NATIONALSPARESMANAGERS).exists():
+            logged_in_nsm = NationalSparesManager.objects.get(user=user.id).id
+            associated_nsm_id = retailer_obj.distributor.asm.nsm_id
+            return logged_in_nsm ==  associated_nsm_id
+        return True
+
+    def get_form(self,request, obj=None, **kwargs):
+        form = super(TransitDamageClaimAdmin,self).get_form(request, obj, **kwargs)
+        invoice = form.base_fields['invoice_number']
+        invoice.widget.can_add_related = False
+        return form
+
+    def changelist_view(self, request, extra_context={}):
+        order_details = []
+        order_details_dict = {}
+        data = SalesReturnHistory.objects.all()
+        for each in data:
+            order_details_dict["invoices"] = each.invoice_number.invoice_id
+            order_details_dict["part_number"] = each.part_number
+            order_details_dict["quantity"] = each.quantity
+            order_details_dict["date"] = each.created_date
+            order_details_dict["reason"] = SALES_RETURN_REASON_MAP.get(each.reason)
+
+            order_details.append(order_details_dict.copy())
+
+        order_details = sorted(order_details)
+        context = {
+                    'order_details':order_details
+                }
+        template = 'admin/bajaj/transitdamageclaim/change_list.html'
+        form_url = ''
+        return super(TransitDamageClaimAdmin, self).changelist_view(request, context)
+
+>>>>>>> 6117b21dc24d6834576a688930271dbffa4ec966
 
 def get_admin_site_custom(brand):
     brand_admin = BajajAdminSite(name=brand)
@@ -3156,6 +3296,11 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("DistributorTarget", brand), DistributorTargetAdmin)
     brand_admin.register(get_model("DistributorSalesRepTarget", brand), DistributorSalesRepTargetAdmin)
     brand_admin.register(get_model("RetailerTarget", brand), RetailerTargetAdmin)
+    brand_admin.register(get_model("SalesReturnHistory", brand), SalesReturnAdmin)
+    brand_admin.register(get_model("SpareWarrantyClaim", brand), SpareWarrantyClaimAdmin)
+    brand_admin.register(get_model("TransitDamageClaim", brand), TransitDamageClaimAdmin)
+
+
     return brand_admin
 
 brand_admin = get_admin_site_custom(GmApps.BAJAJ)

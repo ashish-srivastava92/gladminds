@@ -1146,3 +1146,28 @@ class OrderPartDetails(base_models.OrderPartDetails):
     class Meta(base_models.OrderPartDetails.Meta):
         app_label = _APP_NAME
         verbose_name_plural = "Order Part Details"
+
+#####################SALES RETURN############################
+class SalesReturnHistory(base_models.SalesReturnHistory):
+
+    invoice_number = models.ForeignKey(Invoices)
+    retailer = models.ForeignKey(Retailer)
+    dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
+    distributor = models.ForeignKey(Distributor, null=True, blank=True)
+    
+    class Meta(base_models.SalesReturnHistory.Meta):
+        app_label = _APP_NAME
+
+class SpareWarrantyClaim(SalesReturnHistory):
+
+    class Meta(base_models.SalesReturnHistory.Meta):
+        proxy = True
+        app_label = _APP_NAME
+        verbose_name_plural = "Spare Warranty Claim"
+
+class TransitDamageClaim(SalesReturnHistory):
+
+    class Meta(base_models.SalesReturnHistory.Meta):
+        proxy = True
+        app_label = _APP_NAME
+        verbose_name_plural = "Transit Damage Claim"

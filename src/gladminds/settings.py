@@ -293,6 +293,18 @@ SUIT_CONFIG = {
 
 )},
              
+        {'app': 'bajaj', 'label': 'Sales Return', 'icon': ' icon-folder-open',
+         'models':(
+                    {'model': 'salesreturnhistory',
+                     'label': 'Sales Return History'},
+
+                     {'model': 'sparewarrantyclaim',
+                      'label': 'Spare Warranty Claim'},
+
+                   {'model': 'transitdamageclaim',
+                    'label': 'Transit Damage Claim'},
+)},
+
              {'app': 'bajaj', 'label': 'Location Details', 'icon': ' icon-folder-open',
          'models':(
                   
@@ -476,7 +488,7 @@ MIDDLEWARE_CLASSES = (
     'gladminds.core.middlewares.dynamicsite_middleware.DynamicSitesMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
+#     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',

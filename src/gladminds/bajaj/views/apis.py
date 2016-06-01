@@ -66,10 +66,11 @@ def authentication(request):
             payload = jwt_payload_handler(user)
             if registration_id:
                 from push_notifications.models import APNSDevice, GCMDevice
-                gcm_obj = GCMDevice.objects.filter(registration_id=registration_id)
-                if not gcm_obj:
+                gcm_obj_list = GCMDevice.objects.filter(registration_id=registration_id)
+                if not gcm_obj_list:
                     gcm_obj = GCMDevice(registration_id=registration_id, user_id=user.id)
                 else:
+                    gcm_obj = gcm_obj_list[0]
                     gcm_obj.user_id = user.id
                 gcm_obj.save()
             data = {"Id": role_id,
@@ -346,7 +347,7 @@ def split_date(date):
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
-@transaction.commit_manually
+@transaction.atomic
 def place_order(request, dsr_id):
     '''
     This method gets the orders placed by the dsr on behalf of the retailer and puts
@@ -381,7 +382,7 @@ def place_order(request, dsr_id):
                     orderpart_details.part_number_catalog = part_catalog
                     orderpart_details.order_part_number = orderpart_details.part_number_catalog.part_number
                 else:
-                    '''Get the part detailes from PartPricing Table'''
+                    '''Get the part details from PartPricing Table'''
                     part_category = PartPricing.objects.\
                                              get(part_number=item['part_number'])
                     orderpart_details.part_number = part_category
@@ -391,12 +392,12 @@ def place_order(request, dsr_id):
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
                 orderpart_details_list.append(orderpart_details)
-                orderpart_details.save()
-
         try:
-            transaction.commit()
+            OrderPartDetails.objects.bulk_create(orderpart_details_list)
         except:
-            transaction.rollback()
+            # TODO: Add logger here
+            return Response({'message': 'Order could not be placed', 'status':0})
+
     try:
         send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
         send_email_to_retailer_on_place_order(orderpart, orderpart_details_list)
@@ -407,7 +408,7 @@ def place_order(request, dsr_id):
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
-@transaction.commit_manually
+@transaction.atomic
 def retailer_place_order(request, retailer_id):
     '''
     This method gets the orders placed by the retailer and puts
@@ -448,11 +449,12 @@ def retailer_place_order(request, retailer_id):
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
                 orderpart_details_list.append(orderpart_details)
-                orderpart_details.save()
     try:
-        transaction.commit()
+        OrderPartDetails.objects.bulk_create(orderpart_details_list)
     except:
-        transaction.rollback()
+        # TODO: Add logger here
+        return Response({'message': 'Order could not be placed', 'status':0})
+
     try:
         send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
         send_email_to_retailer_on_place_order(orderpart, orderpart_details_list)

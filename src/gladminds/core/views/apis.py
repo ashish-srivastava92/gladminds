@@ -2,7 +2,7 @@
 author: araskumar.a
 date: 31-08-2015
 '''
-import json, datetime, time, decimal
+import json, datetime, time, decimal,logging
 from datetime import timedelta
 from collections import OrderedDict
 from operator import itemgetter
@@ -23,7 +23,8 @@ from rest_framework_jwt.settings import api_settings
 from gladminds.core.models import Distributor, DistributorSalesRep, Retailer, CvCategories, \
             OrderPart, OrderPartDetails,DSRWorkAllocation, AlternateParts, Collection, \
             CollectionDetails,PartMasterCv,RetailerCollection,PartsStock, Invoices, \
-            UserProfile, PartIndexDetails, PartIndexPlates, PartPricing, FocusedPart
+            UserProfile, PartIndexDetails, PartIndexPlates, PartPricing, FocusedPart, \
+            SalesReturnHistory, Invoices
 from gladminds.core import constants
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
 from django.conf import settings
@@ -34,6 +35,7 @@ from gladminds.sqs_tasks import send_loyalty_sms, send_mail_for_sfa_order_placed
 
 AUDIT_ACTION = 'SEND TO QUEUE'
 
+logger = logging.getLogger("gladminds")
 
 today = datetime.datetime.now()
 @api_view(['POST'])
@@ -189,6 +191,7 @@ from django.conf import settings
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
+@transaction.atomic
 def place_order(request, dsr_id):
     '''
     This method gets the orders placed by the dsr on behalf of the retailer and puts
@@ -233,12 +236,12 @@ def place_order(request, dsr_id):
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
-                orderpart_details_list.append(orderpart_details)
-                orderpart_details.save()
+                orderpart_details_list.append(orderpart_details)                
         try:
-            transaction.commit()
+            OrderPartDetails.objects.bulk_create(orderpart_details_list)
         except:
-            transaction.rollback()
+            # TODO: Add logger here
+            return Response({'message': 'Order could not be placed', 'status':0})
         try:
             send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
             send_email_to_retailer_on_place_order(orderpart, orderpart_details_list)
@@ -425,6 +428,7 @@ def split_date(date):
 @api_view(['POST'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
+@transaction.atomic
 def retailer_place_order(request, retailer_id):
     '''
     This method gets the orders placed by the retailer and puts
@@ -454,7 +458,7 @@ def retailer_place_order(request, retailer_id):
                     orderpart_details.part_number_catalog = part_catalog
                     orderpart_details.order_part_number = orderpart_details.part_number_catalog.part_number
                 else:
-                    '''Get the part detailes from PartPricing Table'''
+                    '''Get the part details from PartPricing Table'''
                     part_category = PartPricing.objects.\
                                              get(part_number=item['part_number'])
                     orderpart_details.part_number = part_category
@@ -464,8 +468,12 @@ def retailer_place_order(request, retailer_id):
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
                 orderpart_details_list.append(orderpart_details)
-                orderpart_details.save()
-    transaction.commit()
+    try:
+        OrderPartDetails.objects.bulk_create(orderpart_details_list)
+    except:
+        # TODO: Add logger here
+        return Response({'message': 'Order could not be placed', 'status':0})
+
     try:
         send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
         send_email_to_retailer_on_place_order(orderpart, orderpart_details_list)
@@ -1374,13 +1382,60 @@ def dsr_average_orders(request, dsr_id):
                          'status': 0})
     else:
         return Response(retailer_parts_list)
-   
-    
-    
-    
-
 
     
+@api_view(['POST'])
+# # @authentication_classes((JSONWebTokenAuthentication,))
+# # @permission_classes((IsAuthenticated,))
+def salesreturn(request, dsr_id):
+    '''
+    This method gets the orders placed by the dsr on behalf of the retailer and puts
+    it in the database
+    '''
+    try:
+        load = json.loads(request.body)
+        dsr=DistributorSalesRep.objects.get(distributor_sales_code=dsr_id)
+        if dsr:
+            for order in load:
+                try:
+                    retailer=Retailer.objects.get(retailer_code=order['retailer_id'])
+                    invoice=Invoices.objects.get(invoice_id=order['invoice_id'])
 
-    
+                    salesreturn_obj = SalesReturnHistory.objects.get(invoice_number__invoice_id=str(invoice.invoice_id) \
+                                                                        and part_number==order['part_number'])
+                    if salesreturn_obj:
+                            salesreturn_obj.retailer=retailer
+                            salesreturn_obj.dsr=dsr
 
+                            salesreturn_obj.part_number=order['part_number']
+                            salesreturn_obj.description=order['part_description']
+                            salesreturn_obj.quantity=order['part_quantity']
+                            salesreturn_obj.reason=order['reason']
+                            salesreturn_obj.required_part=order['required_part']
+                            salesreturn_obj.excess_part=order['excess_quantity']
+                            salesreturn_obj.short_part=order['shortage_quantity']
+                            salesreturn_obj.save()
+
+                except:
+                    salesreturn = SalesReturnHistory()
+                    retailer=Retailer.objects.get(retailer_code=order['retailer_id'])
+                    invoice=Invoices.objects.get(invoice_id=order['invoice_id'])
+                    salesreturn.dsr = dsr
+                    salesreturn.retailer = retailer
+
+                    salesreturn.invoice_number=invoice
+                    salesreturn.part_number = order['part_number']
+                    salesreturn.description = order['part_description']
+                    salesreturn.quantity = order['part_quantity']
+                    salesreturn.reason = order['reason']
+                    salesreturn.required_part = order['required_part']
+                    salesreturn.short_part = order['excess_quantity']
+                    salesreturn.excess_part = order['shortage_quantity']
+                    salesreturn.save()
+
+            return Response({'message': 'Sales return request made successfully', 'status':1})
+
+    except Exception as ex:
+        logger.error("Exception placing sales return request - {0}".format(ex))
+
+    return Response({'message': 'Save failed, Incorrect Details', 'status':0})
