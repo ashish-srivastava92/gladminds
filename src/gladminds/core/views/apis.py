@@ -118,10 +118,10 @@ def get_retailers(request, dsr_id):
         retailer_dict = {}
         
         ########### MTD logic to get the number of parts ordered from 1 -> till date ##########
-        monthStart = datetime.datetime.now().replace(day=1).strftime("%Y-%m-%d")
-        monthCurrent = datetime.datetime.now().strftime("%Y-%m-%d")
+        month_start = datetime.datetime.now().replace(day=1).strftime("%Y-%m-%d")
+        month_current = datetime.datetime.now().strftime("%Y-%m-%d")
         orders = OrderPart.objects.filter(retailer__retailer_code=retailer.retailer_code, \
-                                        order_date__range=[monthStart, monthCurrent] )
+                                        order_date__range=[month_start, month_current] )
         mtd = {}
         parts_mtd = 0
         for order in orders:
