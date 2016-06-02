@@ -118,24 +118,24 @@ def get_retailers(request, dsr_id):
         retailer_dict = {}
         
         ########### MTD logic to get the number of parts ordered from 1 -> till date ##########
-        month_start = datetime.datetime.now().replace(day=1).strftime("%Y-%m-%d")
-        month_current = datetime.datetime.now().strftime("%Y-%m-%d")
-        orders = OrderPart.objects.filter(retailer__retailer_code=retailer.retailer_code, \
-                                        order_date__range=[month_start, month_current] )
-        mtd = {}
-        parts_mtd = 0
-        for order in orders:
-            for order_details in order.orderpartdetails_set.all():
-                try:
-                    if order_details.part_number.part_number in mtd:
-                        mtd[order_details.part_number.part_number] += order_details.quantity
-                    else:
-                        mtd[order_details.part_number.part_number] = order_details.quantity
-                    parts_mtd  += order_details.line_total
-                except OrderPartDetails.DoesNotExist:
-                    pass
-        retailer_dict.update({"retailer_mtd":mtd}) 
-        retailer_dict.update({"parts_mtd": '%.2f' % float(int(parts_mtd)) })  
+        #month_start = datetime.datetime.now().replace(day=1).strftime("%Y-%m-%d")
+        #month_current = datetime.datetime.now().strftime("%Y-%m-%d")
+        #orders = OrderPart.objects.filter(retailer__retailer_code=retailer.retailer_code, \
+                                        #order_date__range=[month_start, month_current] )
+        #mtd = {}
+        #parts_mtd = 0
+        #for order in orders:
+            #for order_details in order.orderpartdetails_set.all():
+                #try:
+                    #if order_details.part_number.part_number in mtd:
+                        #mtd[order_details.part_number.part_number] += order_details.quantity
+                    #else:
+                        #mtd[order_details.part_number.part_number] = order_details.quantity
+                    #parts_mtd  += order_details.line_total
+                #except OrderPartDetails.DoesNotExist:
+                    #pass
+        #retailer_dict.update({"retailer_mtd":mtd}) 
+        #retailer_dict.update({"parts_mtd": '%.2f' % float(int(parts_mtd)) })  
         ########### End of MTD logic #############
 
         retailer_dict.update({"retailer_Id":retailer.retailer_code})
