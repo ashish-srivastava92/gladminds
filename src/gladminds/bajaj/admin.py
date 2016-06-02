@@ -1195,9 +1195,12 @@ class RetailerAdmin(GmModelAdmin):
 class RecentOrderAdmin(GmModelAdmin):
     
     
-    search_fields =('order_number','dsr','order_date','retailer_name')
-    list_display = ('order_number_url', 'dsr','retailer','order_date',)
+    search_fields =('order_number','dsr','order_date', 'retailer_name')
+    list_display = ('order_number_url', 'dsr', 'retailer_name', 'order_date',)
     
+    def retailer_name(self, obj):
+        return obj.retailer.retailer_name
+
     def order_number_url(self, obj):
         return '<a href=%s/%s/open/%s>%s</a>' % ('/admin/get_parts', obj.id, obj.retailer_id, obj.order_number)
     order_number_url.allow_tags = True
@@ -2403,21 +2406,15 @@ class OrderPartAdmin(GmModelAdmin):
         opts = model_admin.model._meta
         order_details=[]
         order_obj = OrderPart.objects.get(id=order_id)
-        print order_obj.retailer,"retttt"
         order_objs = OrderPart.objects.filter(retailer=order_obj.retailer,accept=0)
-        print order_objs,"objssssssssssssssssss"
         for each in order_objs:
-            print each.id
             orderdetails_obj = OrderPartDetails.objects.filter(order_id=each.id).aggregate(Sum('line_total'))
             orderdetails_obj["line_total__sum"]
-            
-            
             order_dict={}
             order_dict["total_value"]= orderdetails_obj["line_total__sum"]
             order_dict["order_id"] = each.id
             order_dict["order_date"] = order_obj.order_date
             order_details.append(order_dict)
-        print order_details,"disppp"
         context = { 
                    'opts':opts,
                    'app_label' : opts.app_label,
@@ -3016,6 +3013,64 @@ class ContainerLRAdmin(GmModelAdmin):
         if css_class:
             return {'class': css_class}
 
+class BackOrdersAdmin(GmModelAdmin):
+    list_display = ('qty',)
+
+    def changelist_view(self, request, extra_context={} ):
+        retailer_code = request.GET.get('retailer_id')
+        dsr_code = request.GET.get('dsr_id')
+        modified_since = request.GET.get('modified_since', '1970-01-01')   
+        if dsr_code:
+            distributor = DistributorSalesRep.objects.get(distributor_sales_code=dsr_code)
+            retailers = Retailer.objects.filter(distributor=distributor.distributor, \
+                approved=constants.STATUS['APPROVED'] )
+            orderpart_details_obj_list = []
+            delivered_order_obj_list = []
+        else:
+            retailers = Retailer.objects.filter(retailer_code=retailer_code, \
+                approved=constants.STATUS['APPROVED'] )
+            orderpart_details_obj_list = OrderPartDetails.objects.filter(\
+                order__retailer__in=retailers, modified_date__gt=modified_since).order_by('-id')
+            delivered_order_obj_list = OrderDeliveredHistory.objects.filter(\
+                order__retailer__in=retailers, modified_date__gt=modified_since).order_by('-id')
+        pending_orders_list = []
+        counter = 0
+        # This is added inorder to ensure both orderpart_details_obj_list and delivered_order_obj_list are having element inorder to prevent error .....
+        # Conforming with the logic above incase if block above is executed
+        if orderpart_details_obj_list and delivered_order_obj_list:
+            # Iterating only first 1000 order detail records, way too old orders should not be relevant
+            iter_orderpart_details_obj_list = orderpart_details_obj_list[:1000]
+            for orderpart_detail_obj in iter_orderpart_details_obj_list:
+                pending_order_dict = {}
+                order_obj = orderpart_detail_obj.order
+                part_number = orderpart_detail_obj.part_number
+                delivered_obj_list = delivered_order_obj_list.filter(order=order_obj, part_number=part_number)
+                if not delivered_obj_list:
+                    pending_quantity = orderpart_detail_obj.quantity
+                else:
+                    # Assuming unique part numbers per order. Take the first record in case of multiple values
+                    delivered_obj = delivered_obj_list[0]
+                    delivered_quantity = delivered_obj.delivered_quantity
+                    ordered_quantity = orderpart_detail_obj.quantity
+                    pending_quantity = int(ordered_quantity) - int(delivered_quantity)
+
+                if pending_quantity > 0:
+                    pending_order_dict['retailer_id'] = order_obj.retailer.retailer_code
+                    pending_order_dict['part_number'] = orderpart_detail_obj.part_number.part_number
+                    pending_order_dict['part_quantity'] = orderpart_detail_obj.quantity
+                    pending_order_dict['part_description'] = orderpart_detail_obj.part_number.description
+                    pending_order_dict['datetime'] = datetime.datetime.now()
+                    ordered_date = None
+                    if orderpart_detail_obj.order.order_date:
+                        ordered_date = orderpart_detail_obj.order.order_date.date()
+                    pending_order_dict['order_date'] = ordered_date
+                    pending_orders_list.append(pending_order_dict)
+                    counter = counter + 1 
+        context = {"pending_orders_list":pending_orders_list}
+        template = 'admin/bajaj/orderpart/change_list.html'  # = Your new template
+        form_url = ''
+        return super(BackOrdersAdmin, self).changelist_view(request, context)
+
 class SalesReturnAdmin(GmModelAdmin):
 
     def has_add_permission(self, request):
@@ -3162,7 +3217,7 @@ def get_admin_site_custom(brand):
     brand_admin.register(get_model("Collection", brand), CollectionAdmin)
     brand_admin.register(get_model("Invoices", brand), InvoiceAdmin)
     # brand_admin.register(get_model("DistributorStaff", brand), DistributorStaffAdmin)
-#     brand_admin.register(get_model("BackOrders", brand), BackOrdersAdmin)
+    brand_admin.register(get_model("BackOrders", brand), BackOrdersAdmin)
     brand_admin.register(get_model("DistributorSalesRep", brand), DistributorSalesRepAdmin)  
     brand_admin.register(get_model("DSRWorkAllocation", brand), DSRWorkAllocationAdmin)
     brand_admin.register(get_model("PermanentJourneyPlan", brand), PermanentJourneyPlanAdmin) 
