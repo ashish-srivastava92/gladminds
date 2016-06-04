@@ -210,9 +210,10 @@ def get_parts(request):
             parts_dict.update({"part_available_quantity":'NA'})
         else:
             parts_dict.update({"part_available_quantity":available_quantity.available_quantity})
-        parts_dict.update({"part_products":part.products})
+        applicable_models = ', '.join(list(part.applicable_models.values_list('model_name', flat=True)))        
+        parts_dict.update({"part_products":applicable_models})
         parts_dict.update({"mrp":part.mrp})
-        parts_dict.update({"datetime": datetime.datetime.now()})        
+        parts_dict.update({"datetime": datetime.datetime.now()})
         parts_list.append(parts_dict)
     return Response(parts_list)
 

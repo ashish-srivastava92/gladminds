@@ -249,8 +249,8 @@ def get_parts(request):
         parts_dict.update({"part_name":part.description})
         parts_dict.update({"part_number":part.part_number})
         parts_dict.update({"part_category":part.subcategory.name})
-        associated_categories = part.associated_parts.all()
-        parts_dict.update({"associated_categories_str": [i.part_number for i in associated_categories]})
+        associated_part_list = associated_parts(part)
+        parts_dict.update({"associated_categories_str": associated_part_list})
         try:
             available_quantity = PartsStock.objects.get(part_number = part)
         except:
@@ -264,6 +264,18 @@ def get_parts(request):
         parts_dict.update({"datetime": datetime.datetime.now()})
         parts_list.append(parts_dict)
     return Response(parts_list)
+
+
+def associated_parts(part):
+    '''
+    returns all the associated parts for a part object
+    '''
+    associated_parts_obj_list = part.associated_parts.all()
+    associated_part_number_list = list(associated_parts_obj_list.values_list('part_number', flat=True))
+    for associated_part in associated_parts_obj_list:
+        associated_part_number_list.extend(associated_part.associated_parts.values_list('part_number', flat=True))
+    return set(associated_part_number_list)
+
 
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
