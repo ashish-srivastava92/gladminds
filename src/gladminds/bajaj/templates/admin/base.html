@@ -35,8 +35,14 @@
           <!-- Header -->
           <div id="header" class="header" style="background-image: -webkit-gradient(linear, left top, right top, from(#F5F5F5), to(#F5F5F5));color:#708090;">
             <div id="branding" style="border-right: 0px; min-width: 225px;">
-              <a href="{% url 'admin:index' %}"><h1 id="site-name">{% block branding %}<img style="width: 209px;height: 43px;margin-left: -11px;argin-top: -2px;
-" src="{{STATIC_URL}}img/bajaj_logo.jpg" />{% endblock %}</h1></a>
+              <a href="{% url 'admin:index' %}"><h1 id="site-name">
+                {% block branding %}
+                {% if request.user|verticle == 'MC' %}
+                  <img style="width: 209px;height: 43px;margin-left: -11px;argin-top: -2px;" src="{{STATIC_URL}}img/bajaj_logo_mc.png" />
+                {% else %}
+                  <img style="width: 209px;height: 43px;margin-left: -11px;argin-top: -2px;" src="{{STATIC_URL}}img/bajaj_logo_cv.jpg" />
+                {% endif %}
+                {% endblock %}</h1></a>
             </div>
 
             {% block header_time %}
@@ -203,6 +209,5 @@
   <script src="{% static 'suit/js/suit.js' %}"></script>
   {% include 'RBAC/restrict_view.html' %}
   {% block extrajs %}{% endblock %}
-
 </body>
 </html>
