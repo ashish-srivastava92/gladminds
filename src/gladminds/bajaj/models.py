@@ -1404,12 +1404,12 @@ class BackOrders(base_models.BackOrders):
     distributor = models.ForeignKey(Distributor, null=True, blank=True)
     qty = models.IntegerField(null=True,blank=True)
     datetime = models.DateTimeField()
+
     class Meta(base_models.BackOrders.Meta):
         app_label = _APP_NAME 
     
     
 class DSRLocationDetails(base_models.DSRLocationDetails):
-    
     
     dsr = models.ForeignKey(DistributorSalesRep, null=True, blank=True)
     latitude = models.CharField(max_length=255,null=True, blank=True)
