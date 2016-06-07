@@ -100,12 +100,28 @@ def send_email_to_retailer_on_place_order(orderpart, orderpart_details_list):
                         'orderpart_details': orderpart_details_list
                     })
 
+########### This API fetches all the retailers for the given distributor #####################
+########### This API is called via the PJP routine by the change_list.html ################### 
+@api_view(['GET'])
+def get_retailers_for_distributor(request, dsr_id):
+    dsr = DistributorSalesRep.objects.get(distributor_sales_code=dsr_id)
+    if( dsr ): # check if the dsr is fetched / exists
+        retailers = list(dsr.retailer_set.all())
+        if( retailers ): # check if dsr has retailers
+            return_retailer = []
+            for retailer in retailers:
+                return_retailer.append( retailer.retailer_name )
+            return Response( return_retailer )
+    return Response([]) # if the dsr doesnt have retialer return blank list
+########### End of Get Retailer For Distributor ##############################################
+
 ########### MTD logic to get the number of parts ordered from 1 -> till date ##########
 @api_view(['GET'])
-def get_mtd_retailer(request, retailer_code):
+def get_mtd_retailer(request, dsr_id):
     month_start = datetime.datetime.now().replace(day=1).strftime("%Y-%m-%d")
     month_current = datetime.datetime.now().strftime("%Y-%m-%d")
-    orders = OrderPart.objects.filter(  retailer__retailer_code=retailer_code,\
+    distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+    orders = OrderPart.objects.filter(  distributor = distributor.distributor,\
                                         order_date__range=[month_start, month_current] )
     mtd, retailer_dict = {}, {}
     parts_mtd=0
@@ -137,7 +153,8 @@ def get_retailers(request, dsr_id):
         modified_since = '1970-01-01'
     distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
     retailers = Retailer.objects.filter(distributor = distributor.distributor, \
-                                approved = constants.STATUS['APPROVED'], modified_date__gt=modified_since)
+                                        approved = constants.STATUS['APPROVED'], \
+                                        modified_date__gt=modified_since)
     retailer_list = []
     for retailer in retailers:
         retailer_dict = {}

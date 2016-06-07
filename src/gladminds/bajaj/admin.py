@@ -2566,7 +2566,12 @@ class ProductCatalogAdmin(GmModelAdmin):
     #search_fields = ('partner__partner_id', 'product_id',
      #               'brand', 'model', 'category',
       #              'sub_category')
-    list_display = ('get_model', 'get_plate', 'part_number', 'description', 'mrp')
+    list_display = ('get_model', 'get_plate', 'part_number', 'description', 'get_mrp')
+    search_fields = ('applicable_models__model_name',)
+
+    def get_mrp(self, obj):
+        return obj.mrp
+    get_mrp.short_description = "MRP"
 
     def get_model(self, obj):
         return obj.plate.model.model_name
