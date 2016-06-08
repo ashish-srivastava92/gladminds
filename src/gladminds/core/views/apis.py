@@ -165,10 +165,6 @@ def get_retailers(request, dsr_id):
     retailers = Retailer.objects.filter(distributor = distributor.distributor, \
                                         approved = constants.STATUS['APPROVED'], \
                                         modified_date__gt=modified_since)
-    #month_current = datetime.datetime.now().strftime("%Y-%m-%d")
-    #month_six_before = (datetime.datetime.today() - relativedelta(months=6)).strftime("%Y-%m-%d")
-    #month_start = datetime.datetime.now().replace(day=1).strftime("%Y-%m-%d")
-
     retailer_list = []
     for retailer in retailers:
         retailer_dict = {}
@@ -190,7 +186,6 @@ def get_retailers(request, dsr_id):
         if not retailer.latitude or not retailer.longitude:
             retailer.latitude=''
             retailer.longitude=''
-        
         retailer_dict.update({"latitude":str(retailer.latitude)})
         retailer_dict.update({"longitude":str(retailer.longitude)})
         retailer_dict.update({"datetime": datetime.datetime.now()})
