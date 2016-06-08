@@ -115,17 +115,26 @@ def get_retailers_for_distributor(request, dsr_id):
     return Response([]) # if the dsr doesnt have retialer return blank list
 ########### End of Get Retailer For Distributor ##############################################
 
+
 ########### MTD logic to get the number of parts ordered from 1 -> till date ##########
 @api_view(['GET'])
 def get_mtd_retailer(request, dsr_id):
     month_start = datetime.datetime.now().replace(day=1).strftime("%Y-%m-%d")
     month_current = datetime.datetime.now().strftime("%Y-%m-%d")
     distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-    orders = OrderPart.objects.filter(  distributor = distributor.distributor,\
-                                        order_date__range=[month_start, month_current] )
-    mtd, retailer_dict = {}, {}
-    parts_mtd=0
+    retailers = distributor.retailer_set.all()
+    orders = []
+    for retailer in retailers:
+        date_range_filtered_orders = retailer.orderpart_set.all().filter(order_date__range=[month_start, month_current]) # This is to filter the order based on date 1 -> till date
+        if(date_range_filtered_orders): # checking if order from 1-> till date exists
+            for _order in date_range_filtered_orders:
+                orders.append( _order )
+
+    retailer_dict = {} # this dictionary holds { "Retailer_Name" : { "Part_Number": Quantity , "Total_Value": total } }
+    
     for order in orders:
+        mtd = {}
+        parts_mtd = 0
         for order_details in order.orderpartdetails_set.all():
             try:
                 if order_details.part_number.part_number in mtd:
@@ -135,8 +144,8 @@ def get_mtd_retailer(request, dsr_id):
                 parts_mtd  += order_details.line_total
             except OrderPartDetails.DoesNotExist:
                 pass
-    retailer_dict.update({"retailer_mtd":mtd})
-    retailer_dict.update({"parts_mtd": '%.2f' % float(int(parts_mtd)) })
+            mtd['parts_mtd'] = '%.2f' % float(int(parts_mtd))
+        retailer_dict[order.retailer.retailer_name] = mtd
     return Response(retailer_dict)
 
 
