@@ -117,38 +117,39 @@ def get_retailers_for_distributor(request, dsr_id):
 
 
 ########### MTD logic to get the number of parts ordered from 1 -> till date ##########
+from dateutil.relativedelta import relativedelta
+import math
 @api_view(['GET'])
-def get_mtd_retailer(request, dsr_id):
-    month_start = datetime.datetime.now().replace(day=1).strftime("%Y-%m-%d")
+def retailer_mtd_six_months_average(request, dsr_id):
+    month_start_object = datetime.datetime.now().replace(day=1) # This is the object that holds the 1st of current month -> type:datetime used
+    month_start_str = month_start_object.strftime("%Y-%m-%d") # this is the formatted object YYYY-MM-DD
     month_current = datetime.datetime.now().strftime("%Y-%m-%d")
+    month_six_before = (month_start_object - relativedelta(months=6)).strftime("%Y-%m-%d")
+
     distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
     retailers = distributor.retailer_set.all()
-    orders = []
+    output = []
+
     for retailer in retailers:
-        date_range_filtered_orders = retailer.orderpart_set.all().filter(order_date__range=[month_start, month_current]) # This is to filter the order based on date 1 -> till date
-        if(date_range_filtered_orders): # checking if order from 1-> till date exists
-            for _order in date_range_filtered_orders:
-                orders.append( _order )
+        line_total = 0.0
+        six_month_total = 0.0
+        retailer_dict = {}
+        orderpart_set = retailer.orderpart_set.all()
+        for orderpart in orderpart_set.filter( order_date__gt=month_start_str,\
+                                                order_date__lt=month_current):
+            for orderpart_detail in orderpart.orderpartdetails_set.all():
+                line_total += orderpart_detail.line_total
 
-    retailer_dict = {} # this dictionary holds { "Retailer_Name" : { "Part_Number": Quantity , "Total_Value": total } }
-    
-    for order in orders:
-        mtd = {}
-        parts_mtd = 0
-        for order_details in order.orderpartdetails_set.all():
-            try:
-                if order_details.part_number.part_number in mtd:
-                    mtd[order_details.part_number.part_number] += order_details.quantity
-                else:
-                    mtd[order_details.part_number.part_number] = order_details.quantity
-                parts_mtd  += order_details.line_total
-            except OrderPartDetails.DoesNotExist:
-                pass
-            mtd['parts_mtd'] = '%.2f' % float(int(parts_mtd))
-        retailer_dict[order.retailer.retailer_name] = mtd
-    return Response(retailer_dict)
+        for orderpart in orderpart_set.filter( order_date__gt=month_six_before,\
+                                                order_date__lt=month_current):
+            for orderpart_detail in orderpart.orderpartdetails_set.all():
+                six_month_total += orderpart_detail.line_total
 
-
+        retailer_dict['retailer_code'] = retailer.retailer_code
+        retailer_dict['retailer_mtd'] = line_total
+        retailer_dict['retailer_avg'] = math.ceil(six_month_total/6)
+        output.append( retailer_dict )
+    return Response(output)
 
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
@@ -164,6 +165,10 @@ def get_retailers(request, dsr_id):
     retailers = Retailer.objects.filter(distributor = distributor.distributor, \
                                         approved = constants.STATUS['APPROVED'], \
                                         modified_date__gt=modified_since)
+    #month_current = datetime.datetime.now().strftime("%Y-%m-%d")
+    #month_six_before = (datetime.datetime.today() - relativedelta(months=6)).strftime("%Y-%m-%d")
+    #month_start = datetime.datetime.now().replace(day=1).strftime("%Y-%m-%d")
+
     retailer_list = []
     for retailer in retailers:
         retailer_dict = {}
@@ -185,6 +190,7 @@ def get_retailers(request, dsr_id):
         if not retailer.latitude or not retailer.longitude:
             retailer.latitude=''
             retailer.longitude=''
+        
         retailer_dict.update({"latitude":str(retailer.latitude)})
         retailer_dict.update({"longitude":str(retailer.longitude)})
         retailer_dict.update({"datetime": datetime.datetime.now()})
