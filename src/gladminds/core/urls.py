@@ -162,7 +162,7 @@ urlpatterns = patterns('',
 
     url(r'^cv/api-token-auth/', 'gladminds.core.views.apis.authentication'),
     url(r'^cv/get_retailers/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.core.views.apis.get_retailers'),
-    url(r'^cv/get_mtd_retailers/retailer_code/(?P<retailer_code>\d+)/$', 'gladminds.core.views.apis.get_mtd_retailer'),
+    url(r'^cv/get_mtd_retailers/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.core.views.apis.get_mtd_retailer'),
     url(r'^cv/get_retailers_for_distributor/dsr_id/(?P<dsr_id>\d+)/$', 'gladminds.core.views.apis.get_retailers_for_distributor', name='get_retailers_for_distributor'),
     url(r'^cv/get_retailer_profile/retailer_id/(?P<retailer_id>\d+)/$',
                                                 'gladminds.core.views.apis.get_retailer_profile'),
