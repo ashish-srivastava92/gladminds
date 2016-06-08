@@ -548,6 +548,9 @@ class Retailer(base_models.Retailer):
                                                 blank=True)
     actual = models.DecimalField(max_digits=20, decimal_places=4, null=True, \
                                                 blank=True)
+    credit_limit = models.DecimalField( max_digits=10, decimal_places=2, \
+                                        null=True, blank=True )
+
     
     def image_tag(self):
         return u'<img src="{0}/{1}" width="200px;"/>'.format('/static', self.image_url)
