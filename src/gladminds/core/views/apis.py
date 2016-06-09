@@ -125,8 +125,8 @@ def retailer_mtd_six_months_average(request, dsr_id):
     month_start_str = month_start_object.strftime("%Y-%m-%d") # this is the formatted object YYYY-MM-DD
     month_current = datetime.datetime.now().strftime("%Y-%m-%d")
     month_six_before = (month_start_object - relativedelta(months=6)).strftime("%Y-%m-%d")
-    distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
-    retailers = distributor.retailer_set.all()
+    dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+    retailers = dsr.distributor.retailer_set.all()
     output = []
     for retailer in retailers:
         line_total = 0.0
