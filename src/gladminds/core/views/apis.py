@@ -32,6 +32,8 @@ from gladminds.core.services.message_template import get_template
 from gladminds.core import utils
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.sqs_tasks import send_loyalty_sms, send_mail_for_sfa_order_placed, send_sfa_order_placed_sms
+from dateutil.relativedelta import relativedelta
+import math
 
 AUDIT_ACTION = 'SEND TO QUEUE'
 
@@ -117,8 +119,6 @@ def get_retailers_for_distributor(request, dsr_id):
 
 
 ########### MTD logic to get the number of parts ordered from 1 -> till date ##########
-from dateutil.relativedelta import relativedelta
-import math
 @api_view(['GET'])
 def retailer_mtd_six_months_average(request, dsr_id):
     month_start_object = datetime.datetime.now().replace(day=1) # This is the object that holds the 1st of current month -> type:datetime used
