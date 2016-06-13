@@ -1202,7 +1202,12 @@ class RecentOrderAdmin(GmModelAdmin):
         return obj.retailer.retailer_name
 
     def order_number_url(self, obj):
-        return '<a href=%s/%s/open/%s>%s</a>' % ('/admin/get_parts', obj.id, obj.retailer_id, obj.order_number)
+        totals = [ order_part_detail.line_total for order_part_detail in obj.orderpartdetails_set.all() if order_part_detail.line_total ]
+        if sum(totals) < 10000: # TODO : add credit_limit field instead of hard-coded value
+            return '<a href=%s/%s/open/%s>%s</a>' % ('/admin/get_parts', obj.id, obj.retailer_id, obj.order_number)
+        else:
+            return '<a style="color: red;" href=%s/%s/open/%s>%s</a>' % ('/admin/get_parts', obj.id, obj.retailer_id, obj.order_number)
+
     order_number_url.allow_tags = True
 
     change_form_template = 'admin/bajaj/orderpart/change_list.html'
