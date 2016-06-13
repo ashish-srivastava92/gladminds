@@ -1202,7 +1202,12 @@ class RecentOrderAdmin(GmModelAdmin):
         return obj.retailer.retailer_name
 
     def order_number_url(self, obj):
-        return '<a href=%s/%s/open/%s>%s</a>' % ('/admin/get_parts', obj.id, obj.retailer_id, obj.order_number)
+        totals = [ order_part_detail.line_total for order_part_detail in obj.orderpartdetails_set.all() if order_part_detail.line_total ]
+        if sum(totals) < 10000: # TODO : add credit_limit field instead of hard-coded value
+            return '<a href=%s/%s/open/%s>%s</a>' % ('/admin/get_parts', obj.id, obj.retailer_id, obj.order_number)
+        else:
+            return '<a style="color: red;" href=%s/%s/open/%s>%s</a>' % ('/admin/get_parts', obj.id, obj.retailer_id, obj.order_number)
+
     order_number_url.allow_tags = True
 
     change_form_template = 'admin/bajaj/orderpart/change_list.html'
@@ -2566,7 +2571,12 @@ class ProductCatalogAdmin(GmModelAdmin):
     #search_fields = ('partner__partner_id', 'product_id',
      #               'brand', 'model', 'category',
       #              'sub_category')
-    list_display = ('get_model', 'get_plate', 'part_number', 'description', 'mrp')
+    list_display = ('get_model', 'get_plate', 'part_number', 'description', 'get_mrp')
+    search_fields = ('applicable_models__model_name',)
+
+    def get_mrp(self, obj):
+        return obj.mrp
+    get_mrp.short_description = "MRP"
 
     def get_model(self, obj):
         return obj.plate.model.model_name

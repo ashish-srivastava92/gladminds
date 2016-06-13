@@ -32,6 +32,8 @@ from gladminds.core.services.message_template import get_template
 from gladminds.core import utils
 from gladminds.core.managers.audit_manager import sms_log
 from gladminds.sqs_tasks import send_loyalty_sms, send_mail_for_sfa_order_placed, send_sfa_order_placed_sms
+from dateutil.relativedelta import relativedelta
+import math
 
 AUDIT_ACTION = 'SEND TO QUEUE'
 
@@ -100,6 +102,51 @@ def send_email_to_retailer_on_place_order(orderpart, orderpart_details_list):
                         'orderpart_details': orderpart_details_list
                     })
 
+########### This API fetches all the retailers for the given distributor #####################
+########### This API is called via the PJP routine by the change_list.html ################### 
+@api_view(['GET'])
+def get_retailers_for_distributor(request, dsr_id):
+    dsr = DistributorSalesRep.objects.get(distributor_sales_code=dsr_id)
+    if( dsr ): # check if the dsr is fetched / exists
+        retailers = list(dsr.retailer_set.all())
+        if( retailers ): # check if dsr has retailers
+            return_retailer = []
+            for retailer in retailers:
+                return_retailer.append( retailer.retailer_name )
+            return Response( return_retailer )
+    return Response([]) # if the dsr doesnt have retialer return blank list
+########### End of Get Retailer For Distributor ##############################################
+
+
+########### MTD logic to get the number of parts ordered from 1 -> till date ##########
+@api_view(['GET'])
+def retailer_mtd_six_months_average(request, dsr_id):
+    month_start_object = datetime.datetime.now().replace(day=1) # This is the object that holds the 1st of current month -> type:datetime used
+    month_start_str = month_start_object.strftime("%Y-%m-%d") # this is the formatted object YYYY-MM-DD
+    month_current = datetime.datetime.now().strftime("%Y-%m-%d")
+    month_six_before = (month_start_object - relativedelta(months=6)).strftime("%Y-%m-%d")
+    dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
+    retailers = dsr.distributor.retailer_set.all()
+    output = []
+    for retailer in retailers:
+        line_total = 0.0
+        six_month_total = 0.0
+        retailer_dict = {}
+        orderpart_set = retailer.orderpart_set.filter(  order_date__gt=month_six_before,\
+                                                        order_date__lt=month_current)
+        for orderpart in orderpart_set.filter( order_date__gt=month_start_str,\
+                                                order_date__lt=month_current):
+            for orderpart_detail in orderpart.orderpartdetails_set.all():
+                line_total += orderpart_detail.line_total
+        for orderpart in orderpart_set:
+            for orderpart_detail in orderpart.orderpartdetails_set.all():
+                six_month_total += orderpart_detail.line_total
+        retailer_dict['retailer_code'] = retailer.retailer_code
+        retailer_dict['retailer_mtd'] = line_total
+        retailer_dict['retailer_avg'] = math.ceil(six_month_total/6)
+        output.append( retailer_dict )
+    return Response(output)
+
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
@@ -112,32 +159,11 @@ def get_retailers(request, dsr_id):
         modified_since = '1970-01-01'
     distributor = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
     retailers = Retailer.objects.filter(distributor = distributor.distributor, \
-                                approved = constants.STATUS['APPROVED'], modified_date__gt=modified_since)
+                                        approved = constants.STATUS['APPROVED'], \
+                                        modified_date__gt=modified_since)
     retailer_list = []
     for retailer in retailers:
         retailer_dict = {}
-        
-        ########### MTD logic to get the number of parts ordered from 1 -> till date ##########
-        #month_start = datetime.datetime.now().replace(day=1).strftime("%Y-%m-%d")
-        #month_current = datetime.datetime.now().strftime("%Y-%m-%d")
-        #orders = OrderPart.objects.filter(retailer__retailer_code=retailer.retailer_code, \
-                                        #order_date__range=[month_start, month_current] )
-        #mtd = {}
-        #parts_mtd = 0
-        #for order in orders:
-            #for order_details in order.orderpartdetails_set.all():
-                #try:
-                    #if order_details.part_number.part_number in mtd:
-                        #mtd[order_details.part_number.part_number] += order_details.quantity
-                    #else:
-                        #mtd[order_details.part_number.part_number] = order_details.quantity
-                    #parts_mtd  += order_details.line_total
-                #except OrderPartDetails.DoesNotExist:
-                    #pass
-        #retailer_dict.update({"retailer_mtd":mtd}) 
-        #retailer_dict.update({"parts_mtd": '%.2f' % float(int(parts_mtd)) })  
-        ########### End of MTD logic #############
-
         retailer_dict.update({"retailer_Id":retailer.retailer_code})
         retailer_dict.update({"retailer_name":retailer.retailer_name})
         retailer_dict.update({"retailer_mobile":retailer.mobile})

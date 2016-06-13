@@ -126,7 +126,18 @@ a[href^="https://maps.google.com/maps"]{display:none !important}
 }
 .filtersRight{
     position: absolute !important; 
-    width: 20%;right: -36px;top: 0px;
+    width: 15%;
+    right: -36px;
+    top: 0px;
+    z-index: 5000; 
+    box-shadow: 0px 2px 3px 1px #909090;
+    border-bottom-left-radius: 7px;
+}
+.filtersRightRetailer{
+    position: absolute !important; 
+    width: 15%;
+    right: 125px;
+    top: 0px;
     z-index: 5000; 
     box-shadow: 0px 2px 3px 1px #909090;
     border-bottom-left-radius: 7px;
@@ -558,12 +569,14 @@ $.ajax({
         $.each( distributorsUser.users, function( key, val ) {
                 var dsrLength;
                 dsrLength=val.retailers.length; 
-                $( '<button type="button" class="btn btn-primary btn-lg dsrButton"  ><div class="span12"><b>'+ val.firstname+'</b><br><span style="">Retailers count : '+dsrLength+'</span></div></button>').attr( "dsrid", val.userid).attr( "id", val.userid).appendTo( "#rightside");
+                $( '<button type="button" class="btn btn-primary btn-lg dsrButton"  ><div class="span12 retailer-div-tag" style="font-size: 10px;"><b>'+ val.firstname+'</b><br><span style="">Retailers count : '+dsrLength+'</span></div></button>').attr( "dsrid", val.userid).attr( "id", val.userid).appendTo( "#rightside");
             });
-        $(".filtersRight").css("display","block")
+        $(".filtersRight").css("display","block");
     }
 }
 });
+
+
 
 
 //**************************************************DSRButton Click****************************************//
@@ -600,13 +613,13 @@ function loadMap(dsrObj){
 
 
 //****************************************GetRetailers Functions***********************************************//
-
 function getRetailerLocations1(dsrsobj,userId,arr){
     DeleteMarkers();
     weekArray = [];var max_lat=new Array();var min_long=new Array();var max;
     var dsrArray=dsrsobj.retailers;
     var otherretailersLength=dsrArray.length;
     console.log("otherretailersLength1"+otherretailersLength);
+    $('#retailer-populate').empty();
     dsrArray=[];
          otherretailersLength=0;
             $.each( dsrsobj.users, function( key2, val2 ) {
@@ -619,6 +632,7 @@ function getRetailerLocations1(dsrsobj,userId,arr){
                                 min_long.push(retailerval.longitude);
                                 // otherretailersLength++;
                                 weekArray.push();
+                                $( '<button type="button" class="btn btn-primary btn-lg dsrButton"  ><div class="span12" style="font-size: 10px;"><b>'+ retailerval.shopname+'</b></div></button>').appendTo( "#retailer-populate");
                             }
                         }
             
@@ -1141,6 +1155,18 @@ function hideLoading(){
 
             <div id="map" style="width: 100%; height: 100%;"></div>
         </div>
+
+        <div class="span12" style="width:100%" id="mapContainer">
+            <div class="filtersRightRetailer" >
+            <div class="filterToggle">
+                <div class="btn-group-vertical" role="group" aria-label="Vertical button group" style="display:block;" id="retailer-populate"></div>
+            </div>
+                 <div class="row-fluid" style="padding: 2px;"> <span  style="float:left;"><i class=" icon2 icon-chevron-up"></i><span></div> 
+            </div>
+
+            <div id="map" style="width: 100%; height: 100%;"></div>
+        </div>
+
     </div>
 
 </div>

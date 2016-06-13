@@ -340,7 +340,7 @@ DB_PASSWORD = 'dssoffline'
 
 # TODO: Need to change below logic while merging with main code base.
 # Frm MC and CV, codes would be in different dirs so below variable won't be required.
-BRAND_VERTICLE = "MC"
+BRAND_VERTICLE = "CV"
 # for bajaj CV
 # DB_USER = os.environ.get('DB_USER', 'bajajcv')
 # DB_HOST = os.environ.get('DB_HOST', 'bajajcv.chnnvvffqwop.us-east-1.rds.amazonaws.com')
