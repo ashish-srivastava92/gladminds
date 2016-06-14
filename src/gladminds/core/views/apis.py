@@ -144,7 +144,6 @@ def retailer_mtd_six_months_average(request, dsr_id):
         retailer_dict['retailer_code'] = retailer.retailer_code
         retailer_dict['retailer_mtd'] = line_total
         retailer_dict['retailer_avg'] = math.ceil(six_month_total/6)
-        retailer_dict['mtd'] = part_number_to_quantity
         output.append( retailer_dict )
     return Response(output)
 
@@ -277,33 +276,6 @@ def place_order(request, dsr_id):
             pass 
     return Response({'message': 'Order updated successfully', 'status':1})
  
-
-import copy
-@api_view(['GET'])
-def load_parts_temp(request):
-    parts_list = [['24101900','AP101146','3100338','39121420','24130105','39100006','36244050','36244059','36244060','36244071'],
-            ]
-    for parts in parts_list:
-        print '--------------PARTS LIST--------------------'
-        print parts
-        for part_number in parts:
-            try:
-                parts_modified = copy.copy(parts)
-                parts_modified.remove(part_number)
-                part = PartPricing.objects.get(part_number=part_number)
-                print '------------------PART---------------------'
-                print 'Part Number : ' , part.part_number
-                associated_part = [ i.part_number for i in part.associated_parts.all() ]
-                difference = list( set(parts_modified) - set(associated_part))
-                print 'Missing Parts : ', difference
-                print 'Associated Part : ', associated_part
-                print '-------------------------------------------'
-            except PartPricing.DoesNotExist:
-                print 'This Part Doesnt exist : ', part_number
-
-    return Response({"200":"done....."})
-
-
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
