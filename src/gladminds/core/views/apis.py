@@ -286,8 +286,7 @@ def get_parts(request):
     modified_since = request.GET.get('modified_since', '1970-01-01')
     if not modified_since:
         modified_since = '1970-01-01'
-    parts = PartPricing.objects.filter(part_number='AP121073')
-    #parts = PartPricing.objects.filter(active = True, modified_date__gt=modified_since)
+    parts = PartPricing.objects.filter(active = True, modified_date__gt=modified_since)
     parts_list =[]
     for part in parts:
         #available_quantity = PartsStock.objects.get(part_number_id = part.id ).available_quantity
@@ -297,7 +296,6 @@ def get_parts(request):
         parts_dict.update({"part_number":part.part_number})
         parts_dict.update({"part_category":part.subcategory.name})
         associated_part_list = associated_parts(part)
-        #associated_part_list = [ associated_part.part_number for associated_part in part.associated_parts.all() if part.associated_parts.all()]
         parts_dict.update({"associated_categories_str": associated_part_list})
         try:
             available_quantity = PartsStock.objects.get(part_number = part)
