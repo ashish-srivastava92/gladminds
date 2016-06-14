@@ -144,6 +144,7 @@ def retailer_mtd_six_months_average(request, dsr_id):
         retailer_dict['retailer_code'] = retailer.retailer_code
         retailer_dict['retailer_mtd'] = line_total
         retailer_dict['retailer_avg'] = math.ceil(six_month_total/6)
+        retailer_dict['mtd'] = part_number_to_quantity
         output.append( retailer_dict )
     return Response(output)
 
@@ -275,7 +276,33 @@ def place_order(request, dsr_id):
             # TODO: Add logger to it
             pass 
     return Response({'message': 'Order updated successfully', 'status':1})
-        
+ 
+
+import copy
+@api_view(['GET'])
+def load_parts_temp(request):
+    parts_list = [['24101900','AP101146','3100338','39121420','24130105','39100006','36244050','36244059','36244060','36244071'],
+            ]
+    for parts in parts_list:
+        print '--------------PARTS LIST--------------------'
+        print parts
+        for part_number in parts:
+            try:
+                parts_modified = copy.copy(parts)
+                parts_modified.remove(part_number)
+                part = PartPricing.objects.get(part_number=part_number)
+                print '------------------PART---------------------'
+                print 'Part Number : ' , part.part_number
+                associated_part = [ i.part_number for i in part.associated_parts.all() ]
+                difference = list( set(parts_modified) - set(associated_part))
+                print 'Missing Parts : ', difference
+                print 'Associated Part : ', associated_part
+                print '-------------------------------------------'
+            except PartPricing.DoesNotExist:
+                print 'This Part Doesnt exist : ', part_number
+
+    return Response({"200":"done....."})
+
 
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
@@ -287,7 +314,8 @@ def get_parts(request):
     modified_since = request.GET.get('modified_since', '1970-01-01')
     if not modified_since:
         modified_since = '1970-01-01'
-    parts = PartPricing.objects.filter(active = True, modified_date__gt=modified_since)
+    parts = PartPricing.objects.filter(part_number='AP121073')
+    #parts = PartPricing.objects.filter(active = True, modified_date__gt=modified_since)
     parts_list =[]
     for part in parts:
         #available_quantity = PartsStock.objects.get(part_number_id = part.id ).available_quantity
@@ -297,6 +325,7 @@ def get_parts(request):
         parts_dict.update({"part_number":part.part_number})
         parts_dict.update({"part_category":part.subcategory.name})
         associated_part_list = associated_parts(part)
+        #associated_part_list = [ associated_part.part_number for associated_part in part.associated_parts.all() if part.associated_parts.all()]
         parts_dict.update({"associated_categories_str": associated_part_list})
         try:
             available_quantity = PartsStock.objects.get(part_number = part)
@@ -1367,6 +1396,11 @@ def dsr_average_orders(request, dsr_id):
     dsr =  DistributorSalesRep.objects.select_related('distributor').get(distributor_sales_code = dsr_id)
     distributor = dsr.distributor
     retailers_list = []
+
+    month_start_object = datetime.datetime.now().replace(day=1) # This is the object that holds the 1st of current month -> type:datetime used
+    month_start_str = month_start_object.strftime("%Y-%m-%d") # this is the formatted object YYYY-MM-DD
+    month_current = datetime.datetime.now().strftime("%Y-%m-%d")
+
     # get the retailer objects for this distributor
     retailers = Retailer.objects.filter(distributor = distributor)
     # get the current month date object with the first day
@@ -1401,8 +1435,14 @@ def dsr_average_orders(request, dsr_id):
                 average_sale = total_sale / constants.AVERAGE_API_TIME_MONTHS
                 retailer_dict['retailer_id'] = retailer.retailer_code
                 retailer_dict['part_number'] = part['part_number__part_number']
+
+                orderpart_detail_count = OrderPartDetails.objects.filter(   order__retailer=retailer, \
+                                                                            created_date__gte=month_start_str, \
+                                                                            created_date__lte=month_current, \
+                                                                            part_number__part_number=part['part_number__part_number'] ).count()
                 retailer_dict['average_sale_last_six_months'] = \
                                                 average_sale
+                retailer_dict['mtd'] = orderpart_detail_count
                 # calculate area average (retailer area ) for the previous month
                 # set the previous date to the last month
                 previous_date = previous_date = first_date - timedelta(days = 30)

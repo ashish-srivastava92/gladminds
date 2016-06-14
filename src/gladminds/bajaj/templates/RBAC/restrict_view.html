@@ -74,6 +74,13 @@
 	interchange_menu();
 </script>
 
+<script type="text/javascript">
+	var url = window.location.href.split('//')[1].split('admin')[1].slice(0,19)
+	if (url == "/bajaj/partpricing/"){
+		$('#id_associated_parts')[0].style.height = '500px';
+	}
+</script>
+
 
 
 
