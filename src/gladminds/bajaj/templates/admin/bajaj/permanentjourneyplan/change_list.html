@@ -235,6 +235,7 @@ $(document).ready(function(){
     $("#nsm").change(function(){ 
         showLoading();
         var nsms=$("#nsm").val();
+        var nsms=$("#nsm").val();
         $("#asm").empty();
         $("#actualParts").css('visibility','hidden');
         $("#distributor").empty();
@@ -363,6 +364,10 @@ $('.icon1').clickToggle1(function(){
 });
 var selectedDate;
 $('#actualdate').datepicker().on('changeDate', function (ev) {  
+    $('#retailer-populate').empty();
+
+    $( '<button type="button" class="btn btn-primary btn-lg dsrButton"  ><div class="span12" style="font-size: 10px;"><b>'+' retailerval.shopname'+'</b></div></button>').appendTo( "#retailer-populate");
+
      if (ev.dates && !ev.date && selectedDate)
      {
            $(this).datepicker('setDate',selectedDate);
@@ -459,6 +464,8 @@ $('#actualdate').datepicker().on('changeDate', function (ev) {
         method:"GET",
         data:{"dsr_id":dsrId,"date":x},
         success : function(actualObj){  
+            console.log('--------DSR-------');
+            console.log(actualObj)
             var actualDate="13-12-2015";
             var actualDate=n;  
             main2(actualObj.users,dsrId,actualDate);
@@ -614,12 +621,13 @@ function loadMap(dsrObj){
 
 //****************************************GetRetailers Functions***********************************************//
 function getRetailerLocations1(dsrsobj,userId,arr){
+
     DeleteMarkers();
     weekArray = [];var max_lat=new Array();var min_long=new Array();var max;
     var dsrArray=dsrsobj.retailers;
     var otherretailersLength=dsrArray.length;
     console.log("otherretailersLength1"+otherretailersLength);
-    $('#retailer-populate').empty();
+    
     dsrArray=[];
          otherretailersLength=0;
             $.each( dsrsobj.users, function( key2, val2 ) {
@@ -632,7 +640,7 @@ function getRetailerLocations1(dsrsobj,userId,arr){
                                 min_long.push(retailerval.longitude);
                                 // otherretailersLength++;
                                 weekArray.push();
-                                $( '<button type="button" class="btn btn-primary btn-lg dsrButton"  ><div class="span12" style="font-size: 10px;"><b>'+ retailerval.shopname+'</b></div></button>').appendTo( "#retailer-populate");
+                                
                             }
                         }
             
@@ -743,7 +751,7 @@ function getRetailerLocations(dsrsobj,dsrID)
             $("#"+weekArray[i]).attr("checked",true).attr("disabled",false).parent().css("color","black");
             $("#"+weekArray[i]).attr("state","1");$("#"+weekArray[i]).addClass("chkbox");
         }
-        console.log("otherretailersLength----"+otherretailersLength);
+        //console.log("otherretailersLength----"+otherretailersLength);
     }
     var totalmax;var totalmin;
     var countmin=min_long.length;
@@ -1073,7 +1081,7 @@ function main2(data,userId,actualDate)
        } 
     });
     center_map(map)
-
+    console.log(dsrLocations);
 }  
 function resizeWindow1(){
     var windowHeight=$( window ).height();
@@ -1174,5 +1182,4 @@ function hideLoading(){
           <div class="txt"></div>
           <div class="bg"></div>
       </div>
-
 {% endblock content %}
