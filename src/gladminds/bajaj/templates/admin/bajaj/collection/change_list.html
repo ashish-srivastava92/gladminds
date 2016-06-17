@@ -176,6 +176,7 @@ body .modal {
 				     <th class="text-center">Total Order Value</th>
 				      <th class="text-center">Outstanding</th>
 				      <th class="text-center">Collection Details</th>
+				      <th class="text-center">Credit Limit</th>
 	
 				</tr>
 				
@@ -185,16 +186,16 @@ body .modal {
         <tbody>
         	{% for each in ret_collection_details %}
         	<tr>
-        		
         		<td class="text-left">{{each.retailer_name}}</td>
         		<td class="text-center">{{each.total_value}}</td>
-        		
         		<td class="text-center">{{each.outstanding}}</td>
-        		
         		<td class="text-center"><a onclick="loadCollectionJSON(this)" retName="{{each.retailer_name}}" href="javascript:void(0)" rel="{% url 'get_collection_details' each.retailer_id %}">Details</a></td>
-        	 
-        		 
-     
+        		<td class="text-center">
+        			<form action="#" style="display: flex;">
+        				<input type="text" name="credit_limit"><br>
+        				<input type="submit" value="Submit" id="submit_credit_limit">
+        			</form>
+        		</td>
         	</tr>
         	   		{% endfor %}
 			
@@ -241,6 +242,10 @@ body .modal {
             url = "{% url 'download_sample_Collection_upload_csv' %}"
             location.href= url;
         }
+    </script>
+
+    <script type="text/javascript">
+    	$('#submit_credit_limit')
     </script>
 
 {% endblock %}
