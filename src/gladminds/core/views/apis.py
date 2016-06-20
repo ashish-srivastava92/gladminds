@@ -247,14 +247,12 @@ def place_order(request, dsr_id):
                 part_number_catalog = None
                 if item_part_type == 1:
                     '''Get the part details from Catalog Table'''
-                    part_catalog = PartIndexDetails.objects.\
-                                             get(part_number=item['part_number'], plate_id=item.get("plate_id"))
+                    part_catalog = PartIndexDetails.objects.get(part_number=item['part_number'], plate_id=item.get("plate_id"))
                     orderpart_details.part_number_catalog = part_catalog
                     orderpart_details.order_part_number = orderpart_details.part_number_catalog.part_number
                 else:
                     '''Get the part detailes from PartPricing Table'''
-                    part_category = PartPricing.objects.\
-                                             get(part_number=item['part_number'])
+                    part_category = PartPricing.objects.get(part_number=item['part_number'])
                     orderpart_details.part_number = part_category
                     orderpart_details.order_part_number = orderpart_details.part_number.part_number
 
@@ -262,12 +260,13 @@ def place_order(request, dsr_id):
                 orderpart_details.quantity = item['qty']
                 orderpart_details.order = orderpart
                 orderpart_details.line_total = item['line_total']
+                orderpart_details.save()
                 orderpart_details_list.append(orderpart_details)                
-        try:
-            OrderPartDetails.objects.bulk_create(orderpart_details_list)
-        except:
+        #try:
+            #OrderPartDetails.objects.bulk_create(orderpart_details_list)
+        #except:
             # TODO: Add logger here
-            return Response({'message': 'Order could not be placed', 'status':0})
+            #return Response({'message': 'Order could not be placed', 'status':0})
         try:
             send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
             send_email_to_retailer_on_place_order(orderpart, orderpart_details_list)
