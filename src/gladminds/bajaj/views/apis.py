@@ -1672,6 +1672,17 @@ def get_collection(request):
 
     return HttpResponse(json.dumps(collection_details), content_type='application/json')
 
+
+@api_view(['POST'])
+def check_updated_order(request):
+    data = json.loads(request.body)
+    order_part = OrderPart.objects.get(order_number=str(data["order_id"]))
+    order_number = order_part.order_number
+    return_data = {order_number:[]}
+    for orderpart_detail in order_part.orderpartdetails_set.all():
+        return_data[order_number].append(orderpart_detail.part_number.part_number)
+    return Response({'order':return_data})
+
 @api_view(['GET'])
 @transaction.commit_manually
 def update_six_months_retailer_history(request):

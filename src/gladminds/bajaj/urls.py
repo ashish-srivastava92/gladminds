@@ -182,6 +182,7 @@ urlpatterns = patterns('',
     url(r'^salesreturn_history_save/$','gladminds.bajaj.views.views.save_salesreturn', name='save_salesreturn'),
     url(r'^spare_warranty_save/$','gladminds.bajaj.views.views.save_sparewarranty', name='save_sparewarranty'),
     url(r'^transit_damage_save/$','gladminds.bajaj.views.views.save_transitdamage', name='save_transitdamage'),
+    url(r'^check_orders/$','gladminds.bajaj.views.apis.check_updated_order', name='check_updated_order'),
 
 #     url(r'^gcm_notif/','gladminds.bajaj.views.views.send_gcm_notification'),
     
