@@ -247,7 +247,10 @@ def place_order(request, dsr_id):
                 part_number_catalog = None
                 if item_part_type == 1:
                     '''Get the part details from Catalog Table'''
-                    part_catalog = PartIndexDetails.objects.get(part_number=item['part_number'], plate_id=item.get("plate_id"))
+                    try:
+                        part_catalog = PartIndexDetails.objects.get(part_number=item['part_number'], plate_id=item.get("plate_id"))
+                    except PartIndexDetails.DoesNotExit:
+                        logger.error("part index details doesnot exists - {0}".format(item['part_number']))
                     orderpart_details.part_number_catalog = part_catalog
                     orderpart_details.order_part_number = orderpart_details.part_number_catalog.part_number
                 else:
