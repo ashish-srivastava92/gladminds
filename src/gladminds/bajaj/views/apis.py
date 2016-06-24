@@ -1678,13 +1678,16 @@ def check_updated_order(request):
     data = json.loads(request.body)
     try:
         order_part = OrderPart.objects.get(order_number=str(data["order_id"]))
+        order_number = order_part.order_number
+        return_data = {order_number:[]}
+        for orderpart_detail in order_part.orderpartdetails_set.all():
+            return_data[order_number].append(orderpart_detail.part_number.part_number)
+        return Response({'order':return_data})
     except OrderPart.DoesNotExist:
         logger.error("order part doesnot exist - {0}".format(data["order_id"]))
-    order_number = order_part.order_number
-    return_data = {order_number:[]}
-    for orderpart_detail in order_part.orderpartdetails_set.all():
-        return_data[order_number].append(orderpart_detail.part_number.part_number)
-    return Response({'order':return_data})
+    return Response({'order':{order_number:[]}})
+    
+    
 
 @api_view(['GET'])
 @transaction.commit_manually
