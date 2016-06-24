@@ -1676,7 +1676,10 @@ def get_collection(request):
 @api_view(['POST'])
 def check_updated_order(request):
     data = json.loads(request.body)
-    order_part = OrderPart.objects.get(order_number=str(data["order_id"]))
+    try:
+        order_part = OrderPart.objects.get(order_number=str(data["order_id"]))
+    except OrderPart.DoesNotExist:
+        logger.error("order part doesnot exist - {0}".format(data["order_id"]))
     order_number = order_part.order_number
     return_data = {order_number:[]}
     for orderpart_detail in order_part.orderpartdetails_set.all():
