@@ -186,14 +186,14 @@ body .modal {
         <tbody>
         	{% for each in ret_collection_details %}
         	<tr>
-        		<td class="text-left">{{each.retailer_name}}</td>
+        		<td class="text-left" id="{{each.retailer_code}}">{{each.retailer_name}}</td>
         		<td class="text-center">{{each.total_value}}</td>
         		<td class="text-center">{{each.outstanding}}</td>
         		<td class="text-center"><a onclick="loadCollectionJSON(this)" retName="{{each.retailer_name}}" href="javascript:void(0)" rel="{% url 'get_collection_details' each.retailer_id %}">Details</a></td>
         		<td class="text-center">
         			<form action="#" style="display: flex;">
-        				<input type="text" name="credit_limit"><br>
-        				<input type="submit" value="Submit" id="submit_credit_limit">
+        				<input type="text" name="credit_limit" value="{{each.credit_limit}}"><br>
+        				<input type="submit" value="Submit" class="submit_credit_limit">
         			</form>
         		</td>
         	</tr>
@@ -246,6 +246,25 @@ body .modal {
 
     <script type="text/javascript">
     	$('#submit_credit_limit')
+    </script>
+
+    <script type="text/javascript">
+    	$('.submit_credit_limit').each(function(){ 
+    		$(this)[0].addEventListener('click',function(){
+    			var retailer_code = this.parentElement.parentElement.parentElement.children[0].id;
+    			var credit_limit = this.parentElement.children[0].value;
+    			var data = { 	"csrfmiddlewaretoken": "{{ csrf_token }}",
+    							"retailer_code": retailer_code , 
+    							"credit_limit": credit_limit 
+    						}
+    			$.ajax({
+    				url: "/cv/update_credit_limit/",
+    				type: "POST",
+    				dataType: 'json',
+    				data: data,
+    			});
+    		});
+    	});
     </script>
 
 {% endblock %}

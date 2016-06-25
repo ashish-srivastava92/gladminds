@@ -2290,3 +2290,17 @@ def dsr_dashboard_report_from_to(request, dsr_id, from_date, to_date):
         
     # finally add the dictionary to the list which is sent as the response
     return Response(retailers_list)
+
+@api_view(['POST'])
+def updateCreditLimit(request):
+    data = request.body
+    retailer_code = data.split('&')[1].split('=')[1]
+    credit_limit = data.split('&')[2].split('=')[1]
+    try:
+        retailer = Retailer.objects.get(retailer_code=retailer_code)
+        retailer.credit_limit = credit_limit
+        retailer.save()
+    except Retailer.DoesNotExist:
+        logger.error("Retailer doesnot exist - {0}".format(retailer_code))
+        return Response({"message":"Updated Not Sucessfull"})
+    return Response({"message":"Updated Sucessfull"})

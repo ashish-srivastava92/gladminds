@@ -1203,7 +1203,7 @@ class RecentOrderAdmin(GmModelAdmin):
 
     def order_number_url(self, obj):
         totals = [ order_part_detail.line_total for order_part_detail in obj.orderpartdetails_set.all() if order_part_detail.line_total ]
-        if sum(totals) < 10000: # TODO : add credit_limit field instead of hard-coded value
+        if sum(totals) < obj.retailer.credit_limit: 
             return '<a href=%s/%s/open/%s>%s</a>' % ('/admin/get_parts', obj.id, obj.retailer_id, obj.order_number)
         else:
             return '<a style="color: red;" href=%s/%s/open/%s>%s</a>' % ('/admin/get_parts', obj.id, obj.retailer_id, obj.order_number)
@@ -1336,12 +1336,14 @@ class CollectionAdmin(GmModelAdmin):
         ret_details_dict = {}
         if self.param.groups.filter(name__in=\
                                     ['SuperAdmins', 'Admins', 'NationalSparesManagers', 'AreaSparesManagers', 'SFAAdmins']).exists():
-            ret_objs = Retailer.objects.all()
+            ret_objs = Retailer.objects.all()[:5]
         elif  self.param.groups.filter(name__in=['Distributors']).exists():
             dist_id = Distributor.objects.get(user_id=request.user).id
-            ret_objs = Retailer.objects.filter(distributor=dist_id)        
+            ret_objs = Retailer.objects.filter(distributor=dist_id)[:5]        
         for each in ret_objs :
             ret_details_dict["retailer_name"] = each.retailer_name
+            ret_details_dict["retailer_code"] = each.retailer_code
+            ret_details_dict["credit_limit"] = each.credit_limit
             # order_objs = OrderPart.objects.filter(retailer_id = each.id).values_list("id",flat=True)
             # orderdetails_obj = OrderPartDetails.objects.filter(order_id__in=order_objs).aggregate(total_value=Sum('line_total'))
             # ret_details_dict["total_value"] = orderdetails_obj["total_value"]
@@ -1370,9 +1372,7 @@ class CollectionAdmin(GmModelAdmin):
             ret_details_dict["retailer_id"] = each.id
             ret_details.append(ret_details_dict.copy()) 
 
-
-        context = {"ret_collection_details":ret_details}
-        
+        context = {"ret_collection_details":ret_details}     
         template = 'admin/bajaj/collection/change_list.html'  # = Your new template
         form_url = ''
         return super(CollectionAdmin, self).changelist_view(request, context)
@@ -1522,7 +1522,7 @@ class PartCategoryAdmin(GmModelAdmin):
 #     def Pending(self, obj):
 #         
 #         ordered_qty = OrderPartDetails.objects.filter(part_number_id = obj.id).aggregate(total_ordered=Sum('quantity'))
-# #         print ordered_qty,"qtyyyy"
+# #  print ordered_qty,"qtyyyy"
 # #         
 #         if ordered_qty["total_ordered"] == None:
 #           ordered_qty1 =0 
