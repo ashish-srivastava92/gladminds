@@ -1336,10 +1336,10 @@ class CollectionAdmin(GmModelAdmin):
         ret_details_dict = {}
         if self.param.groups.filter(name__in=\
                                     ['SuperAdmins', 'Admins', 'NationalSparesManagers', 'AreaSparesManagers', 'SFAAdmins']).exists():
-            ret_objs = Retailer.objects.all()[:5]
+            ret_objs = Retailer.objects.all()
         elif  self.param.groups.filter(name__in=['Distributors']).exists():
             dist_id = Distributor.objects.get(user_id=request.user).id
-            ret_objs = Retailer.objects.filter(distributor=dist_id)[:5]        
+            ret_objs = Retailer.objects.filter(distributor=dist_id)        
         for each in ret_objs :
             ret_details_dict["retailer_name"] = each.retailer_name
             ret_details_dict["retailer_code"] = each.retailer_code
