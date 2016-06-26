@@ -364,10 +364,6 @@ $('.icon1').clickToggle1(function(){
 });
 var selectedDate;
 $('#actualdate').datepicker().on('changeDate', function (ev) {  
-    $('#retailer-populate').empty();
-
-    $( '<button type="button" class="btn btn-primary btn-lg dsrButton"  ><div class="span12" style="font-size: 10px;"><b>'+' retailerval.shopname'+'</b></div></button>').appendTo( "#retailer-populate");
-
      if (ev.dates && !ev.date && selectedDate)
      {
            $(this).datepicker('setDate',selectedDate);
@@ -451,10 +447,12 @@ $('#actualdate').datepicker().on('changeDate', function (ev) {
         if(z!="#ff0000")
             getRetailerLocations1(dsrsGlobalObj,dsrId,arr); 
         if(z=="#ff0000") { 
-            DeleteMarkers(); gmap("12.9667","77.5667"); 
+            DeleteMarkers(); 
+            gmap("12.9667","77.5667"); 
         }
              
     }
+
     if(arr.length!=0){ 
         var actualObj;
         // $.getJSON( "getretailers_actual.json", function( actualObj ) {  
@@ -464,15 +462,17 @@ $('#actualdate').datepicker().on('changeDate', function (ev) {
         method:"GET",
         data:{"dsr_id":dsrId,"date":x},
         success : function(actualObj){  
-            console.log('--------DSR-------');
-            console.log(actualObj)
             var actualDate="13-12-2015";
-            var actualDate=n;  
+            var actualDate=n; 
             main2(actualObj.users,dsrId,actualDate);
         }
         });
     }
-    if(arr.length==0) { DeleteMarkers(); getRetailerLocations(dsrsGlobalObj); }
+    if(arr.length==0) {
+     DeleteMarkers(); 
+     console.log("------------RMx-----------------");
+     console.log( dsrsGlobalObj ); 
+     getRetailerLocations(dsrsGlobalObj); }
 });
 
 $("input:checkbox").change(function()
@@ -626,8 +626,6 @@ function getRetailerLocations1(dsrsobj,userId,arr){
     weekArray = [];var max_lat=new Array();var min_long=new Array();var max;
     var dsrArray=dsrsobj.retailers;
     var otherretailersLength=dsrArray.length;
-    console.log("otherretailersLength1"+otherretailersLength);
-    
     dsrArray=[];
          otherretailersLength=0;
             $.each( dsrsobj.users, function( key2, val2 ) {
@@ -643,8 +641,6 @@ function getRetailerLocations1(dsrsobj,userId,arr){
                                 
                             }
                         }
-            
-
                     });
                 }
             }
@@ -667,6 +663,8 @@ function getRetailerLocations1(dsrsobj,userId,arr){
     // gmap(0,0);
     gmap("12.9667","77.5667");  
     DeleteMarkers();
+    $('#retailer-populate').empty();
+    var toDisplay = new Array();
     $.each( dsrsobj.users, function( key2, val2 ) {
             if(val2.userid==userId){   
                 if(val2.retailers){ 
@@ -675,9 +673,11 @@ function getRetailerLocations1(dsrsobj,userId,arr){
                         dsrArray=[];otherretailersLength=0;
                         $.each( val2.retailers, function( retailerkey, retailerval) {
                             if(arr[i]==retailerval.day){ 
+                                toDisplay.push(retailerval);
                                 dsrArray.push(retailerval);
                                 // otherretailersLength++;
                                 weekArray.push();
+                                $( '<button type="button" class="btn btn-primary btn-lg dsrButton"  ><div class="span12" style="font-size: 10px;"><b>'+ retailerval.shopname +'</b></div></button>').appendTo( "#retailer-populate");
                             }
                          });
                         main1(dsrArray,otherretailersLength);
@@ -696,6 +696,7 @@ function getRetailerLocations1(dsrsobj,userId,arr){
             }
 
         });
+    console.log( toDisplay );
 }
 
 function getRetailerLocations(dsrsobj,dsrID)
@@ -988,6 +989,9 @@ function center_map(map) {
 
 function main2(data,userId,actualDate)
 { 
+    console.log("---------------DMx-----------------");
+    console.log(data);
+    console.log(userId);
     dsrLocations=new Array();lat_lng=[];
     var homeControlDiv = document.createElement( 'div' ),
     HomeControl = function ( controlDiv, map ) 
