@@ -235,6 +235,7 @@ $(document).ready(function(){
     $("#nsm").change(function(){ 
         showLoading();
         var nsms=$("#nsm").val();
+        var nsms=$("#nsm").val();
         $("#asm").empty();
         $("#actualParts").css('visibility','hidden');
         $("#distributor").empty();
@@ -446,10 +447,12 @@ $('#actualdate').datepicker().on('changeDate', function (ev) {
         if(z!="#ff0000")
             getRetailerLocations1(dsrsGlobalObj,dsrId,arr); 
         if(z=="#ff0000") { 
-            DeleteMarkers(); gmap("12.9667","77.5667"); 
+            DeleteMarkers(); 
+            gmap("12.9667","77.5667"); 
         }
              
     }
+
     if(arr.length!=0){ 
         var actualObj;
         // $.getJSON( "getretailers_actual.json", function( actualObj ) {  
@@ -460,12 +463,14 @@ $('#actualdate').datepicker().on('changeDate', function (ev) {
         data:{"dsr_id":dsrId,"date":x},
         success : function(actualObj){  
             var actualDate="13-12-2015";
-            var actualDate=n;  
+            var actualDate=n; 
             main2(actualObj.users,dsrId,actualDate);
         }
         });
     }
-    if(arr.length==0) { DeleteMarkers(); getRetailerLocations(dsrsGlobalObj); }
+    if(arr.length==0) {
+     DeleteMarkers(); 
+     getRetailerLocations(dsrsGlobalObj); }
 });
 
 $("input:checkbox").change(function()
@@ -614,12 +619,11 @@ function loadMap(dsrObj){
 
 //****************************************GetRetailers Functions***********************************************//
 function getRetailerLocations1(dsrsobj,userId,arr){
+
     DeleteMarkers();
     weekArray = [];var max_lat=new Array();var min_long=new Array();var max;
     var dsrArray=dsrsobj.retailers;
     var otherretailersLength=dsrArray.length;
-    console.log("otherretailersLength1"+otherretailersLength);
-    $('#retailer-populate').empty();
     dsrArray=[];
          otherretailersLength=0;
             $.each( dsrsobj.users, function( key2, val2 ) {
@@ -632,11 +636,9 @@ function getRetailerLocations1(dsrsobj,userId,arr){
                                 min_long.push(retailerval.longitude);
                                 // otherretailersLength++;
                                 weekArray.push();
-                                $( '<button type="button" class="btn btn-primary btn-lg dsrButton"  ><div class="span12" style="font-size: 10px;"><b>'+ retailerval.shopname+'</b></div></button>').appendTo( "#retailer-populate");
+                                
                             }
                         }
-            
-
                     });
                 }
             }
@@ -659,6 +661,7 @@ function getRetailerLocations1(dsrsobj,userId,arr){
     // gmap(0,0);
     gmap("12.9667","77.5667");  
     DeleteMarkers();
+    $('#retailer-populate').empty();
     $.each( dsrsobj.users, function( key2, val2 ) {
             if(val2.userid==userId){   
                 if(val2.retailers){ 
@@ -670,6 +673,7 @@ function getRetailerLocations1(dsrsobj,userId,arr){
                                 dsrArray.push(retailerval);
                                 // otherretailersLength++;
                                 weekArray.push();
+                                $( '<button type="button" class="btn btn-primary btn-lg dsrButton"  ><div class="span12" style="font-size: 10px;"><b>'+ retailerval.shopname +'</b></div></button>').appendTo( "#retailer-populate");
                             }
                          });
                         main1(dsrArray,otherretailersLength);
@@ -698,7 +702,6 @@ function getRetailerLocations(dsrsobj,dsrID)
     var dsrArray=dsrsobj.retailers;
     var otherretailersLength=dsrArray.length;
     if(actualVariableenabled==1) otherretailersLength=0;
-    console.log("otherretailersLength1"+otherretailersLength);
     if(dsrID==undefined){
         $.each( dsrsobj.retailers, function( key, val ) {
             max_lat.push(val.latitude);
@@ -743,7 +746,7 @@ function getRetailerLocations(dsrsobj,dsrID)
             $("#"+weekArray[i]).attr("checked",true).attr("disabled",false).parent().css("color","black");
             $("#"+weekArray[i]).attr("state","1");$("#"+weekArray[i]).addClass("chkbox");
         }
-        console.log("otherretailersLength----"+otherretailersLength);
+        //console.log("otherretailersLength----"+otherretailersLength);
     }
     var totalmax;var totalmin;
     var countmin=min_long.length;
@@ -1073,14 +1076,14 @@ function main2(data,userId,actualDate)
        } 
     });
     center_map(map)
-
+    //console.log(dsrLocations);
 }  
 function resizeWindow1(){
     var windowHeight=$( window ).height();
     var windowWidth=$( window ).width();
     windowWidth=windowWidth-225;
     windowHeight=windowHeight-110;
-    console.log(windowHeight);console.log(windowWidth)
+    //console.log(windowHeight);console.log(windowWidth)
     $("#mapContainer").css("height",windowHeight+"px");$("#mapContainer").css("width",windowWidth+"px");
 }
 function showLoading(){
@@ -1174,5 +1177,4 @@ function hideLoading(){
           <div class="txt"></div>
           <div class="bg"></div>
       </div>
-
 {% endblock content %}

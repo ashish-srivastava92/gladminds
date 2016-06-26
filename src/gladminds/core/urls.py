@@ -188,8 +188,11 @@ urlpatterns = patterns('',
                         'gladminds.bajaj.views.apis.add_retailer'),
     url(r'^cv/dsr_dashboard_report/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.bajaj.views.apis.dsr_dashboard_report'),
+    url(r'^cv/dsr_dashboard_report_from_to/dsr_id/(?P<dsr_id>\d+)/(?P<from_date>[\w\-]+)/(?P<to_date>[\w\-]+)/$',
+                        'gladminds.bajaj.views.apis.dsr_dashboard_report_from_to'),
     url(r'^cv/get_orders/dsr_id/(?P<dsr_id>\d+)/$',
                         'gladminds.bajaj.views.apis.get_orders'),
+    url(r'^cv/update_credit_limit/$', 'gladminds.bajaj.views.apis.updateCreditLimit'),
     url(r'^cv/get_retailer_orders/retailer_id/(?P<retailer_id>\d+)/$',
                         'gladminds.bajaj.views.apis.get_retailer_orders'),
     url(r'^mc/get_parts_catalog/', 'gladminds.bajaj.views.apis.get_parts_catalog'),
@@ -279,5 +282,6 @@ urlpatterns = patterns('',
     url(r'^mc/get_collection/$','gladminds.bajaj.views.apis.get_collection'),
     ##SalesReturn
     url(r'^cv/salesreturn/dsr_id/(?P<dsr_id>\d+)$','gladminds.core.views.apis.salesreturn',name='salesreturn'),
+    
 )
 

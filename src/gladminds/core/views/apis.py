@@ -241,33 +241,35 @@ def place_order(request, dsr_id):
             orderpart_details_list =  []
             #push all the items into the orderpart details
             for item in order['order_items']:
-                orderpart_details = OrderPartDetails()
-                item_part_type = item.get('part_type')
-                part_category = None
-                part_number_catalog = None
-                if item_part_type == 1:
+                try:
                     '''Get the part details from Catalog Table'''
-                    part_catalog = PartIndexDetails.objects.\
-                                             get(part_number=item['part_number'], plate_id=item.get("plate_id"))
-                    orderpart_details.part_number_catalog = part_catalog
-                    orderpart_details.order_part_number = orderpart_details.part_number_catalog.part_number
-                else:
-                    '''Get the part detailes from PartPricing Table'''
-                    part_category = PartPricing.objects.\
-                                             get(part_number=item['part_number'])
-                    orderpart_details.part_number = part_category
-                    orderpart_details.order_part_number = orderpart_details.part_number.part_number
+                    part_catalog = PartIndexDetails.objects.get(part_number=item['part_number'], plate_id=item.get("plate_id"))
+                    orderpart_details = OrderPartDetails()
+                    item_part_type = item.get('part_type')
+                    part_category = None
+                    part_number_catalog = None
+                    if item_part_type == 1:
+                        orderpart_details.part_number_catalog = part_catalog
+                        orderpart_details.order_part_number = orderpart_details.part_number_catalog.part_number
+                    else:
+                        '''Get the part detailes from PartPricing Table'''
+                        part_category = PartPricing.objects.get(part_number=item['part_number'])
+                        orderpart_details.part_number = part_category
+                        orderpart_details.order_part_number = orderpart_details.part_number.part_number
 
-                    #return Response({'error': 'Part '+ item['part_number'] +' not found'})
-                orderpart_details.quantity = item['qty']
-                orderpart_details.order = orderpart
-                orderpart_details.line_total = item['line_total']
-                orderpart_details_list.append(orderpart_details)                
-        try:
-            OrderPartDetails.objects.bulk_create(orderpart_details_list)
-        except:
+                        #return Response({'error': 'Part '+ item['part_number'] +' not found'})
+                    orderpart_details.quantity = item['qty']
+                    orderpart_details.order = orderpart
+                    orderpart_details.line_total = item['line_total']
+                    orderpart_details.save()
+                    orderpart_details_list.append(orderpart_details)  
+                except PartIndexDetails.DoesNotExit:
+                        logger.error("part index details doesnot exists - {0}".format(item['part_number']))              
+        #try:
+            #OrderPartDetails.objects.bulk_create(orderpart_details_list)
+        #except:
             # TODO: Add logger here
-            return Response({'message': 'Order could not be placed', 'status':0})
+            #return Response({'message': 'Order could not be placed', 'status':0})
         try:
             send_msg_to_retailer_on_place_order(request,retailer.id,orderpart.order_number)
             send_email_to_retailer_on_place_order(orderpart, orderpart_details_list)
@@ -275,8 +277,7 @@ def place_order(request, dsr_id):
             # TODO: Add logger to it
             pass 
     return Response({'message': 'Order updated successfully', 'status':1})
-        
-
+ 
 @api_view(['GET'])
 # @authentication_classes((JSONWebTokenAuthentication,))
 # @permission_classes((IsAuthenticated,))
@@ -1367,6 +1368,11 @@ def dsr_average_orders(request, dsr_id):
     dsr =  DistributorSalesRep.objects.select_related('distributor').get(distributor_sales_code = dsr_id)
     distributor = dsr.distributor
     retailers_list = []
+
+    month_start_object = datetime.datetime.now().replace(day=1) # This is the object that holds the 1st of current month -> type:datetime used
+    month_start_str = month_start_object.strftime("%Y-%m-%d") # this is the formatted object YYYY-MM-DD
+    month_current = datetime.datetime.now().strftime("%Y-%m-%d")
+
     # get the retailer objects for this distributor
     retailers = Retailer.objects.filter(distributor = distributor)
     # get the current month date object with the first day
@@ -1401,8 +1407,14 @@ def dsr_average_orders(request, dsr_id):
                 average_sale = total_sale / constants.AVERAGE_API_TIME_MONTHS
                 retailer_dict['retailer_id'] = retailer.retailer_code
                 retailer_dict['part_number'] = part['part_number__part_number']
+
+                orderpart_detail_count = OrderPartDetails.objects.filter(   order__retailer=retailer, \
+                                                                            created_date__gte=month_start_str, \
+                                                                            created_date__lte=month_current, \
+                                                                            part_number__part_number=part['part_number__part_number'] ).count()
                 retailer_dict['average_sale_last_six_months'] = \
                                                 average_sale
+                retailer_dict['mtd'] = orderpart_detail_count
                 # calculate area average (retailer area ) for the previous month
                 # set the previous date to the last month
                 previous_date = previous_date = first_date - timedelta(days = 30)
