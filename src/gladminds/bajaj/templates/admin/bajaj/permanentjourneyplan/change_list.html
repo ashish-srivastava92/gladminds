@@ -470,8 +470,6 @@ $('#actualdate').datepicker().on('changeDate', function (ev) {
     }
     if(arr.length==0) {
      DeleteMarkers(); 
-     console.log("------------RMx-----------------");
-     console.log( dsrsGlobalObj ); 
      getRetailerLocations(dsrsGlobalObj); }
 });
 
@@ -664,7 +662,6 @@ function getRetailerLocations1(dsrsobj,userId,arr){
     gmap("12.9667","77.5667");  
     DeleteMarkers();
     $('#retailer-populate').empty();
-    var toDisplay = new Array();
     $.each( dsrsobj.users, function( key2, val2 ) {
             if(val2.userid==userId){   
                 if(val2.retailers){ 
@@ -673,7 +670,6 @@ function getRetailerLocations1(dsrsobj,userId,arr){
                         dsrArray=[];otherretailersLength=0;
                         $.each( val2.retailers, function( retailerkey, retailerval) {
                             if(arr[i]==retailerval.day){ 
-                                toDisplay.push(retailerval);
                                 dsrArray.push(retailerval);
                                 // otherretailersLength++;
                                 weekArray.push();
@@ -696,7 +692,6 @@ function getRetailerLocations1(dsrsobj,userId,arr){
             }
 
         });
-    console.log( toDisplay );
 }
 
 function getRetailerLocations(dsrsobj,dsrID)
@@ -707,7 +702,6 @@ function getRetailerLocations(dsrsobj,dsrID)
     var dsrArray=dsrsobj.retailers;
     var otherretailersLength=dsrArray.length;
     if(actualVariableenabled==1) otherretailersLength=0;
-    console.log("otherretailersLength1"+otherretailersLength);
     if(dsrID==undefined){
         $.each( dsrsobj.retailers, function( key, val ) {
             max_lat.push(val.latitude);
@@ -989,9 +983,6 @@ function center_map(map) {
 
 function main2(data,userId,actualDate)
 { 
-    console.log("---------------DMx-----------------");
-    console.log(data);
-    console.log(userId);
     dsrLocations=new Array();lat_lng=[];
     var homeControlDiv = document.createElement( 'div' ),
     HomeControl = function ( controlDiv, map ) 
@@ -1085,14 +1076,14 @@ function main2(data,userId,actualDate)
        } 
     });
     center_map(map)
-    console.log(dsrLocations);
+    //console.log(dsrLocations);
 }  
 function resizeWindow1(){
     var windowHeight=$( window ).height();
     var windowWidth=$( window ).width();
     windowWidth=windowWidth-225;
     windowHeight=windowHeight-110;
-    console.log(windowHeight);console.log(windowWidth)
+    //console.log(windowHeight);console.log(windowWidth)
     $("#mapContainer").css("height",windowHeight+"px");$("#mapContainer").css("width",windowWidth+"px");
 }
 function showLoading(){
