@@ -329,9 +329,12 @@ DATABASE_ROUTERS = ['gladminds.router.DatabaseAppsRouter']
 #DB_PASSWORD = os.environ.get('DB_PASSWORD', 'gladminds')
 
 # # for server
-DB_USER = 'dssoffline'
-DB_HOST = 'dssoffline.chnnvvffqwop.us-east-1.rds.amazonaws.com'
-DB_PASSWORD = 'dssoffline'
+DB_USER = os.environ.get('DB_USER', 'dssoffline')
+DB_HOST = os.environ.get('DB_HOST', 'dssoffline.chnnvvffqwop.us-east-1.rds.amazonaws.com')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'dssoffline')
+
+
+
 
 # for bajaj MC
 #DB_USER = os.environ.get('DB_USER', 'aftersell')
