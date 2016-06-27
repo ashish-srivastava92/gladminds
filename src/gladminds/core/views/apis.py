@@ -221,7 +221,7 @@ from django.conf import settings
 def place_order(request, dsr_id):
     '''
     This method gets the orders placed by the dsr on behalf of the retailer and puts
-    it in the database
+    it in the database ..
     '''
     parts = json.loads(request.body)
     dsr = DistributorSalesRep.objects.get(distributor_sales_code = dsr_id)
