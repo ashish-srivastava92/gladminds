@@ -238,17 +238,17 @@ def place_order(request, dsr_id):
             orderpart.latitude = order['latitude']
             orderpart.longitude = order['longitude']
             orderpart.save()
-            orderpart_details_list =  []
+            #orderpart_details_list =  []
             #push all the items into the orderpart details
             for item in order['order_items']:
-                try:
-                    '''Get the part details from Catalog Table'''
-                    part_catalog = PartIndexDetails.objects.get(part_number=item['part_number'], plate_id=item.get("plate_id"))
+                if(True):
+                    '''Get the part details from Catalog Table'''         
                     orderpart_details = OrderPartDetails()
                     item_part_type = item.get('part_type')
                     part_category = None
                     part_number_catalog = None
                     if item_part_type == 1:
+                        part_catalog = PartIndexDetails.objects.get(part_number=item['part_number'] , plate_id=item.get("plate_id"))
                         orderpart_details.part_number_catalog = part_catalog
                         orderpart_details.order_part_number = orderpart_details.part_number_catalog.part_number
                     else:
@@ -256,15 +256,14 @@ def place_order(request, dsr_id):
                         part_category = PartPricing.objects.get(part_number=item['part_number'])
                         orderpart_details.part_number = part_category
                         orderpart_details.order_part_number = orderpart_details.part_number.part_number
-
                         #return Response({'error': 'Part '+ item['part_number'] +' not found'})
                     orderpart_details.quantity = item['qty']
                     orderpart_details.order = orderpart
                     orderpart_details.line_total = item['line_total']
                     orderpart_details.save()
-                    orderpart_details_list.append(orderpart_details)  
-                except PartIndexDetails.DoesNotExit:
-                        logger.error("part index details doesnot exists - {0}".format(item['part_number']))              
+                    #orderpart_details_list.append(orderpart_details)  
+                #except PartIndexDetails.DoesNotExit:
+                        #logger.error("part index details doesnot exists - {0}".format(item['part_number']))              
         #try:
             #OrderPartDetails.objects.bulk_create(orderpart_details_list)
         #except:
