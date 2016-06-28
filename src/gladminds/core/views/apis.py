@@ -48,7 +48,7 @@ def authentication(request):
     '''
     #load the json input of username and password as json
     load = json.loads(request.body)
-    load = request.data
+#     load = request.data
     user = authenticate(username = load["username"], password = load["password"])
     
     if user:
