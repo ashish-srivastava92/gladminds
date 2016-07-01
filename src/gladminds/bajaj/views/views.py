@@ -2786,3 +2786,25 @@ def save_transitdamage(request):
         except Exception as Ex:
             logger.error('Details are not saved. Exception occurred', Ex)
     return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+def user_add(request):
+    context_dict ={}
+    nsms = models.NationalSparesManager.objects.filter()
+    context_dict['nsms'] = nsms
+    states = models.State.objects.filter()
+    context_dict['states'] = states
+    territories = models.Territory.objects.filter()
+    context_dict['territories'] = territories
+    distributors = models.Distributor.objects.filter()
+    context_dict['distributors'] = distributors
+    asms = models.AreaSparesManager.objects.filter()
+    context_dict['asms'] = asms
+    districts = models.District.objects.filter()
+    context_dict['districts'] = districts
+    dsr = models.DistributorSalesRep.objects.filter()
+    context_dict['dsrs'] = dsr
+    locality = models.Locality.objects.filter()
+    context_dict['locality'] = locality
+
+    template = 'bajaj_user/distributor.html'
+    return render(request, template, context_dict)
