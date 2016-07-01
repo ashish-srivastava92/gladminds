@@ -72,7 +72,10 @@ def authentication(request):
             jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
             payload = jwt_payload_handler(user)
             data = {"Id": role_id,
-                      "token": jwt_encode_handler(payload), "status":1, "login_type":login_type}
+                    "token": jwt_encode_handler(payload), 
+                    "status":1, 
+                    "login_type":login_type,
+                    "name": user.first_name+" "+user.last_name}
             return Response(data, content_type="application/json")
         else:
             return Response({'message': 'you are not active. Please contact your distributor', 'status':0})

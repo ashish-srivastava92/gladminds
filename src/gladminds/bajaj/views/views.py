@@ -1131,7 +1131,7 @@ def get_collection_details(request, ret_id):
         collection_details_dict['payment_date'] = each.payment_date
         collection_details_dict['collected_by'] = each.dsr.user.user.first_name
         collection_details_dict['collected_amount'] = each.collected_amount
-        collection_details_dict['payment_date'] = datetime.datetime.strftime(each.payment_date, '%Y-%m-%d %H:%M:%S')
+        collection_details_dict['payment_date'] = datetime.datetime.strftime(each.payment_date, '%d-%m-%Y %H:%M:%S')
         more_details_obj = CollectionDetails.objects.filter(collection_id=each.id)
         for each_obj in more_details_obj:
             if each_obj.mode == 1:
@@ -1383,8 +1383,8 @@ def upload_transit_stock(request):
                 else:
                     part_transit_stock_obj = part_transit_stock_obj_list[0]
                 part_transit_stock_obj.shipped_quantity = row_list['Shipped Quantity']
-                shipped_date_str = row_list['Shipped Date(YYYY-MM-DD)']
-                expected_arrival_date_str = row_list['Expected Date of Arrival(YYYY-MM-DD)']
+                shipped_date_str = row_list['Shipped Date(DD-MM-YYYY)']
+                expected_arrival_date_str = row_list['Expected Date of Arrival(DD-MM-YYYY)']
                 part_transit_stock_obj.shipped_date = datetime.datetime.strptime(shipped_date_str, '%Y-%m-%d').date()
                 part_transit_stock_obj.expected_date_of_arrival = \
                                         datetime.datetime.strptime(expected_arrival_date_str, '%Y-%m-%d').date()
@@ -1496,7 +1496,7 @@ def upload_average_part_history(request):
             retailer_code =  each_part_history['Retailer Code']
             part_number = each_part_history['Part Number']
             part_quantity = int(each_part_history['Part Quantity'])
-            selling_date_str = each_part_history['Date (YYYY-MM-DD)']
+            selling_date_str = each_part_history['Date (DD-MM-YYYY)']
             selling_date = datetime.datetime.strptime(selling_date_str, '%Y-%m-%d')
             selling_month = selling_date.month
             selling_year = selling_date.year
@@ -1550,7 +1550,7 @@ def download_sample_average_part_history(request):
         'Locality',
         'Part Number',
         'Part Qunatity',
-        'Date (YYYY-MM-DD)'
+        'Date (DD-MM-YYYY)'
         ])
     return response
 
@@ -1707,7 +1707,7 @@ def upload_order_invoice(request):
                 try:
                     invoice_date_str = each_invoice.get('Invoice Date')
                 except:
-                    invoice_date_str = each_invoice.get('Invoice Date(YYYY-MM-DD)')
+                    invoice_date_str = each_invoice.get('Invoice Date(DD-MM-YYYY)')
                 part_number = each_invoice.get('Part Number')
                 part_quantity = int(each_invoice.get('Billed Part Quantity'))
                 transporter_id = each_invoice.get('Transporter ID')
@@ -1715,11 +1715,11 @@ def upload_order_invoice(request):
                 try:
                     shipping_date_str = each_invoice.get('Shipping Date')
                 except:
-                    shipping_date_str = each_invoice.get('Shipping Date(YYYY-MM-DD)')
+                    shipping_date_str = each_invoice.get('Shipping Date(DD-MM-YYYY)')
                 lr_number = each_invoice.get('LR Number')
 
-                invoice_date = datetime.datetime.strptime(invoice_date_str, '%Y-%m-%d').date()
-                shipping_date = datetime.datetime.strptime(shipping_date_str, '%Y-%m-%d').date()
+                invoice_date = datetime.datetime.strptime(invoice_date_str, '%d-%m-%Y').date()
+                shipping_date = datetime.datetime.strptime(shipping_date_str, '%d-%m-%Y').date()
                 line_grand_total = each_invoice.get('Line Grand Total')
                 if line_grand_total:
                     grand_total = float(line_grand_total)
@@ -1835,8 +1835,8 @@ def download_sample_transit_stock_csv(request):
      'Part Number',
      'Part Description',
      'Shipped Quantity',
-     'Shipped Date(YYYY-MM-DD)',
-     'Expected Date of Arrival(YYYY-MM-DD)'])
+     'Shipped Date(DD-MM-YYYY)',
+     'Expected Date of Arrival(DD-MM-YYYY)'])
     return response
 
 
@@ -1846,14 +1846,14 @@ def download_sample_order_invoice_csv(request):
     writer = csv.writer(response, dialect=csv.excel)
     writer.writerow([
      'Invoice No.',
-     'Invoice Date(YYYY-MM-DD)',
+     'Invoice Date(DD-MM-YYYY)',
      'Order Ref. No.',
      'Part Number',
      'Billed Part Quantity',
      'Part Description',
      'Transporter ID',
      'Transporter/Courier Name',
-     'Shipping Date(YYYY-MM-DD)',
+     'Shipping Date(DD-MM-YYYY)',
      'LR Number',
      'MRP',
      'VAT in %ge',
