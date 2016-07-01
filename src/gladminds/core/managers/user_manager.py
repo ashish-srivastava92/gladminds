@@ -124,3 +124,36 @@ class RegisterUser():
         else:
             logger.info('{0} id is not provided.'.format(str(group)))
             raise Exception('{0} id is not provided.'.format(str(group)))   
+
+class RegisterUserDefaultData():
+
+    def register_data(self, group, username , phone_number,first_name='', last_name='', email='', address='',state='', pincode='',password = '',country='', dob ='', gender = '', APP=None):
+        user_profile = get_model('UserProfile', APP)
+        logger.info('New {0} Registration with id - {1}'.format(group, username))
+        try:
+            user_group = Group.objects.using(APP).get(name=group)
+        except ObjectDoesNotExist as ex:
+            logger.info("[Exception: new_ registration]: {0}".format(ex))
+            user_group = Group.objects.using(APP).create(name=group)
+            user_group.save(using=APP)
+        if username:
+            try:
+                user_details = user_profile.objects.select_related('user').get(user__username=username)
+            except ObjectDoesNotExist as ex:
+                logger.info("[Exception: new_ registration]: {0}".format(ex))
+                new_user_list = User.objects.filter(username=username)
+                if new_user_list:
+                    new_user = new_user_list[0]
+                else:
+                    new_user = User(username=username, first_name=first_name, last_name=last_name, email=email)
+                new_user.set_password(password)
+                new_user.is_staff = 1
+                new_user.save(using=APP)
+                new_user.groups.add(user_group)
+                logger.info(group  ' {0} registered successfully'.format(username))
+                user_details = user_profile(user=new_user,phone_number=phone_number, address=address, date_of_birth = dob, gender = gender,state=state, pincode=pincode, country = country)
+                user_details.save()
+            return user_details
+        else:
+            logger.info('{0} id is not provided.'.format(str(group)))
+            raise Exception('{0} id is not provided.'.format(str(group)))
