@@ -77,6 +77,8 @@
 	       </li>
 	     </ul>
       </li>
+      <li ><a href = "/add_users" target="_blank"><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>Add Users</a>
+      </li>
     
      {%else %}
       {% if 'Orders' in app.label and  app.models and request.user.username != "bajaj" %}
