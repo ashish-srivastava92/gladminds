@@ -28,7 +28,7 @@ from gladminds.core.apis.base_apis import CustomBaseModelResource
 from gladminds.core.auth.access_token_handler import create_access_token, \
     delete_access_token
 from gladminds.core.auth_helper import Roles
-from gladminds.core.managers.user_manager import RegisterUser
+from gladminds.core.managers.user_manager import RegisterUser, RegisterUserDefaultData
 from gladminds.core.model_fetcher import models
 from gladminds.sqs_tasks import send_otp
 from gladminds.core.cron_jobs.queue_utils import send_job_to_queue
@@ -37,8 +37,10 @@ from gladminds.core.model_helpers import format_phone_number
 from gladminds.core.utils import check_password
 from gladminds.afterbuy import utils as core_utils
 from gladminds.core.model_fetcher import get_model
+from tastypie.resources import Resource
 import csv
 import StringIO
+
 
 LOG = logging.getLogger('gladminds')
 
@@ -48,6 +50,7 @@ from boto.gs.cors import HEADERS
 logger = logging.getLogger('gladminds')
 
 register_user = RegisterUser()
+register_data = RegisterUserDefaultData()
 
 class UserResource(CustomBaseModelResource):
     '''
@@ -1252,27 +1255,156 @@ class NationalSparesManagerResource(CustomBaseModelResource):
     '''
        National spares managers resource
     '''
+    user = fields.ForeignKey(UserProfileResource, 'user', full =True)
+    territory = fields.ToManyField(TerritoryResource, 'territory', full = True)
+
     class Meta:
         queryset = models.NationalSparesManager.objects.all()
         resource_name = "national-spares-managers"
         authorization = Authorization()
-        authentication = AccessTokenAuthentication()
+        #authentication = AccessTokenAuthentication()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
-        
+    def prepend_urls(self):
+        return [ url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),
+                    self.wrap_view('register_nsm'), name="register_nsm"),
+                 url(r"^(?P<resource_name>%s)/update/(?P<retailer_id>\d)%s" % (self._meta.resource_name,trailing_slash()),
+                      self.wrap_view('update_nsm'), name="update_nsm"),]
+          
+     def register_nsm(self, request, **kwargs):
+        try:
+            self.is_authenticated(request)
+            if request.method != 'POST':
+                return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                    status=400)
+        except :
+            return HttpResponse(json.dumps({"message" : "Not Authorized"}), content_type= "application/json",
+                                     status=401)
+        try:
+            load = json.loads(request.body)
+
+            username = load.get('username')
+            email = load.get('email')
+            password = load.get('password')
+            first_name = load.get('first-name')
+            last_name = load.get('last-name')
+
+            mobile = load.get('mobile')
+            address = load.get('address')
+            state = load.get('state')
+            country = load.get('country')
+            pincode = load.get('pincode')
+            dob = load.get('dob')
+            gender = load.get('gender')
+
+            nsm_id = load.get('nsm_code')
+            name = str(first_name)  ''  str(last_name)
+            territory = load.get('territory_id')
+
+            user_profile = register_data.register_data( Roles.NATIONALSPARESMANAGERS, username = username, 
+                                                               phone_number = mobile, first_name = first_name,
+                                                               last_name = last_name, email = email, address = address,
+                                                               state = state, pincode = pincode, password = password,
+                                                               country=country, dob = dob, gender = gender,
+                                                               APP=settings.BRAND
+                                                               )
+                   
+            nsm = get_model('NationalSparesManager')(user = user_profile, nsm_id = nsm_id,
+                                                  name = name, email = email, phone_number = mobile)
+
+            nsm.save()
+            for area in territory:
+                area = models.Territory.objects.get(id = area)
+                nsm.territory.add(area)
+            data = {"status": 200 , "message" : "NSM registered successfully"}
+        except Exception ,e :
+            data = {"status": 0 , "message" : "Enter correct data"}
+            return HttpResponse(json.dumps(data), content_type="application/json")
+
         
 class AreaSparesManagerResource(CustomBaseModelResource):
     '''
        Area spares managers resource
     '''
+    user = fields.ForeignKey(UserProfileResource, 'user', full = True)
+    state = fields.ToManyField(StateResource, 'state', full = True)
+    nsm = fields.ForeignKey(NationalSparesManagerResource, 'nsm', full = True)
+
     class Meta:
         queryset = models.AreaSparesManager.objects.all()
         resource_name = "area-spares-managers"
         authorization = Authorization()
+        #authentication = AccessTokenAuthentication()
+        allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+        def prepend_urls(self):
+            return [url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),self.wrap_view('register_asm'), name="register_asm"),
+                    url(r"^(?P<resource_name>%s)/update/(?P<retailer_id>\d)%s" % (self._meta.resource_name,trailing_slash()),self.wrap_view('update_asm'), name="update_asm"),]
+
+        def register_asm(self, request, **kwargs):
+            try:
+                self.is_authenticated(request)
+                if request.method != 'POST':
+                    return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
+                        status=400)
+            except :
+                return HttpResponse(json.dumps({"message" : "Not Authorized"}), content_type= "application/json",status=401)
+            try:
+                load = json.loads(request.body)
+
+                username = load.get('username')
+                email = load.get('email')
+                password = load.get('password')
+                first_name = load.get('first-name')
+                last_name = load.get('last-name')
+
+                mobile = load.get('mobile')
+                address = load.get('address')
+                state = load.get('state')
+                country = load.get('country')
+                pincode = load.get('pincode')
+                dob = load.get('dob')
+                gender = load.get('gender')
+
+                asm_id = username
+                name = str(first_name)  ''  str(last_name)
+                state = load.get('mstate_id')
+                nsm_id = load.get('mnsm_id')
+
+                user_profile = register_data.register_data(Roles.AREASPARESMANAGERS, username = username, 
+                                                                   phone_number = mobile, first_name = first_name,
+                                                                   last_name = last_name, email = email, address = address,
+                                                                   state = state, pincode = pincode, password = password,
+                                                                   country=country, dob = dob, gender = gender,
+                                                                   APP=settings.BRAND
+                                                                   )
+
+                asm = get_model('AreaSparesManager')(user = user_profile, asm_id = asm_id, nsm_id = nsm_id,
+                                                      name = name, email = email, phone_number = mobile)
+                asm.save()
+
+                for area in state:
+                    area = models.State.objects.get(id = area)
+                    asm.state.add(area)
+                data = {"status": 200 , "message" : "ASM registered successfully"}
+            except Exception ,e :
+                data = {"status": 0 , "message" : "Enter correct data"}
+            return HttpResponse(json.dumps(data), content_type="application/json")
+
+class DistrictResource(CustomBaseModelResource):
+    class Meta:
+        queryset = models.District.objects.all()
+        resource_name = "districts"
+        authorization = Authorization()
+        #authorization = MultiAuthorization(DjangoAuthorization(), DistributorCustomAuthorization())
         authentication = AccessTokenAuthentication()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
-        
+        filtering = {
+                  "district" : ALL
+                  } 
+    
 class PartnerResource(CustomBaseModelResource):
     '''
        Partners for loaylty redemption resource
@@ -1292,30 +1424,210 @@ class DistributorResource(CustomBaseModelResource):
     '''
     user = fields.ForeignKey(UserProfileResource, 'user', full=True)
     asm = fields.ForeignKey(AreaSparesManagerResource, 'asm', full=True)
+    state = fields.ForeignKey(StateResource, 'state', full = True)
+    district = fields.ToManyField(DistrictResource, 'district', full = True)
+
     class Meta:
         queryset = models.Distributor.objects.all()
         resource_name = "distributors"
         authorization = Authorization()
         #authorization = MultiAuthorization(DjangoAuthorization(), DistributorCustomAuthorization())
-        authentication = AccessTokenAuthentication()
+        #authentication = AccessTokenAuthentication()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         filtering = {
                      "distributor_id" : ALL
                      }
 
+    def prepend_urls(self):
+        return [url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),self.wrap_view('register_distributor'), name="register_distributor"),
+                url(r"^(?P<resource_name>%s)/update/(?P<retailer_id>\d)%s" % (self._meta.resource_name,trailing_slash()),self.wrap_view('update_distributor'), name="update_distributor"),]
+
+    def register_distributor(self, request, **kwargs):
+        try:
+            self.is_authenticated(request)
+            if request.method != 'POST':
+                return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",status=400)
+        except :
+            return HttpResponse(json.dumps({"message" : "Not Authorized"}), content_type= "application/json",status=401)
+        try:
+            load = json.loads(request.body)
+            username = load.get('username')
+            try:
+                username = models.User.objects.get(username = username)
+                return HttpResponse(json.dumps({"message" : "Username Already Exists"}), content_type= "application/json",status=401)
+            except:
+                email = load.get('email')
+                password = load.get('password')
+                first_name = load.get('first-name')
+                last_name = load.get('last-name')
+                name = str(first_name)  ''  str(last_name)
+
+                mobile = load.get('mobile')
+                address = load.get('address')
+                state = load.get('state')
+                country = load.get('country')
+                pincode = load.get('pincode')
+                dob = load.get('dob')
+                gender = load.get('gender')
+
+                distributor_id = load.get("distributor-id")
+                territory = load.get('territory')
+                mobile2 = load.get('mobile2')
+                email_bajaj = load.get('email_bajaj')
+                address_line2 = load.get('address_2')
+                address_line3 = load.get('address_3')
+                address_line4 = load.get('address_4')
+                profile = load.get('profile')
+                language = load.get('language')
+                tin = load.get('tin')
+                cst = load.get('cst')
+                latitude = load.get('latitude')
+                longitude = load.get('longitude')
+
+                asm_id = load.get('asm_id')
+                state_id = load.get('state_id')
+                districts = load.get('mdistrict_id')
+
+                user_profile = register_data.register_data(Roles.DISTRIBUTORS, username = username, 
+                                                                   phone_number = mobile, first_name = first_name,
+                                                                   last_name = last_name, email = email, address = address,
+                                                                   state = state, pincode = pincode, password = password,
+                                                                   country=country, dob = dob, gender = gender,
+                                                                   APP=settings.BRAND
+                                                                   )
+
+                asm = models.AreaSparesManager.objects.get(id = asm_id)
+                state_map = models.State.objects.get(id = state_id)
+
+                distributor = get_model('Distributor')(user_id = user_profile.user_id, asm_id = asm.id , state = state_map,
+                                                    name = name,
+                                                    territory= territory, mobile1 = mobile, mobile2 = mobile2, 
+                                                    email_bajaj = email_bajaj, address_line_2 = address_line2,
+                                                    address_line_3 = address_line3, address_line_4 = address_line4,
+                                                    profile = profile, language = language, tin = tin, cst = cst,
+                                                    latitude = latitude, longitude= longitude, distributor_id = distributor_id                                                   
+                                                     )
+
+                distributor.save()
+                for dist in districts:
+                    d = models.District.objects.get(id = dist)
+                    distributor.district.add(d)
+                    data = {"status": 200 , "message" : "Distributor registered successfully"}
+        except Exception ,e :
+            data = {"status": 0 , "message" : "Enter correct data"}
+        return HttpResponse(json.dumps(data), content_type="application/json")
+
 
 class RetailerResource(CustomBaseModelResource):
     '''
        Spare part retailers resource
     '''
+    user = fields.ForeignKey(UserProfileResource, 'user', full=True)
+    dsr = fields.ForeignKey(DsrResource, 'dsr', full=True)
+    locality = fields.ForeignKey(LocalityResource, 'locality', full = True)
+
     class Meta:
         queryset = models.Retailer.objects.all()
         resource_name = "retailers"
         authorization = Authorization()
-        authentication = AccessTokenAuthentication()
+        #authentication = AccessTokenAuthentication()
         allowed_methods = ['get', 'post', 'put']
         always_return_data = True
+
+    def prepend_urls(self):
+        return [url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),self.wrap_view('register_retailer'), name="register_retailer"),
+                url(r"^(?P<resource_name>%s)/update/(?P<retailer_id>\d)%s" % (self._meta.resource_name,trailing_slash()),self.wrap_view('update_retailer'), name="update_retailer")]
+
+    def register_retailer(self, request, **kwargs):
+        try:
+            self.is_authenticated(request)
+            if request.method != 'POST':
+                return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",status=400)
+        except :
+            return HttpResponse(json.dumps({"message" : "Not Authorized"}), content_type= "application/json",status=401)
+
+        try:
+            load = json.loads(request.body)
+
+            username = load.get('username')
+            email = load.get('email')
+            password = load.get('password')
+            first_name = load.get('first-name')
+            last_name = load.get('last-name')
+
+            mobile = load.get('mobile')
+            address = load.get('address')
+            state = load.get('state')
+            country = load.get('country')
+            pincode = load.get('pincode')
+            dob = load.get('dob')
+            gender = load.get('gender')
+
+
+            billing_code = load.get('billing_code')
+            address_line_2 = load.get('address2')
+            address_line_3 = load.get('address3')
+            address_line_4 = load.get('address4')
+            profile = load.get('profile')
+            latitude = load.get('latitude')
+            longitude = load.get('longitude')
+            language = load.get('language')
+            rejected_reason = load.get('rejected-reason')
+            district = load.get('district')
+            near_dealrer_name =load.get('neardealer')
+            total_counter_sale = load.get('total-c-sale')
+            total_sales_parts = load.get('total-s-parts')
+            identification_no = load.get('identification-no')
+            mechanic_1 = load.get('mechanic1')
+            mechanic_2 = load.get('mechanic2')
+            shop_size = load.get('shop-size')
+            territory = load.get('territory')
+            identity_url = load.get('identity-url')
+            signature_url = load.get('signature-url')
+            target = load.get('target')
+            actual = load.get('actual')
+            retailer_code = load.get('retailer_code')
+            retailer_name = load.get('retailer_name')
+
+            #         user_id = load.get('user_id')
+            distributor_id = load.get('distributor_ret_id')
+            locality_id = load.get('locality_dropdown')
+            dsr_id = load.get('dsr_id')
+
+            user_profile = register_data.register_data(Roles.RETAILERS, username = username, phone_number = mobile,
+                                                               first_name = first_name, last_name = last_name,
+                                                                email = email, address = address,
+                                                               state = state, pincode = pincode,
+                                                               password = password,country=country,
+                                                               dob = dob, gender = gender, APP=settings.BRAND
+                                                               )
+
+            #             dsr = get_model('DistributorSalesRep').get(id = dsr_id)
+            dsr = models.DistributorSalesRep.objects.get(id = dsr_id)
+            locality = get_model('Locality').objects.get(id = locality_id)
+            distributor = get_model('Distributor').objects.get(id = distributor_id)
+
+            retailer = get_model('Retailer')( billing_code = billing_code, address_line_2 = address_line_2,
+                                          address_line_3 = address_line_3, address_line_4 = address_line_4,
+                                          profile = profile, latitude = latitude, longitude = longitude,
+                                          language = language, rejected_reason = rejected_reason, district = district,
+                                          near_dealer_name = near_dealrer_name, total_counter_sale = total_counter_sale,
+                                          total_sale_parts = total_sales_parts, identification_no = identification_no,
+                                          mechanic_1 = mechanic_1, mechanic_2 = mechanic_2, shop_size = shop_size, 
+                                          territory = territory, identity_url = identity_url, signature_url = signature_url,
+                                          target = target, actual = actual,
+                                          user = user_profile, dsr = dsr, locality = locality, distributor = distributor,
+                                          retailer_name = retailer_name, retailer_code = retailer_code,
+                                           approved =2, mobile = mobile, is_active = 1                                   
+                                          )
+
+            retailer.save()
+            user_profile.save()
+            data = {"status": 200 , "message" : "Retailer registered successfully"}
+        except Exception ,e :
+            data = {"status": 0 , "message" : "Enter correct data"}
+            return HttpResponse(json.dumps(data), content_type="application/json")
 
 class MemberResource(CustomBaseModelResource):
     '''
