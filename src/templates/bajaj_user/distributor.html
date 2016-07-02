@@ -1,533 +1,1262 @@
-<!doctype html>
-<html>
-<head>
+	{% load filter %}
+	<!doctype html>
+	<html>
+	<head>
 
-<link rel="stylesheet" href="/static/css/bajaj_user/bootstrap.min.css">
-<!-- Optional theme -->
-<link rel="stylesheet" href="/static/css/bajaj_user/bootstrap-theme.min.css">
-<script src="/static/js/bajaj_user/jquery-1.12.0.min.js"></script>
-<!-- Latest compiled and minified JavaScript -->
-<script src="/static/js/bajaj_user/bootstrap.min.js"></script>
-<link rel="stylesheet" href="/static/css/bajaj_user/mystyle.css">
-<link rel="stylesheet" href="/static/css/bajaj_user/style.css">
-</head>
-<body>
-	<div class="col-lg-12">
-				<div class="row main_header">
-					<div class="col-lg-2"></div>
-                    <div class="col-lg-8">
+	<link rel="stylesheet" href="/static/css/bajaj_user/bootstrap.min.css">
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="/static/css/bajaj_user/bootstrap-theme.min.css">
+	<script src="/static/js/bajaj_user/jquery-1.12.0.min.js"></script>
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="/static/js/bajaj_user/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="/static/css/bajaj_user/mystyle.css">
+	<link rel="stylesheet" href="/static/css/bajaj_user/style.css">
+	<script type="text/javascript" src="/static/js/bajaj_user/userrole.js"></script>
+	<!--<script type="text/javascript" src="/static/js/bajaj_user/distributor.js"></script>-->
+	<!--<script type="text/javascript" src="/static/js/bajaj_user/role.js" ></script>-->
 
-                    <div class="col-lg-2"></div>	
-                        <div class="portlet portlet-default curve_border">
-	                            <div class="portlet-heading">
-	                                <div class="portlet-title">
-	                                    <h4 style="text-align:center;">User Management </h4>
+	<link rel="stylesheet" href="css/bootstrap.min.css">
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="css/bootstrap-theme.min.css">
+	<script src="js/jquery-1.12.0.min.js"></script>
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="css/mystyle.css">
+	<link rel="stylesheet" href="css/style.css">
+	
+	<script type="text/javascript" src="js/distributor.js"></script>
+	</head>
+	<body>
+		<!--<p>{{ role }}</p>-->
+		<div class="col-lg-12">
+					<div class="row main_header">
+						<div class="col-lg-2"></div>
+	                    <div class="col-lg-8">
+
+	                    <div class="col-lg-2"></div>	
+	                        <div class="portlet portlet-default curve_border">
+		                            <div class="portlet-heading">
+		                                <div class="portlet-title">
+		                                    <h4 style="text-align:center;">User Management </h4>
+		                                </div>
+		                                <div class="clearfix"></div>
+		                            </div>
+	                            <div class="portlet-body grey_bg_body">
+	                                <div id="myTabContent" class="tab-content">     
+	                              
+	      <div class="col-lg-12">
+			<div class="row"> 
+				<div class="col-lg-3">
+<!-- this is the code where we filter by clicks here we have given the href id's (ex:#stackedProfile_nsm for nsm)
+					-->
+					<ul id="myStacked" class="nav nav-pills nav-stacked">
+	                                            <li class="" value="nsm" id="nsm"><a href="#stackedProfile_nsm" data-toggle="tab">NSM</a>
+	                                            </li>
+	                                            <li class="" value="asm" id="asm"><a href="#stackedProfile_asm" data-toggle="tab">ASM</a>
+	                                            </li>
+	                                            <li class="" value="distributor" id="distributor"><a href="#stackedProfile" data-toggle="tab">Distributor</a>
+	                                            </li>
+	                                            
+	                                            <li class="" id="distrep" value="distrep"><a href="#stackedProfile_dsp" data-toggle="tab">Distributor Sales Representative</a>
+	                                            </li>
+	                                            <li class="active" value="retailer" id="retailer"><a href="#stackedHome" data-toggle="tab">Retailer</a>
+	                                            </li>
+	                                            
+	                     	</ul>
+				</div>
+				<div class="col-lg-9">
+					
+					<!--action="/v1/gm-users/user_entry/" method="post"-->
+					<div id="user">
+						<!-- <h3 style="text-align:center;">User Management</h3> -->
+					  
+<!-- ----------------------------------------------------------------------------------------------------------------------- -->
+					
+
+						<div class="portlet-body grey_bg_body">
+	                                <div class="row">
+	                                    <div class="col-sm-12">
+	                                        <div id="myStackedContent" class="tab-content">
+<!-- here we specified the contents for retailer -->
+	                                            <div class="tab-pane fade active in" id="stackedHome">
+	                                            	<form id="UserDetails" autocomplete="on"> 
+					<!--action="/v1/gm-users/user_entry/" method="post"-->
+		<div id="user">
+						<!-- <h3 style="text-align:center;">User Management</h3> -->
+					  <div class="row">					  	
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label >User Name :<span style="color:red">*</span></label>
+						</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="text" name="username" required>
+						</div>
+					  </div>  	
+					   <div>&nbsp;</div>	
+					  <div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">			
+							<label>Password :<span style="color:red">*</span></label>
+						</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="password" autocomplete="off" placeholder="Password" name="password" id="password";  required>
+						</div>
+					  </div>	
+					  <div>&nbsp;</div>
+					  <div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Confirm Password :<span style="color:red">*</span></label>
+						</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="password" placeholder="Confirm password" name="cpassword" id="cpassword" onkeyup="checkPasswordMatch()" required>
+						</div>
+					   </div>	
+					   <div class="row">
+					   		<div class="col-lg-4"></div>
+					   		<div class="col-lg-8" id="passwordmatch"></div>
+					   </div>	
+					   <div>&nbsp;</div>					
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>First Name :<span style="color:red">*</span></label>
+							</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="text" name="first-name" maxlength="5"  required>
+						</div>	
+					   </div>
+						<div>&nbsp;</div>						
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Last Name :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input size="10" class="form-control" type="text" name="last-name"  required>
+							</div>
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Email :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="email" name="email"  required>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Mobile :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="mobile"  required>
+							</div>
+						</div>		
+	                    <div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Address :<span style="color:red">*</span></label>
+					    	</div>
+					    	<div class="col-lg-8">
+						    <input class="form-control" type="text" name="address"  required>
+					    	</div>
+					    </div>					  
+					    <div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							
+							<label>State :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="state"   required>
+							</div>	
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Country :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="country"   required>
+							</div>
+						</div>		
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Pincode :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="pincode" maxlength="6"  required>
+							</div>	
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>DOB :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="date" name="dob"   required>
+							</div>
+						</div>			
+	                    <div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Gender :<span style="color:red">*</span></label>
+					    	</div>
+					    	<div class="col-lg-8">
+							<select name='gender' class="form-control">
+								<OPTION SELECTED VALUE="">Select...</OPTION>
+								<option value="M">M</option>
+								  <option value="F">F</option>
+								  <option value="OT">OT</option>
+							</select>
+							</div>
+						</div>	
+					<div>&nbsp;</div>
+						<div class="row">							
+							<div class="col-lg-8">
+							<input type="hidden" id="role"  class="form-control" value= "role" name="role"/  required>
+							</div>
+						</div>	
+<!-- --------------------------------------------------------------------------------- role based data goes here(start)------------------------------------- -->
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Retailer Name:<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="retailer_name" required>
+							</div>	
+						</div>	
+						<div>&nbsp;</div>	
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Plot No.:<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="address2" required>
+							</div>	
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Street:<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="address3" required>
+							</div>		
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>City:<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="address4" required>
+							</div>		
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Total Avg. Sales:<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="total-s-parts" required>
+							</div>		
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Billing code :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="billing_code"  required>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Distributor :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+								<select name = 'distributor_ret_id' id="mdistributor_ret_id" class="form-control" required>
+								{% for entry in distributors %}
+									<option value = "{{entry.id}}" >{{entry.name}}</option>
+								{% endfor %}
+								</select>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>DSR :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+								<select name = 'dsr_id' id="mdsr_id" class="form-control" required>
+								{% for entry in dsrs %}
+									<option value = "{{entry.id}}" >{{entry}}</option>
+								{% endfor %}}
+								</select>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Locality :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+								<select name = 'locality_dropdown' class="form-control" id="mlocality_dropdown" >
+								{% for entry in locality %}
+									<option value = "{{entry.id}}" >{{entry.name}}</option>
+								{% endfor %}}
+								</select>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Retailer Code :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="retailer_code" required>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Retailer Id :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="retailer_id" required>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+<!-- ---------------------------------------------------------------------------------role based data goes here(end)------------------------------------- -->
+			<div class="row"><div class="col-lg-8 col-sm-8 col-md-8"></div>		
+				<div class="col-lg-1 col-sm-1 col-md-1"><button type="submit" class="btn btn-primary" style="margin-top:20px;" disabled id="submit">Submit</button></div>
+			</div>	
+
+		</div>					
+</form>
+						
+	        </div>
+ <!-- here we specified the contents for distributor sales   -->
+	                    <div class="tab-pane fade" id="stackedProfile_dsp">
+	               <form id="UserDetails2" autocomplete="off" onsubmit="return submi2();"> 
+					<!--action="/v1/gm-users/user_entry/" method="post"-->
+					<div id="user">
+						<!-- <h3 style="text-align:<span style="color:red">*</span>center;">User Management</h3> -->
+					  <div class="row">
+					  	
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label >User Name :<span style="color:red">*</span></label>
+						</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="text" name="username"  required>
+						</div>
+					  </div>  	
+					   <div>&nbsp;</div>	
+					  <div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">			
+							<label>Password :<span style="color:red">*</span></label>
+						</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="password" autocomplete="off" placeholder="Password" name="password" id="password2";  required>
+						</div>
+					  </div>	
+					  <div>&nbsp;</div>
+					  <div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Confirm Password :<span style="color:red">*</span></label>
+						</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="password" placeholder="Confirm password" name="cpassword" id="cpassword2" onkeyup="checkPasswordMatch2()" required>
+						</div>
+					   </div>	
+					   <div class="row">
+					   		<div class="col-lg-4"></div>
+					   		<div class="col-lg-8" id="passwordmatch2"></div>
+					   </div>	
+					   <div>&nbsp;</div>					
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>First Name :<span style="color:red">*</span></label>
+							</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="text" name="first-name" maxlength="5"  required>
+						</div>	
+					   </div>
+						<div>&nbsp;</div>						
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Last Name :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input size="10" class="form-control" type="text" name="last-name"  required>
+							</div>
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Email :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="email" name="email"  required>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Mobile :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="mobile"  required>
+							</div>
+						</div>		
+	                    <div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Address :<span style="color:red">*</span></label>
+					    	</div>
+					    	<div class="col-lg-8">
+						    <input class="form-control" type="text" name="address"  required>
+					    	</div>
+					    </div>					  
+					    <div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							
+							<label>State :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="state"   required>
+							</div>	
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Country :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="country"   required>
+							</div>
+						</div>		
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Pincode :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="pincode" maxlength="6"  required>
+							</div>	
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>DOB :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="date" name="dob"   required>
+							</div>
+						</div>			
+	                    <div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Gender :<span style="color:red">*</span></label>
+					    	</div>
+					    	<div class="col-lg-8">
+							<select name='gender' class="form-control">
+								<OPTION SELECTED VALUE="">Select...</OPTION>
+								<option value="M">M</option>
+								  <option value="F">F</option>
+								  <option value="OT">OT</option>
+							</select>
+							</div>
+						</div>	
+					<div>&nbsp;</div>
+						<div class="row">							
+							<div class="col-lg-8">
+							<input type="hidden" id="role"  class="form-control" value= "role" name="role"/  required>
+							</div>
+						</div>	
+
+<!-- --------------------------------------------------------------------------------- role based data goes here(start)------------------------------------- -->
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Distributor :<span style="color:red">*</span></label>
+							</div>
+						    <div class="col-lg-8">
+								
+								<select name = 'distributor_dsr_id' id="distributor_dsr_id" class = 'form-control' required>
+								{% for entry in distributors %}
+									<option value = "{{entry.id}}" >{{entry.name}}</option>
+								{% endfor %}}
+							</select>
+							</div>	
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Distributor Sales Code :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="distributor_sales_code" required>
+							</div>
+						</div>
+<!-- ---------------------------------------------------------------------------------role based data goes here(end)------------------------------------- -->
+			<div class="row"><div class="col-lg-8 col-sm-8 col-md-8"></div>		
+				<div class="col-lg-1 col-sm-1 col-md-1"><button type="submit" class="btn btn-primary" style="margin-top:20px;" id="submit2">Submit</button></div>
+			</div>	
+
+		</div>					
+	</form>
+	                                           	
+						
+						
+	                    </div> 
+  <!-- here we specified for asm -->
+	                 <div class="tab-pane fade" id="stackedProfile_asm">
+	                   					<form id="UserDetails3" autocomplete="on" onsubmit="return submi3()"> 
+					<!--action="/v1/gm-users/user_entry/" method="post"-->
+					<div id="user">
+						<!-- <h3 style="text-align:<span style="color:red">*</span>center;">User Management</h3> -->
+					  <div class="row">
+					  	
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label >User Name :<span style="color:red">*</span></label>
+						</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="text" name="username"  required>
+						</div>
+					  </div>  	
+					   <div>&nbsp;</div>	
+					  <div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">			
+							<label>Password :<span style="color:red">*</span></label>
+						</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="password" autocomplete="off" placeholder="Password" name="password" id="password3";  required>
+						</div>
+					  </div>	
+					  <div>&nbsp;</div>
+					  <div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Confirm Password :<span style="color:red">*</span></label>
+						</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="password" placeholder="Confirm password" name="cpassword" id="cpassword3" onkeyup="checkPasswordMatch3()" required>
+						</div>
+					   </div>	
+					   <div class="row">
+					   		<div class="col-lg-4"></div>
+					   		<div class="col-lg-8" id="passwordmatch3"></div>
+					   </div>	
+					   <div>&nbsp;</div>					
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>First Name :<span style="color:red">*</span></label>
+							</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="text" name="first-name" maxlength="5"  required>
+						</div>	
+					   </div>
+						<div>&nbsp;</div>						
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Last Name :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input size="10" class="form-control" type="text" name="last-name"  required>
+							</div>
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Email :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="email" name="email"  required>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Mobile :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="mobile"  required>
+							</div>
+						</div>		
+	                    <div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Address :<span style="color:red">*</span></label>
+					    	</div>
+					    	<div class="col-lg-8">
+						    <input class="form-control" type="text" name="address"  required>
+					    	</div>
+					    </div>					  
+					    <div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							
+							<label>State :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="state"   required>
+							</div>	
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Country :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="country"   required>
+							</div>
+						</div>		
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Pincode :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="pincode" maxlength="6"  required>
+							</div>	
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>DOB :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="date" name="dob"   required>
+							</div>
+						</div>			
+	                    <div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Gender :<span style="color:red">*</span></label>
+					    	</div>
+					    	<div class="col-lg-8">
+							<select name='gender' class="form-control">
+								<OPTION SELECTED VALUE="">Select...</OPTION>
+								<option value="M">M</option>
+								  <option value="F">F</option>
+								  <option value="OT">OT</option>
+							</select>
+							</div>
+						</div>	
+					<div>&nbsp;</div>
+						<div class="row">							
+							<div class="col-lg-8">
+							<input type="hidden" id="role"  class="form-control" value= "role" name="role"/  required>
+							</div>
+						</div>	
+
+<!-- --------------------------------------------------------------------------------- role based data goes here(start)------------------------------------- -->
+
+
+						<div>&nbsp;</div>										
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>NSM :<span style="color:red">*</span></label>
+							</div>
+					    	<div class="col-lg-8">							
+							<select name = 'nsm_id'  id="nsm_id"class = 'form-control' required>
+								{% for entry in nsms %}
+									<option value = "{{entry.id}}" >{{entry.name}}</option>
+								{% endfor %}}
+							</select>
+							<!-- <select name = 'nsm_id' id="nsm_id" class = 'form-control' multiple>
+								
+									<option value = "1" >{{entry.name}}</option>
+									<option value = "2" >{{entry.name}}</option>
+							</select> -->
+							</div>
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>ASM state :<span style="color:red">*</span></label>
+					    	</div>
+					    	<div class="col-lg-8">							
+							<select multiple name = 'state_id' id="mstate_id" class = 'form-control'  required>
+								{% for entry in states %}
+									<option value = "{{entry.id}}" >{{entry.state_name}}</option>
+								{% endfor %}}
+							</select>
+							<!-- <select multiple name = 'state_id' id="mstate_id" class = 'form-control' >
+								
+									<option value = "1" >{{entry.state_name}}</option>
+									<option value = "2" >{{entry.name}}</option>
+							</select> -->
+							</div>
+						</div>	
+
+
+
+
+<!-- ---------------------------------------------------------------------------------role based data goes here(end)------------------------------------- -->
+			<div class="row"><div class="col-lg-8 col-sm-8 col-md-8"></div>		
+				<div class="col-lg-1 col-sm-1 col-md-1"><button type="submit" class="btn btn-primary" style="margin-top:20px;" disabled id="submit3">Submit</button></div>
+			</div>	
+
+		</div>					
+	</form>
+	                    </div>
+  <!-- here we have specified the contents for nsm (#stackedProfile_nsm) -->
+	       <div class="tab-pane fade" id="stackedProfile_nsm">
+						<form id="UserDetails4" autocomplete="on" onsubmit="return submi4()"> 
+					<!--action="/v1/gm-users/user_entry/" method="post"-->
+	<div id="user">
+						<!-- <h3 style="text-align:<span style="color:red">*</span>center;">User Management</h3> -->
+					  <div class="row">					  	
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label >User Name :<span style="color:red">*</span></label>
+						</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="text" name="username"  required>
+						</div>
+					  </div>  	
+					   <div>&nbsp;</div>	
+					  <div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">			
+							<label>Password :<span style="color:red">*</span></label>
+						</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="password" autocomplete="off" placeholder="Password" name="password" id="password4";  required>
+						</div>
+					  </div>	
+					  <div>&nbsp;</div>
+					  <div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Confirm Password :<span style="color:red">*</span></label>
+						</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="password" placeholder="Confirm password" name="cpassword" id="cpassword4" onkeyup="checkPasswordMatch4()" required>
+						</div>
+					   </div>	
+					   <div class="row">
+					   		<div class="col-lg-4"></div>
+					   		<div class="col-lg-8" id="passwordmatch4"></div>
+					   </div>	
+					   <div>&nbsp;</div>					
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>First Name :<span style="color:red">*</span></label>
+							</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="text" name="first-name" maxlength="5"  required>
+						</div>	
+					   </div>
+						<div>&nbsp;</div>						
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Last Name :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input size="10" class="form-control" type="text" name="last-name"  required>
+							</div>
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Email :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="email" name="email"  required>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Mobile :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="mobile"  required>
+							</div>
+						</div>		
+	                    <div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Address :<span style="color:red">*</span></label>
+					    	</div>
+					    	<div class="col-lg-8">
+						    <input class="form-control" type="text" name="address"  required>
+					    	</div>
+					    </div>					  
+					    <div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							
+							<label>State :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="state"   required>
+							</div>	
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Country :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="country"   required>
+							</div>
+						</div>		
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Pincode :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="pincode" maxlength="6"  required>
+							</div>	
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>DOB :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="date" name="dob"   required>
+							</div>
+						</div>			
+	                    <div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Gender :<span style="color:red">*</span></label>
+					    	</div>
+					    	<div class="col-lg-8">
+							<select name='gender' class="form-control">
+								<OPTION SELECTED VALUE="">Select...</OPTION>
+								<option value="M">M</option>
+								  <option value="F">F</option>
+								  <option value="OT">OT</option>
+							</select>
+							</div>
+						</div>	
+					<div>&nbsp;</div>
+						<div class="row">							
+							<div class="col-lg-8">
+							<input type="hidden" id="role"  class="form-control" value= "role" name="role"/  required>
+							</div>
+						</div>	
+
+<!-- --------------------------------------------------------------------------------- role based data goes here(start)ASM------------------------------------- -->
+
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Nsm_Id</label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="nsm_code"  required>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Territory :<span style="color:red">*</span></label>
+							</div>
+						    <div class="col-lg-8">
+								
+								<select multiple name = 'territory_id' id="mterritory_id" class = 'form-control' required>
+								{% for entry in territories %}
+									<option value = "{{entry.id}}" >{{entry.territory}}</option>
+								{% endfor %}}
+							</select>
+							</div>	
+						</div>
+
+
+<!-- ---------------------------------------------------------------------------------role based data goes here(end)------------------------------------- -->
+			<div class="row"><div class="col-lg-8 col-sm-8 col-md-8"></div>		
+				<div class="col-lg-1 col-sm-1 col-md-1"><button type="submit" class="btn btn-primary" style="margin-top:20px;" disabled id="submit4">Submit</button></div>
+			</div>	
+
+		</div>					
+</form>
+	       </div>
+  <!-- here we specified the contents for distibutor -->
+	          <div class="tab-pane fade" id="stackedProfile">	                                            							
+					<form id="UserDetails5" autocomplete="on" onsubmit="return submi5()"> 
+					<!--action="/v1/gm-users/user_entry/" method="post"-->
+	<div id="user">
+						<!-- <h3 style="text-align:<span style="color:red">*</span>center;">User Management</h3> -->
+					  <div class="row">					  	
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label >User Name :<span style="color:red">*</span></label>
+						</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="text" name="username"  required>
+						</div>
+					  </div>  	
+					   <div>&nbsp;</div>	
+					  <div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">			
+							<label>Password :<span style="color:red">*</span></label>
+						</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="password" autocomplete="off" placeholder="Password" name="password" id="password5";  required>
+						</div>
+					  </div>	
+					  <div>&nbsp;</div>
+					  <div class="row">
+						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Confirm Password :<span style="color:red">*</span></label>
+						</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="password" placeholder="Confirm password" name="cpassword" id="cpassword5" onkeyup="checkPasswordMatch5()" required>
+						</div>
+					   </div>	
+					   <div class="row">
+					   		<div class="col-lg-4"></div>
+					   		<div class="col-lg-8" id="passwordmatch5"></div>
+					   </div>	
+					   <div>&nbsp;</div>					
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>First Name :<span style="color:red">*</span></label>
+							</div>
+						<div class="col-lg-8">
+							<input class="form-control" type="text" name="first-name" maxlength="5"  required>
+						</div>	
+					   </div>
+						<div>&nbsp;</div>						
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Last Name :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input size="10" class="form-control" type="text" name="last-name"  required>
+							</div>
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Email :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="email" name="email"  required>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Mobile :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="mobile"  required>
+							</div>
+						</div>		
+	                    <div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Address :<span style="color:red">*</span></label>
+					    	</div>
+					    	<div class="col-lg-8">
+						    <input class="form-control" type="text" name="address"  required>
+					    	</div>
+					    </div>					  
+					    <div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							
+							<label>State :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="state"   required>
+							</div>	
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Country :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="country"   required>
+							</div>
+						</div>		
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Pincode :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="pincode" maxlength="6"  required>
+							</div>	
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>DOB :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="date" name="dob"   required>
+							</div>
+						</div>			
+	                    <div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Gender :<span style="color:red">*</span></label>
+					    	</div>
+					    	<div class="col-lg-8">
+							<select name='gender' class="form-control">
+								<OPTION SELECTED VALUE="">Select...</OPTION>
+								<option value="M">M</option>
+								  <option value="F">F</option>
+								  <option value="OT">OT</option>
+							</select>
+							</div>
+						</div>	
+					<div>&nbsp;</div>
+						<div class="row">							
+							<div class="col-lg-8">
+							<input type="hidden" id="role"  class="form-control" value= "role" name="role"/  required>
+							</div>
+						</div>	
+
+<!-- --------------------------------------------------------------------------------- role based data goes here(start)------------------------------------- -->
+
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Distributor ID :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="textbox" name="distributor_id"  required>
+							</div>
+					</div>		
+					<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Bajaj Email</label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="email" name="email_bajaj"  required>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Mobile1 :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="mobile1" required>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Mobile2 :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="mobile2" required>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Language:<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="language" required>
+							</div>
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Profile :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="profile" required>
+							</div>
+						</div>	
+						<div>&nbsp;</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Latitude :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="latitude" required>
+							</div>
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Longitude :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="longitude"  required>
+							</div>
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Address Line 1 :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="address_2"  required>
+							</div>
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Address Line 2 :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="address_3"  required>
+							</div>
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right" >
+							<label>Address Line 3 :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="address_4"  required>
+							</div>
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Phone(Landline) :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="landline_no"  required>
+							</div>
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Territory :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="territory" required>
+							</div>
+						</div>	
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>State :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<select name = 'state_id'  id="mdstate_id" class = 'form-control' >
+								{% for entry in states %}
+									<option value = "{{entry.id}}" >{{entry.state_name}}</option>
+								{% endfor %}}
+							</select>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>City :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="city" required>
+							</div>
+						</div>
+					<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>District :<span style="color:red">*</span></label>
+					    	</div>
+					    	<div class="col-lg-8">
+							<select multiple name = 'district_id' id="mddistrict_id" class = 'form-control' required>
+								{% for entry in districts %}
+									<option value = "{{entry.id}}" >{{entry.name}}</option>
+								{% endfor %}}
+							</select>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>ASM :<span style="color:red">*</span></label>
+					    	</div>
+					    	<div class="col-lg-8">
+							<select name = 'asm_id' id="asm_id" class = 'form-control' required>
+								{% for entry in asms %}
+									<option value = "{{entry.id}}" >{{entry.name}}</option>
+								{% endfor %}}
+							</select>
+							</div>
+						</div>
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Tin :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="tin" required>
+							</div>
+						</div>		
+						<div>&nbsp;</div>
+						<div class="row">
+							<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
+							<label>Cst :<span style="color:red">*</span></label>
+							</div>
+							<div class="col-lg-8">
+							<input class="form-control" type="text" name="cst" required>
+							</div>
+						</div>
+
+
+<!-- ---------------------------------------------------------------------------------role based data goes here(end)------------------------------------- -->
+			<div class="row"><div class="col-lg-8 col-sm-8 col-md-8"></div>		
+				<div class="col-lg-1 col-sm-1 col-md-1"><button type="submit" class="btn btn-primary" style="margin-top:20px;" disabled  id="submit5">Submit</button></div>
+			</div>	
+
+		</div>					
+</form>
+						
+	           </div>
+	                                
+	                                        </div>
+	                                    </div>
 	                                </div>
-	                                <div class="clearfix"></div>
+	                            </div>	
+
+						<div>&nbsp;</div>	
+						                             
+	                    </div>
 	                            </div>
-                            <div class="portlet-body grey_bg_body">
-                                <div id="myTabContent" class="tab-content">     
-                              
-      <div class="col-lg-12">
-		<div class="row"> 
-			<div class="col-lg-3">
-				<ul id="myStacked" class="nav nav-pills nav-stacked">
-                                            <li class=""><a href="#stackedProfile_nsm" data-toggle="tab">NSM</a>
-                                            </li>
-                                            <li class=""><a href="#stackedProfile_asm" data-toggle="tab">ASM</a>
-                                            </li>
-                                            <li class=""><a href="#stackedProfile" data-toggle="tab">Distributor</a>
-                                            </li>
-                                            
-                                            <li class=""><a href="#stackedProfile_dsp" data-toggle="tab">Distributor Sales Representative</a>
-                                            </li>
-                                            <li class="active"><a href="#stackedHome" data-toggle="tab">Retailer</a>
-                                            </li>
-                                            
-                     	</ul>
-			</div>
-			<div class="col-lg-9">
-				<form id="UserDetails" autocomplete="on">
-				<!--action="/v1/gm-users/user_entry/" method="post"-->
-				<div id="user">
-					<!-- <h3 style="text-align:center;">User Management</h3> -->
-				  <div class="row">
-				  	
-					<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label >User Name :</label>
-					</div>
-					<div class="col-lg-8">
-						<input class="form-control" type="text" name="username" >
-					</div>
-				  </div>  	
-				   <div>&nbsp;</div>	
-				  <div class="row">
-					<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">			
-						<label>Password :</label>
-					</div>
-					<div class="col-lg-8">
-						<input class="form-control" type="password" autocomplete="off" placeholder="Password" name="password" id="password";>
-					</div>
-				  </div>	
-				  <div>&nbsp;</div>
-				  <div class="row">
-					<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Confirm Password :</label>
-					</div>
-					<div class="col-lg-8">
-						<input class="form-control" type="password" placeholder="Confirm password" name="cpassword" id="cpassword" onkeyup="checkPasswordMatch()";> 
-					</div>
-				   </div>	
-				   <div class="row">
-				   		<div class="col-lg-4"></div>
-				   		<div class="col-lg-8" id="passwordmatch"></div>
-				   </div>	
-				   <div>&nbsp;</div>					
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>First Name :</label>
-						</div>
-					<div class="col-lg-8">
-						<input class="form-control" type="text" name="firstname" maxlength="5">
-					</div>	
-				   </div>
-					<div>&nbsp;</div>						
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Last Name :</label>
-						</div>
-						<div class="col-lg-8">
-						<input size="10" class="form-control" type="text" name="lastname">
-						</div>
-					</div>	
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Email :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="email" name="email">
-						</div>
-					</div>
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Mobile :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="phonenumber">
-						</div>
-					</div>	
-					<!-- <div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Form Number:</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="formnumber">
-						</div>
-					</div>	 -->
-					
-                    <div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Address :</label>
-				    	</div>
-				    	<div class="col-lg-8">
-					    <input class="form-control" type="text" name="address">
-				    	</div>
-				    </div>					  
-				    <div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>State :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="state" >
-						</div>	
-					</div>	
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Country :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="country" >
-						</div>
-					</div>		
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Pincode :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="pincode" maxlength="6">
-						</div>	
-					</div>	
-					<!-- <div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Department:</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="department" >
-						</div>
-					</div>		 -->
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>DOB :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="date" name="dob" >
-						</div>
-					</div>			
-                    <div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Gender :</label>
-				    	</div>
-				    	<div class="col-lg-8">
-						<select name='gender' class="form-control">
-							<OPTION SELECTED VALUE="">Select...</OPTION>
-							<option value="M">M</option>
-							  <option value="F">F</option>
-							  <option value="OT">OT</option>
-						</select>
-						</div>
-					</div>	
-				<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Image :</label>
-						</div>
-						<div class="col-lg-8">
-						<input type="file" id="user_agreement"  class="form-control" value="Browse" name="src"class="required"/>
-						</div>
-					</div>	
-<!-- ----------------------------------------------------------------------------------------------------------------------- -->
-				
-
-					<div class="portlet-body grey_bg_body">
-                                <div class="row">
-                                    <div class="col-sm-12">
-                                        <div id="myStackedContent" class="tab-content">
-                                            <div class="tab-pane fade active in" id="stackedHome">
-                                            	<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Area:</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="area">
-						</div>	
-					</div>		
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Billing code :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="billing_code">
-						</div>
-					</div>
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Distributor :</label>
-						</div>
-						<div class="col-lg-8">
-							<select class="form-control">
-							<OPTION SELECTED VALUE="Select">Select...</OPTION>
-							<option value="Distributor1">Distributor 1</option>
-							  <option value="Distributor2">Distributor 2</option>
-							  <option value="Distributor3">Distributor 3</option>
-							  <option value="Distributor4">Distributor 4</option>
-							</select>
-						</div>
-					</div>
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Retailer District :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="retailer_district">
-						</div>
-					</div>
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Territory :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="territory">
-						</div>
-					</div>
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Plot Number :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="plot_no">
-						</div>
-					</div>
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Street Name :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="Street_naame">
-						</div>
-					</div>
-
-                                                
-                                            </div>
-                                           <div class="tab-pane fade" id="stackedProfile_dsp">
-                                           	<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Distributor :</label>
-						</div>
-					    <div class="col-lg-8">
-							<select class="form-control">
-							<OPTION SELECTED VALUE="Select">Select...</OPTION>
-							  <option value="Distributor1">Distributor1</option>
-							  <option value="Distributor2">Distributor2</option>
-							  <option value="Distributor3">Distributor3</option>
-							  <option value="Distributor4">Distributor4</option>
-							</select>
-						</div>	
-					</div>
-                                           </div> 
-                                            <div class="tab-pane fade" id="stackedProfile_asm">
-                                            	<div>&nbsp;</div>
-										
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>NSM :</label>
-						</div>
-				    	<div class="col-lg-8">
-						<select name='gender' class="form-control">
-							<OPTION SELECTED VALUE="">NSM...</OPTION>
-							<option value="nsm1">NSM1</option>
-							  <option value="nsm2">NSM2</option>
-							  <option value="nsm3">NSM3</option>
-						</select>
-						</div>
-					</div>	
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>ASM state :</label>
-				    	</div>
-				    	<div class="col-lg-8">
-						<select name='gender' class="form-control">
-							<OPTION SELECTED VALUE="">State...</OPTION>
-							<option value="asm_karnataka">Karnataka</option>
-							  <option value="asm_Kerela">kerela</option>
-							  <option value="asm_tamilnadu">Tamil Nadu</option>
-						</select>
-						</div>
-					</div>	
-                                            </div>
-                                            <div class="tab-pane fade" id="stackedProfile_nsm">
-                                            	<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Territory :</label>
-						</div>
-					    <div class="col-lg-8">
-							<select class="form-control">
-							<OPTION SELECTED  value=""required>Select...</OPTION>
-							  <option value="South">South</option>
-							  <option value="North">North</option>
-							  <option value="East">East</option>
-							  <option value="West">West</option>
-							</select>
-						</div>	
-					</div>
-                                            </div>
-                                            <div class="tab-pane fade" id="stackedProfile">
-                                            	<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Distributor ID :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="textbox" name="distributor_id" >
-						</div>
-				</div>		
-				<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Name of Distributorship</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="textbox" name="distributorship_name" >
-						</div>
-					</div>
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Mobile1 :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="mobile1">
-						</div>
-					</div>
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Mobile2 :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="mobile2">
-						</div>
-					</div>
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Bajaj Email :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="email" name="bajaj_email">
-						</div>
-					</div>	
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Profile :</label>
-				    	</div>
-				    	<div class="col-lg-8">
-						<select name='profile' class="form-control">
-							<OPTION SELECTED VALUE="">Profile...</OPTION>
-							<option value="wholesale_distributor">Wholesale distributor</option>
-							  
-						</select>
-						</div>
-					</div>
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Plot No :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="plot_no">
-						</div>
-					</div>	
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Locality :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="locality">
-						</div>
-					</div>	
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Phone(Landline) :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="landline_no">
-						</div>
-					</div>	
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Street Name :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="street_name">
-						</div>
-					</div>
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>City :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="city">
-						</div>
-					</div>
-				<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>District :</label>
-				    	</div>
-				    	<div class="col-lg-8">
-						<select name='gender' class="form-control">
-							<OPTION SELECTED VALUE="">District...</OPTION>
-							<option value="">District1</option>
-							  <option value="">District2</option>
-							  <option value="">District3</option>
-						</select>
-						</div>
-					</div>
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Tin :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="tin">
-						</div>
-					</div>		
-					<div>&nbsp;</div>
-					<div class="row">
-						<div class="col-lg-4 col-sm-4 col-md-4 fieldname_right">
-						<label>Cst :</label>
-						</div>
-						<div class="col-lg-8">
-						<input class="form-control" type="text" name="cst">
-						</div>
-					</div>
-
-					
-                            </div>
-                                
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>	
-
-				<div>&nbsp;</div>	
-					<div class="row"><div class="col-lg-8 col-sm-8 col-md-8"></div>		
-					<div class="col-lg-1 col-sm-1 col-md-1"><button type="submit" class="btn btn-primary" style="margin-top:20px;" disabled id="submit">Submit</button></div>
-					</div>                             
-                    </div>
-                            </div>
-                            <!-- /.portlet-body -->
-                        </div>
-                        <!-- /.portlet -->
-                    </div>
-                    <!-- /.col-lg-12 -->
-                </div>
-					
-<!-- ----------------------------------------------------------------------------------------------------------------------- -->
+	                            <!-- /.portlet-body -->
+	                        </div>
+	                        <!-- /.portlet -->
+	                    </div>
+	                    <!-- /.col-lg-12 -->
+	                </div>
+					<div id= "hello" > </div>	
+	<!-- ----------------------------------------------------------------------------------------------------------------------- -->
 
 
-					<div class="row"><div class="col-lg-8 col-sm-8 col-md-8"></div>
-						<div class="col-lg-1 col-sm-1 col-md-1"></div>
-					</div>
-              </div>
-              </form>
+						<div class="row"><div class="col-lg-8 col-sm-8 col-md-8"></div>
+							<div class="col-lg-1 col-sm-1 col-md-1"></div>
+						</div>
+	              </div>
+	              
+				</div>
 			</div>
 		</div>
-	</div>
-			
-<script type= text/javascript>
+				
+	<script type= "text/javascript">
+	
+	var map = {
+	"nsm":"/v1/national-spares-managers/register/",
+	"asm":"/v1/area-spares-managers/register/",
+	"distributor":"/v1/distributors/register/",
+	"dsr":"/v1/distributor-sales-rep/register/",
+	"retailer":"/v1/retailers/register/",
+	}
+	// ---------------------------------------begin-----------------js for password matching--------------------------
+	function checkPasswordMatch(){
+			// debugger;
+		    var passwordd = $("#password").val();
+		
+		    var cpasswordd = $("#cpassword").val();
 
-// ---------------------------------------begin-----------------js for password matching--------------------------
-		function checkPasswordMatch() {
-		    var password1 = $("#password").val();
-		    var cpassword1 = $("#cpassword").val();
-
-		    if (password1 != cpassword1)
+		    if (passwordd != cpasswordd)
 		    {
 		        $("#passwordmatch").html("Passwords do not match!");
 		    	$("#passwordmatch").css('color', 'red');
@@ -542,48 +1271,1039 @@
 		}
 
 
+function checkPasswordMatch1(){
+			// debugger;
+		    var passwordd1 = $("#password1").val();
+		
+		    var cpasswordd1 = $("#cpassword1").val();
+
+		    if (passwordd1 != cpasswordd1)
+		    {
+		        $("#passwordmatch1").html("Passwords do not match!");
+		    	$("#passwordmatch1").css('color', 'red');
+		    	document.getElementById("submit1").disabled = true;
+		    }
+		    else
+		    {
+		        $("#passwordmatch1").html("Passwords match.");
+		        $("#passwordmatch1").css('color', 'blue');
+		    	document.getElementById("submit1").disabled = false;
+		    }
+		}
+
+function checkPasswordMatch2(){
+			// debugger;
+		    var passwordd2 = $("#password2").val();
+		
+		    var cpasswordd2 = $("#cpassword2").val();
+
+		    if (passwordd2 != cpasswordd2)
+		    {
+		        $("#passwordmatch2").html("Passwords do not match!");
+		    	$("#passwordmatch2").css('color', 'red');
+		    	document.getElementById("submit").disabled = true;
+		    }
+		    else
+		    {
+		        $("#passwordmatch2").html("Passwords match.");
+		        $("#passwordmatch2").css('color', 'blue');
+		    	document.getElementById("submit").disabled = false;
+		    }
+		}		
+
+
+function checkPasswordMatch3(){
+			// debugger;
+		    var passwordd3 = $("#password3").val();
+		
+		    var cpasswordd3 = $("#cpassword3").val();
+
+		    if (passwordd3 != cpasswordd3)
+		    {
+		        $("#passwordmatch3").html("Passwords do not match!");
+		    	$("#passwordmatch3").css('color', 'red');
+		    	document.getElementById("submit3").disabled = true;
+		    }
+		    else
+		    {
+		        $("#passwordmatch3").html("Passwords match.");
+		        $("#passwordmatch3").css('color', 'blue');
+		    	document.getElementById("submit3").disabled = false;
+		    }
+		}
+
+
+function checkPasswordMatch4(){
+			// debugger;
+		    var passwordd4 = $("#password4").val();
+		
+		    var cpasswordd4 = $("#cpassword4").val();
+
+		    if (passwordd4 != cpasswordd4)
+		    {
+		        $("#passwordmatch4").html("Passwords do not match!");
+		    	$("#passwordmatch4").css('color', 'red');
+		    	document.getElementById("submit4").disabled = true;
+		    }
+		    else
+		    {
+		        $("#passwordmatch4").html("Passwords match.");
+		        $("#passwordmatch4").css('color', 'blue');
+		    	document.getElementById("submit4").disabled = false;
+		    }
+		}
+function checkPasswordMatch5(){
+			// debugger;
+		    var passwordd5 = $("#password5").val();
+		
+		    var cpasswordd5 = $("#cpassword5").val();
+
+		    if (passwordd5 != cpasswordd5)
+		    {
+		        $("#passwordmatch5").html("Passwords do not match!");
+		    	$("#passwordmatch5").css('color', 'red');
+		    	document.getElementById("submit5").disabled = true;
+		    }
+		    else
+		    {
+		        $("#passwordmatch5").html("Passwords match.");
+		        $("#passwordmatch5").css('color', 'blue');
+		    	document.getElementById("submit5").disabled = false;
+		    }
+		}
+
+
+
+
+
+		$('#distrep').click(function(){
+  			
+  			document.getElementById("role").value = "dsr";
+  			
+		});
+		$('#retailer').click(function(){
+  			document.getElementById("role").value = "retailer";
+  			
+		});
+		$('#asm').click(function(){
+  			document.getElementById("role").value = "asm";
+  			
+		});
+		$('#nsm').click(function(){
+  			document.getElementById("role").value = "nsm";
+  			
+		});
+		$('#distributor').click(function(){
+  			document.getElementById("role").value = "distributor";
+		});
+	
+
+// -------------------------upon clicking submit of retailer i am dealing with multiselect here---------------------------
+
+$('#submit').click(function () {
+		var selected1 = $("#mterritory_id option:selected");
+        var message1 = "";
+        selected1.each(function () {
+            message1 +=  $(this).val() + ",";
+            
+        });
+        str1 = message1.substring(0, message1.length - 1);
+        
+        console.log(str1);
+     });   
+
+$('#submit').click(function () {
+		var selected2 = $("#mstate_id option:selected");
+        var message2 = "";
+        message2 += "["
+        selected2.each(function () {
+
+            message2 +=  $(this).val() + ",";
+            
+        });
+        str2 = message2.substring(0, message2.length - 1);
+        message2 += "]"
+        console.log(str2);
+     });  
+ 
+
+$('#submit').click(function () {
+		var selected3 = $("#mdsr_id option:selected");
+        var message3 = "";
+        	message3 +=  "[";
+        selected3.each(function () {
+        	message3+="\""
+            message3 +=  $(this).val();
+            message3+="\""
+            message3+=","
+
+        });
+        
+
+        str3 = message3.substring(0, message3.length - 1);
+
+        str3+="]";
+        console.log(str3);
+     });   
+
+
+
+
+  
+
+
+$('#submit').click(function () {
+		var selected4 = $("#mlocality_dropdown option:selected");
+        var message4 = "";
+        	message4 +=  "[";
+        selected4.each(function () {
+        	message4+="\""
+            message4 +=  $(this).val();
+            message4+="\""
+            message4+=","
+
+        });
+        
+
+        str4 = message4.substring(0, message4.length - 1);
+
+        str4+="]";
+        console.log(str4);
+     });   
+
+  
+$('#submit').click(function () {
+		var selected5 = $("#mdistrict_id option:selected");
+        var message5 = "";
+        selected5.each(function () {
+            message5 +=  $(this).val() + ",";
+            
+        });
+        str5 = message5.substring(0, message5.length - 1);
+        
+        console.log(str5);
+     });   
+
+
+
+
+$('#submit').click(function () {
+		var selected6 = $("#mdistributor_ret_id option:selected");
+        var message6 = "";
+        	message6 +=  "[";
+        selected6.each(function () {
+        	message6+="\""
+            message6 +=  $(this).val();
+            message6+="\""
+            message6+=","
+
+        });
+        
+
+        str6 = message6.substring(0, message6.length - 1);
+
+        str6+="]";
+        console.log(str6);
+     });   
+
+
+
+
+// -------------------------upon clicking submit of dsp i am dealing with multiselect here---------------------------
+
+
+$('#submit2').click(function () {
+		var selected1 = $("#mterritory_id option:selected");
+        var message1 = "";
+        selected1.each(function () {
+            message1 +=  $(this).val() + ",";
+            
+        });
+        str1 = message1.substring(0, message1.length - 1);
+        
+        console.log(str1);
+     });   
+
+
+$('#submit2').click(function () {
+		var selected7 = $("#distributor_dsr_id option:selected");
+        var message7 = "";
+        	message7 +=  "[";
+        selected7.each(function () {
+        	message7+="\""
+            message7 +=  $(this).val();
+            message7+="\""
+            message7+=","
+
+        });
+        
+
+        str7 = message7.substring(0, message7.length - 1);
+
+        str7+="]";
+        console.log(str7);
+     });   
+
+
+
+
+$('#submit2').click(function () {
+		var selected2 = $("#mstate_id option:selected");
+        var message2 = "";
+        selected2.each(function () {
+            message2 +=  $(this).val() + ",";
+            
+        });
+        str2 = message2.substring(0, message2.length - 1);
+        
+        console.log(str2);
+     });  
+
+
+
+
+
+
+
+
+$('#submit2').click(function () {
+		var selected3 = $("#mdsr_id option:selected");
+        var message3 = "";
+        selected3.each(function () {
+            message3 +=  $(this).val() + ",";
+            
+        });
+        str3 = message3.substring(0, message3.length - 1);
+        
+        console.log(str3);
+     });   
+
+$('#submit2').click(function () {
+		var selected4 = $("#mlocality_dropdown option:selected");
+        var message4 = "";
+        selected4.each(function () {
+            message4 +=  $(this).val() + ",";
+            
+        });
+        str4 = message4.substring(0, message4.length - 1);
+        
+        console.log(str4);
+     });   
+  
+$('#submit2').click(function () {
+		var selected5 = $("#mdistrict_id option:selected");
+        var message5 = "";
+        selected5.each(function () {
+            message5 +=  $(this).val() + ",";
+            
+        });
+        str5 = message5.substring(0, message5.length - 1);
+        
+        console.log(str5);
+     });   
+
+$('#submit2').click(function () {
+		var selected6 = $("#mdistributor_ret_id option:selected");
+        var message6 = "";
+        selected6.each(function () {
+            message6+=  $(this).val() + ",";
+            
+        });
+        str6 = message6.substring(0, message6.length - 1);
+        
+        console.log(str6);
+     });   
+	
+		
+
+// -------------------------upon clicking submit of ASM i am dealing with multiselect here---------------------------   
+
+$('#submit3').click(function () {
+		var selected1 = $("#mterritory_id option:selected");
+        var message1 = "";
+        selected1.each(function () {
+            message1 +=  $(this).val() + ",";
+            
+        });
+        str1 = message1.substring(0, message1.length - 1);
+        
+        console.log(str1);
+     });   
+
+
+
+$('#submit3').click(function () {
+		var selected2 = $("#mstate_id option:selected");
+        var message2 = "";
+        	message2 +=  "[";
+        selected2.each(function () {
+        	message2+="\""
+            message2 +=  $(this).val();
+            message2+="\""
+            message2+=","
+
+        });
+        
+
+        str2 = message2.substring(0, message2.length - 1);
+
+        str2+="]";
+        console.log(str2);
+     });
+
+
+
+
+$('#submit3').click(function () {
+		var selected8 = $("#nsm_id option:selected");
+		console.log(selected8);
+        var message8 = "";
+        	message8 +=  "[";
+        	console.log(message8);
+        selected8.each(function () {
+        	message8+="\""
+            message8 +=  $(this).val();
+            message8+="\""
+            message8+=","
+
+        });
+        
+        console.log(message8);
+        str8 = message8.substring(0, message8.length - 1);
+
+        str8+="]";
+        console.log(str8);
+     });        
+
+
+
+$('#submit3').click(function () {
+		var selected3 = $("#mdsr_id option:selected");
+        var message3 = "";
+        selected3.each(function () {
+            message3 +=  $(this).val() + ",";
+            
+        });
+        str3 = message3.substring(0, message3.length - 1);
+        
+        console.log(str3);
+     });   
+
+$('#submit3').click(function () {
+		var selected4 = $("#mlocality_dropdown option:selected");
+        var message4 = "";
+        selected4.each(function () {
+            message4 +=  $(this).val() + ",";
+            
+        });
+        str4 = message4.substring(0, message4.length - 1);
+        
+        console.log(str4);
+     });   
+  
+$('#submit3').click(function () {
+		var selected5 = $("#mdistrict_id option:selected");
+        var message5 = "";
+        selected5.each(function () {
+            message5 +=  $(this).val() + ",";
+            
+        });
+        str5 = message5.substring(0, message5.length - 1);
+        
+        console.log(str5);
+     });   
+
+$('#submit3').click(function () {
+		var selected6 = $("#mdistributor_ret_id option:selected");
+        var message6 = "";
+        selected6.each(function () {
+            message6+=  $(this).val() + ",";
+            
+        });
+        str6 = message6.substring(0, message6.length - 1);
+        
+        console.log(str6);
+     });   
+
+// -------------------------upon clicking submit of ASM i am dealing with multiselect here---------------------------
+
+$('#submit4').click(function () {
+		var selected1 = $("#mterritory_id option:selected");
+        var message1 = "";
+        	message1 +=  "[";
+        selected1.each(function () {
+        	message1+="\""
+            message1 +=  $(this).val();
+            message1+="\""
+            message1+=","
+
+        });
+        
+
+        str1 = message1.substring(0, message1.length - 1);
+
+        str1+="]";
+        console.log(str1);
+     });
+
+
+$('#submit4').click(function () {
+		var selected1 = $("#mterritory_id option:selected");
+        var message1 = "";
+        	message1 +=  "[";
+        selected1.each(function () {
+        	message1+="\""
+            message1 +=  $(this).val();
+            message1+="\""
+            message1+=","
+
+        });
+        
+
+        str1 = message1.substring(0, message1.length - 1);
+
+        str1+="]";
+        console.log(str1);
+     });   
+
+$('#submit4').click(function () {
+		var selected2 = $("#mstate_id option:selected");
+        var message2 = "";
+        selected2.each(function () {
+            message2 +=  $(this).val() + ",";
+            
+        });
+        str2 = message2.substring(0, message2.length - 1);
+        
+        console.log(str2);
+     });  
+$('#submit4').click(function () {
+		var selected3 = $("#mdsr_id option:selected");
+        var message3 = "";
+        selected3.each(function () {
+            message3 +=  $(this).val() + ",";
+            
+        });
+        str3 = message3.substring(0, message3.length - 1);
+        
+        console.log(str3);
+     });   
+
+$('#submit4').click(function () {
+		var selected4 = $("#mlocality_dropdown option:selected");
+        var message4 = "";
+        selected4.each(function () {
+            message4 +=  $(this).val() + ",";
+            
+        });
+        str4 = message4.substring(0, message4.length - 1);
+        
+        console.log(str4);
+     });   
+  
+$('#submit4').click(function () {
+		var selected5 = $("#mdistrict_id option:selected");
+        var message5 = "";
+        selected5.each(function () {
+            message5 +=  $(this).val() + ",";
+            
+        });
+        str5 = message5.substring(0, message5.length - 1);
+        
+        console.log(str5);
+     });   
+
+$('#submit4').click(function () {
+		var selected6 = $("#mdistributor_ret_id option:selected");
+        var message6 = "";
+        selected6.each(function () {
+            message6+=  $(this).val() + ",";
+            
+        });
+        str6 = message6.substring(0, message6.length - 1);
+        
+        console.log(str6);
+     });   
+
+
+// -------------------------upon clicking submit of distributor i am dealing with multiselect here---------------------------
+
+$('#submit5').click(function () {
+		var selected1 = $("#mterritory_id option:selected");
+        var message1 = "";
+        selected1.each(function () {
+            message1 +=  $(this).val() + ",";
+            
+        });
+        str1 = message1.substring(0, message1.length - 1);
+        
+        console.log(str1);
+     });   
+
+
+
+
+$('#submit5').click(function () {
+		var selected2 = $("#mdstate_id option:selected");
+        var message2 = "";
+        	message2 +=  "[";
+        selected2.each(function () {
+        	message2+="\""
+            message2 +=  $(this).val();
+            message2+="\""
+            message2+=","
+
+        });
+        str2 = message2.substring(0, message2.length - 1);
+        str2+="]";
+        console.log(str2);
+     }); 
+
+$('#submit5').click(function () {
+		var selected7 = $("#asm_id option:selected");
+        var message7 = "";
+        	message7 +=  "[";
+        selected7.each(function () {
+        	message7+="\""
+            message7 +=  $(this).val();
+            message7+="\""
+            message7+=","
+
+        });
+        str7 = message7.substring(0, message7.length - 1);
+        str7+="]";
+        console.log(str7);
+     }); 
+
+
+$('#submit5').click(function () {
+		var selected3 = $("#mdsr_id option:selected");
+        var message3 = "";
+        selected3.each(function () {
+            message3 +=  $(this).val() + ",";
+            
+        });
+        str3 = message3.substring(0, message3.length - 1);
+        
+        console.log(str3);
+     });   
+
+$('#submit5').click(function () {
+		var selected4 = $("#mlocality_dropdown option:selected");
+        var message4 = "";
+        selected4.each(function () {
+            message4 +=  $(this).val() + ",";
+            
+        });
+        str4 = message4.substring(0, message4.length - 1);
+        
+        console.log(str4);
+     });   
+  
+
+
+$('#submit5').click(function () {
+		var selected5 = $("#mddistrict_id option:selected");
+        var message5 = "";
+        	message5 +=  "[";
+        selected5.each(function () {
+        	message5+="\""
+            message5 +=  $(this).val();
+            message5+="\""
+            message5+=","
+
+        });
+        str5 = message5.substring(0, message5.length - 1);
+        str5+="]";
+        console.log(str5);
+     }); 
+
+
+
+
+
+$('#submit5').click(function () {
+		var selected6 = $("#mdistributor_ret_id option:selected");
+        var message6 = "";
+        selected6.each(function () {
+            message6+=  $(this).val() + ",";
+            
+        });
+        str6 = message6.substring(0, message6.length - 1);
+        
+        console.log(str6);
+     });   
+
+
+
+
+
+
+
+		
+// ----------------------the below functionis for retailer(json)---------------------
 
 $(document).on('submit','#UserDetails',function (e) {
-	//e.preventDefault();
-	
-	
-	var data1="{";
-	var other_data = $('#UserDetails').serializeArray();
-    $.each(other_data,function(key,input){
-        data1+="\""+input.name+"\":\""+input.value+"\"";
-        data1+=",";
-    });
-    var file=$("#user_agreement").val();
-    var file2=$("#user_agreement1").val();
-    data1+="\"user_agreement\":\""+file+"\"";
-    data1+=",";
-    data1+="\"user_agreement1\":\""+file2+"\"";
-    data1+="}";
-    data1 = JSON.stringify(data1);
-    var data2 = JSON.parse(data1);
-    console.info(data2);
-    return false;
-    
-	
-	
+		//e.preventDefault();
+		var role = $('#role').val();
+		alert(role);
+		alert(map[role]);
+		var data1="{";
+		var other_data = $('#UserDetails').serializeArray();
+	    $.each(other_data,function(key,input){
+	    	data1+="\""+input.name+"\":\""+input.value+"\"";
+	        data1+=",";
+	       
+	    });
+	    var file=$("#user_agreement").val();
+	     var file2=$("#user_agreement1").val();
+	     var file3=$("#user_agreement2").val();
+	     var file4 = str1;
+	     var file5 = str2;
+	     var file6 = str3;
+	     var file7 = str4;
+	     var file8 = str5;
+	     var file9 = str6;
 
-	$.ajax({
-		url: '/v1/gm-users/user_entry/',
-		type: 'POST',
-  		contentType: "application/json",
-  		data:data2,
-  		
-  		success: function () {
-  		
-  		}
-  		
-  		
+	    data1+="\"user_agreement\":\""+file+"\"";
+	     data1+=",";
+	     data1+="\"user_agreement1\":\""+file2+"\"";
+	     data1+=",";
+	     data1+="\"user_agreement2\":\""+file3+"\"";
+	     data1+=",";
+	     // data1+="\"mterritory_id\":\""+file4+"\"";
+	     // data1+=",";
+	     // data1+="\"mstate_id\":\""+file5+"\"";
+	     // data1+=",";
+	     data1+="\"mdsr_id\":"+file6+"";
+	     data1+=",";
+	     data1+="\"mlocality_dropdown\":"+file7+"";
+	     data1+=",";
+	     // data1+="\"mdistrict_id\":\""+file8+"\"";
+	     // data1+=",";
+	     data1+="\"mdistributor_ret_id\":"+file9+"";
+	    data1+="}";
+	    data1 = JSON.stringify(data1);
+	    var data2 = JSON.parse(data1);
+	    console.info(data2);
+	    return false;
+	   
+		
+		
+
+		$.ajax({
+			url: map[role],
+			type: 'POST',
+	  		
+	  		data:data2,
+	  		
+	  		success: function(data) {
+		  		alert(data.message)
+		  		location.href = "/add_users"
+	  		},
+	  		
+	  		
+		
+		});	
+	});
+
+// ----------------------------the below function is for dsp(json)-------------------------
+// $('#submit2').click(function (e) {
+ function submi2()
+ 	{
+		//e.preventDefault();
+		var role = $('#role').val();
+		alert(role);
+		alert(map[role]);
+		var data1="{";
+		var other_data = $('#UserDetails2').serializeArray();
+	    $.each(other_data,function(key,input){
+	        data1+="\""+input.name+"\":\""+input.value+"\"";
+	        data1+=",";
+	    });
+	    var file=$("#user_agreement").val();
+	     var file2=$("#user_agreement1").val();
+	     var file3=$("#user_agreement2").val();
+	     var file4 = str1;
+	     var file5 = str2;
+	     var file6 = str3;
+	     var file7 = str4;
+	     var file8 = str5;
+	     var file9 = str6;
+	     var file10 = str7;
+
+	    data1+="\"user_agreement\":\""+file+"\"";
+	     data1+=",";
+	     data1+="\"user_agreement1\":\""+file2+"\"";
+	     data1+=",";
+	     data1+="\"user_agreement2\":\""+file3+"\"";
+	     data1+=",";
+	     // data1+="\"mterritory_id\":\""+file4+"\"";
+	     // data1+=",";
+	     // data1+="\"mstate_id\":\""+file5+"\"";
+	     // data1+=",";
+	     // data1+="\"mdsr_id\":\""+file6+"\"";
+	     // data1+=",";
+	     // data1+="\"mlocality_dropdown\":\""+file7+"\"";
+	     // data1+=",";
+	     // data1+="\"mdistrict_id\":\""+file8+"\"";
+	     // data1+=",";
+	     // data1+="\"mdistributor_ret_id\":\""+file9+"\"";
+	     // data1+=",";
+	     data1+="\"mdistributor_id\":"+file10+"";
+	    data1+="}";
+	    data1 = JSON.stringify(data1);
+	    var data2 = JSON.parse(data1);
+	    console.info(data2);
+	    
+	   
+		
+		
+
+								$.ajax({
+									url: map[role],
+									type: 'POST',
+							  		
+							  		data:data2,
+							  		
+							  		success: function(data) {
+								  		alert(data.message)
+								  		location.href = "/add_users"
+							  		},
+							  		
+							  		
+								
+								});	
+	}
+
+
+// -----------------------------------the below function is for ASM(json)----------------
+function submi3(){
 	
-	})	
-})
-</script>
-</body>
-</html>
+		//e.preventDefault();
+		var role = $('#role').val();
+		alert(role);
+		alert(map[role]);
+		var data1="{";
+		var other_data = $('#UserDetails3').serializeArray();
+	    $.each(other_data,function(key,input){
+	        data1+="\""+input.name+"\":\""+input.value+"\"";
+	        data1+=",";
+	    });
+	    var file=$("#user_agreement").val();
+	     var file2=$("#user_agreement1").val();
+	     var file3=$("#user_agreement2").val();
+	     var file4 = str1;
+	     var file5 = str2;
+	     var file6 = str3;
+	     var file7 = str4;
+	     var file8 = str5;
+	     var file9 = str6;
+	     var file10 = str8;
+
+	    data1+="\"user_agreement\":\""+file+"\"";
+	     data1+=",";
+	     data1+="\"user_agreement1\":\""+file2+"\"";
+	     data1+=",";
+	     data1+="\"user_agreement2\":\""+file3+"\"";
+	     data1+=",";
+	     // data1+="\"mterritory_id\":\""+file4+"\"";
+	     // data1+=",";
+	     data1+="\"mstate_id\":"+file5+"";
+	     data1+=",";
+	     // data1+="\"mdsr_id\":\""+file6+"\"";
+	     // data1+=",";
+	     // data1+="\"mlocality_dropdown\":\""+file7+"\"";
+	     // data1+=",";
+	     // data1+="\"mdistrict_id\":\""+file8+"\"";
+	     // data1+=",";
+	     // data1+="\"mdistributor_ret_id\":\""+file9+"\"";
+	     // data1+=",";
+	     data1+="\"mnsm_id\":"+file10+"";
+	    data1+="}";
+	    data1 = JSON.stringify(data1);
+	    var data2 = JSON.parse(data1);
+	    console.info(data2);
+	    
+	   
+		
+		
+
+								$.ajax({
+									url: map[role],
+									type: 'POST',
+							  		
+							  		data:data2,
+							  		
+							  		success: function(data) {
+								  		alert(data.message)
+								  		location.href = "/add_users"
+							  		},
+							  		
+							  		
+								
+								});	
+	}
+	
+// -----------------------------------the below function us for NSM(json)-------------------------
+
+function submi4()
+       {
+               //e.preventDefault();
+               var role = $('#role').val();
+               alert(role);
+               alert(map[role]);
+               var data1="{";
+               var other_data = $('#UserDetails4').serializeArray();
+           $.each(other_data,function(key,input){
+               data1+="\""+input.name+"\":\""+input.value+"\"";
+               data1+=",";
+           });
+           var file=$("#user_agreement").val();
+            var file2=$("#user_agreement1").val();
+            var file3=$("#user_agreement2").val();
+            var file4 = str1;
+            var file5 = str2;
+            var file6 = str3;
+            var file7 = str4;
+            var file8 = str5;
+            var file9 = str6;
+
+           data1+="\"user_agreement\":\""+file+"\"";
+            data1+=",";
+            data1+="\"user_agreement1\":\""+file2+"\"";
+            data1+=",";
+            data1+="\"user_agreement2\":\""+file3+"\"";
+            data1+=",";
+            data1+="\"mterritory_id\":"+file4+"";
+            // data1+=",";
+            // data1+="\"mstate_id\":\""+file5+"\"";
+            // data1+=",";
+            // data1+="\"mdsr_id\":\""+file6+"\"";
+            // data1+=",";
+            // data1+="\"mlocality_dropdown\":\""+file7+"\"";
+            // data1+=",";
+            // data1+="\"mdistrict_id\":\""+file8+"\"";
+            // data1+=",";
+            // data1+="\"mdistributor_ret_id\":\""+file9+"\"";
+           data1+="}";
+           data1 = JSON.stringify(data1);
+           var data2 = JSON.parse(data1);
+           console.info(data2);
+          
+               
+               
+
+               $.ajax({
+                       url: map[role],
+                       type: 'POST',
+                         
+                         data:data2,
+                         
+                         success: function(data) {
+                                 alert(data.message)
+                                 location.href = "/add_users"
+                         },
+                         
+                         
+               
+               });        
+       }
+// --------------------the below function is for distibutor---------------------------------
+function submi5()
+	{
+		//e.preventDefault();
+		var role = $('#role').val();
+		alert(role);
+		alert(map[role]);
+		var data1="{";
+		var other_data = $('#UserDetails5').serializeArray();
+	    $.each(other_data,function(key,input){
+	    	if(input.name != 'district_id'){
+	        data1+="\""+input.name+"\":\""+input.value+"\"";
+	        data1+=",";
+	       }
+	    });
+	    var file=$("#user_agreement").val();
+	     var file2=$("#user_agreement1").val();
+	     var file3=$("#user_agreement2").val();
+	     var file4 = str1;
+	     var file5 = str2;
+	     var file6 = str3;
+	     var file7 = str4;
+	     var file8 = str5;
+	     var file9 = str6;
+	     var file10 = str7;
+	    data1+="\"user_agreement\":\""+file+"\"";
+	     data1+=",";
+	     data1+="\"user_agreement1\":\""+file2+"\"";
+	     data1+=",";
+	     data1+="\"user_agreement2\":\""+file3+"\"";
+	     data1+=",";
+	     // data1+="\"mterritory_id\":\""+file4+"\"";
+	     // data1+=",";
+	     data1+="\"mstate_id\":"+file5+"";
+	     data1+=",";
+	     // data1+="\"mdsr_id\":\""+file6+"\"";
+	     // data1+=",";
+	     // data1+="\"mlocality_dropdown\":\""+file7+"\"";
+	     // data1+=",";
+	     data1+="\"mdistrict_id\":"+file8+"";
+	     data1+=",";
+	     // data1+="\"mdistributor_ret_id\":\""+file9+"\"";
+	     // data1+=",";
+	     //data1+="\"asm_id\":"+file10+"";
+	    data1+="}";
+	    data1 = JSON.stringify(data1);
+	    var data2 = JSON.parse(data1);
+	    console.info(data2);
+	    
+	   
+		
+		
+
+								$.ajax({
+									url: map[role],
+									type: 'POST',
+							  		
+							  		data:data2,
+							  		
+							  		success: function(data) {
+								  		alert(data.message)
+								  		location.href = "/add_users"
+							  		},
+							  		
+							  		
+								
+								});	
+	}
+
+
+	</script>
+	 
+<script>
+        var role = {{ request.user|rbac }};
+         
+        if( role == 3 ){
+            $('#nsm').hide();
+            $('#asm').hide();
+        }
+        if(role == 4){
+        	$('#nsm').hide();
+        }
+        if(role == 1){
+        	$('#nsm').hide();
+            $('#asm').hide();
+            $('#distributor').hide();
+        }
+         
+    </script>
+	</body>
+	</html>
+
+
+
+
 
 
 

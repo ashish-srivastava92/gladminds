@@ -39,6 +39,7 @@ api_v1.register(user_apis.PartnerResource())
 api_v1.register(user_apis.DistributorResource())
 api_v1.register(user_apis.RetailerResource())
 api_v1.register(user_apis.MemberResource())
+api_v1.register(user_apis.DsrResource())
 
 api_v1.register(user_apis.ServiceDeskUserResource())
 
