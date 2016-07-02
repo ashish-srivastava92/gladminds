@@ -1274,8 +1274,8 @@ class NationalSparesManagerResource(CustomBaseModelResource):
     def register_nsm(self, request, **kwargs):
         try:
             self.is_authenticated(request)
-        if request.method != 'POST':
-            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",status=400)
+            if request.method != 'POST':
+                return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",status=400)
         except :
             return HttpResponse(json.dumps({"message" : "Not Authorized"}), content_type= "application/json",status=401)
         try:
@@ -1295,7 +1295,7 @@ class NationalSparesManagerResource(CustomBaseModelResource):
             gender = load.get('gender')
 
             nsm_id = load.get('nsm_code')
-            name = str(first_name)  ''  str(last_name)
+            name = str(first_name) + '' + str(last_name)
             territory = load.get('territory_id')
 
             user_profile = register_data.register_data( Roles.NATIONALSPARESMANAGERS, username = username, 
@@ -1365,7 +1365,7 @@ class AreaSparesManagerResource(CustomBaseModelResource):
                 gender = load.get('gender')
 
                 asm_id = username
-                name = str(first_name)  ''  str(last_name)
+                name = str(first_name) + '' + str(last_name)
                 state = load.get('mstate_id')
                 nsm_id = load.get('mnsm_id')
 
@@ -1458,7 +1458,7 @@ class DistributorResource(CustomBaseModelResource):
                 password = load.get('password')
                 first_name = load.get('first-name')
                 last_name = load.get('last-name')
-                name = str(first_name)  ''  str(last_name)
+                name = str(first_name) + '' + str(last_name)
 
                 mobile = load.get('mobile')
                 address = load.get('address')
