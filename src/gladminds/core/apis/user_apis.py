@@ -1515,6 +1515,82 @@ class DistributorResource(CustomBaseModelResource):
             data = {"status": 0 , "message" : "Enter correct data"}
         return HttpResponse(json.dumps(data), content_type="application/json")
 
+class LocalityResource(CustomBaseModelResource):
+
+    city = fields.ForeignKey(CityResource, 'city', full=True)
+
+    class Meta:
+        queryset = models.Locality.objects.all()
+        resource_name = "locality"
+        authorization = Authorization()
+        authentication = AccessTokenAuthentication()
+        allowed_methods = ['get', 'post', 'put']
+        always_return_data = True  
+
+class DsrResource(CustomBaseModelResource):
+
+    distributor = fields.ForeignKey(DistributorResource, 'distributor', full=True)
+
+    class Meta:
+        queryset = models.DistributorSalesRep.objects.all()
+        resource_name = "distributor-sales-rep"
+        authorization = Authorization()
+        #         authentication = AccessTokenAuthentication()
+        allowed_methods = ['get', 'post', 'put']
+        always_return_data = True
+
+    def prepend_urls(self):
+        return [url(r"^(?P<resource_name>%s)/register%s" % (self._meta.resource_name,trailing_slash()),self.wrap_view('register_dsr'), name="register_dsr"),
+                url(r"^(?P<resource_name>%s)/update/(?P<retailer_id>\d)%s" % (self._meta.resource_name,trailing_slash()),self.wrap_view('update_dsr'), name="update_dsr")]
+
+    def register_dsr(self, request, **kwargs):
+        try:
+            self.is_authenticated(request)
+            if request.method != 'POST':
+                return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",status=400)
+        except :
+            return HttpResponse(json.dumps({"message" : "Not Authorized"}), content_type= "application/json",status=401)
+        try:
+            load = json.loads(request.body)
+            username = load.get('username')
+            try:
+                username = models.User.objects.get(username = username)
+                return HttpResponse(json.dumps({"message" : "Username Already Exists"}), content_type= "application/json",status=401)
+            except:
+                email = load.get('email')
+                password = load.get('password')
+                first_name = load.get('first-name')
+                last_name = load.get('last-name')
+
+                mobile = load.get('mobile')
+                address = load.get('address')
+                state = load.get('state')
+                country = load.get('country')
+                pincode = load.get('pincode')
+                dob = load.get('dob')
+                gender = load.get('gender')
+
+                distributor = load.get('distributor_dsr_id')
+                distributor_sales_code = load.get('distributor_sales_code')
+
+                user_profile = register_data.register_data(Roles.DISTRIBUTORSALESREP, username = username, phone_number = mobile,
+                                                               first_name = first_name, last_name = last_name,
+                                                                email = email, address = address,
+                                                               state = state, pincode = pincode,
+                                                               password = password,country=country,
+                                                               dob = dob, gender = gender, APP=settings.BRAND
+                                                               )
+
+                distributor = models.Distributor.objects.get(id = distributor)
+
+
+                dsr = get_model('DistributorSalesRep')(user = user_profile, email = email, distributor_sales_code = distributor_sales_code,
+                                                    distributor_id = distributor.id)
+                dsr.save()
+                data = {"status": 200 , "message" : "Distributor registered successfully"}
+        except Exception ,e :
+            data = {"status": 0 , "message" : "Enter correct data"}
+        return HttpResponse(json.dumps(data), content_type="application/json")
 
 class RetailerResource(CustomBaseModelResource):
     '''

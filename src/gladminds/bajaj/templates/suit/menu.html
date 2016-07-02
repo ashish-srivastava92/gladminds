@@ -55,10 +55,7 @@
         {% endif %}
         {% endif %}
       {% endfor %}
-       <li {{ model.is_active|yesno:' class=active,' }}><a href = "/add_users" target="_blank"><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>Add Users
-         </a>
-      </li>
-
+       
        <li {{ model.is_active|yesno:' class=active,' }}><a href = "/sfa_reports" target="_blank"><i class="{% firstof 'icon-folder-open' 'icon-chevron-right' %}"></i>SFA Reports
          </a>
       </li>
