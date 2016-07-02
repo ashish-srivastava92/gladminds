@@ -150,7 +150,7 @@ class RegisterUserDefaultData():
                 new_user.is_staff = 1
                 new_user.save(using=APP)
                 new_user.groups.add(user_group)
-                logger.info(group  ' {0} registered successfully'.format(username))
+                logger.info(' {0} registered successfully'.format(username))
                 user_details = user_profile(user=new_user,phone_number=phone_number, address=address, date_of_birth = dob, gender = gender,state=state, pincode=pincode, country = country)
                 user_details.save()
             return user_details

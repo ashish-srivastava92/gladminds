@@ -1271,18 +1271,15 @@ class NationalSparesManagerResource(CustomBaseModelResource):
                  url(r"^(?P<resource_name>%s)/update/(?P<retailer_id>\d)%s" % (self._meta.resource_name,trailing_slash()),
                       self.wrap_view('update_nsm'), name="update_nsm"),]
           
-     def register_nsm(self, request, **kwargs):
+    def register_nsm(self, request, **kwargs):
         try:
             self.is_authenticated(request)
-            if request.method != 'POST':
-                return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",
-                    status=400)
+        if request.method != 'POST':
+            return HttpResponse(json.dumps({"message" : "Method not allowed"}), content_type= "application/json",status=400)
         except :
-            return HttpResponse(json.dumps({"message" : "Not Authorized"}), content_type= "application/json",
-                                     status=401)
+            return HttpResponse(json.dumps({"message" : "Not Authorized"}), content_type= "application/json",status=401)
         try:
             load = json.loads(request.body)
-
             username = load.get('username')
             email = load.get('email')
             password = load.get('password')
@@ -1319,7 +1316,7 @@ class NationalSparesManagerResource(CustomBaseModelResource):
             data = {"status": 200 , "message" : "NSM registered successfully"}
         except Exception ,e :
             data = {"status": 0 , "message" : "Enter correct data"}
-            return HttpResponse(json.dumps(data), content_type="application/json")
+        return HttpResponse(json.dumps(data), content_type="application/json")
 
         
 class AreaSparesManagerResource(CustomBaseModelResource):
