@@ -7,7 +7,8 @@ register = template.Library()
 ROLES_MAP = {  'Distributors': 1,
                'SFAAdmins': 2,
                'AreaSparesManagers': 3,
-               'NationalSparesManagers': 4
+               'NationalSparesManagers': 4,
+               'SuperAdmins': 100
             }
 
 @register.filter(name='rbac')
