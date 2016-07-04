@@ -11,7 +11,7 @@ from gladminds.core.models import NationalSparesManager, AreaSparesManager, Dist
 from gladminds.core.base_models import SparePartUPC
 from django.core.validators import MinValueValidator, MaxValueValidator
  
-
+#Adding test comments
 
 
 _APP_NAME = GmApps.BAJAJ
